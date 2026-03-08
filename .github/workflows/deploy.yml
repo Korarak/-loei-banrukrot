@@ -66,5 +66,5 @@ jobs:
             echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login ${{ secrets.REGISTRY_URL }} -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
             
             # Pull latest images and recreate containers
-            docker compose pull
-            docker compose up -d      
+            docker-compose pull
+            docker-compose up -d      
