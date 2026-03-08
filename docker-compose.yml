@@ -1,0 +1,43 @@
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: loei-banrakrod-db
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-password123}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  backend:
+    image: docker5.loeitech.org:5000/loei-banrakrod-backend:latest
+    container_name: loei-banrakrod-backend
+    restart: always
+    depends_on:
+      - mongodb
+    environment:
+      - PORT=8080
+      - MONGODB_URI=mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password123}@mongodb:27017/banrakrod?authSource=admin
+      - JWT_SECRET=${JWT_SECRET}
+      - NODE_ENV=production
+      - FRONTEND_URL=http://localhost:8083
+    ports:
+      - "8082:8080"
+    volumes:
+      - ./backend/public/uploads:/app/public/uploads
+
+  frontend:
+    image: docker5.loeitech.org:5000/loei-banrakrod-frontend:latest
+    container_name: loei-banrakrod-frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "8083:8081"
+    environment:
+      - NODE_ENV=production
+
+volumes:
+  mongodb_data:

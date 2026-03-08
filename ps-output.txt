@@ -1,0 +1,19 @@
+=== PS Aux ===
+root         813  0.0  0.5 2564344 83452 ?       Ssl  Feb26   2:14 dockerd --group docker --exec-root=/run/snap.docker --data-root=/var/snap/docker/common/var-lib-docker --pidfile=/run/snap.docker/docker.pid --config-file=/var/snap/docker/3377/config/daemon.json
+root         940  0.0  0.5 2509896 87524 ?       Ssl  Feb26   2:54 /usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock
+root        1376  0.0  0.0 2114764 6764 ?        Sl   Feb26   0:01 /usr/bin/docker-proxy -proto tcp -host-ip 0.0.0.0 -host-port 9000 -container-ip 172.17.0.2 -container-port 9000
+root        1383  0.0  0.0 1671348 4316 ?        Sl   Feb26   0:01 /usr/bin/docker-proxy -proto tcp -host-ip :: -host-port 9000 -container-ip 172.17.0.2 -container-port 9000
+root        1432  0.0  0.3 1280460 51536 ?       Ssl  Feb26   2:49 /portainer
+root        1544  0.1  0.3 2099724 52184 ?       Ssl  Feb26  14:59 containerd --config /run/snap.docker/containerd/containerd.toml
+root       78542  0.0  0.0 1671348 4216 ?        Sl   14:44   0:00 /usr/bin/docker-proxy -proto tcp -host-ip 0.0.0.0 -host-port 5000 -container-ip 172.18.0.2 -container-port 5000
+root       78551  0.0  0.0 1745080 4496 ?        Sl   14:44   0:00 /usr/bin/docker-proxy -proto tcp -host-ip :: -host-port 5000 -container-ip 172.18.0.2 -container-port 5000
+root       78609  0.0  0.1 730152 18184 ?        Ssl  14:44   0:00 registry serve /etc/docker/registry/config.yml
+adm1n_l+   80185  0.0  0.0   6684  2468 ?        S    14:59   0:00 grep -iE registry|portainer|docker
+=== Fuser ===
+=== Systemctl ===
+=== Snap ===
+Name    Version   Rev    Tracking       Publisher    Notes
+core22  20260128  2339   latest/stable  canonical**  base
+core24  20260107  1349   latest/stable  canonical**  base
+docker  28.4.0    3377   latest/stable  canonical**  -
+snapd   2.73      25935  latest/stable  canonical**  snapd

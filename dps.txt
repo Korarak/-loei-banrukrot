@@ -1,0 +1,2 @@
+CONTAINER ID   IMAGE        COMMAND                  CREATED              STATUS    PORTS     NAMES
+407c9418ae8a   registry:2   "/entrypoint.sh /etc…"   About a minute ago   Created             private-registry
