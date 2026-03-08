@@ -65,6 +65,8 @@ jobs:
             # Authenticate server to pull image
             echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login ${{ secrets.REGISTRY_URL }} -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
             
+            export REGISTRY_URL=${{ secrets.REGISTRY_URL }}
+            
             # Pull latest images and recreate containers
             docker-compose pull
             docker-compose up -d      
