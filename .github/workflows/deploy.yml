@@ -67,4 +67,4 @@ jobs:
             
             # Pull latest images and recreate containers
             docker compose pull
-            docker compose up -d   
+            docker compose up -d    
