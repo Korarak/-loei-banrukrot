@@ -44,3 +44,8 @@ docker-compose.override.yml
 # Test coverage
 coverage/
 .nyc_output/
+
+# Deployment summaries and config
+deployment_summary.md
+.env.production
+

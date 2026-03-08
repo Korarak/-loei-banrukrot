@@ -14,7 +14,7 @@ const createAdmin = async () => {
         const adminData = {
             username: 'admin',
             email: 'admin@example.com',
-            password: 'Banrakrod_Admin_Secure2026!', // You can change this
+            password: process.env.ADMIN_PASSWORD || 'ChangeThisPassword123!', // You can change this
             role: 'owner'
         };
 
