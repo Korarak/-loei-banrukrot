@@ -50,20 +50,21 @@ jobs:
     needs: build-and-push
     
     steps:
-      - name: Deploy Backend via Portainer Webhook
-        run: |
-          if [ -n "${{ secrets.PORTAINER_WEBHOOK_URL_BACKEND }}" ]; then
-            curl -X POST "${{ secrets.PORTAINER_WEBHOOK_URL_BACKEND }}"
-            echo "Backend deployment triggered"
-          else
-            echo "PORTAINER_WEBHOOK_URL_BACKEND secret is not set, skipping backend deployment"
-          fi
-
-      - name: Deploy Frontend via Portainer Webhook
-        run: |
-          if [ -n "${{ secrets.PORTAINER_WEBHOOK_URL_FRONTEND }}" ]; then
-            curl -X POST "${{ secrets.PORTAINER_WEBHOOK_URL_FRONTEND }}"
-            echo "Frontend deployment triggered"
-          else
-            echo "PORTAINER_WEBHOOK_URL_FRONTEND secret is not set, skipping frontend deployment"
-          fi
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_SSH_HOST }}
+          port: ${{ secrets.SERVER_SSH_PORT }}
+          username: ${{ secrets.SERVER_SSH_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            # Ensure the directory exists
+            mkdir -p /home/${{ secrets.SERVER_SSH_USERNAME }}/loei-banrakrod
+            cd /home/${{ secrets.SERVER_SSH_USERNAME }}/loei-banrakrod
+            
+            # Authenticate server to pull image
+            echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login ${{ secrets.REGISTRY_URL }} -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+            
+            # Pull latest images and recreate containers
+            docker compose pull
+            docker compose up -d

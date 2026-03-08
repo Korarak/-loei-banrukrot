@@ -15,15 +15,13 @@ MONGODB_URI=mongodb://admin:your_secure_password@mongodb:27017/banrakrod?authSou
 # No Frontend vars needed in Production .env here since they are baked into the image at build time via GitHub Actions.
 ```
 
-## 2. Portainer Deployment (Initial Setup)
-1. Go to **Registries** and add your Private Registry (`docker5.loeitech.org:5000`) with authentication.
-2. Go to **Stacks** -> **Add stack**.
-3. Give it a name (e.g., `banrakrod-stack`).
-4. Paste the content of `docker-compose.yml`.
-5. Add the **Environment variables** listed above.
-6. Enable **Webhooks** for both the `frontend` and `backend` services.
-7. Click **Deploy the stack**.
-8. Copy the Webhook URLs and configure them as GitHub Actions Secrets (`PORTAINER_WEBHOOK_URL_FRONTEND` and `PORTAINER_WEBHOOK_URL_BACKEND`).
+## 2. Server Deployment Setup (For GitHub Actions)
+To allow GitHub Actions to deploy automatically via SSH:
+
+1. SSH into your server: `ssh -p 223 adm1n_ltc@202.29.231.188`
+2. Create the deployment directory: `mkdir -p ~/loei-banrakrod`
+3. Copy your `docker-compose.yml` and `.env` files into `~/loei-banrakrod`.
+4. Your GitHub Actions pipeline will automatically log into the server via SSH, pull the latest images from your registry, and run `docker compose up -d` in that directory.
 
 ## 3. Port Mappings
 - **Frontend**: Port `8081`
