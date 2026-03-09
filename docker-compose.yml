@@ -23,6 +23,8 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - NODE_ENV=production
       - FRONTEND_URL=${FRONTEND_URL:-http://localhost:8083}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
     ports:
       - "8082:8080"
     volumes:
