@@ -209,7 +209,7 @@ export default function ProductsPage() {
                                 <button
                                     onClick={() => handleCategoryChange(null)}
                                     className={`w-full text-left px-4 py-3 rounded-xl text-sm transition-all duration-200 flex items-center justify-between font-bold group ${!categoryParam
-                                        ? 'bg-primary text-white shadow-lg shadow-primary/30'
+                                        ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30'
                                         : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-900'
                                         }`}
                                 >
@@ -221,7 +221,7 @@ export default function ProductsPage() {
                                         key={cat._id}
                                         onClick={() => handleCategoryChange(cat.slug)}
                                         className={`w-full text-left px-4 py-3 rounded-xl text-sm transition-all duration-200 flex items-center justify-between font-bold group ${categoryParam === cat.slug
-                                            ? 'bg-primary text-white shadow-lg shadow-primary/30'
+                                            ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30'
                                             : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-900'
                                             }`}
                                     >
@@ -311,7 +311,7 @@ export default function ProductsPage() {
                                         <button
                                             onClick={() => handleCategoryChange(null)}
                                             className={`w-full text-left px-4 py-3 rounded-xl text-sm transition-all duration-200 flex items-center justify-between font-bold group ${!categoryParam
-                                                ? 'bg-primary text-white shadow-lg shadow-primary/30'
+                                                ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30'
                                                 : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
                                                 }`}
                                         >
@@ -323,7 +323,7 @@ export default function ProductsPage() {
                                                 key={cat._id}
                                                 onClick={() => handleCategoryChange(cat.slug)}
                                                 className={`w-full text-left px-4 py-3 rounded-xl text-sm transition-all duration-200 flex items-center justify-between font-bold group ${categoryParam === cat.slug
-                                                    ? 'bg-primary text-white shadow-lg shadow-primary/30'
+                                                    ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30'
                                                     : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
                                                     }`}
                                             >
