@@ -54,9 +54,9 @@ const scaleIn = {
 };
 
 const testimonials = [
-    { name: 'คุณชาตรี', role: 'Vespa GTS Owner', text: 'อะไหล่คุณภาพดีมาก ได้ของแท้ราคายุติธรรม สั่งปุ๊บได้ปั๊บ ประทับใจครับ', rating: 5 },
-    { name: 'คุณสมหญิง', role: 'Vespa Sprint Owner', text: 'ทีมงานให้คำปรึกษาดีมาก แนะนำอะไหล่ที่เหมาะกับรถเราเลย ขอบคุณค่ะ', rating: 5 },
-    { name: 'คุณวิทยา', role: 'Vespa PX Owner', text: 'หาอะไหล่เวสป้ารุ่นเก่ายากมาก แต่ที่นี่มีครบ! จัดส่งเร็ว แพ็คอย่างดี', rating: 5 },
+    { name: 'คุณชาตรี', role: 'Vespa GTS Owner', text: 'งานโรงกลึงเนียนมากครับ เอาเสื้อสูบมาทำกับช่างโอ๊ต รถวิ่งดีขึ้นเยอะเลย แนะนำครับ', rating: 5 },
+    { name: 'คุณก้อง', role: 'Vespa Sprint Owner', text: 'อะไหล่แต่งเยอะมาก ช่างโอ๊ตให้คำแนะนำดีมากครับ เรื่องเวสป้าต้องที่นี่เลย', rating: 5 },
+    { name: 'คุณบอย', role: 'Vespa PX Owner', text: 'หาอะไหล่ยากๆ หรืออยากได้งานสร้าง ที่นี่จัดให้ได้หมด ประทับใจงานมืออาชีพครับ', rating: 5 },
 ];
 
 export default function Home() {
@@ -83,18 +83,17 @@ export default function Home() {
                     >
                         <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-accent font-bold text-sm uppercase tracking-widest mb-8 shadow-glow transition-all hover:bg-white/20 hover:scale-105 cursor-default">
                             <Zap className="h-4 w-4 fill-accent" />
-                            The Ultimate Vespa Experience
+                            Vespa Specialist & Oat Engineering
                         </motion.div>
 
                         <motion.h1 variants={fadeInUp} className="text-5xl md:text-7xl lg:text-8xl font-black mb-8 tracking-tighter leading-[1.1] drop-shadow-lg">
-                            DRIVE YOUR <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-pink-500 italic pr-4">PASSION</span>
-                            FURTHER
+                            RIDE WITH <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-pink-500 italic pr-4">PRECISION</span>
                         </motion.h1>
 
                         <motion.p variants={fadeInUp} className="text-xl md:text-2xl mb-12 text-gray-200 font-medium max-w-2xl leading-relaxed">
-                            ศูนย์รวมอะไหล่และของแต่งเวสป้า <span className="text-accent font-bold">ที่ครบเครื่องที่สุด</span> ในจังหวัดเลย
-                            ยกระดับการขับขี่ของคุณด้วยสินค้าคุณภาพระดับโลก
+                            ศูนย์รวมอะไหล่ บริการโมดิฟาย และ <span className="text-accent font-bold">งานโรงกลึงเทคโนโลยีสูง</span> สำหรับ Vespa
+                            ยกระดับประสิทธิภาพรถของคุณโดย ช่างโอ๊ต (Oat Engineering)
                         </motion.p>
 
                         <motion.div variants={fadeInUp} className="flex flex-wrap gap-6">
@@ -172,9 +171,9 @@ export default function Home() {
                     variants={staggerContainer}
                 >
                     {[
-                        { href: '/products?category=Engine Parts', icon: Settings, title: 'ENGINE', desc: 'Performance kits, pistons, and power upgrades for speed lovers.', color: 'primary', hoverColor: 'group-hover:text-primary', bgHover: 'group-hover:bg-primary/20', bg: 'bg-primary/10', iconColor: 'text-primary', rotate: 'group-hover:rotate-6' },
-                        { href: '/products?category=Body & Frame', icon: Package, title: 'BODY', desc: 'Frames, panels, fenders and accessories to style your ride.', color: 'blue-600', hoverColor: 'group-hover:text-blue-600', bgHover: 'group-hover:bg-blue-500/20', bg: 'bg-blue-500/10', iconColor: 'text-blue-600', rotate: 'group-hover:-rotate-6' },
-                        { href: '/products?category=Maintenance', icon: Wrench, title: 'SERVICE', desc: 'Oils, filters, and tools to keep your Vespa running smooth.', color: 'accent', hoverColor: 'group-hover:text-accent', bgHover: 'group-hover:bg-accent/20', bg: 'bg-accent/10', iconColor: 'text-accent', rotate: 'group-hover:rotate-12' },
+                        { href: '/products?category=Engine Parts', icon: Settings, title: 'MODIFICATION', desc: 'งานโมดิฟายเครื่องยนต์ และงานโรงกลึงสร้างอะไหล่ Custom โดยช่างโอ๊ต', color: 'primary', hoverColor: 'group-hover:text-primary', bgHover: 'group-hover:bg-primary/20', bg: 'bg-primary/10', iconColor: 'text-primary', rotate: 'group-hover:rotate-6' },
+                        { href: '/products?category=Body & Frame', icon: Package, title: 'SPARE PARTS', desc: 'อะไหล่แท้และอะไหล่แต่ง Vespa ทุกรุ่น ครบจบในที่เดียว', color: 'blue-600', hoverColor: 'group-hover:text-blue-600', bgHover: 'group-hover:bg-blue-500/20', bg: 'bg-blue-500/10', iconColor: 'text-blue-600', rotate: 'group-hover:-rotate-6' },
+                        { href: '/products?category=Maintenance', icon: Wrench, title: 'MAINTENANCE', desc: 'บริการซ่อมบำรุง เช็คระยะ และดูแลรักษาเวสป้าแบบมืออาชีพ', color: 'accent', hoverColor: 'group-hover:text-accent', bgHover: 'group-hover:bg-accent/20', bg: 'bg-accent/10', iconColor: 'text-accent', rotate: 'group-hover:rotate-12' },
                     ].map((cat, i) => (
                         <motion.div key={i} variants={fadeInUp}>
                             <Link href={cat.href} className="group block">

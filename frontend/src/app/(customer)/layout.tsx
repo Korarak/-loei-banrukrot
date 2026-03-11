@@ -106,10 +106,10 @@ export default function CustomerLayout({
                             </div>
                             <div>
                                 <div className="text-xl font-black tracking-tighter italic text-gray-900 group-hover:text-primary transition-colors">
-                                    BANRAKROD
+                                    บ้านรักรถ
                                 </div>
                                 <div className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] group-hover:text-primary/70 transition-colors">
-                                    Loei Province
+                                    เมืองเลย
                                 </div>
                             </div>
                         </Link>

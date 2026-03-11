@@ -5,8 +5,8 @@
     /* Powerful Colorful Accents - High Energy & Contrast */
     --background: 0 0% 100%;
     /* Pure White */
-    --foreground: 150 90% 10%;
-    /* Very Dark Electric Green */
+    --foreground: 154 34% 15%;
+    /* Deep charcoal with hint of green */
 
     --card: 0 0% 100%;
     --card-foreground: 150 90% 10%;
@@ -14,8 +14,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 150 90% 10%;
 
-    /* PRIMARY: ELECTRIC EMERALD */
-    --primary: 150 90% 40%;
+    /* PRIMARY: DEEP EMERALD - Adjusted for better text contrast */
+    --primary: 152 76% 36%;
     --primary-foreground: 0 0% 100%;
 
     /* SECONDARY: VIBRANT CYAN TINT */

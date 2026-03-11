@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "BANRAKROD - ร้านบ้านรักรถ",
-  description: "Loei Province Automotive E-commerce + POS System",
+  title: "บ้านรักรถเมืองเลย - ซ่อมเวสป้า & โรงกลึงโอ๊ต (Vespa Repair & Oat Engineering)",
+  description: "ศูนย์รวมอะไหล่และบริการปรับแต่งซ่อมบำรุงรถจักรยานยนต์ Vespa ครบวงจร โดยช่างโอ๊ต (Oat Engineering) เมืองเลย",
 };
 
 export default function RootLayout({

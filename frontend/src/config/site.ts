@@ -1,8 +1,11 @@
 export const siteConfig = {
     brand: {
-        name: "บ้านรักรถ จังหวัดเลย",
-        description: "ยกระดับการขับขี่ของคุณด้วยอะไหล่เวสป้าคุณภาพเยี่ยม คัดสรรเพื่อคนรักรถตัวจริง พร้อมบริการดูแลซ่อมบำรุงครบวงจร โดยทีมช่างผู้เชี่ยวชาญ",
+        name: "บ้านรักรถเมืองเลย",
+        englishName: "Banrukrot Loei",
+        tagline: "Vespa Specialist & Oat Engineering",
+        description: "ยกระดับการขับขี่ของคุณด้วยอะไหล่เวสป้าคุณภาพเยี่ยม คัดสรรเพื่อคนรักรถตัวจริง พร้อมบริการดูแลซ่อมบำรุงและงานโรงกลึงครบวงจร โดยช่างโอ๊ต (Oat Engineering)",
     },
+    owner: "นายกิตติธัช กุลัตถ์นาม",
     footerData: {
         explore: [
             { label: "รายการสินค้า", href: "/products" },
@@ -12,13 +15,16 @@ export const siteConfig = {
         contact: {
             header: "ติดต่อเรา",
             items: [
-                { type: "email", value: "info@banrakrod-loei.com" },
-                { type: "phone", value: "+66 XX XXX XXXX" },
-                { type: "address", value: "123 ต.เมือง อ.เมือง จ.เลย 42000" }
+                { type: "phone", label: "ช่างโอ๊ต", value: "061-370-2484" },
+                { type: "phone", label: "ร้าน", value: "094-373-0664" },
+                { type: "address", value: "519/2 หมู่ 5 บ้านหนองผักก้าม ต.เมือง อ.เมือง จ.เลย 42000" },
+                { type: "maps", value: "พิกัดร้าน", href: "https://goo.gl/maps/Cbas3yCjPz6feeSPA" }
             ],
             social: {
-                facebook: "https://facebook.com/banrakrod",
-                instagram: "https://instagram.com/banrakrod",
+                facebook: "https://www.facebook.com/profile.php?id=100063556782744",
+                tiktok: "https://www.tiktok.com/@oatengineering",
+                youtube: "https://www.youtube.com/@kittithat168",
+                instagram: "https://instagram.com/banrakrod", // Keep as placeholder or remove if not needed
                 line: "https://line.me/ti/p/banrakrod"
             }
         },
@@ -26,6 +32,6 @@ export const siteConfig = {
             { label: "นโยบายความเป็นส่วนตัว", href: "#" },
             { label: "เงื่อนไขการให้บริการ", href: "#" },
         ],
-        copyright: "© 2024 บ้านรักรถ จังหวัดเลย. สงวนลิขสิทธิ์."
+        copyright: `© ${new Date().getFullYear()} บ้านรักรถเมืองเลย & OAT Engineering. สงวนลิขสิทธิ์.`
     }
 };

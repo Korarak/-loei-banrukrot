@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Wrench, ChevronDown, Facebook, Instagram, Phone, Mail, MapPin, Twitter } from 'lucide-react';
+import { Wrench, ChevronDown, ChevronRight, Facebook, Instagram, Phone, Mail, MapPin, Twitter } from 'lucide-react';
 import { useState } from 'react';
 import { siteConfig } from '@/config/site';
 
@@ -31,22 +31,22 @@ export default function Footer() {
                                 <Wrench className="h-5 w-5" />
                             </div>
                             <div>
-                                <h2 className="text-xl font-black italic tracking-tighter text-white">BANRAKROD</h2>
-                                <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Loei Province</p>
+                                <h2 className="text-xl font-black italic tracking-tighter text-white">บ้านรักรถเมืองเลย</h2>
+                                <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">OAT ENGINEERING</p>
                             </div>
                         </div>
                         <p className="text-gray-400 text-sm leading-relaxed mb-8">
                             {siteConfig.brand.description}
                         </p>
-                        <div className="flex gap-4">
+                        <div className="flex flex-wrap gap-4">
                             <Link href={siteConfig.footerData.contact.social.facebook} className="h-10 w-10 bg-gray-900 rounded-full flex items-center justify-center text-gray-400 hover:bg-[#1877F2] hover:text-white transition-all transform hover:-translate-y-1">
                                 <Facebook className="h-5 w-5" />
                             </Link>
-                            <Link href={siteConfig.footerData.contact.social.instagram} className="h-10 w-10 bg-gray-900 rounded-full flex items-center justify-center text-gray-400 hover:bg-[#E4405F] hover:text-white transition-all transform hover:-translate-y-1">
-                                <Instagram className="h-5 w-5" />
+                            <Link href={siteConfig.footerData.contact.social.tiktok} className="h-10 w-10 bg-gray-900 rounded-full flex items-center justify-center text-gray-400 hover:bg-[#000000] hover:text-white transition-all transform hover:-translate-y-1">
+                                <span className="font-bold text-xs">TT</span>
                             </Link>
-                            <Link href={siteConfig.footerData.contact.social.line} className="h-10 w-10 bg-gray-900 rounded-full flex items-center justify-center text-gray-400 hover:bg-[#06C755] hover:text-white transition-all transform hover:-translate-y-1">
-                                <span className="font-bold text-sm">L</span>
+                            <Link href={siteConfig.footerData.contact.social.youtube} className="h-10 w-10 bg-gray-900 rounded-full flex items-center justify-center text-gray-400 hover:bg-[#FF0000] hover:text-white transition-all transform hover:-translate-y-1">
+                                <span className="font-bold text-xs">YT</span>
                             </Link>
                         </div>
                     </div>
@@ -71,14 +71,21 @@ export default function Footer() {
                         <div className="col-span-2 md:col-span-1">
                             <h3 className="font-bold text-white uppercase tracking-widest text-sm mb-6">Contact Us</h3>
                             <ul className="space-y-4 text-sm text-gray-400 font-medium">
-                                {siteConfig.footerData.contact.items.map((item, index) => (
+                                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                                {siteConfig.footerData.contact.items.map((item: any, index: number) => (
                                     <li key={index} className="flex items-start gap-3">
                                         <div className="mt-1 min-w-[16px]">
-                                            {item.type === 'email' && <Mail className="h-4 w-4 text-primary" />}
                                             {item.type === 'phone' && <Phone className="h-4 w-4 text-primary" />}
                                             {item.type === 'address' && <MapPin className="h-4 w-4 text-primary" />}
+                                            {item.type === 'maps' && <ChevronRight className="h-4 w-4 text-primary" />}
                                         </div>
-                                        <span>{item.value}</span>
+                                        {item.href ? (
+                                            <Link href={item.href} target="_blank" className="hover:text-primary transition-colors">
+                                                {item.label ? `${item.label}: ` : ''}{item.value}
+                                            </Link>
+                                        ) : (
+                                            <span>{item.label ? `${item.label}: ` : ''}{item.value}</span>
+                                        )}
                                     </li>
                                 ))}
                             </ul>

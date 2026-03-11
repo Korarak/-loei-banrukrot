@@ -48,4 +48,9 @@ coverage/
 # Deployment summaries and config
 deployment_summary.md
 .env.production
-
+docker-compose.local.yml
+test-local-prod.bat
+create-local-admin.bat
+docker-compose.dev.yml
+test-local-dev.bat
+create-dev-admin.bat
