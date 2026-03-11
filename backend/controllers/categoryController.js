@@ -55,13 +55,21 @@ exports.createCategory = async (req, res, next) => {
     try {
         const { name, description, sortOrder } = req.body;
 
-        // Generate slug from name
-        let slug = name.toLowerCase()
-            .replace(/[^a-z0-9]+/g, '-')
+        // Generate base slug from name
+        let baseSlug = name.toLowerCase()
+            .replace(/[^a-z0-9\u0E00-\u0E7F]+/g, '-')
             .replace(/^-|-$/g, '');
 
-        if (!slug) {
-            slug = `category-${Date.now()}`;
+        if (!baseSlug) {
+            baseSlug = `category`;
+        }
+
+        let slug = baseSlug;
+        let slugExists = await Category.findOne({ slug });
+        
+        // Append random string if slug exists
+        if (slugExists) {
+            slug = `${baseSlug}-${Math.random().toString(36).substring(2, 6)}`;
         }
 
         // Get next categoryId
@@ -96,12 +104,20 @@ exports.updateCategory = async (req, res, next) => {
         const updateData = {};
         if (name) {
             updateData.name = name;
-            let slug = name.toLowerCase()
-                .replace(/[^a-z0-9]+/g, '-')
+            let baseSlug = name.toLowerCase()
+                .replace(/[^a-z0-9\u0E00-\u0E7F]+/g, '-')
                 .replace(/^-|-$/g, '');
 
-            if (!slug) {
-                slug = `category-${Date.now()}`;
+            if (!baseSlug) {
+                baseSlug = `category`;
+            }
+
+            let slug = baseSlug;
+            // Check if slug exists and belongs to a DIFFERENT category
+            let slugExists = await Category.findOne({ slug, _id: { $ne: req.params.id } });
+            
+            if (slugExists) {
+                slug = `${baseSlug}-${Math.random().toString(36).substring(2, 6)}`;
             }
             updateData.slug = slug;
         }
