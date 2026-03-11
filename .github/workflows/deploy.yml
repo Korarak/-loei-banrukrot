@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -68,6 +71,6 @@ jobs:
             export REGISTRY_URL=${{ secrets.REGISTRY_URL }}
             
             # Pull latest images and recreate containers
-            docker compose down
-            docker compose pull
-            docker compose up -d      
+            docker-compose down
+            docker-compose pull
+            docker-compose up -d      
