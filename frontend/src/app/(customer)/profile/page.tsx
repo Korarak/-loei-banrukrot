@@ -1,7 +1,7 @@
 'use client';
 
 import { useAuthStore } from '@/stores/useAuthStore';
-import { useCustomerAddresses, useAddAddress, useDeleteAddress, useUpdateAddress, useUpdateCustomer } from '@/hooks/useCustomers';
+import { useCustomerAddresses, useAddAddress, useDeleteAddress, useUpdateAddress, useUpdateCustomer, CustomerAddress } from '@/hooks/useCustomers';
 import api from '@/lib/api';
 import { getImageUrl } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -36,6 +36,8 @@ export default function ProfilePage() {
 
     const [isAdding, setIsAdding] = useState(false);
     const [isEditingProfile, setIsEditingProfile] = useState(false);
+    const [isEditingAddress, setIsEditingAddress] = useState(false);
+    const [editingAddress, setEditingAddress] = useState<CustomerAddress | null>(null);
     const [isUploading, setIsUploading] = useState(false);
     const [editForm, setEditForm] = useState({
         firstName: '',
@@ -159,6 +161,28 @@ export default function ProfilePage() {
             } catch (error) {
                 toast.error('ไม่สามารถลบที่อยู่ได้');
             }
+        }
+    };
+
+    const handleEditAddressClick = (addr: CustomerAddress) => {
+        setEditingAddress({ ...addr });
+        setIsEditingAddress(true);
+    };
+
+    const handleUpdateAddressSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingAddress) return;
+        try {
+            await updateAddress.mutateAsync({
+                customerId: customer._id,
+                addressId: editingAddress._id,
+                data: editingAddress
+            });
+            toast.success('อัปเดตที่อยู่เรียบร้อย');
+            setIsEditingAddress(false);
+            setEditingAddress(null);
+        } catch (error) {
+            toast.error('ไม่สามารถอัปเดตที่อยู่ได้');
         }
     };
 
@@ -554,14 +578,24 @@ export default function ProfilePage() {
                                                 )}
                                             </div>
                                         </div>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            className="text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl"
-                                            onClick={() => handleDeleteAddress(addr._id)}
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
+                                        <div>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="text-gray-400 hover:text-primary hover:bg-primary/5 rounded-xl mr-1"
+                                                onClick={() => handleEditAddressClick(addr)}
+                                            >
+                                                <Pencil className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl"
+                                                onClick={() => handleDeleteAddress(addr._id)}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
                                     </div>
                                 ))
                             ) : (
@@ -572,6 +606,112 @@ export default function ProfilePage() {
                         </div>
                     </CardContent>
                 </Card>
+
+                <Dialog open={isEditingAddress} onOpenChange={setIsEditingAddress}>
+                    <DialogContent className="sm:max-w-[600px] rounded-2xl max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                            <DialogTitle>แก้ไขที่อยู่</DialogTitle>
+                            <DialogDescription>
+                                แก้ไขรายละเอียดที่อยู่จัดส่งของคุณ
+                            </DialogDescription>
+                        </DialogHeader>
+                        {editingAddress && (
+                            <form onSubmit={handleUpdateAddressSubmit} className="space-y-4 py-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="edit-recipientName">ชื่อผู้รับ</Label>
+                                        <Input
+                                            id="edit-recipientName"
+                                            value={editingAddress.recipientName}
+                                            onChange={e => setEditingAddress({ ...editingAddress, recipientName: e.target.value })}
+                                            required
+                                            className="bg-white rounded-xl"
+                                            placeholder="ชื่อ-นามสกุล"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="edit-phone">เบอร์โทรศัพท์ติดต่อ</Label>
+                                        <Input
+                                            id="edit-phone"
+                                            value={editingAddress.phone || ''}
+                                            onChange={e => setEditingAddress({ ...editingAddress, phone: e.target.value })}
+                                            required
+                                            className="bg-white rounded-xl"
+                                        />
+                                    </div>
+                                    <div className="col-span-1 md:col-span-2 space-y-2">
+                                        <Label htmlFor="edit-streetAddress">ที่อยู่ (บ้านเลขที่, หมู่, ซอย, ถนน)</Label>
+                                        <Input
+                                            id="edit-streetAddress"
+                                            value={editingAddress.streetAddress}
+                                            onChange={e => setEditingAddress({ ...editingAddress, streetAddress: e.target.value })}
+                                            required
+                                            className="bg-white rounded-xl"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="edit-subDistrict">ตำบล/แขวง</Label>
+                                        <Input
+                                            id="edit-subDistrict"
+                                            value={editingAddress.subDistrict || ''}
+                                            onChange={e => setEditingAddress({ ...editingAddress, subDistrict: e.target.value })}
+                                            required
+                                            className="bg-white rounded-xl"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="edit-district">อำเภอ/เขต</Label>
+                                        <Input
+                                            id="edit-district"
+                                            value={editingAddress.district}
+                                            onChange={e => setEditingAddress({ ...editingAddress, district: e.target.value })}
+                                            required
+                                            className="bg-white rounded-xl"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="edit-province">จังหวัด</Label>
+                                        <Input
+                                            id="edit-province"
+                                            value={editingAddress.province}
+                                            onChange={e => setEditingAddress({ ...editingAddress, province: e.target.value })}
+                                            required
+                                            className="bg-white rounded-xl"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="edit-zipCode">รหัสไปรษณีย์</Label>
+                                        <Input
+                                            id="edit-zipCode"
+                                            value={editingAddress.zipCode}
+                                            onChange={e => setEditingAddress({ ...editingAddress, zipCode: e.target.value })}
+                                            required
+                                            className="bg-white rounded-xl"
+                                        />
+                                    </div>
+                                    <div className="flex items-center space-x-2 pt-2 md:col-span-2">
+                                        <input
+                                            type="checkbox"
+                                            id="edit-isDefault"
+                                            checked={editingAddress.isDefault}
+                                            onChange={e => setEditingAddress({ ...editingAddress, isDefault: e.target.checked })}
+                                            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                        />
+                                        <Label htmlFor="edit-isDefault">ตั้งเป็นที่อยู่หลัก (เริ่มต้น)</Label>
+                                    </div>
+                                </div>
+                                <DialogFooter className="pt-4">
+                                    <Button type="button" variant="outline" onClick={() => setIsEditingAddress(false)} className="rounded-xl">
+                                        ยกเลิก
+                                    </Button>
+                                    <Button type="submit" disabled={updateAddress.isPending} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full">
+                                        {updateAddress.isPending ? 'กำลังบันทึก...' : 'บันทึกการแก้ไข'}
+                                    </Button>
+                                </DialogFooter>
+                            </form>
+                        )}
+                    </DialogContent>
+                </Dialog>
             </div>
         </div>
     );

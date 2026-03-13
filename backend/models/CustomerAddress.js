@@ -16,6 +16,10 @@ const customerAddressSchema = new mongoose.Schema({
         required: true,
         maxlength: 255
     },
+    phone: {
+        type: String,
+        maxlength: 20
+    },
     streetAddress: {
         type: String,
         required: true,

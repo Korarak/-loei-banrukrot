@@ -155,7 +155,7 @@ exports.getCustomerAddresses = async (req, res, next) => {
 // @access  Private/Admin
 exports.addCustomerAddress = async (req, res, next) => {
     try {
-        const { addressLabel, recipientName, streetAddress, subDistrict, district, province, zipCode, isDefault } = req.body;
+        const { addressLabel, recipientName, phone, streetAddress, subDistrict, district, province, zipCode, isDefault } = req.body;
 
         // If set as default, unset other default addresses for this customer
         if (isDefault) {
@@ -169,6 +169,7 @@ exports.addCustomerAddress = async (req, res, next) => {
             customerId: req.params.id,
             addressLabel,
             recipientName,
+            phone,
             streetAddress,
             subDistrict,
             district,
@@ -191,7 +192,7 @@ exports.addCustomerAddress = async (req, res, next) => {
 // @access  Private/Admin
 exports.updateCustomerAddress = async (req, res, next) => {
     try {
-        const { addressLabel, recipientName, streetAddress, subDistrict, district, province, zipCode, isDefault } = req.body;
+        const { addressLabel, recipientName, phone, streetAddress, subDistrict, district, province, zipCode, isDefault } = req.body;
         const address = await CustomerAddress.findById(req.params.addressId);
 
         if (!address) {
@@ -211,6 +212,7 @@ exports.updateCustomerAddress = async (req, res, next) => {
 
         address.addressLabel = addressLabel || address.addressLabel;
         address.recipientName = recipientName || address.recipientName;
+        address.phone = phone || address.phone;
         address.streetAddress = streetAddress || address.streetAddress;
         address.subDistrict = subDistrict || address.subDistrict;
         address.district = district || address.district;
