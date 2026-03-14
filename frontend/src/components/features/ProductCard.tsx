@@ -190,7 +190,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                         )}
 
                         {/* Overlay Actions */}
-                        <div className="absolute inset-x-4 bottom-4 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out z-20 opacity-0 group-hover:opacity-100 flex gap-2">
+                        <div className="absolute inset-x-4 bottom-4 translate-y-0 md:translate-y-full md:group-hover:translate-y-0 transition-transform duration-500 ease-out z-20 opacity-100 md:opacity-0 md:group-hover:opacity-100 flex gap-2">
                             <motion.div className="flex-1" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                                 <Button
                                     className="w-full bg-white text-primary hover:bg-emerald-50 shadow-lg border border-emerald-100 font-bold rounded-xl h-10 text-xs uppercase tracking-wider"

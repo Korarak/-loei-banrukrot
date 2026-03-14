@@ -8,13 +8,14 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Install dependencies based on the preferred package manager
-COPY package.json package-lock.json* ./
-# Remove package-lock.json to avoid private registry errors and clean install
-RUN rm -rf package-lock.json && npm install
+# Copy monorepo root files and the frontend package file
+COPY package.json package-lock.json ./
+COPY frontend/package.json ./frontend/
 
-# Add build arguments
-ARG NEXT_PUBLIC_API_URL
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+# Use npm ci for deterministic installs and cache mounts to speed up repeated builds
+# We use --workspace to only install frontend dependencies
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --workspace=frontend --legacy-peer-deps
 
 # Rebuild the source code only when needed
 FROM base AS builder
@@ -23,15 +24,13 @@ WORKDIR /app
 # Re-declare build arg for this stage (ARGs don't carry across stages)
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_TELEMETRY_DISABLED 1
 
 COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/frontend/node_modules ./frontend/node_modules
 COPY . .
 
-# Next.js collects completely anonymous telemetry data about general usage.
-# Learn more here: https://nextjs.org/telemetry
-# Uncomment the following line in case you want to disable telemetry during the build.
-# ENV NEXT_TELEMETRY_DISABLED 1
-
+WORKDIR /app/frontend
 RUN npm run build
 
 # Production image, copy all the files and run next
@@ -39,17 +38,15 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-# Uncomment the following line in case you want to disable telemetry during runtime.
-# ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED 1
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 # Recreate the folder structure for standalone mode to ensure correct paths
-# https://nextjs.org/docs/pages/api-reference/next-config-js/output#automatically-copying-traced-files
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/frontend/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/frontend/.next/static ./frontend/.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/frontend/public ./frontend/public
 
 USER nextjs
 

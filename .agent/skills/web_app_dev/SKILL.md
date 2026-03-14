@@ -75,6 +75,11 @@ To run individually:
     -   All interactive elements must have `aria-label` or visible label.
     -   Semantic HTML (`<header>`, `<main>`, `<footer>`, `<article>`) is mandatory.
     -   Ensure sufficient color contrast.
+- **Mobile-First UX/UI**:
+    -   Avoid hover-triggered interactions for critical functionality (menus, buttons).
+    -   Use click/tap-based menus (Radix or Framer Motion).
+    -   Ensure interactive targets are at least 44x44px.
+    -   Test all features on mobile screen resolutions.
 
 ## API Security Best Practices
 - **Validation**: Strict `zod` validation for ALL inputs on both Frontend and Backend. Trust nothing.

@@ -30,6 +30,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
       position={position}
+      expand={true}
       richColors
       closeButton
       visibleToasts={4}

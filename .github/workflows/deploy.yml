@@ -10,7 +10,7 @@ env:
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     
     steps:
       - name: Checkout Code
@@ -29,7 +29,7 @@ jobs:
       - name: Build and Push Backend Image
         uses: docker/build-push-action@v6
         with:
-          context: ./backend
+          context: .
           file: ./backend/Dockerfile
           push: true
           tags: ${{ secrets.REGISTRY_URL }}/loei-banrakrod-backend:latest
@@ -39,7 +39,7 @@ jobs:
       - name: Build and Push Frontend Image
         uses: docker/build-push-action@v6
         with:
-          context: ./frontend
+          context: .
           file: ./frontend/Dockerfile
           push: true
           tags: ${{ secrets.REGISTRY_URL }}/loei-banrakrod-frontend:latest
@@ -49,7 +49,7 @@ jobs:
           cache-to: type=registry,ref=${{ secrets.REGISTRY_URL }}/loei-banrakrod-frontend:buildcache,mode=max
 
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     needs: build-and-push
     
     steps:

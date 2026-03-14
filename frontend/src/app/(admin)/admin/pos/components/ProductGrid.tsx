@@ -131,7 +131,7 @@ function POSProductCard({ product, onAdd }: { product: Product; onAdd: () => voi
                     </span>
                     {hasStock && (
                         <div
-                            className="h-6 w-6 rounded-full bg-black text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                            className="h-6 w-6 rounded-full bg-black text-white flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity shadow-sm"
                             aria-hidden="true"
                         >
                             <span className="text-lg leading-none mb-0.5">+</span>
