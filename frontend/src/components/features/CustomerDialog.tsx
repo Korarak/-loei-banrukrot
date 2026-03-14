@@ -493,7 +493,7 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                                     <FormItem>
                                                         <FormLabel>แขวง/ตำบล</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder="แขวง/ตำบล" {...field} className="rounded-xl" />
+                                                            <Input placeholder={"แขวง/ตำบล"} {...field} className="rounded-xl" />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -506,7 +506,7 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                                     <FormItem>
                                                         <FormLabel>เขต/อำเภอ</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder="เขต/อำเภอ" {...field} className="rounded-xl" />
+                                                            <Input placeholder={"เขต/อำเภอ"} {...field} className="rounded-xl" />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -522,7 +522,7 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                                     <FormItem>
                                                         <FormLabel>จังหวัด</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder="จังหวัด" {...field} className="rounded-xl" />
+                                                            <Input placeholder={"จังหวัด"} {...field} className="rounded-xl" />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
