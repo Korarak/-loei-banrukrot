@@ -40,6 +40,17 @@ import {
     type CustomerAddress
 } from '@/hooks/useCustomers';
 import { toast } from 'sonner';
+
+// Constants for Thai Strings to avoid compiler bugs with Unicode escapes in attributes
+const SUB_DISTRICT_PLACEHOLDER = "แขวง/ตำบล";
+const DISTRICT_PLACEHOLDER = "เขต/อำเภอ";
+const PROVINCE_PLACEHOLDER = "จังหวัด";
+const POSTAL_CODE_PLACEHOLDER = "รหัสไปรษณีย์";
+const FIRST_NAME_PLACEHOLDER = "เช่น สมชาย";
+const LAST_NAME_PLACEHOLDER = "เช่น รักษาสุข";
+const PHONE_PLACEHOLDER = "เบอร์โทรศัพท์";
+const EMAIL_PLACEHOLDER = "อีเมล (ถ้ามี)";
+const SEARCH_PLACEHOLDER = "ค้นหาชื่อลูกค้า, เบอร์โทรศัพท์, อีเมล...";
 import { Badge } from '@/components/ui/badge';
 
 const customerSchema = z.object({
@@ -287,7 +298,7 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                                     <FormControl>
                                                         <div className="relative">
                                                             <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                                            <Input placeholder="เช่น สมชาย" {...field} className="pl-10 h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white transition-all" />
+                                                            <Input placeholder={FIRST_NAME_PLACEHOLDER} {...field} className="pl-10 h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white transition-all" />
                                                         </div>
                                                     </FormControl>
                                                     <FormMessage />
@@ -303,7 +314,7 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                                     <FormControl>
                                                         <div className="relative">
                                                             <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                                            <Input placeholder="เช่น รักษาสุข" {...field} className="pl-10 h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white transition-all" />
+                                                            <Input placeholder={LAST_NAME_PLACEHOLDER} {...field} className="pl-10 h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white transition-all" />
                                                         </div>
                                                     </FormControl>
                                                     <FormMessage />
@@ -493,7 +504,7 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                                     <FormItem>
                                                         <FormLabel>แขวง/ตำบล</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder={"แขวง/ตำบล"} {...field} className="rounded-xl" />
+                                                            <Input placeholder={SUB_DISTRICT_PLACEHOLDER} {...field} className="rounded-xl" />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -506,7 +517,7 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                                     <FormItem>
                                                         <FormLabel>เขต/อำเภอ</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder={"เขต/อำเภอ"} {...field} className="rounded-xl" />
+                                                            <Input placeholder={DISTRICT_PLACEHOLDER} {...field} className="rounded-xl" />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -522,7 +533,7 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                                     <FormItem>
                                                         <FormLabel>จังหวัด</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder={"จังหวัด"} {...field} className="rounded-xl" />
+                                                            <Input placeholder={PROVINCE_PLACEHOLDER} {...field} className="rounded-xl" />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -535,7 +546,7 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                                     <FormItem>
                                                         <FormLabel>รหัสไปรษณีย์</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder="รหัสไปรษณีย์" {...field} className="rounded-xl" />
+                                                            <Input placeholder={POSTAL_CODE_PLACEHOLDER} {...field} className="rounded-xl" />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>

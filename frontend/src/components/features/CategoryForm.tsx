@@ -19,6 +19,10 @@ import { Switch } from '@/components/ui/switch';
 import { useCreateCategory, useUpdateCategory, type Category } from '@/hooks/useCategories';
 import { Loader2 } from 'lucide-react';
 
+// Constants for Thai Strings to avoid compiler bugs
+const CATEGORY_NAME_PLACEHOLDER = "เช่น อะไหล่เครื่องยนต์";
+const CATEGORY_DESCRIPTION_PLACEHOLDER = "คำอธิบายสั้นๆ เกี่ยวกับหมวดหมู่นี้...";
+
 const categorySchema = z.object({
     name: z.string().min(1, 'กรุณาระบุชื่อหมวดหมู่'),
     description: z.string().optional(),
@@ -84,7 +88,7 @@ export default function CategoryForm({ category, onSuccess, onCancel }: Category
                             <FormItem>
                                 <FormLabel>ชื่อหมวดหมู่</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="เช่น อะไหล่เครื่องยนต์" {...field} className="h-11" />
+                                    <Input placeholder={CATEGORY_NAME_PLACEHOLDER} {...field} className="h-11" />
                                 </FormControl>
                                 <FormDescription>
                                     ชื่อหมวดหมู่ที่จะแสดงให้ลูกค้าเห็น
@@ -102,7 +106,7 @@ export default function CategoryForm({ category, onSuccess, onCancel }: Category
                                 <FormLabel>รายละเอียด (ไม่บังคับ)</FormLabel>
                                 <FormControl>
                                     <Textarea
-                                        placeholder="คำอธิบายสั้นๆ เกี่ยวกับหมวดหมู่นี้..."
+                                        placeholder={CATEGORY_DESCRIPTION_PLACEHOLDER}
                                         className="min-h-[100px] resize-none"
                                         {...field}
                                     />

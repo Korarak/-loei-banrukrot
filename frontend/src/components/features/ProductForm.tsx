@@ -24,6 +24,13 @@ import type { Product } from '@/hooks/useProducts';
 import { useCategories } from '@/hooks/useCategories';
 import ImageManager from './ImageManager';
 
+// Constants for Thai Strings to avoid compiler bugs
+const PRODUCT_NAME_PLACEHOLDER = "ระบุชื่อสินค้า";
+const CATEGORY_PLACEHOLDER = "เลือกหมวดหมู่";
+const BRAND_PLACEHOLDER = "เช่น Piaggio, Vespa";
+const SHIPPING_SIZE_PLACEHOLDER = "เลือกขนาดการจัดส่ง";
+const DESCRIPTION_PLACEHOLDER = "ระบุรายละเอียดสินค้า...";
+
 const variantSchema = z.object({
     sku: z.string().min(1, 'กรุณาระบุ SKU'),
     price: z.number().min(0, 'ราคาต้องมากกว่าหรือเท่ากับ 0'),
@@ -115,7 +122,7 @@ export default function ProductForm({ product, onSubmit, onCancel, isLoading }: 
                                 <FormItem>
                                     <FormLabel>ชื่อสินค้า</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="ระบุชื่อสินค้า" autoComplete="off" {...field} className="h-11" />
+                                        <Input placeholder={PRODUCT_NAME_PLACEHOLDER} autoComplete="off" {...field} className="h-11" />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -135,7 +142,7 @@ export default function ProductForm({ product, onSubmit, onCancel, isLoading }: 
                                         >
                                             <FormControl>
                                                 <SelectTrigger className="h-11">
-                                                    <SelectValue placeholder="เลือกหมวดหมู่" />
+                                                    <SelectValue placeholder={CATEGORY_PLACEHOLDER} />
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
@@ -159,7 +166,7 @@ export default function ProductForm({ product, onSubmit, onCancel, isLoading }: 
                                         <FormLabel>ยี่ห้อ (ไม่บังคับ)</FormLabel>
                                         <FormControl>
                                             <Input
-                                                placeholder="เช่น Piaggio, Vespa"
+                                                placeholder={BRAND_PLACEHOLDER}
                                                 autoComplete="off"
                                                 {...field}
                                                 className="h-11"
@@ -185,7 +192,7 @@ export default function ProductForm({ product, onSubmit, onCancel, isLoading }: 
                                     >
                                         <FormControl>
                                             <SelectTrigger className="h-11">
-                                                <SelectValue placeholder="เลือกขนาดการจัดส่ง" />
+                                                <SelectValue placeholder={SHIPPING_SIZE_PLACEHOLDER} />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
@@ -284,7 +291,7 @@ export default function ProductForm({ product, onSubmit, onCancel, isLoading }: 
                                 <FormLabel>รายละเอียดสินค้า</FormLabel>
                                 <FormControl>
                                     <Textarea
-                                        placeholder="ระบุรายละเอียดสินค้า..."
+                                        placeholder={DESCRIPTION_PLACEHOLDER}
                                         className="min-h-[120px] resize-none"
                                         {...field}
                                     />

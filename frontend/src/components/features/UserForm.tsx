@@ -16,6 +16,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
+// Constants for Thai Strings to avoid compiler bugs
+const USERNAME_PLACEHOLDER = "ระบุชื่อผู้ใช้งาน";
+const PASSWORD_NEW_PLACEHOLDER = "เว้นว่างไว้หากไม่ต้องการเปลี่ยน";
+const PASSWORD_REQUIRED_PLACEHOLDER = "ระบุรหัสผ่าน";
+const ROLE_PLACEHOLDER = "เลือกสิทธิ์";
+const STATUS_PLACEHOLDER = "เลือกสถานะ";
+
 const baseUserSchema = z.object({
     username: z.string().min(3, 'ชื่อผู้ใช้งานต้องมีอย่างน้อย 3 ตัวอักษร'),
     email: z.string().email('รูปแบบอีเมลไม่ถูกต้อง'),
@@ -89,7 +96,7 @@ export default function UserForm({ user, onSubmit, onCancel, isLoading }: UserFo
                         <FormItem>
                             <FormLabel>ชื่อผู้ใช้งาน</FormLabel>
                             <FormControl>
-                                <Input placeholder="ระบุชื่อผู้ใช้งาน" autoComplete="off" {...field} />
+                                <Input placeholder={USERNAME_PLACEHOLDER} autoComplete="off" {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -119,7 +126,7 @@ export default function UserForm({ user, onSubmit, onCancel, isLoading }: UserFo
                             <FormControl>
                                 <Input
                                     type="password"
-                                    placeholder={user ? "เว้นว่างไว้หากไม่ต้องการเปลี่ยน" : "ระบุรหัสผ่าน"}
+                                    placeholder={user ? PASSWORD_NEW_PLACEHOLDER : PASSWORD_REQUIRED_PLACEHOLDER}
                                     autoComplete="new-password"
                                     {...field}
                                 />
@@ -139,7 +146,7 @@ export default function UserForm({ user, onSubmit, onCancel, isLoading }: UserFo
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <FormControl>
                                         <SelectTrigger>
-                                            <SelectValue placeholder="เลือกสิทธิ์" />
+                                            <SelectValue placeholder={ROLE_PLACEHOLDER} />
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
@@ -164,7 +171,7 @@ export default function UserForm({ user, onSubmit, onCancel, isLoading }: UserFo
                                 >
                                     <FormControl>
                                         <SelectTrigger>
-                                            <SelectValue placeholder="เลือกสถานะ" />
+                                            <SelectValue placeholder={STATUS_PLACEHOLDER} />
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>

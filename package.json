@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "Banrakrod E-commerce + POS System Monorepo",
   "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
   "scripts": {
     "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
     "start": "concurrently \"npm run start:backend\" \"npm run start:frontend\"",
