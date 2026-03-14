@@ -9,7 +9,7 @@ import { getImageUrl } from '@/lib/utils';
 import { Heart } from 'lucide-react';
 import { useWishlistStore } from '@/stores/useWishlistStore';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 
 interface ProductCardProps {
     product: any;
@@ -18,7 +18,13 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
     const addToCart = useAddToCart();
     const customer = useAuthStore((state) => state.customer);
-    const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlistStore();
+    const { addToWishlist, removeFromWishlist } = useWishlistStore();
+    const inWishlist = useWishlistStore((state) => state.items.some((item) => item._id === product._id));
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     // 3D Motion Values
     const ref = useRef<HTMLDivElement>(null);
@@ -74,14 +80,12 @@ export default function ProductCard({ product }: ProductCardProps) {
             : `฿${minPrice.toLocaleString()} - ฿${maxPrice.toLocaleString()}`
         : 'Price N/A';
 
-    const inWishlist = isInWishlist(product._id);
-
     const handleWishlistToggle = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
         if (inWishlist) {
             removeFromWishlist(product._id);
-            toast.success('Removed from wishlist');
+            toast.success('ลบออกจากรายการโปรดแล้ว');
         } else {
             addToWishlist({
                 _id: product._id,
@@ -90,7 +94,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 price: minPrice,
                 slug: product._id
             });
-            toast.success('Added to wishlist');
+            toast.success('เพิ่มในรายการโปรดแล้ว');
         }
     };
 
@@ -167,12 +171,12 @@ export default function ProductCard({ product }: ProductCardProps) {
                             whileTap={{ scale: 0.8 }}
                             whileHover={{ scale: 1.1 }}
                             onClick={handleWishlistToggle}
-                            className={`absolute top-3 right-3 z-30 p-2 rounded-full backdrop-blur-sm transition-all duration-200 shadow-sm ${inWishlist
+                            className={`absolute top-3 right-3 z-30 p-2 rounded-full backdrop-blur-sm transition-all duration-200 shadow-sm ${(inWishlist && mounted)
                                 ? 'bg-red-50 text-red-500 hover:bg-red-100'
                                 : 'bg-white/80 text-gray-400 hover:bg-white hover:text-red-500'
                                 }`}
                         >
-                            <Heart className={`h-4 w-4 ${inWishlist ? 'fill-current' : ''}`} />
+                            <Heart className={`h-4 w-4 ${(inWishlist && mounted) ? 'fill-current' : ''}`} />
                         </motion.button>
 
                         {primaryImage ? (
@@ -182,6 +186,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                                 fill
                                 className="object-cover object-center group-hover:scale-110 transition-transform duration-700 ease-out z-10"
                                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                unoptimized
                             />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
@@ -193,20 +198,20 @@ export default function ProductCard({ product }: ProductCardProps) {
                         <div className="absolute inset-x-4 bottom-4 translate-y-0 md:translate-y-full md:group-hover:translate-y-0 transition-transform duration-500 ease-out z-20 opacity-100 md:opacity-0 md:group-hover:opacity-100 flex gap-2">
                             <motion.div className="flex-1" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                                 <Button
-                                    className="w-full bg-white text-primary hover:bg-emerald-50 shadow-lg border border-emerald-100 font-bold rounded-xl h-10 text-xs uppercase tracking-wider"
+                                    className="w-full bg-white text-primary hover:bg-emerald-50 shadow-lg border border-emerald-100 font-bold rounded-xl h-10 text-[10px] uppercase tracking-wider"
                                     onClick={handleAddToCart}
                                     disabled={!defaultVariant || defaultVariant.stockAvailable <= 0 || addToCart.isPending}
                                 >
-                                    {addToCart.isPending ? '...' : (defaultVariant && defaultVariant.stockAvailable > 0 ? 'Add to Cart' : 'Sold Out')}
+                                    {addToCart.isPending ? '...' : (defaultVariant && defaultVariant.stockAvailable > 0 ? 'ใส่ตะกร้า' : 'สินค้าหมด')}
                                 </Button>
                             </motion.div>
                             <motion.div className="flex-1" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                                 <Button
                                     variant="secondary"
-                                    className="w-full bg-black/80 backdrop-blur-md text-white hover:bg-black shadow-lg border-0 font-bold rounded-xl h-10 text-xs uppercase tracking-wider"
+                                    className="w-full bg-black/80 backdrop-blur-md text-white hover:bg-black shadow-lg border-0 font-bold rounded-xl h-10 text-[10px] uppercase tracking-wider"
                                     onClick={(e) => { e.preventDefault(); /* Open Quick View Modal */ }}
                                 >
-                                    Quick View
+                                    ดูสินค้า
                                 </Button>
                             </motion.div>
                         </div>
@@ -214,7 +219,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                         <div className="absolute top-3 left-3 z-20 flex flex-col gap-2">
                             {product.variants.some((v: any) => v.stockAvailable <= 0) && (
                                 <Badge variant="destructive" className="rounded-lg px-2 py-1 text-[10px] font-bold uppercase tracking-wider shadow-sm animate-pulse">
-                                    Sold Out
+                                    หมด
                                 </Badge>
                             )}
                         </div>
@@ -254,7 +259,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                                 </div>
                             )}
                         </div>
-                        <h3 className="font-bold text-lg text-gray-900 line-clamp-2 mb-3 group-hover:text-primary transition-colors duration-300 flex-1 leading-tight">
+                        <h3 className="font-bold text-sm text-gray-900 line-clamp-2 mb-3 group-hover:text-primary transition-colors duration-300 flex-1 leading-tight">
                             {product.productName}
                         </h3>
                         <div className="flex items-end justify-between mt-auto pt-4 border-t border-gray-50">

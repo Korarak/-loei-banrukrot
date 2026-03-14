@@ -21,10 +21,10 @@ import api from '@/lib/api';
 
 const formSchema = z.object({
     email: z.string().email({
-        message: 'Please enter a valid email address.',
+        message: 'กรุณากรอกอีเมลที่ถูกต้อง',
     }),
     password: z.string().min(6, {
-        message: 'Password must be at least 6 characters.',
+        message: 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร',
     }),
 });
 
@@ -59,7 +59,7 @@ export default function LoginPage() {
             }
         } catch (err: any) {
             console.error(err);
-            setError(err.response?.data?.message || 'Login failed');
+            setError(err.response?.data?.message || 'การเข้าสู่ระบบล้มเหลว');
         } finally {
             setIsLoading(false);
         }
@@ -68,8 +68,8 @@ export default function LoginPage() {
     return (
         <div className="space-y-6">
             <div className="space-y-2 text-center">
-                <h1 className="text-3xl font-bold">Admin Login</h1>
-                <p className="text-gray-500">Enter your credentials to access the admin panel</p>
+                <h1 className="text-3xl font-bold">เข้าสู่ระบบ (ผู้ดูแลระบบ)</h1>
+                <p className="text-gray-500">กรอกข้อมูลของคุณเพื่อเข้าสู่ระบบส่วนจัดการส่วนหลัง</p>
             </div>
 
             {error && (
@@ -85,7 +85,7 @@ export default function LoginPage() {
                         name="email"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Email</FormLabel>
+                                <FormLabel>อีเมล</FormLabel>
                                 <FormControl>
                                     <Input placeholder="admin@example.com" {...field} />
                                 </FormControl>
@@ -98,7 +98,7 @@ export default function LoginPage() {
                         name="password"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Password</FormLabel>
+                                <FormLabel>รหัสผ่าน</FormLabel>
                                 <FormControl>
                                     <Input type="password" placeholder="******" {...field} />
                                 </FormControl>
@@ -107,14 +107,14 @@ export default function LoginPage() {
                         )}
                     />
                     <Button type="submit" className="w-full text-black" disabled={isLoading}>
-                        {isLoading ? 'Signing in...' : 'Sign in'}
+                        {isLoading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
                     </Button>
                 </form>
             </Form>
 
             <div className="text-center text-sm">
                 <Link href="/register" className="text-primary hover:underline">
-                    Don't have an account? Register
+                    ยังไม่มีบัญชี? ลงทะเบียน
                 </Link>
             </div>
         </div>

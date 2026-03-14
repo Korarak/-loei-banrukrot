@@ -17,8 +17,8 @@ import api from '@/lib/api';
 import { useAuthStore } from '@/stores/useAuthStore';
 
 const formSchema = z.object({
-    email: z.string().email('Invalid email address'),
-    password: z.string().min(6, 'Password must be at least 6 characters'),
+    email: z.string().email('กรุณากรอกอีเมลที่ถูกต้อง'),
+    password: z.string().min(6, 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร'),
 });
 
 export default function CustomerLoginPage() {
@@ -43,11 +43,11 @@ export default function CustomerLoginPage() {
             if (response.data.success) {
                 const { token, ...customer } = response.data.data;
                 loginCustomer(customer, token);
-                toast.success('Login successful');
+                toast.success('เข้าสู่ระบบสำเร็จ');
                 router.push(redirect);
             }
         } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Login failed');
+            toast.error(error.response?.data?.message || 'การเข้าสู่ระบบล้มเหลว');
         } finally {
             setIsLoading(false);
         }
@@ -57,9 +57,9 @@ export default function CustomerLoginPage() {
         <div className="container mx-auto flex items-center justify-center min-h-[calc(100vh-4rem)] p-4">
             <Card className="w-full max-w-md shadow-lg">
                 <CardHeader className="space-y-1">
-                    <CardTitle className="text-2xl font-bold text-center">Customer Login</CardTitle>
+                    <CardTitle className="text-2xl font-bold text-center">เข้าสู่ระบบ</CardTitle>
                     <CardDescription className="text-center">
-                        Enter your email and password to access your account
+                        กรอกอีเมลและรหัสผ่านเพื่อเข้าสู่บัญชีของคุณ
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -70,7 +70,7 @@ export default function CustomerLoginPage() {
                                 name="email"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Email</FormLabel>
+                                        <FormLabel>อีเมล</FormLabel>
                                         <FormControl>
                                             <Input placeholder="name@example.com" {...field} />
                                         </FormControl>
@@ -83,7 +83,7 @@ export default function CustomerLoginPage() {
                                 name="password"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Password</FormLabel>
+                                        <FormLabel>รหัสผ่าน</FormLabel>
                                         <FormControl>
                                             <Input type="password" placeholder="••••••" {...field} />
                                         </FormControl>
@@ -95,12 +95,12 @@ export default function CustomerLoginPage() {
                                 {isLoading ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Logging in...
+                                        กำลังเข้าสู่ระบบ...
                                     </>
                                 ) : (
                                     <>
                                         <LogIn className="mr-2 h-4 w-4" />
-                                        Login
+                                        เข้าสู่ระบบ
                                     </>
                                 )}
                             </Button>
@@ -113,7 +113,7 @@ export default function CustomerLoginPage() {
                         </div>
                         <div className="relative flex justify-center text-xs uppercase">
                             <span className="bg-background px-2 text-muted-foreground">
-                                Or continue with
+                                หรือเข้าสู่ระบบด้วย
                             </span>
                         </div>
                     </div>
@@ -132,12 +132,12 @@ export default function CustomerLoginPage() {
                 </CardContent>
                 <CardFooter className="flex flex-col space-y-2">
                     <div className="text-sm text-center text-gray-500">
-                        Don't have an account?{' '}
+                        ยังไม่มีบัญชี?{' '}
                         <Link
                             href={`/customer-register?redirect=${encodeURIComponent(redirect)}`}
                             className="text-primary hover:underline font-medium"
                         >
-                            Register here
+                            ลงทะเบียนที่นี่
                         </Link>
                     </div>
                 </CardFooter>

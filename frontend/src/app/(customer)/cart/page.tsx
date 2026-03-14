@@ -123,13 +123,13 @@ export default function CartPage() {
     if (items.length === 0) {
         return (
             <div className="max-w-4xl mx-auto">
-                <h1 className="text-3xl font-bold mb-8">Shopping Cart</h1>
-                <Card className="p-12 text-center">
+                <h1 className="text-3xl font-bold mb-8">รถเข็นของคุณ</h1>
+                <Card className="p-12 text-center border-0 shadow-lg rounded-[2.5rem]">
                     <ShoppingBag className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-                    <h2 className="text-xl font-semibold mb-2">Your cart is empty</h2>
-                    <p className="text-gray-600 mb-6">Add some products to get started!</p>
-                    <Button asChild className="bg-green-600 hover:bg-green-700">
-                        <Link href="/products">Browse Products</Link>
+                    <h2 className="text-xl font-semibold mb-2">รถเข็นของคุณว่างเปล่า</h2>
+                    <p className="text-gray-600 mb-6">เลือกชมสินค้าเพื่อเพิ่มใส่รถเข็นเลย!</p>
+                    <Button asChild className="bg-gray-900 hover:bg-black rounded-full px-8">
+                        <Link href="/products">เลือกชมสินค้า</Link>
                     </Button>
                 </Card>
             </div>
@@ -169,6 +169,7 @@ export default function CartPage() {
                                                 fill
                                                 className="object-cover"
                                                 sizes="(max-width: 768px) 128px, 160px"
+                                                unoptimized
                                             />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-xs text-gray-400 bg-gray-50">
@@ -282,12 +283,12 @@ export default function CartPage() {
                                         {addresses.map((address) => (
                                             <div key={address._id} className={`flex items-start space-x-3 border-2 rounded-2xl p-4 cursor-pointer transition-all ${selectedAddressId === address._id ? 'border-primary bg-primary/5 shadow-md shadow-primary/10' : 'border-gray-50 hover:border-gray-200 bg-gray-50/50'}`}>
                                                 <RadioGroupItem value={address._id} id={address._id} className="mt-1" />
-                                                <Label htmlFor={address._id} className="cursor-pointer flex-1 space-y-1">
+                                                <Label htmlFor={address._id} className="cursor-pointer flex-1 flex flex-col gap-1.5">
                                                     <div className="flex items-center justify-between">
-                                                        <span className="font-bold text-gray-900">{address.recipientName}</span>
+                                                        <span className="font-bold text-gray-900 text-base leading-none">{address.recipientName}</span>
                                                         {address.isDefault && <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">Default</span>}
                                                     </div>
-                                                    <span className="text-xs text-gray-500 font-medium leading-relaxed block">
+                                                    <span className="text-xs text-gray-500 font-medium leading-relaxed">
                                                         {address.streetAddress}, {address.subDistrict}, {address.district}, {address.province} {address.zipCode}
                                                     </span>
                                                 </Label>

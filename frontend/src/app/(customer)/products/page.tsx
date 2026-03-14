@@ -25,6 +25,7 @@ import {
     SheetHeader,
     SheetTitle,
     SheetTrigger,
+    SheetClose,
 } from "@/components/ui/sheet";
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -293,87 +294,117 @@ export default function ProductsPage() {
                     </form>
                     <Sheet>
                         <SheetTrigger asChild>
-                            <Button className="bg-primary text-white rounded-xl">
+                            <Button className="bg-zinc-900 text-white rounded-xl hover:bg-black transition-colors shadow-md">
                                 <Filter className="h-4 w-4" />
                             </Button>
                         </SheetTrigger>
-                        <SheetContent side="left" className="w-[300px] sm:w-[350px] overflow-y-auto bg-white">
-                            <SheetHeader className="px-1 pt-6 text-left">
-                                <SheetTitle className="text-xl font-black mb-6 flex items-center gap-2">
-                                    <Filter className="h-5 w-5" /> FILTERS
-                                </SheetTitle>
-                            </SheetHeader>
-                            <div className="space-y-8 pb-10">
+                        <SheetContent side="bottom" className="rounded-t-[2.5rem] h-[85vh] overflow-y-auto bg-white border-t-0 p-0 shadow-2xl z-[70]">
+                            {/* Header - Fixed with better spacing */}
+                            <div className="sticky top-0 bg-white/90 backdrop-blur-xl z-20 px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+                                <SheetHeader className="p-0 text-left">
+                                    <SheetTitle className="text-lg font-black flex items-center gap-2 text-gray-900">
+                                        <Filter className="h-4 w-4 text-primary" /> ตัวกรองสินค้า
+                                    </SheetTitle>
+                                </SheetHeader>
+                                <SheetClose className="h-9 w-9 flex items-center justify-center rounded-full bg-gray-50 text-gray-400 hover:bg-gray-200 transition-colors border border-gray-100">
+                                    <X className="h-4 w-4" />
+                                </SheetClose>
+                            </div>
+                            <div className="px-6 py-8 space-y-10 pb-32">
                                 {/* Categories */}
-                                <div className="space-y-4">
-                                    <h3 className="text-sm font-black uppercase tracking-widest text-gray-900 border-b border-gray-100 pb-2">CATEGORIES</h3>
-                                    <div className="space-y-2">
+                                <div className="space-y-5">
+                                    <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 border-b border-gray-50 pb-3">หมวดหมู่สินค้า</h3>
+                                    <div className="grid grid-cols-2 gap-2.5">
                                         <button
                                             onClick={() => handleCategoryChange(null)}
-                                            className={`w-full text-left px-4 py-3 rounded-xl text-sm transition-all duration-200 flex items-center justify-between font-bold group ${!categoryParam
-                                                ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30'
-                                                : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
+                                            className={`text-center px-4 py-3 rounded-2xl text-[13px] transition-all duration-300 flex items-center justify-between font-bold group border-2 ${!categoryParam
+                                                ? 'bg-gray-900 border-gray-900 text-white shadow-lg'
+                                                : 'bg-white border-gray-50 text-gray-500 hover:bg-gray-50'
                                                 }`}
                                         >
-                                            ALL PRODUCTS
-                                            {!categoryParam && <div className="h-2 w-2 rounded-full bg-white animate-pulse" />}
+                                            ทั้งหมด
+                                            {!categoryParam && <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />}
                                         </button>
                                         {categories?.map((cat) => (
                                             <button
                                                 key={cat._id}
                                                 onClick={() => handleCategoryChange(cat.slug)}
-                                                className={`w-full text-left px-4 py-3 rounded-xl text-sm transition-all duration-200 flex items-center justify-between font-bold group ${categoryParam === cat.slug
-                                                    ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30'
-                                                    : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
+                                                className={`text-left px-4 py-3 rounded-2xl text-[13px] transition-all duration-300 flex items-center justify-between font-bold group border-2 ${categoryParam === cat.slug
+                                                    ? 'bg-gray-900 border-gray-900 text-white shadow-lg'
+                                                    : 'bg-white border-gray-50 text-gray-500 hover:bg-gray-50'
                                                     }`}
                                             >
-                                                {cat.name.toUpperCase()}
-                                                {categoryParam === cat.slug && <div className="h-2 w-2 rounded-full bg-white animate-pulse" />}
+                                                {cat.name}
+                                                {categoryParam === cat.slug && <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />}
                                             </button>
                                         ))}
                                     </div>
                                 </div>
 
-                                {/* Price Range */}
-                                <div className="space-y-6">
-                                    <h3 className="text-sm font-black uppercase tracking-widest text-gray-900 border-b border-gray-100 pb-2">PRICE RANGE</h3>
-                                    <div className="px-2">
-                                        <Slider
-                                            defaultValue={[0, 20000]}
-                                            max={50000}
-                                            step={100}
-                                            value={priceRange}
-                                            onValueChange={setPriceRange}
-                                            className="my-6"
-                                        />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                    {/* Price Range */}
+                                    <div className="space-y-6">
+                                        <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 border-b border-gray-50 pb-3">ช่วงราคา</h3>
+                                        <div className="px-3">
+                                            <Slider
+                                                defaultValue={[0, 20000]}
+                                                max={50000}
+                                                step={100}
+                                                value={priceRange}
+                                                onValueChange={setPriceRange}
+                                                className="my-8"
+                                            />
+                                        </div>
+                                        <div className="flex items-center justify-between text-base font-black text-gray-900 bg-gray-50 p-5 rounded-2xl border-2 border-dashed border-gray-100">
+                                            <div className="flex flex-col gap-0.5">
+                                                <span className="text-[10px] text-gray-400 uppercase tracking-widest">เริ่มต้น</span>
+                                                <span className="text-gray-900">฿{priceRange[0].toLocaleString()}</span>
+                                            </div>
+                                            <div className="h-8 w-px bg-gray-200" />
+                                            <div className="flex flex-col gap-0.5 text-right">
+                                                <span className="text-[10px] text-gray-400 uppercase tracking-widest">สูงสุด</span>
+                                                <span className="text-gray-900">฿{priceRange[1].toLocaleString()}</span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center justify-between text-sm font-bold text-gray-700 bg-gray-50 p-3 rounded-xl border border-gray-100">
-                                        <span>฿{priceRange[0].toLocaleString()}</span>
-                                        <span className="text-gray-300">to</span>
-                                        <span>฿{priceRange[1].toLocaleString()}</span>
+
+                                    {/* Brands */}
+                                    <div className="space-y-5">
+                                        <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 border-b border-gray-50 pb-3">แบรนด์สินค้า</h3>
+                                        <div className="flex flex-wrap gap-2.5">
+                                            {availableBrands.map((brand) => (
+                                                <button
+                                                    key={brand}
+                                                    onClick={() => handleBrandToggle(brand)}
+                                                    className={`px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider border-2 transition-all ${selectedBrands.includes(brand)
+                                                        ? 'bg-gray-900 text-white border-gray-900 shadow-xl'
+                                                        : 'bg-white text-gray-400 border-gray-50 hover:border-gray-900 hover:text-gray-900'
+                                                        }`}
+                                                >
+                                                    {brand}
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
+                            </div>
 
-                                {/* Brands */}
-                                <div className="space-y-4">
-                                    <h3 className="text-sm font-black uppercase tracking-widest text-gray-900 border-b border-gray-100 pb-2">BRANDS</h3>
-                                    <div className="flex flex-wrap gap-2">
-                                        {availableBrands.map((brand) => (
-                                            <button
-                                                key={brand}
-                                                onClick={() => handleBrandToggle(brand)}
-                                                className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide border-2 transition-all ${selectedBrands.includes(brand)
-                                                    ? 'bg-gray-900 text-white border-gray-900'
-                                                    : 'bg-white text-gray-400 border-gray-200 hover:border-gray-900 hover:text-gray-900'
-                                                    }`}
-                                            >
-                                                {brand}
-                                            </button>
-                                        ))}
-                                    </div>
+                            {/* Sticky Footer for Mobile Buttons - Offset for BottomNav */}
+                            <div className="fixed bottom-16 md:bottom-0 inset-x-0 p-6 bg-gradient-to-t from-white via-white to-transparent pointer-events-none z-30">
+                                <div className="max-w-md mx-auto flex gap-3 pointer-events-auto">
+                                    <Button 
+                                        variant="outline" 
+                                        onClick={clearFilters} 
+                                        className="flex-1 h-12 rounded-2xl font-black text-[13px] uppercase tracking-[0.1em] text-gray-500 border-2 border-gray-50 bg-white hover:bg-red-50 hover:text-red-500 hover:border-red-100 transition-all shadow-lg"
+                                    >
+                                        ล้างข้อมูล
+                                    </Button>
+                                    <SheetClose asChild>
+                                        <Button className="flex-[2] h-12 rounded-2xl font-black text-[13px] uppercase tracking-[0.2em] bg-gray-900 text-white hover:bg-black shadow-2xl transition-all active:scale-95">
+                                            ตกลง
+                                        </Button>
+                                    </SheetClose>
                                 </div>
-
-                                <Button onClick={clearFilters} className="w-full h-12 rounded-xl font-bold">Clear All Filters</Button>
                             </div>
                         </SheetContent>
                     </Sheet>
@@ -400,9 +431,9 @@ export default function ProductsPage() {
                     </div>
 
                     {isLoading ? (
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             {[1, 2, 3, 4, 5, 6].map((i) => (
-                                <div key={i} className="aspect-[3/4] bg-gray-100 rounded-3xl animate-pulse" />
+                                <div key={i} className="aspect-[4/5] bg-gray-100 rounded-[2.5rem] animate-pulse" />
                             ))}
                         </div>
                     ) : products.length > 0 ? (
@@ -419,7 +450,7 @@ export default function ProductsPage() {
                                 }}
                                 initial="hidden"
                                 animate="show"
-                                className="grid grid-cols-2 lg:grid-cols-3 gap-6"
+                                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
                             >
                                 {products.map((product: any) => (
                                     <motion.div

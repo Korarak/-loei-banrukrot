@@ -187,10 +187,6 @@ export default function ProductDetailPage() {
                         </div>
                     </div>
 
-                    <div className="prose prose-lg text-gray-500 mb-8 leading-relaxed">
-                        <p>{product.description || 'No description available for this product.'}</p>
-                    </div>
-
                     {/* Variants */}
                     {variants.length > 1 && (
                         <div className="mb-8">
@@ -213,7 +209,7 @@ export default function ProductDetailPage() {
                     )}
 
                     {/* Desktop Actions */}
-                    <div className="mt-auto hidden lg:block">
+                    <div className="mb-10 hidden lg:block">
                         <div className="flex items-center gap-6 p-6 bg-gray-50 rounded-[2rem] border border-gray-100">
                             <div className="flex items-center gap-3 bg-white rounded-full p-1.5 border border-gray-200">
                                 <Button
@@ -243,6 +239,13 @@ export default function ProductDetailPage() {
                                 <ShoppingCart className="mr-2 h-5 w-5" />
                                 {addToCart.isPending ? 'Adding...' : 'Add to Cart'}
                             </Button>
+                        </div>
+                    </div>
+
+                    <div className="border-t border-gray-100 pt-8 mt-4">
+                        <h3 className="text-sm font-black uppercase tracking-widest text-gray-900 mb-4">Description</h3>
+                        <div className="prose prose-lg text-gray-500 max-w-none leading-relaxed whitespace-pre-wrap">
+                            {product.description || 'No description available for this product.'}
                         </div>
                     </div>
                 </div>

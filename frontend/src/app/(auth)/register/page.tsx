@@ -21,13 +21,13 @@ import api from '@/lib/api';
 
 const formSchema = z.object({
     username: z.string().min(3, {
-        message: 'Username must be at least 3 characters.',
+        message: 'ชื่อผู้ใช้ต้องมีอย่างน้อย 3 ตัวอักษร',
     }),
     email: z.string().email({
-        message: 'Please enter a valid email address.',
+        message: 'กรุณากรอกอีเมลที่ถูกต้อง',
     }),
     password: z.string().min(6, {
-        message: 'Password must be at least 6 characters.',
+        message: 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร',
     }),
 });
 
@@ -58,7 +58,7 @@ export default function RegisterPage() {
             }
         } catch (err: any) {
             console.error(err);
-            setError(err.response?.data?.message || 'Registration failed');
+            setError(err.response?.data?.message || 'การลงทะเบียนล้มเหลว');
         } finally {
             setIsLoading(false);
         }
@@ -67,8 +67,8 @@ export default function RegisterPage() {
     return (
         <div className="space-y-6">
             <div className="space-y-2 text-center">
-                <h1 className="text-3xl font-bold">Create Account</h1>
-                <p className="text-gray-500">Register for a new admin account</p>
+                <h1 className="text-3xl font-bold">สร้างบัญชีใหม่</h1>
+                <p className="text-gray-500">ลงทะเบียนบัญชีสำหรับผู้ดูแลระบบ</p>
             </div>
 
             {error && (
@@ -84,7 +84,7 @@ export default function RegisterPage() {
                         name="username"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Username</FormLabel>
+                                <FormLabel>ชื่อผู้ใช้</FormLabel>
                                 <FormControl>
                                     <Input placeholder="johndoe" {...field} />
                                 </FormControl>
@@ -97,7 +97,7 @@ export default function RegisterPage() {
                         name="email"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Email</FormLabel>
+                                <FormLabel>อีเมล</FormLabel>
                                 <FormControl>
                                     <Input placeholder="admin@example.com" {...field} />
                                 </FormControl>
@@ -110,7 +110,7 @@ export default function RegisterPage() {
                         name="password"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Password</FormLabel>
+                                <FormLabel>รหัสผ่าน</FormLabel>
                                 <FormControl>
                                     <Input type="password" placeholder="******" {...field} />
                                 </FormControl>
@@ -118,15 +118,15 @@ export default function RegisterPage() {
                             </FormItem>
                         )}
                     />
-                    <Button type="submit" className="w-full" disabled={isLoading}>
-                        {isLoading ? 'Creating account...' : 'Create account'}
+                    <Button type="submit" className="w-full text-black" disabled={isLoading}>
+                        {isLoading ? 'กำลังสร้างบัญชี...' : 'สร้างบัญชี'}
                     </Button>
                 </form>
             </Form>
 
             <div className="text-center text-sm">
                 <Link href="/login" className="text-primary hover:underline">
-                    Already have an account? Sign in
+                    มีบัญชีอยู่แล้ว? เข้าสู่ระบบ
                 </Link>
             </div>
         </div>

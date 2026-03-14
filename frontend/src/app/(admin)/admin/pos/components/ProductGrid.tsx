@@ -90,6 +90,7 @@ function POSProductCard({ product, onAdd }: { product: Product; onAdd: () => voi
                         sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
                         className="object-cover group-hover:scale-110 transition-transform duration-500"
                         loading="lazy"
+                        unoptimized
                     />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-300">
