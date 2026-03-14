@@ -1,0 +1,16 @@
+
+node_modules
+.git
+.gitignore
+.vscode
+.env*
+frontend/.next
+frontend/node_modules
+backend/node_modules
+*.log
+npm-debug.log*
+.DS_Store
+coverage
+.nyc_output
+dist
+build

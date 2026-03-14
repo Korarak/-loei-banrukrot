@@ -22,7 +22,6 @@ ENV NODE_ENV=production
 
 # Copy necessary files from deps
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/backend/node_modules ./backend/node_modules
 COPY . .
 
 WORKDIR /app/backend
