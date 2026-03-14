@@ -67,10 +67,10 @@ export default function AdminOrdersPage() {
     useEffect(() => {
         if (orders) {
             if (previousOrderCount.current > 0 && orders.length > previousOrderCount.current) {
-                toast("New Order Received!", {
-                    description: "A new order has been placed.",
+                toast("ได้รับคำสั่งซื้อใหม่!", {
+                    description: "มีคำสั่งซื้อใหม่เข้ามาในระบบ",
                     action: {
-                        label: "View",
+                        label: "ดู",
                         onClick: () => window.location.reload(),
                     },
                 });
@@ -119,7 +119,7 @@ export default function AdminOrdersPage() {
             });
             setTrackingDialogOpen(false);
             setTrackingOrder(null);
-            toast.success('Order marked as shipped');
+            toast.success('อัปเดตสถานะการจัดส่งเรียบร้อยแล้ว');
         } catch (error) {
             // Error handled by mutation
         }
@@ -167,28 +167,28 @@ export default function AdminOrdersPage() {
         <div className="space-y-6 max-w-6xl mx-auto">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Orders</h1>
-                    <p className="text-gray-500 text-sm mt-1">Manage online orders and POS sales transactions.</p>
+                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">คำสั่งซื้อ</h1>
+                    <p className="text-gray-500 text-sm mt-1">จัดการคำสั่งซื้อออนไลน์และรายการขายหน้าร้าน (POS)</p>
                 </div>
                 <Button asChild className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 rounded-xl text-black">
                     <Link href="/admin/pos">
                         <Plus className="mr-2 h-4 w-4" />
-                        New POS Sale
+                        เริ่มการขาย POS ใหม่
                     </Link>
                 </Button>
             </div>
 
             {/* Main Tabs for Source Filtering */}
             <Tabs defaultValue="all" value={sourceFilter} onValueChange={setSourceFilter} className="w-full">
-                <TabsList className="grid w-full md:w-[400px] grid-cols-3 bg-gray-100/50 p-1 rounded-xl">
+                <TabsList className="grid w-full md:w-[450px] grid-cols-3 bg-gray-100/50 p-1 rounded-xl">
                     <TabsTrigger value="all" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                        All ({countAll})
+                        ทั้งหมด ({countAll})
                     </TabsTrigger>
                     <TabsTrigger value="online" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm gap-2">
-                        <Globe className="h-4 w-4" /> Online ({countOnline})
+                        <Globe className="h-4 w-4" /> ออนไลน์ ({countOnline})
                     </TabsTrigger>
                     <TabsTrigger value="pos" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm gap-2">
-                        <Store className="h-4 w-4" /> POS ({countPos})
+                        <Store className="h-4 w-4" /> หน้าร้าน ({countPos})
                     </TabsTrigger>
                 </TabsList>
             </Tabs>
@@ -199,7 +199,7 @@ export default function AdminOrdersPage() {
                 <div className="relative md:col-span-8 lg:col-span-9">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
-                        placeholder="Search order ref, customer, email..."
+                        placeholder="ค้นหาด้วยเลขที่ออเดอร์, ชื่อลูกค้า, อีเมล..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="pl-10 h-11 bg-white border-gray-200 rounded-xl focus:ring-2 focus:ring-primary/20 transition-all shadow-sm"
@@ -230,8 +230,8 @@ export default function AdminOrdersPage() {
                         <div className="bg-gray-50 p-4 rounded-full mb-4">
                             <Search className="h-8 w-8 text-gray-400" />
                         </div>
-                        <p className="text-lg font-medium text-gray-900">No orders found</p>
-                        <p className="text-sm text-gray-500">Try adjusting your filters or search query.</p>
+                        <p className="text-lg font-medium text-gray-900">ไม่พบคำสั่งซื้อ</p>
+                        <p className="text-sm text-gray-500">ลองปรับการกรองหรือคำค้นหาของคุณ</p>
                     </div>
                 ) : (
                     filteredOrders.map((order) => (
@@ -242,11 +242,11 @@ export default function AdminOrdersPage() {
                                     <div className="flex items-center gap-3">
                                         {order.source === 'pos' ? (
                                             <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200 gap-1.5 py-1 px-2.5 rounded-lg shrink-0">
-                                                <Store className="h-3.5 w-3.5" /> POS Sale
+                                                <Store className="h-3.5 w-3.5" /> ขายหน้าร้าน
                                             </Badge>
                                         ) : (
                                             <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 gap-1.5 py-1 px-2.5 rounded-lg shrink-0">
-                                                <Globe className="h-3.5 w-3.5" /> Online
+                                                <Globe className="h-3.5 w-3.5" /> ออนไลน์
                                             </Badge>
                                         )}
                                         <span className="font-mono font-semibold text-lg text-gray-900">
@@ -269,7 +269,7 @@ export default function AdminOrdersPage() {
                                         <span className="text-gray-700 font-medium truncate max-w-[200px]">
                                             {order.customer?.firstName
                                                 ? `${order.customer.firstName} ${order.customer.lastName}`
-                                                : 'Walk-in Customer'}
+                                                : 'ลูกค้าหน้าร้าน (Walk-in)'}
                                         </span>
                                     </div>
                                 </div>
@@ -277,7 +277,7 @@ export default function AdminOrdersPage() {
                                 {/* 2. Items Summary & Payment */}
                                 <div className="lg:col-span-4 space-y-3 border-t lg:border-t-0 lg:border-l border-gray-100 pt-4 lg:pt-0 lg:pl-6">
                                     <div className="space-y-1">
-                                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Items ordered</p>
+                                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">รายการสินค้า</p>
                                         {(order.items || []).slice(0, 2).map((item, idx) => (
                                             <div key={idx} className="flex justify-between text-sm text-gray-700">
                                                 <span className="truncate pr-4">{item.productName}</span>
@@ -286,7 +286,7 @@ export default function AdminOrdersPage() {
                                         ))}
                                         {(order.items || []).length > 2 && (
                                             <p className="text-xs text-primary font-medium mt-1">
-                                                +{(order.items || []).length - 2} more items...
+                                                และรายการอื่นๆ อีก {(order.items || []).length - 2} รายการ...
                                             </p>
                                         )}
                                     </div>
@@ -297,7 +297,7 @@ export default function AdminOrdersPage() {
                                             ) : (
                                                 <CreditCard className="h-3.5 w-3.5" />
                                             )}
-                                            <span>Paid: {order.paymentMethod || 'PromptPay'}</span>
+                                            <span>ชำระด้วย: {order.paymentMethod === 'Cash' ? 'เงินสด' : (order.paymentMethod === 'PromptPay' ? 'พร้อมเพย์' : order.paymentMethod)}</span>
                                         </div>
                                         {order.shippingInfo && order.shippingInfo.provider && (
                                             <div className="flex items-center gap-2 text-xs text-blue-600 font-medium bg-blue-50 w-fit px-2 py-0.5 rounded-md">
@@ -311,7 +311,7 @@ export default function AdminOrdersPage() {
                                 {/* 3. Total & Actions */}
                                 <div className="lg:col-span-4 flex flex-row lg:flex-col items-center lg:items-end justify-between gap-4 border-t lg:border-t-0 lg:border-l border-gray-100 pt-4 lg:pt-0 lg:pl-6">
                                     <div className="text-right">
-                                        <p className="text-xs text-gray-500 mb-0.5">Total Amount</p>
+                                        <p className="text-xs text-gray-500 mb-0.5">ยอดรวมทั้งหมด</p>
                                         <p className="text-2xl font-bold text-gray-900 tracking-tight">
                                             ฿{order.totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                         </p>
@@ -353,15 +353,15 @@ export default function AdminOrdersPage() {
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2 text-red-600">
                             <AlertCircle className="h-5 w-5" />
-                            Cancel Order?
+                            ยกเลิกคำสั่งซื้อ?
                         </DialogTitle>
                         <DialogDescription className="pt-2">
-                            This action cannot be undone. This will permanently cancel the order and return items to stock.
+                            การดำเนินการนี้ไม่สามารถยกเลิกได้ คำสั่งซื้อจะถูกยกเลิกอย่างถาวรและสินค้าจะถูกคืนเข้าสต็อก
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter className="gap-2 sm:space-x-0">
-                        <Button variant="outline" onClick={() => setCancelDialogOpen(false)} className="w-full sm:w-auto">Keep Order</Button>
-                        <Button variant="destructive" onClick={confirmCancel} className="w-full sm:w-auto">Yes, Cancel Order</Button>
+                        <Button variant="outline" onClick={() => setCancelDialogOpen(false)} className="w-full sm:w-auto">ไม่ต้องยกเลิก</Button>
+                        <Button variant="destructive" onClick={confirmCancel} className="w-full sm:w-auto">ใช่, ยกเลิกคำสั่งซื้อ</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -372,44 +372,44 @@ export default function AdminOrdersPage() {
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <Store className="h-5 w-5 text-primary" />
-                            Shipping Details
+                            รายละเอียดการจัดส่ง
                         </DialogTitle>
                         <DialogDescription>
-                            Enter tracking number to mark this order as shipped.
+                            กรอกหมายเลขติดตามพัสดุเพื่อเปลี่ยนสถานะเป็น "เริ่มการจัดส่ง"
                         </DialogDescription>
                     </DialogHeader>
 
                     <div className="grid gap-4 py-4">
                         <div className="grid gap-2">
-                            <Label htmlFor="courier">Courier</Label>
+                            <Label htmlFor="courier">บริษัทขนส่ง</Label>
                             <Select value={courier} onValueChange={setCourier}>
                                 <SelectTrigger id="courier">
-                                    <SelectValue placeholder="Select courier" />
+                                    <SelectValue placeholder="เลือกบริษัทขนส่ง" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="Flash Express">Flash Express</SelectItem>
                                     <SelectItem value="Kerry Express">Kerry Express</SelectItem>
                                     <SelectItem value="J&T Express">J&T Express</SelectItem>
-                                    <SelectItem value="Thailand Post">Thailand Post</SelectItem>
-                                    <SelectItem value="Other">Other</SelectItem>
+                                    <SelectItem value="Thailand Post">ไปรษณีย์ไทย</SelectItem>
+                                    <SelectItem value="Other">อื่นๆ</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                         <div className="grid gap-2">
-                            <Label htmlFor="tracking">Tracking Number</Label>
+                            <Label htmlFor="tracking">หมายเลขติดตามพัสดุ (Tracking Number)</Label>
                             <Input
                                 id="tracking"
                                 value={trackingNumber}
                                 onChange={(e) => setTrackingNumber(e.target.value)}
-                                placeholder="e.g. TH0123456789"
+                                placeholder="เช่น TH0123456789"
                                 autoFocus
                             />
                         </div>
                     </div>
 
                     <DialogFooter className="gap-2 sm:space-x-0">
-                        <Button variant="outline" onClick={() => setTrackingDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={confirmTracking} disabled={!trackingNumber} className="text-white">Confirm Shipment</Button>
+                        <Button variant="outline" onClick={() => setTrackingDialogOpen(false)}>ยกเลิก</Button>
+                        <Button onClick={confirmTracking} disabled={!trackingNumber} className="text-white">ยืนยันการจัดส่ง</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

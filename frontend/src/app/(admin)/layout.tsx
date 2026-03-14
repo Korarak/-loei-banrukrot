@@ -43,7 +43,7 @@ export default function AdminLayout({
                     <div className="h-12 w-12 bg-primary/20 rounded-xl animate-pulse flex items-center justify-center">
                         <div className="h-6 w-6 bg-primary rounded-lg animate-bounce" />
                     </div>
-                    <p className="text-sm font-bold text-gray-400 animate-pulse uppercase tracking-widest">Authenticating...</p>
+                    <p className="text-sm font-bold text-gray-400 animate-pulse uppercase tracking-widest">กำลังตรวจสอบสิทธิ์...</p>
                 </div>
             </div>
         );

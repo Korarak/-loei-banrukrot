@@ -175,3 +175,37 @@ exports.deleteCategory = async (req, res, next) => {
         next(error);
     }
 };
+
+// @desc    Reorder categories
+// @route   PUT /api/categories/reorder
+// @access  Private (staff/owner)
+exports.reorderCategories = async (req, res, next) => {
+    try {
+        const { categories } = req.body; // Expects [{ id, sortOrder }]
+
+        if (!Array.isArray(categories)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid data format. Expected an array of categories.'
+            });
+        }
+
+        const bulkOps = categories.map(cat => ({
+            updateOne: {
+                filter: { _id: cat.id },
+                update: { sortOrder: cat.sortOrder }
+            }
+        }));
+
+        if (bulkOps.length > 0) {
+            await Category.bulkWrite(bulkOps);
+        }
+
+        res.json({
+            success: true,
+            message: 'Categories reordered successfully'
+        });
+    } catch (error) {
+        next(error);
+    }
+};

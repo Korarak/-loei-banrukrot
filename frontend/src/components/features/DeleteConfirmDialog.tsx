@@ -24,8 +24,8 @@ export default function DeleteConfirmDialog({
     open,
     onOpenChange,
     onConfirm,
-    title = 'Are you sure?',
-    description = 'This action cannot be undone. This will permanently delete this item.',
+    title = 'คุณแน่ใจหรือไม่?',
+    description = 'การดำเนินการนี้ไม่สามารถยกเลิกได้ รายการนี้จะถูกลบอย่างถาวร',
     isLoading = false,
 }: DeleteConfirmDialogProps) {
     return (
@@ -36,7 +36,7 @@ export default function DeleteConfirmDialog({
                     <AlertDialogDescription>{description}</AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel disabled={isLoading}>ยกเลิก</AlertDialogCancel>
                     <AlertDialogAction
                         onClick={(e) => {
                             e.preventDefault();
@@ -45,7 +45,7 @@ export default function DeleteConfirmDialog({
                         disabled={isLoading}
                         className="bg-red-600 hover:bg-red-700"
                     >
-                        {isLoading ? 'Deleting...' : 'Delete'}
+                        {isLoading ? 'กำลังลบ...' : 'ลบออก'}
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

@@ -40,11 +40,11 @@ export default function ProductDialog({ productId, open, onOpenChange }: Product
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto bg-white">
                 <DialogHeader>
-                    <DialogTitle>{productId ? 'Edit Product' : 'Create New Product'}</DialogTitle>
+                    <DialogTitle>{productId ? 'แก้ไขสินค้า' : 'สร้างสินค้าใหม่'}</DialogTitle>
                     <DialogDescription>
                         {productId
-                            ? 'Update product information and variants'
-                            : 'Add a new product with variants to your inventory'}
+                            ? 'อัปเดตข้อมูลรายละเอียดสินค้าและตัวเลือกต่างๆ'
+                            : 'เพิ่มสินค้าใหม่พร้อมตัวเลือกสินค้าลงในคลังของคุณ'}
                     </DialogDescription>
                 </DialogHeader>
 

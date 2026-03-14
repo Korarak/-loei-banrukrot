@@ -258,7 +258,7 @@ export default function CustomersPage() {
                                                     )}
                                                     {customer.provider && customer.provider !== 'local' && (
                                                         <Badge variant="secondary" className="text-[10px] h-5 bg-gray-100 text-gray-600 px-1.5 font-normal">
-                                                            via {customer.provider}
+                                                            ผ่าน {customer.provider === 'google' ? 'Google' : customer.provider}
                                                         </Badge>
                                                     )}
                                                 </div>

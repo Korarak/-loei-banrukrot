@@ -45,7 +45,7 @@ export default function AdminProfilePage() {
         e.preventDefault();
 
         if (form.password && form.password !== form.confirmPassword) {
-            toast.error('Passwords do not match');
+            toast.error('รหัสผ่านไม่ตรงกัน');
             return;
         }
 
@@ -61,10 +61,10 @@ export default function AdminProfilePage() {
 
             const updatedUser = await updateMe.mutateAsync(updateData);
             updateAuthUser(updatedUser);
-            toast.success('Profile updated successfully');
+            toast.success('อัปเดตโปรไฟล์สำเร็จ');
             setForm(prev => ({ ...prev, password: '', confirmPassword: '' }));
         } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Failed to update profile');
+            toast.error(error.response?.data?.message || 'ไม่สามารถอัปเดตโปรไฟล์ได้');
         }
     };
 
@@ -85,10 +85,10 @@ export default function AdminProfilePage() {
 
             const updatedUser = await updateMe.mutateAsync({ profilePicture: imagePath });
             updateAuthUser(updatedUser);
-            toast.success('Profile picture updated');
+            toast.success('อัปเดตรูปโปรไฟล์แล้ว');
         } catch (error) {
             console.error(error);
-            toast.error('Failed to upload profile picture');
+            toast.error('ไม่สามารถอัปโหลดรูปโปรไฟล์ได้');
         } finally {
             setIsUploading(false);
         }
@@ -98,7 +98,7 @@ export default function AdminProfilePage() {
 
     return (
         <div className="max-w-4xl mx-auto">
-            <h1 className="text-2xl font-bold mb-6">Admin Profile</h1>
+            <h1 className="text-2xl font-bold mb-6">โปรไฟล์ผู้ดูแลระบบ</h1>
 
             <div className="grid gap-8">
                 {/* Profile Header */}
@@ -142,13 +142,13 @@ export default function AdminProfilePage() {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle>Account Details</CardTitle>
+                        <CardTitle>รายละเอียดบัญชี</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleUpdate} className="space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="username">Username</Label>
+                                    <Label htmlFor="username">ชื่อผู้ใช้</Label>
                                     <Input
                                         id="username"
                                         value={form.username}
@@ -157,7 +157,7 @@ export default function AdminProfilePage() {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="email">Email</Label>
+                                    <Label htmlFor="email">อีเมล</Label>
                                     <Input
                                         id="email"
                                         value={form.email}
@@ -168,20 +168,20 @@ export default function AdminProfilePage() {
                             </div>
 
                             <div className="border-t pt-4 space-y-4">
-                                <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">Change Password</h3>
+                                <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">เปลี่ยนรหัสผ่าน</h3>
                                 <div className="space-y-2">
-                                    <Label htmlFor="password">New Password</Label>
+                                    <Label htmlFor="password">รหัสผ่านใหม่</Label>
                                     <Input
                                         id="password"
                                         type="password"
-                                        placeholder="Leave blank to keep current password"
+                                        placeholder="เว้นว่างไว้หากไม่ต้องการเปลี่ยน"
                                         value={form.password}
                                         onChange={(e) => setForm({ ...form, password: e.target.value })}
                                     />
                                 </div>
                                 {form.password && (
                                     <div className="space-y-2">
-                                        <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                                        <Label htmlFor="confirmPassword">ยืนยันรหัสผ่านใหม่</Label>
                                         <Input
                                             id="confirmPassword"
                                             type="password"
@@ -195,7 +195,7 @@ export default function AdminProfilePage() {
 
                             <div className="flex justify-end">
                                 <Button type="submit" disabled={updateMe.isPending}>
-                                    {updateMe.isPending ? 'Saving...' : 'Save Changes'}
+                                    {updateMe.isPending ? 'กำลังบันทึก...' : 'บันทึกการเปลี่ยนแปลง'}
                                 </Button>
                             </div>
                         </form>

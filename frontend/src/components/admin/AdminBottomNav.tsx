@@ -18,22 +18,22 @@ export function AdminBottomNav({ onMenuClick }: AdminBottomNavProps) {
     const navItems = [
         {
             href: '/admin/dashboard',
-            label: 'Dashboard',
+            label: 'แผงควบคุม',
             icon: LayoutDashboard,
         },
         {
             href: '/admin/orders',
-            label: 'Orders',
+            label: 'คำสั่งซื้อ',
             icon: ShoppingCart,
         },
         {
             href: '/admin/products',
-            label: 'Products',
+            label: 'สินค้า',
             icon: Package,
         },
         {
             href: '/admin/pos',
-            label: 'POS',
+            label: 'ขายหน้าร้าน',
             icon: Store,
         }
     ];
@@ -55,7 +55,7 @@ export function AdminBottomNav({ onMenuClick }: AdminBottomNavProps) {
                         className="flex flex-col items-center justify-center w-full h-full space-y-1 text-gray-400 hover:text-gray-600 transition-colors"
                     >
                         <Menu className="h-6 w-6" />
-                        <span className="text-[10px] font-medium">Menu</span>
+                        <span className="text-[10px] font-medium">เมนู</span>
                     </button>
 
                     {navItems.map((item) => (

@@ -30,7 +30,7 @@ export function ProductGrid({ products, onAddToCart, isLoading }: ProductGridPro
             <div className="flex items-center justify-center h-full min-h-[300px]" role="status" aria-label="Loading products">
                 <div className="flex flex-col items-center gap-3">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" aria-hidden="true"></div>
-                    <p className="text-gray-400 text-sm">Loading products...</p>
+                    <p className="text-gray-400 text-sm">กำลังโหลดสินค้า...</p>
                 </div>
             </div>
         );
@@ -40,8 +40,8 @@ export function ProductGrid({ products, onAddToCart, isLoading }: ProductGridPro
         return (
             <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-gray-400" role="alert" aria-label="No products found">
                 <Package className="h-16 w-16 mb-4 opacity-20" aria-hidden="true" />
-                <p className="text-lg font-medium">No products found</p>
-                <p className="text-sm">Try adjusting your search or category filter</p>
+                <p className="text-lg font-medium">ไม่พบสินค้า</p>
+                <p className="text-sm">ลองปรับการค้นหาหรือเลือกหมวดหมู่ใหม่</p>
             </div>
         );
     }
@@ -72,7 +72,7 @@ function POSProductCard({ product, onAdd }: { product: Product; onAdd: () => voi
             )}
             onClick={hasStock ? onAdd : undefined}
             role="article"
-            aria-label={`${product.productName} - ${hasStock ? `Price ${variant?.price} Baht` : 'Out of Stock'}`}
+            aria-label={`${product.productName} - ${hasStock ? `ราคา ${variant?.price} บาท` : 'สินค้าหมด'}`}
             tabIndex={0}
             onKeyDown={(e) => {
                 if (hasStock && (e.key === 'Enter' || e.key === ' ')) {
@@ -103,14 +103,14 @@ function POSProductCard({ product, onAdd }: { product: Product; onAdd: () => voi
                         className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md text-[10px] font-bold text-gray-700 shadow-sm border border-gray-100"
                         aria-label={`${variant.stockAvailable} items left`}
                     >
-                        {variant.stockAvailable} left
+                        เหลือ {variant.stockAvailable}
                     </div>
                 ) : (
                     <div
                         className="absolute inset-0 bg-black/40 flex items-center justify-center backdrop-blur-[1px]"
                         aria-label="Out of stock overlay"
                     >
-                        <Badge variant="destructive" className="text-xs px-2 py-1 font-bold shadow-lg">Out of Stock</Badge>
+                        <Badge variant="destructive" className="text-xs px-2 py-1 font-bold shadow-lg">สินค้าหมด</Badge>
                     </div>
                 )}
             </div>
@@ -121,7 +121,7 @@ function POSProductCard({ product, onAdd }: { product: Product; onAdd: () => voi
                         {product.productName}
                     </h3>
                     <p className="text-[10px] text-gray-400 font-mono truncate">
-                        {variant?.sku || 'No SKU'}
+                        {variant?.sku || 'ไม่มี SKU'}
                     </p>
                 </div>
 

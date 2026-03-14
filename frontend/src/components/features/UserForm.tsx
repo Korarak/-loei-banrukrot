@@ -17,8 +17,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const baseUserSchema = z.object({
-    username: z.string().min(3, 'Username must be at least 3 characters'),
-    email: z.string().email('Invalid email address'),
+    username: z.string().min(3, 'ชื่อผู้ใช้งานต้องมีอย่างน้อย 3 ตัวอักษร'),
+    email: z.string().email('รูปแบบอีเมลไม่ถูกต้อง'),
     role: z.enum(['owner', 'staff']),
     isActive: z.boolean(),
     password: z.string().optional(),
@@ -32,7 +32,7 @@ const formSchema = baseUserSchema.refine((data) => {
     }
     return true;
 }, {
-    message: "Password is required for new users",
+    message: "กรุณาระบุรหัสผ่านสำหรับผู้ใช้งานใหม่",
     path: ["password"],
 });
 
@@ -87,9 +87,9 @@ export default function UserForm({ user, onSubmit, onCancel, isLoading }: UserFo
                     name="username"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Username</FormLabel>
+                            <FormLabel>ชื่อผู้ใช้งาน</FormLabel>
                             <FormControl>
-                                <Input placeholder="johndoe" autoComplete="off" {...field} />
+                                <Input placeholder="ระบุชื่อผู้ใช้งาน" autoComplete="off" {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -101,7 +101,7 @@ export default function UserForm({ user, onSubmit, onCancel, isLoading }: UserFo
                     name="email"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Email</FormLabel>
+                            <FormLabel>อีเมล</FormLabel>
                             <FormControl>
                                 <Input placeholder="john@example.com" type="email" autoComplete="off" {...field} />
                             </FormControl>
@@ -115,11 +115,11 @@ export default function UserForm({ user, onSubmit, onCancel, isLoading }: UserFo
                     name="password"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>{user ? 'New Password (Optional)' : 'Password'}</FormLabel>
+                            <FormLabel>{user ? 'รหัสผ่านใหม่ (ไม่บังคับ)' : 'รหัสผ่าน'}</FormLabel>
                             <FormControl>
                                 <Input
                                     type="password"
-                                    placeholder={user ? "Leave blank to keep current" : "Enter password"}
+                                    placeholder={user ? "เว้นว่างไว้หากไม่ต้องการเปลี่ยน" : "ระบุรหัสผ่าน"}
                                     autoComplete="new-password"
                                     {...field}
                                 />
@@ -135,16 +135,16 @@ export default function UserForm({ user, onSubmit, onCancel, isLoading }: UserFo
                         name="role"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Role</FormLabel>
+                                <FormLabel>สิทธิ์การใช้งาน</FormLabel>
                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                                     <FormControl>
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Select role" />
+                                            <SelectValue placeholder="เลือกสิทธิ์" />
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        <SelectItem value="staff">Staff</SelectItem>
-                                        <SelectItem value="owner">Owner (Admin)</SelectItem>
+                                        <SelectItem value="staff">พนักงาน</SelectItem>
+                                        <SelectItem value="owner">เจ้าของร้าน (ผู้ดูแลระบบ)</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />
@@ -157,19 +157,19 @@ export default function UserForm({ user, onSubmit, onCancel, isLoading }: UserFo
                         name="isActive"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Status</FormLabel>
+                                <FormLabel>สถานะ</FormLabel>
                                 <Select
                                     onValueChange={(val) => field.onChange(val === 'true')}
                                     value={field.value ? 'true' : 'false'}
                                 >
                                     <FormControl>
                                         <SelectTrigger>
-                                            <SelectValue placeholder="Select status" />
+                                            <SelectValue placeholder="เลือกสถานะ" />
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        <SelectItem value="true">Active</SelectItem>
-                                        <SelectItem value="false">Inactive</SelectItem>
+                                        <SelectItem value="true">เปิดใช้งาน</SelectItem>
+                                        <SelectItem value="false">ปิดใช้งาน</SelectItem>
                                     </SelectContent>
                                 </Select>
                                 <FormMessage />
@@ -186,11 +186,11 @@ export default function UserForm({ user, onSubmit, onCancel, isLoading }: UserFo
                             onClick={onCancel}
                             disabled={isLoading}
                         >
-                            Cancel
+                            ยกเลิก
                         </Button>
                     )}
-                    <Button type="submit" disabled={isLoading} className="bg-green-600 hover:bg-green-700">
-                        {isLoading ? 'Saving...' : user ? 'Update User' : 'Create User'}
+                    <Button type="submit" disabled={isLoading} className="bg-green-600 hover:bg-green-700 text-white">
+                        {isLoading ? 'กำลังบันทึก...' : user ? 'อัปเดตผู้ใช้งาน' : 'สร้างผู้ใช้งาน'}
                     </Button>
                 </div>
             </form>

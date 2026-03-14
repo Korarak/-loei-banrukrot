@@ -43,11 +43,11 @@ export default function UsersPage() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['users'] });
-            toast.success('User deleted successfully');
+            toast.success('ลบผู้ใช้งานสำเร็จแล้ว');
             setDeleteId(null);
         },
         onError: (error: any) => {
-            toast.error(error.response?.data?.message || 'Failed to delete user');
+            toast.error(error.response?.data?.message || 'ล้มเหลวในการลบผู้ใช้งาน');
         },
     });
 
@@ -70,12 +70,12 @@ export default function UsersPage() {
         <div className="space-y-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Users</h1>
-                    <p className="text-gray-500 mt-2">Manage staff and admin accounts</p>
+                    <h1 className="text-3xl font-bold tracking-tight">ผู้ใช้งาน</h1>
+                    <p className="text-gray-500 mt-2">จัดการบัญชีพนักงานและผู้ดูแลระบบ</p>
                 </div>
                 <Button onClick={handleCreate} className="bg-blue-600 hover:bg-blue-700 text-white">
                     <UserPlus className="h-4 w-4 mr-2" />
-                    Add User
+                    เพิ่มผู้ใช้งาน
                 </Button>
             </div>
 
@@ -84,7 +84,7 @@ export default function UsersPage() {
                     <div className="relative flex-1 max-w-sm">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <Input
-                            placeholder="Search users..."
+                            placeholder="ค้นหาผู้ใช้งาน..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             className="pl-9 bg-gray-50 border-0 focus-visible:ring-1 focus-visible:ring-gray-200"
@@ -96,11 +96,11 @@ export default function UsersPage() {
                     <Table className="min-w-[800px]">
                         <TableHeader>
                             <TableRow className="bg-gray-50/50 hover:bg-gray-50/50">
-                                <TableHead className="w-[100px]">Status</TableHead>
-                                <TableHead>User</TableHead>
-                                <TableHead>Role</TableHead>
-                                <TableHead>Email</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
+                                <TableHead className="w-[100px]">สถานะ</TableHead>
+                                <TableHead>ผู้ใช้งาน</TableHead>
+                                <TableHead>สิทธิ์</TableHead>
+                                <TableHead>อีเมล</TableHead>
+                                <TableHead className="text-right">การดำเนินการ</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -117,13 +117,13 @@ export default function UsersPage() {
                             ) : isError ? (
                                 <TableRow>
                                     <TableCell colSpan={5} className="h-24 text-center text-red-500">
-                                        Failed to load users. {(error as any)?.response?.data?.message || 'Please try again.'}
+                                        ล้มเหลวในการโหลดข้อมูลผู้ใช้งาน. {(error as any)?.response?.data?.message || 'กรุณาลองใหม่อีกครั้ง'}
                                     </TableCell>
                                 </TableRow>
                             ) : filteredUsers?.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={5} className="h-24 text-center text-gray-500">
-                                        No users found.
+                                        ไม่พบผู้ใช้งาน
                                     </TableCell>
                                 </TableRow>
                             ) : (
@@ -134,7 +134,7 @@ export default function UsersPage() {
                                                 variant={user.isActive ? 'default' : 'secondary'}
                                                 className={user.isActive ? 'bg-green-100 text-green-700 hover:bg-green-100' : 'bg-gray-100 text-gray-700 hover:bg-gray-100'}
                                             >
-                                                {user.isActive ? 'Active' : 'Inactive'}
+                                                {user.isActive ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}
                                             </Badge>
                                         </TableCell>
                                         <TableCell>
@@ -147,7 +147,7 @@ export default function UsersPage() {
                                                 ) : (
                                                     <Shield className="h-4 w-4 text-blue-500" />
                                                 )}
-                                                <span className="capitalize">{user.role === 'owner' ? 'Owner (Admin)' : 'Staff'}</span>
+                                                <span className="capitalize">{user.role === 'owner' ? 'เจ้าของร้าน (ผู้ดูแลระบบ)' : 'พนักงาน'}</span>
                                             </div>
                                         </TableCell>
                                         <TableCell className="text-gray-500">{user.email}</TableCell>
@@ -189,8 +189,8 @@ export default function UsersPage() {
                 open={!!deleteId}
                 onOpenChange={(open) => !open && setDeleteId(null)}
                 onConfirm={() => deleteId && deleteUser.mutate(deleteId)}
-                title="Delete User"
-                description="Are you sure you want to delete this user? This action cannot be undone."
+                title="ลบผู้ใช้งาน"
+                description="คุณแน่ใจหรือไม่ว่าต้องการลบผู้ใช้งานนี้? การดำเนินการนี้ไม่สามารถย้อนกลับได้"
                 isLoading={deleteUser.isPending}
             />
         </div>

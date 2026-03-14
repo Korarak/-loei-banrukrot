@@ -47,14 +47,14 @@ export default function POSPage() {
     const addToCart = (product: any) => {
         const variant = product.variants?.[0];
         if (!variant || (variant.stockAvailable || 0) <= 0) {
-            toast.error('Out of stock', { description: 'This item is currently unavailable.', id: 'pos-out-of-stock' }); // Prevent stack
+            toast.error('สินค้าหมด', { description: 'สินค้านี้ไม่พร้อมจำหน่ายในขณะนี้', id: 'pos-out-of-stock' }); // Prevent stack
             return;
         }
 
         const existingItem = cart.find((item) => item.variantId === variant._id);
         if (existingItem) {
             if (existingItem.quantity + 1 > variant.stockAvailable) {
-                toast.error('Stock Limit Reached', { description: `Only ${variant.stockAvailable} items available.`, id: 'pos-stock-limit' }); // Prevent stack
+                toast.error('เกินขีดจำกัดสต๊อก', { description: `มีสินค้าเพียง ${variant.stockAvailable} ชิ้นเท่านั้น`, id: 'pos-stock-limit' }); // Prevent stack
                 return;
             }
             // Optimistic feedback is enough, no toast needed for increment
@@ -73,7 +73,7 @@ export default function POSPage() {
                     stockAvailable: variant.stockAvailable
                 },
             ]);
-            toast.success('Added to cart', { duration: 1000, position: 'bottom-center' });
+            toast.success('เพิ่มลงในรถเข็นแล้ว', { duration: 1000, position: 'bottom-center' });
         }
     };
 
@@ -84,7 +84,7 @@ export default function POSPage() {
                     const newQuantity = Math.max(0, item.quantity + delta);
 
                     if (delta > 0 && newQuantity > item.stockAvailable) {
-                        toast.error('Stock Limit Reached', { description: `Only ${item.stockAvailable} items available.`, id: 'pos-stock-limit-update' }); // Prevent stack
+                        toast.error('เกินขีดจำกัดสต๊อก', { description: `มีสินค้าเพียง ${item.stockAvailable} ชิ้นเท่านั้น`, id: 'pos-stock-limit-update' }); // Prevent stack
                         return item;
                     }
 
@@ -128,12 +128,12 @@ export default function POSPage() {
                 setReceiptDialogOpen(true);
                 clearCart();
                 setMobileCartOpen(false); // Close mobile cart if open
-                toast.success('Sale Completed Successfully');
+                toast.success('การขายเสร็จสมบูรณ์');
             }
         } catch (error: any) {
             console.error(error);
-            toast.error('Sale Failed', {
-                description: error.response?.data?.message || 'Error processing sale.',
+            toast.error('การขายล้มเหลว', {
+                description: error.response?.data?.message || 'เกิดข้อผิดพลาดในการประมวลผลการขาย',
             });
         } finally {
             setIsProcessing(false);
@@ -149,7 +149,7 @@ export default function POSPage() {
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
                         <Input
-                            placeholder="Search products..."
+                            placeholder="ค้นหาสินค้า..."
                             className="pl-10 h-12 text-lg bg-gray-50 border-transparent focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all rounded-xl"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
@@ -196,7 +196,7 @@ export default function POSPage() {
                         <div className="bg-white/20 p-2 rounded-lg">
                             <ShoppingCart className="h-5 w-5" />
                         </div>
-                        <span>View Cart</span>
+                        <span>ดูรถเข็น</span>
                         <Badge variant="secondary" className="ml-2 bg-white/20 text-white hover:bg-white/30 border-none">{totalItems}</Badge>
                     </div>
                     <span>฿{totalAmount.toLocaleString()}</span>
@@ -209,7 +209,7 @@ export default function POSPage() {
                     <SheetHeader className="absolute top-0 left-0 right-0 z-10 bg-white border-b p-4 rounded-t-3xl">
                         <SheetTitle className="flex items-center gap-2">
                             <ShoppingCart className="h-5 w-5" />
-                            Current Sale
+                            การขายปัจจุบัน
                         </SheetTitle>
                     </SheetHeader>
                     <div className="pt-16 h-full">

@@ -86,15 +86,15 @@ export default function ShippingPage() {
 
             if (editingMethod) {
                 await updateMethod.mutateAsync({ id: editingMethod._id, data: payload });
-                toast.success('Updated shipping method successfully');
+                toast.success('อัปเดตวิธีการจัดส่งสำเร็จ');
             } else {
                 await createMethod.mutateAsync(payload);
-                toast.success('Created shipping method successfully');
+                toast.success('สร้างวิธีการจัดส่งสำเร็จ');
             }
             setIsDialogOpen(false);
             resetForm();
         } catch (error) {
-            toast.error('Failed to save shipping method');
+            toast.error('ล้มเหลวในการบันทึกวิธีการจัดส่ง');
         }
     };
 
@@ -102,10 +102,10 @@ export default function ShippingPage() {
         if (deletingId) {
             try {
                 await deleteMethod.mutateAsync(deletingId);
-                toast.success('Deleted shipping method successfully');
+                toast.success('ลบวิธีการจัดส่งสำเร็จ');
                 setDeletingId(null);
             } catch (error) {
-                toast.error('Failed to delete shipping method');
+                toast.error('ล้มเหลวในการลบวิธีการจัดส่ง');
             }
         }
     };
@@ -131,15 +131,15 @@ export default function ShippingPage() {
         <div className="space-y-8">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Shipping Methods</h1>
-                    <p className="text-gray-500 mt-1 text-sm">Manage shipping options and costs</p>
+                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">วิธีการจัดส่งพัสดุ</h1>
+                    <p className="text-gray-500 mt-1 text-sm">จัดการตัวเลือกและค่าธรรมเนียมการจัดส่ง</p>
                 </div>
                 <Button
                     onClick={() => { resetForm(); setIsDialogOpen(true); }}
                     className="bg-black hover:bg-gray-800 text-white rounded-xl px-6 py-6 shadow-lg shadow-gray-200 transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5"
                 >
                     <Plus className="h-5 w-5 mr-2" />
-                    <span className="font-medium">Add Method</span>
+                    <span className="font-medium">เพิ่มวิธีการจัดส่ง</span>
                 </Button>
             </div>
 
@@ -147,11 +147,11 @@ export default function ShippingPage() {
                 <Table>
                     <TableHeader>
                         <TableRow className="hover:bg-transparent border-b border-gray-100">
-                            <TableHead className="pl-8 py-6 text-xs font-bold text-gray-400 uppercase tracking-wider">Method</TableHead>
-                            <TableHead className="py-6 text-xs font-bold text-gray-400 uppercase tracking-wider">Price</TableHead>
-                            <TableHead className="py-6 text-xs font-bold text-gray-400 uppercase tracking-wider">Supported Sizes</TableHead>
-                            <TableHead className="py-6 text-xs font-bold text-gray-400 uppercase tracking-wider">Status</TableHead>
-                            <TableHead className="text-right pr-8 py-6 text-xs font-bold text-gray-400 uppercase tracking-wider">Actions</TableHead>
+                            <TableHead className="pl-8 py-6 text-xs font-bold text-gray-400 uppercase tracking-wider">วิธีการ</TableHead>
+                            <TableHead className="py-6 text-xs font-bold text-gray-400 uppercase tracking-wider">ราคา</TableHead>
+                            <TableHead className="py-6 text-xs font-bold text-gray-400 uppercase tracking-wider">ขนาดที่รองรับ</TableHead>
+                            <TableHead className="py-6 text-xs font-bold text-gray-400 uppercase tracking-wider">สถานะ</TableHead>
+                            <TableHead className="text-right pr-8 py-6 text-xs font-bold text-gray-400 uppercase tracking-wider">การดำเนินการ</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -177,7 +177,7 @@ export default function ShippingPage() {
                                     <div className="flex gap-2">
                                         {method.supportedSizes.map(size => (
                                             <Badge key={size} variant="outline" className="capitalize">
-                                                {size}
+                                                {size === 'small' ? 'ขนาดเล็ก' : 'ขนาดใหญ่'}
                                             </Badge>
                                         ))}
                                     </div>
@@ -185,11 +185,11 @@ export default function ShippingPage() {
                                 <TableCell className="py-6">
                                     {method.isActive ? (
                                         <Badge className="bg-green-50 text-green-700 hover:bg-green-100 border-green-100 px-3 py-1 rounded-full">
-                                            Active
+                                            เปิดใช้งาน
                                         </Badge>
                                     ) : (
                                         <Badge variant="secondary" className="bg-gray-100 text-gray-500 hover:bg-gray-200 border-gray-200 px-3 py-1 rounded-full">
-                                            Inactive
+                                            ปิดใช้งาน
                                         </Badge>
                                     )}
                                 </TableCell>
@@ -218,7 +218,7 @@ export default function ShippingPage() {
                         {methods?.length === 0 && (
                             <TableRow>
                                 <TableCell colSpan={5} className="text-center py-12 text-gray-500">
-                                    No shipping methods found. Create one to get started.
+                                    ไม่พบรายการวิธีการจัดส่ง กรุณาสร้างรายการใหม่เพื่อเริ่มต้น
                                 </TableCell>
                             </TableRow>
                         )}
@@ -229,20 +229,20 @@ export default function ShippingPage() {
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                 <DialogContent className="max-w-md">
                     <DialogHeader>
-                        <DialogTitle>{editingMethod ? 'Edit Shipping Method' : 'New Shipping Method'}</DialogTitle>
+                        <DialogTitle>{editingMethod ? 'แก้ไขวิธีการจัดส่ง' : 'เพิ่มวิธีการจัดส่งใหม่'}</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                         <div className="space-y-2">
-                            <Label htmlFor="name">Method Name</Label>
+                            <Label htmlFor="name">ชื่อวิธีการจัดส่ง</Label>
                             <Input
                                 id="name"
-                                placeholder="e.g. Standard Delivery"
+                                placeholder="เช่น จัดส่งมาตรฐาน"
                                 value={formData.name}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="price">Price (THB)</Label>
+                            <Label htmlFor="price">ราคา (บาท)</Label>
                             <Input
                                 id="price"
                                 type="number"
@@ -252,16 +252,16 @@ export default function ShippingPage() {
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="description">Description (Optional)</Label>
+                            <Label htmlFor="description">รายละเอียด (ไม่บังคับ)</Label>
                             <Input
                                 id="description"
-                                placeholder="e.g. 2-3 business days"
+                                placeholder="เช่น 2-3 วันทำการ"
                                 value={formData.description}
                                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label>Supported Sizes</Label>
+                            <Label>ขนาดที่รองรับ</Label>
                             <div className="flex gap-4 mt-2">
                                 <div className="flex items-center space-x-2">
                                     <Checkbox
@@ -269,7 +269,7 @@ export default function ShippingPage() {
                                         checked={formData.supportedSizes.includes('small')}
                                         onCheckedChange={() => toggleSize('small')}
                                     />
-                                    <Label htmlFor="size-small">Small</Label>
+                                    <Label htmlFor="size-small">ขนาดเล็ก</Label>
                                 </div>
                                 <div className="flex items-center space-x-2">
                                     <Checkbox
@@ -277,7 +277,7 @@ export default function ShippingPage() {
                                         checked={formData.supportedSizes.includes('large')}
                                         onCheckedChange={() => toggleSize('large')}
                                     />
-                                    <Label htmlFor="size-large">Large</Label>
+                                    <Label htmlFor="size-large">ขนาดใหญ่</Label>
                                 </div>
                             </div>
                         </div>
@@ -287,13 +287,13 @@ export default function ShippingPage() {
                                 checked={formData.isActive}
                                 onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked as boolean })}
                             />
-                            <Label htmlFor="active">Active</Label>
+                            <Label htmlFor="active">เปิดใช้งาน</Label>
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={handleSubmit} disabled={createMethod.isPending || updateMethod.isPending}>
-                            {createMethod.isPending || updateMethod.isPending ? 'Saving...' : 'Save Method'}
+                        <Button variant="outline" onClick={() => setIsDialogOpen(false)}>ยกเลิก</Button>
+                        <Button onClick={handleSubmit} disabled={createMethod.isPending || updateMethod.isPending} className="text-white">
+                            {createMethod.isPending || updateMethod.isPending ? 'กำลังบันทึก...' : 'บันทึกวิธีการ'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -302,15 +302,15 @@ export default function ShippingPage() {
             <AlertDialog open={!!deletingId} onOpenChange={() => setDeletingId(null)}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Shipping Method?</AlertDialogTitle>
+                        <AlertDialogTitle>ลบวิธีการจัดส่งนี้?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete the shipping method.
+                            การดำเนินการนี้ไม่สามารถย้อนกลับได้ วิธีการจัดส่งจะถูกลบออกอย่างถาวร
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
                         <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
-                            Delete
+                            ลบ
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

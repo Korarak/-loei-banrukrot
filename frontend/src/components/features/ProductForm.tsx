@@ -25,20 +25,20 @@ import { useCategories } from '@/hooks/useCategories';
 import ImageManager from './ImageManager';
 
 const variantSchema = z.object({
-    sku: z.string().min(1, 'SKU is required'),
-    price: z.number().min(0, 'Price must be positive'),
-    stock: z.number().int().min(0, 'Stock must be non-negative'),
+    sku: z.string().min(1, 'กรุณาระบุ SKU'),
+    price: z.number().min(0, 'ราคาต้องมากกว่าหรือเท่ากับ 0'),
+    stock: z.number().int().min(0, 'สต๊อกต้องมากกว่าหรือเท่ากับ 0'),
 });
 
 const productSchema = z.object({
-    productName: z.string().min(1, 'Product name is required'),
-    description: z.string().min(1, 'Description is required'),
-    categoryId: z.number().min(1, 'Category is required'),
+    productName: z.string().min(1, 'กรุณาระบุชื่อสินค้า'),
+    description: z.string().min(1, 'กรุณาระบุรายละเอียดสินค้า'),
+    categoryId: z.number().min(1, 'กรุณาเลือกหมวดหมู่'),
     brand: z.string().optional(),
     shippingSize: z.enum(['small', 'large']),
     isOnline: z.boolean().optional(),
     isPos: z.boolean().optional(),
-    variants: z.array(variantSchema).min(1, 'At least one variant is required'),
+    variants: z.array(variantSchema).min(1, 'ต้องมีอย่างน้อยหนึ่งตัวเลือก'),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -104,7 +104,7 @@ export default function ProductForm({ product, onSubmit, onCancel, isLoading }: 
                 <div className="space-y-4">
                     <div className="flex items-center gap-2 text-lg font-semibold text-gray-900 pb-2 border-b">
                         <Package className="h-5 w-5 text-gray-500" />
-                        Basic Information
+                        ข้อมูลพื้นฐาน
                     </div>
 
                     <div className="grid grid-cols-1 gap-6">
@@ -113,9 +113,9 @@ export default function ProductForm({ product, onSubmit, onCancel, isLoading }: 
                             name="productName"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Product Name</FormLabel>
+                                    <FormLabel>ชื่อสินค้า</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Enter product name" autoComplete="off" {...field} className="h-11" />
+                                        <Input placeholder="ระบุชื่อสินค้า" autoComplete="off" {...field} className="h-11" />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -128,14 +128,14 @@ export default function ProductForm({ product, onSubmit, onCancel, isLoading }: 
                                 name="categoryId"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Category</FormLabel>
+                                        <FormLabel>หมวดหมู่</FormLabel>
                                         <Select
                                             onValueChange={(value) => field.onChange(parseInt(value))}
                                             value={field.value?.toString()}
                                         >
                                             <FormControl>
                                                 <SelectTrigger className="h-11">
-                                                    <SelectValue placeholder="Select a category" />
+                                                    <SelectValue placeholder="เลือกหมวดหมู่" />
                                                 </SelectTrigger>
                                             </FormControl>
                                             <SelectContent>
@@ -156,10 +156,10 @@ export default function ProductForm({ product, onSubmit, onCancel, isLoading }: 
                                 name="brand"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Brand (Optional)</FormLabel>
+                                        <FormLabel>ยี่ห้อ (ไม่บังคับ)</FormLabel>
                                         <FormControl>
                                             <Input
-                                                placeholder="e.g., Piaggio, Vespa"
+                                                placeholder="เช่น Piaggio, Vespa"
                                                 autoComplete="off"
                                                 {...field}
                                                 className="h-11"
@@ -178,23 +178,23 @@ export default function ProductForm({ product, onSubmit, onCancel, isLoading }: 
                             name="shippingSize"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Shipping Size</FormLabel>
+                                    <FormLabel>ขนาดการจัดส่ง</FormLabel>
                                     <Select
                                         onValueChange={field.onChange}
                                         value={field.value}
                                     >
                                         <FormControl>
                                             <SelectTrigger className="h-11">
-                                                <SelectValue placeholder="Select shipping size" />
+                                                <SelectValue placeholder="เลือกขนาดการจัดส่ง" />
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="small">Small (Standard)</SelectItem>
-                                            <SelectItem value="large">Large (Bulky)</SelectItem>
+                                            <SelectItem value="small">ขนาดเล็ก (มาตรฐาน)</SelectItem>
+                                            <SelectItem value="large">ขนาดใหญ่ (Bulky)</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormDescription>
-                                        Determines available shipping methods for this product.
+                                        กำหนดวิธีการจัดส่งที่ใช้ได้สำหรับสินค้านี้
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>
@@ -206,7 +206,7 @@ export default function ProductForm({ product, onSubmit, onCancel, isLoading }: 
                     <div className="space-y-4 pt-2">
                         <div className="flex items-center gap-2 text-lg font-semibold text-gray-900 pb-2 border-b">
                             <Globe className="h-5 w-5 text-gray-500" />
-                            Sales Channels
+                            ช่องทางการขาย
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <FormField
@@ -224,8 +224,8 @@ export default function ProductForm({ product, onSubmit, onCancel, isLoading }: 
                                                             <Globe className="h-5 w-5" />
                                                         </div>
                                                         <div>
-                                                            <p className={`font-semibold ${field.value ? 'text-blue-700' : 'text-gray-600'}`}>Online Store</p>
-                                                            <p className="text-xs text-gray-500">Website & Mobile App</p>
+                                                            <p className={`font-semibold ${field.value ? 'text-blue-700' : 'text-gray-600'}`}>ร้านค้าออนไลน์</p>
+                                                            <p className="text-xs text-gray-500">เว็บไซต์และแอปมือถือ</p>
                                                         </div>
                                                     </div>
                                                     <div onClick={(e) => e.stopPropagation()}>
@@ -256,8 +256,8 @@ export default function ProductForm({ product, onSubmit, onCancel, isLoading }: 
                                                             <Store className="h-5 w-5" />
                                                         </div>
                                                         <div>
-                                                            <p className={`font-semibold ${field.value ? 'text-orange-700' : 'text-gray-600'}`}>Point of Sale</p>
-                                                            <p className="text-xs text-gray-500">Walk-in customers</p>
+                                                            <p className={`font-semibold ${field.value ? 'text-orange-700' : 'text-gray-600'}`}>หน้าร้าน (POS)</p>
+                                                            <p className="text-xs text-gray-500">สำหรับลูกค้ายื่นหน้าร้าน</p>
                                                         </div>
                                                     </div>
                                                     <div onClick={(e) => e.stopPropagation()}>
@@ -281,10 +281,10 @@ export default function ProductForm({ product, onSubmit, onCancel, isLoading }: 
                         name="description"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Description</FormLabel>
+                                <FormLabel>รายละเอียดสินค้า</FormLabel>
                                 <FormControl>
                                     <Textarea
-                                        placeholder="Enter product description..."
+                                        placeholder="ระบุรายละเอียดสินค้า..."
                                         className="min-h-[120px] resize-none"
                                         {...field}
                                     />
@@ -300,7 +300,7 @@ export default function ProductForm({ product, onSubmit, onCancel, isLoading }: 
                     <div className="flex items-center justify-between pb-2 border-b">
                         <div className="flex items-center gap-2 text-lg font-semibold text-gray-900">
                             <Layers className="h-5 w-5 text-gray-500" />
-                            Product Variants
+                            ตัวเลือกสินค้า
                         </div>
                         <Button
                             type="button"
@@ -310,7 +310,7 @@ export default function ProductForm({ product, onSubmit, onCancel, isLoading }: 
                             className="h-9"
                         >
                             <Plus className="h-4 w-4 mr-2" />
-                            Add Variant
+                            เพิ่มตัวเลือก
                         </Button>
                     </div>
 
@@ -338,7 +338,7 @@ export default function ProductForm({ product, onSubmit, onCancel, isLoading }: 
                                         name={`variants.${index}.price`}
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel className="text-xs text-gray-500 uppercase font-bold">Price</FormLabel>
+                                                <FormLabel className="text-xs text-gray-500 uppercase font-bold">ราคา</FormLabel>
                                                 <FormControl>
                                                     <Input
                                                         type="number"
@@ -363,7 +363,7 @@ export default function ProductForm({ product, onSubmit, onCancel, isLoading }: 
                                         name={`variants.${index}.stock`}
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel className="text-xs text-gray-500 uppercase font-bold">Stock</FormLabel>
+                                                <FormLabel className="text-xs text-gray-500 uppercase font-bold">สต๊อก</FormLabel>
                                                 <FormControl>
                                                     <Input
                                                         type="number"
@@ -405,7 +405,7 @@ export default function ProductForm({ product, onSubmit, onCancel, isLoading }: 
                     <div className="space-y-4 pt-2">
                         <div className="flex items-center gap-2 text-lg font-semibold text-gray-900 pb-2 border-b">
                             <ImageIcon className="h-5 w-5 text-gray-500" />
-                            Product Images
+                            รูปภาพสินค้า
                         </div>
                         <div className="bg-gray-50/50 rounded-xl p-6 border border-dashed border-gray-200">
                             <ImageManager
@@ -425,7 +425,7 @@ export default function ProductForm({ product, onSubmit, onCancel, isLoading }: 
                             disabled={isLoading}
                             className="h-11 px-6"
                         >
-                            Cancel
+                            ยกเลิก
                         </Button>
                     )}
                     <Button
@@ -436,10 +436,10 @@ export default function ProductForm({ product, onSubmit, onCancel, isLoading }: 
                         {isLoading ? (
                             <>
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                Saving...
+                                กำลังบันทึก...
                             </>
                         ) : (
-                            product ? 'Update Product' : 'Create Product'
+                            product ? 'บันทึกการแก้ไข' : 'สร้างสินค้า'
                         )}
                     </Button>
                 </div>

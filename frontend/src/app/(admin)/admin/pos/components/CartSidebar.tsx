@@ -45,8 +45,8 @@ export function CartSidebar({ cart, onUpdateQuantity, onClearCart, onCheckout }:
                         <ShoppingCart className="h-4 w-4" />
                     </div>
                     <div>
-                        <h2 className="font-bold text-base text-gray-900">Current Sale</h2>
-                        <p className="text-[10px] text-gray-500">{totalItems} items</p>
+                        <h2 className="font-bold text-base text-gray-900">การขายปัจจุบัน</h2>
+                        <p className="text-[10px] text-gray-500">{totalItems} รายการ</p>
                     </div>
                 </div>
                 <Button
@@ -110,8 +110,8 @@ export function CartSidebar({ cart, onUpdateQuantity, onClearCart, onCheckout }:
                                 <ShoppingCart className="h-10 w-10 text-gray-400" />
                             </div>
                             <div className="text-center">
-                                <p className="font-medium text-gray-600">Cart is empty</p>
-                                <p className="text-sm max-w-[200px] mt-1">Select products to start a new sale</p>
+                                <p className="font-medium text-gray-600">รถเข็นว่างเปล่า</p>
+                                <p className="text-sm max-w-[200px] mt-1">เลือกสินค้าเพื่อเริ่มการขายใหม่</p>
                             </div>
                         </div>
                     )}
@@ -122,16 +122,16 @@ export function CartSidebar({ cart, onUpdateQuantity, onClearCart, onCheckout }:
             <div className="p-4 bg-white border-t space-y-4 shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.05)] z-20 shrink-0">
                 <div className="space-y-2">
                     <div className="flex justify-between text-gray-500 text-xs">
-                        <span>Subtotal</span>
-                        <span className="font-medium">{totalItems} items</span>
+                        <span>ยอดรวมย่าย</span>
+                        <span className="font-medium">{totalItems} รายการ</span>
                     </div>
                     <div className="flex justify-between text-gray-500 text-xs">
-                        <span>Discount</span>
+                        <span>ส่วนลด</span>
                         <span className="font-medium">฿0.00</span>
                     </div>
                     <Separator className="my-2" />
                     <div className="flex justify-between items-end">
-                        <span className="font-bold text-lg text-gray-900">Total</span>
+                        <span className="font-bold text-lg text-gray-900">ยอดรวม</span>
                         <span className="font-black text-3xl text-primary tracking-tight">
                             ฿{totalAmount.toLocaleString()}
                         </span>
@@ -145,7 +145,7 @@ export function CartSidebar({ cart, onUpdateQuantity, onClearCart, onCheckout }:
                     disabled={cart.length === 0}
                 >
                     <Banknote className="mr-2 h-5 w-5" />
-                    Pay Now
+                    ชำระเงิน
                     <ChevronRight className="ml-auto h-5 w-5 opacity-50" />
                 </Button>
             </div>
@@ -156,15 +156,15 @@ export function CartSidebar({ cart, onUpdateQuantity, onClearCart, onCheckout }:
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2 text-red-600">
                             <AlertCircle className="h-5 w-5" />
-                            Clear Cart?
+                            ล้างรถเข็น?
                         </DialogTitle>
                         <DialogDescription>
-                            Are you sure you want to remove all items from the cart?
+                            คุณแน่ใจหรือไม่ว่าต้องการนำสินค้าทั้งหมดออกจากรถเข็น?
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setClearCartOpen(false)}>Cancel</Button>
-                        <Button variant="destructive" onClick={() => { onClearCart(); setClearCartOpen(false); }}>Clear All</Button>
+                        <Button variant="outline" onClick={() => setClearCartOpen(false)}>ยกเลิก</Button>
+                        <Button variant="destructive" onClick={() => { onClearCart(); setClearCartOpen(false); }}>ล้างทั้งหมด</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

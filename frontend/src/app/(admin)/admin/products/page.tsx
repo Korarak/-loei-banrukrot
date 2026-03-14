@@ -166,15 +166,15 @@ export default function AdminProductsPage() {
             {/* Header Section */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Products</h1>
-                    <p className="text-gray-500 text-sm mt-1">Manage inventory, prices, and product details.</p>
+                    <h1 className="text-3xl font-bold text-gray-900 tracking-tight">สินค้า</h1>
+                    <p className="text-gray-500 text-sm mt-1">จัดการสต๊อกสินค้า ราคา และรายละเอียดสินค้า</p>
                 </div>
                 <Button
                     onClick={handleCreateProduct}
                     className="bg-black hover:bg-gray-800 text-white rounded-xl px-6 py-6 shadow-lg shadow-gray-200 transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5"
                 >
                     <Plus className="h-5 w-5 mr-2" />
-                    <span className="font-medium">Add Product</span>
+                    <span className="font-medium">เพิ่มสินค้า</span>
                 </Button>
             </div>
 
@@ -185,16 +185,16 @@ export default function AdminProductsPage() {
                     <Tabs defaultValue="all" value={stockFilter} onValueChange={setStockFilter} className="w-full md:w-auto">
                         <TabsList className="grid w-full md:w-[400px] grid-cols-4 bg-gray-100/50 p-1 rounded-xl">
                             <TabsTrigger value="all" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                                All ({totalProducts})
+                                ทั้งหมด ({totalProducts})
                             </TabsTrigger>
                             <TabsTrigger value="in_stock" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                                Stock
+                                มีสินค้า
                             </TabsTrigger>
                             <TabsTrigger value="low_stock" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm text-orange-600">
-                                Low
+                                เหลือน้อย
                             </TabsTrigger>
                             <TabsTrigger value="out_of_stock" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm text-red-600">
-                                Out
+                                สินค้าหมด
                             </TabsTrigger>
                         </TabsList>
                     </Tabs>
@@ -203,13 +203,13 @@ export default function AdminProductsPage() {
                     <Tabs defaultValue="all" value={channelFilter} onValueChange={(val) => setChannelFilter(val as any)} className="w-full md:w-auto">
                         <TabsList className="grid w-full md:w-[350px] grid-cols-3 bg-gray-100/50 p-1 rounded-xl">
                             <TabsTrigger value="all" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                                All ({products?.stats?.total || 0})
+                                ทั้งหมด ({products?.stats?.total || 0})
                             </TabsTrigger>
                             <TabsTrigger value="pos" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm gap-2">
-                                <Store className="h-4 w-4" /> POS ({products?.stats?.pos || 0})
+                                <Store className="h-4 w-4" /> หน้าร้าน ({products?.stats?.pos || 0})
                             </TabsTrigger>
                             <TabsTrigger value="online" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm gap-2">
-                                <Globe className="h-4 w-4" /> Online ({products?.stats?.online || 0})
+                                <Globe className="h-4 w-4" /> ออนไลน์ ({products?.stats?.online || 0})
                             </TabsTrigger>
                         </TabsList>
                     </Tabs>
@@ -221,7 +221,7 @@ export default function AdminProductsPage() {
                 <div className="relative md:col-span-8 lg:col-span-9">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
-                        placeholder="Search product name, SKU..."
+                        placeholder="ค้นหาชื่อสินค้า, SKU..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="pl-10 h-11 bg-white border-gray-200 focus:bg-white transition-colors rounded-xl shadow-sm focus:ring-2 focus:ring-primary/20"
@@ -232,18 +232,18 @@ export default function AdminProductsPage() {
                         <SelectTrigger className="h-11 bg-white border-gray-200 rounded-xl shadow-sm">
                             <div className="flex items-center gap-2 text-gray-600">
                                 <SortDesc className="h-4 w-4" />
-                                <SelectValue placeholder="Sort By" />
+                                <SelectValue placeholder="จัดเรียงตาม" />
                             </div>
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="dateCreated-desc">Newest First</SelectItem>
-                            <SelectItem value="dateCreated-asc">Oldest First</SelectItem>
-                            <SelectItem value="price-asc">Price: Low to High</SelectItem>
-                            <SelectItem value="price-desc">Price: High to Low</SelectItem>
-                            <SelectItem value="stock-asc">Stock: Low to High</SelectItem>
-                            <SelectItem value="stock-desc">Stock: High to Low</SelectItem>
-                            <SelectItem value="productName-asc">Name: A-Z</SelectItem>
-                            <SelectItem value="productName-desc">Name: Z-A</SelectItem>
+                            <SelectItem value="dateCreated-desc">ใหม่ล่าสุด</SelectItem>
+                            <SelectItem value="dateCreated-asc">เก่าที่สุด</SelectItem>
+                            <SelectItem value="price-asc">ราคา: ต่ำไปสูง</SelectItem>
+                            <SelectItem value="price-desc">ราคา: สูงไปต่ำ</SelectItem>
+                            <SelectItem value="stock-asc">สต๊อก: น้อยไปมาก</SelectItem>
+                            <SelectItem value="stock-desc">สต๊อก: มากไปน้อย</SelectItem>
+                            <SelectItem value="productName-asc">ชื่อ: A-Z</SelectItem>
+                            <SelectItem value="productName-desc">ชื่อ: Z-A</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
@@ -263,7 +263,7 @@ export default function AdminProductsPage() {
                         const prices = product.variants?.map((v) => v.price).filter(p => p != null) || [];
                         const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
                         const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
-                        const categoryName = categories?.find(c => c.categoryId === product.categoryId)?.name || 'Uncategorized';
+                        const categoryName = categories?.find(c => c.categoryId === product.categoryId)?.name || 'ไม่มีหมวดหมู่';
 
                         // Check stock status for border color
                         let stockStatusDetails = { color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' };
@@ -293,8 +293,8 @@ export default function AdminProductsPage() {
                                     )}
                                     {/* Badges Overlay */}
                                     <div className="absolute top-2 left-2 flex flex-col gap-1">
-                                        {product.isPos && <Badge className="bg-orange-500/90 hover:bg-orange-600 text-white shadow-sm backdrop-blur-sm text-[10px] h-5 px-1.5"><Store className="h-3 w-3 mr-1" /> POS</Badge>}
-                                        {product.isOnline && <Badge className="bg-blue-500/90 hover:bg-blue-600 text-white shadow-sm backdrop-blur-sm text-[10px] h-5 px-1.5"><Globe className="h-3 w-3 mr-1" /> Web</Badge>}
+                                        {product.isPos && <Badge className="bg-orange-500/90 hover:bg-orange-600 text-white shadow-sm backdrop-blur-sm text-[10px] h-5 px-1.5"><Store className="h-3 w-3 mr-1" /> หน้าร้าน</Badge>}
+                                        {product.isOnline && <Badge className="bg-blue-500/90 hover:bg-blue-600 text-white shadow-sm backdrop-blur-sm text-[10px] h-5 px-1.5"><Globe className="h-3 w-3 mr-1" /> ออนไลน์</Badge>}
                                     </div>
                                 </div>
 
@@ -312,17 +312,17 @@ export default function AdminProductsPage() {
                                                 {product.productName}
                                             </h3>
                                             <div className="flex items-center gap-2 mt-1.5 text-xs text-gray-500">
-                                                <span>{product.variants?.length || 0} variants</span>
+                                                <span>{product.variants?.length || 0} ตัวเลือก</span>
                                                 <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
                                                 <span className={product.shippingSize === 'large' ? 'text-orange-600 font-medium' : ''}>
-                                                    {product.shippingSize === 'large' ? 'Bulky Shipping' : 'Standard Shipping'}
+                                                    {product.shippingSize === 'large' ? 'จัดส่งขนาดใหญ่' : 'จัดส่งมาตรฐาน'}
                                                 </span>
                                             </div>
                                         </div>
 
                                         <div className="text-right">
                                             <p className="font-bold text-lg text-gray-900">
-                                                {prices.length === 0 ? 'N/A' : (minPrice === maxPrice ? `฿${minPrice.toLocaleString()}` : `฿${minPrice.toLocaleString()} - ฿${maxPrice.toLocaleString()}`)}
+                                                {prices.length === 0 ? 'ไม่มี' : (minPrice === maxPrice ? `฿${minPrice.toLocaleString()}` : `฿${minPrice.toLocaleString()} - ฿${maxPrice.toLocaleString()}`)}
                                             </p>
                                         </div>
                                     </div>
@@ -332,7 +332,7 @@ export default function AdminProductsPage() {
                                         {/* Stock Control */}
                                         <div className="flex items-center gap-3 w-full sm:w-auto bg-gray-50 p-1.5 rounded-lg border border-gray-100">
                                             <span className={cn("text-xs font-bold px-2 uppercase tracking-wider", stockStatusDetails.color)}>
-                                                {totalStock === 0 ? 'Out of Stock' : (totalStock <= 10 ? 'Low Stock' : 'In Stock')}
+                                                {totalStock === 0 ? 'สินค้าหมด' : (totalStock <= 10 ? 'สินค้าเหลือน้อย' : 'มีสินค้า')}
                                             </span>
                                             <div className="h-4 w-[1px] bg-gray-200"></div>
                                             <div className="flex items-center gap-1">
@@ -367,7 +367,7 @@ export default function AdminProductsPage() {
                                                 className="h-8 text-xs font-medium border-gray-200 hover:bg-gray-50 hover:text-black"
                                                 onClick={() => handleEditProduct(product)}
                                             >
-                                                <Pencil className="h-3.5 w-3.5 mr-1.5" /> Edit
+                                                <Pencil className="h-3.5 w-3.5 mr-1.5" /> แก้ไข
                                             </Button>
                                             <Button
                                                 variant="ghost"
@@ -389,16 +389,16 @@ export default function AdminProductsPage() {
                     <div className="bg-gray-50 h-16 w-16 rounded-full flex items-center justify-center mx-auto mb-4 animate-in fade-in zoom-in duration-300">
                         <Package className="h-8 w-8 text-gray-300" />
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900">No products found</h3>
+                    <h3 className="text-lg font-bold text-gray-900">ไม่พบสินค้า</h3>
                     <p className="text-gray-500 mt-1 max-w-sm mx-auto mb-6">
-                        {search ? `No results for "${search}"` : 'Get started by creating your first product inventory.'}
+                        {search ? `ไม่พบผลลัพธ์สำหรับ "${search}"` : 'เริ่มต้นด้วยการเพิ่มสินค้าชิ้นแรกของคุณในคลัง'}
                     </p>
                     <Button
                         onClick={handleCreateProduct}
                         className="rounded-xl shadow-lg shadow-primary/20"
                     >
                         <Plus className="h-4 w-4 mr-2" />
-                        {search ? 'Clear Search & Add Product' : 'Add New Product'}
+                        {search ? 'ล้างการค้นหาและเพิ่มสินค้า' : 'เพิ่มสินค้าใหม่'}
                     </Button>
                 </div>
             )}
@@ -414,8 +414,8 @@ export default function AdminProductsPage() {
                 onOpenChange={setDeleteDialogOpen}
                 onConfirm={handleDeleteConfirm}
                 isLoading={deleteProduct.isPending}
-                title="Delete Product"
-                description="Are you sure you want to delete this product? This action cannot be undone and will delete all variants."
+                title="ลบสินค้า"
+                description="คุณแน่ใจหรือไม่ว่าต้องการลบสินค้านี้? การดำเนินการนี้ไม่สามารถยกเลิกได้ และจะลบตัวเลือกสินค้าทั้งหมดด้วย"
             />
 
             <ImagePreviewDialog

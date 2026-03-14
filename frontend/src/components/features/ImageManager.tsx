@@ -60,13 +60,13 @@ export default function ImageManager({ productId, images: initialImages }: Image
 
         // Validate file type
         if (!file.type.startsWith('image/')) {
-            toast.error('Please upload an image file');
+            toast.error('กรุณาอัปโหลดไฟล์รูปภาพ');
             return;
         }
 
         // Validate file size (5MB)
         if (file.size > 5 * 1024 * 1024) {
-            toast.error('File size must be less than 5MB');
+            toast.error('ขนาดไฟล์ต้องไม่เกิน 5MB');
             return;
         }
 
@@ -90,11 +90,11 @@ export default function ImageManager({ productId, images: initialImages }: Image
                     imagePath, // Store relative path
                     isPrimary: images.length === 0
                 });
-                toast.success('Image uploaded successfully');
+                toast.success('อัปโหลดรูปภาพสำเร็จ');
             }
         } catch (error) {
             console.error('Upload failed:', error);
-            toast.error('Failed to upload image');
+            toast.error('อัปโหลดรูปภาพไม่สำเร็จ');
         } finally {
             setIsUploading(false);
             if (fileInputRef.current) {
@@ -165,7 +165,7 @@ export default function ImageManager({ productId, images: initialImages }: Image
             console.error("Failed to reorder images:", error);
             // Revert state on error
             setImages(images);
-            toast.error("Failed to save new order. Please try again.");
+            toast.error("ไม่สามารถบันทึกลำดับได้ กรุณาลองใหม่อีกครั้ง");
         }
     };
 
@@ -197,10 +197,10 @@ export default function ImageManager({ productId, images: initialImages }: Image
                             disabled={isUploading || addImage.isPending}
                             className="mb-2"
                         >
-                            {isUploading ? 'Uploading...' : 'Click to Upload Image'}
+                            {isUploading ? 'กำลังอัปโหลด...' : 'คลิกเพื่ออัปโหลดรูปภาพ'}
                         </Button>
                         <p className="text-xs text-gray-500">
-                            SVG, PNG, JPG or GIF (max. 5MB)
+                            SVG, PNG, JPG หรือ GIF (สูงสุด 5MB)
                         </p>
                     </div>
                 </div>
@@ -222,7 +222,7 @@ export default function ImageManager({ productId, images: initialImages }: Image
                                 {image.isPrimary && (
                                     <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-sm text-white px-2 py-1 rounded-md text-[10px] font-bold flex items-center gap-1 shadow-sm">
                                         <Star className="h-3 w-3 fill-current text-yellow-400" />
-                                        PRIMARY
+                                        รูปหลัก
                                     </div>
                                 )}
 
@@ -250,7 +250,7 @@ export default function ImageManager({ productId, images: initialImages }: Image
                                         disabled={updateImage.isPending}
                                         className="w-full text-xs h-8"
                                     >
-                                        Set Primary
+                                        ตั้งเป็นรูปหลัก
                                     </Button>
                                 )}
 
@@ -282,20 +282,20 @@ export default function ImageManager({ productId, images: initialImages }: Image
                 </div>
             ) : (
                 <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-xl border border-dashed">
-                    <p>No images yet.</p>
+                    <p>ยังไม่มีรูปภาพ</p>
                 </div>
             )}
 
             <AlertDialog open={!!deleteImageId} onOpenChange={() => setDeleteImageId(null)}>
                 <AlertDialogContent className="bg-white">
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Image?</AlertDialogTitle>
+                        <AlertDialogTitle>ลบรูปภาพหรือไม่?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete the image.
+                            การดำเนินการนี้ไม่สามารถยกเลิกได้ และรูปภาพจะถูกลบอย่างถาวร
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel disabled={deleteImage.isPending}>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel disabled={deleteImage.isPending}>ยกเลิก</AlertDialogCancel>
                         <Button
                             type="button"
                             variant="destructive"
@@ -306,10 +306,10 @@ export default function ImageManager({ productId, images: initialImages }: Image
                             {deleteImage.isPending ? (
                                 <>
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Deleting...
+                                    กำลังลบ...
                                 </>
                             ) : (
-                                'Delete'
+                                'ลบ'
                             )}
                         </Button>
                     </AlertDialogFooter>

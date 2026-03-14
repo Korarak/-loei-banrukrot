@@ -43,22 +43,22 @@ import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 
 const customerSchema = z.object({
-    firstName: z.string().min(2, 'First name must be at least 2 characters'),
-    lastName: z.string().min(2, 'Last name must be at least 2 characters'),
-    email: z.string().email('Invalid email address'),
+    firstName: z.string().min(2, 'ชื่อต้องมีอย่างน้อย 2 ตัวอักษร'),
+    lastName: z.string().min(2, 'นามสกุลต้องมีอย่างน้อย 2 ตัวอักษร'),
+    email: z.string().email('อีเมลไม่ถูกต้อง'),
     phone: z.string().optional().or(z.literal('')),
-    password: z.string().min(6, 'Password must be at least 6 characters').optional().or(z.literal('')),
+    password: z.string().min(6, 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร').optional().or(z.literal('')),
     isActive: z.boolean(),
 });
 
 const addressSchema = z.object({
     addressLabel: z.string().optional(),
-    recipientName: z.string().min(2, 'Recipient name is required'),
-    streetAddress: z.string().min(5, 'Street address is required'),
+    recipientName: z.string().min(2, 'กรุณาระบุชื่อผู้รับ'),
+    streetAddress: z.string().min(5, 'กรุณาระบุที่อยู่'),
     subDistrict: z.string().optional(),
-    district: z.string().min(2, 'District is required'),
-    province: z.string().min(2, 'Province is required'),
-    zipCode: z.string().min(5, 'Zip code is required'),
+    district: z.string().min(2, 'กรุณาระบุเขต/อำเภอ'),
+    province: z.string().min(2, 'กรุณาระบุจังหวัด'),
+    zipCode: z.string().min(5, 'กรุณาระบุรหัสไปรษณีย์'),
     isDefault: z.boolean(),
 });
 
@@ -171,18 +171,18 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                     id: customer._id,
                     data: updateData,
                 });
-                toast.success('Customer updated successfully');
+                toast.success('อัปเดตข้อมูลลูกค้าเรียบร้อยแล้ว');
             } else {
                 if (!values.password) {
-                    form.setError('password', { message: 'Password is required for new customers' });
+                    form.setError('password', { message: 'จำเป็นต้องระบุรหัสผ่านสำหรับลูกค้าใหม่' });
                     return;
                 }
                 await createCustomer.mutateAsync(values as any);
-                toast.success('Customer created successfully');
+                toast.success('สร้างบัญชีลูกค้าเรียบร้อยแล้ว');
             }
             onOpenChange(false);
         } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Failed to save customer');
+            toast.error(error.response?.data?.message || 'ไม่สามารถบันทึกข้อมูลลูกค้าได้');
         }
     };
 
@@ -196,18 +196,18 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                     addressId: editingAddress._id,
                     data: values,
                 });
-                toast.success('Address updated successfully');
+                toast.success('อัปเดตที่อยู่เรียบร้อยแล้ว');
             } else {
                 await addAddress.mutateAsync({
                     customerId: customer._id,
                     data: values,
                 });
-                toast.success('Address added successfully');
+                toast.success('เพิ่มที่อยู่เรียบร้อยแล้ว');
             }
             setIsAddressFormOpen(false);
             setEditingAddress(null);
         } catch (error: any) {
-            toast.error(error.response?.data?.message || 'Failed to save address');
+            toast.error(error.response?.data?.message || 'ไม่สามารถบันทึกที่อยู่ได้');
         }
     };
 
@@ -215,9 +215,9 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
         if (!customer) return;
         try {
             await deleteAddress.mutateAsync({ addressId, customerId: customer._id });
-            toast.success('Address deleted successfully');
+            toast.success('ลบที่อยู่เรียบร้อยแล้ว');
         } catch (error) {
-            toast.error('Failed to delete address');
+            toast.error('ไม่สามารถลบที่อยู่ได้');
         }
     };
 
@@ -235,21 +235,21 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                     <div className="h-10 w-10 bg-blue-50 rounded-full flex items-center justify-center">
                                         <User className="h-5 w-5 text-blue-600" />
                                     </div>
-                                    Edit Customer
+                                    แก้ไขข้อมูลลูกค้า
                                 </>
                             ) : (
                                 <>
                                     <div className="h-10 w-10 bg-green-50 rounded-full flex items-center justify-center">
                                         <User className="h-5 w-5 text-green-600" />
                                     </div>
-                                    Add New Customer
+                                    เพิ่มลูกค้าใหม่
                                 </>
                             )}
                         </DialogTitle>
                         <DialogDescription className="text-gray-500 text-base mt-1">
                             {customer
-                                ? "Manage customer details and addresses."
-                                : "Create a new customer account."}
+                                ? "จัดการรายละเอียดข้อมูลและที่อยู่ของลูกค้า"
+                                : "สร้างบัญชีผู้ใช้ใหม่สำหรับลูกค้า"}
                         </DialogDescription>
                     </DialogHeader>
                 </div>
@@ -262,14 +262,14 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                     value="details"
                                     className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all"
                                 >
-                                    Personal Details
+                                    ข้อมูลส่วนตัว
                                 </TabsTrigger>
                                 <TabsTrigger
                                     value="addresses"
                                     disabled={!customer}
                                     className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all disabled:opacity-50"
                                 >
-                                    Addresses {addresses && addresses.length > 0 && `(${addresses.length})`}
+                                    ที่อยู่ {addresses && addresses.length > 0 && `(${addresses.length})`}
                                 </TabsTrigger>
                             </TabsList>
                         </div>
@@ -283,11 +283,11 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                             name="firstName"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel className="text-gray-700 font-medium">First Name</FormLabel>
+                                                    <FormLabel className="text-gray-700 font-medium">ชื่อ</FormLabel>
                                                     <FormControl>
                                                         <div className="relative">
                                                             <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                                            <Input placeholder="John" {...field} className="pl-10 h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white transition-all" />
+                                                            <Input placeholder="เช่น สมชาย" {...field} className="pl-10 h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white transition-all" />
                                                         </div>
                                                     </FormControl>
                                                     <FormMessage />
@@ -299,11 +299,11 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                             name="lastName"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel className="text-gray-700 font-medium">Last Name</FormLabel>
+                                                    <FormLabel className="text-gray-700 font-medium">นามสกุล</FormLabel>
                                                     <FormControl>
                                                         <div className="relative">
                                                             <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                                            <Input placeholder="Doe" {...field} className="pl-10 h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white transition-all" />
+                                                            <Input placeholder="เช่น รักษาสุข" {...field} className="pl-10 h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white transition-all" />
                                                         </div>
                                                     </FormControl>
                                                     <FormMessage />
@@ -318,11 +318,11 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                             name="email"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel className="text-gray-700 font-medium">Email Address</FormLabel>
+                                                    <FormLabel className="text-gray-700 font-medium">อีเมล</FormLabel>
                                                     <FormControl>
                                                         <div className="relative">
                                                             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                                            <Input placeholder="john@example.com" {...field} className="pl-10 h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white transition-all" />
+                                                            <Input placeholder="customer@example.com" {...field} className="pl-10 h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white transition-all" />
                                                         </div>
                                                     </FormControl>
                                                     <FormMessage />
@@ -334,11 +334,11 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                             name="phone"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel className="text-gray-700 font-medium">Phone Number</FormLabel>
+                                                    <FormLabel className="text-gray-700 font-medium">เบอร์โทรศัพท์</FormLabel>
                                                     <FormControl>
                                                         <div className="relative">
                                                             <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                                            <Input placeholder="+1 (555) 000-0000" {...field} className="pl-10 h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white transition-all" />
+                                                            <Input placeholder="08x-xxx-xxxx" {...field} className="pl-10 h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white transition-all" />
                                                         </div>
                                                     </FormControl>
                                                     <FormMessage />
@@ -353,14 +353,14 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                         render={({ field }) => (
                                             <FormItem>
                                                 <FormLabel className="text-gray-700 font-medium">
-                                                    {customer ? 'New Password (Optional)' : 'Password'}
+                                                    {customer ? 'รหัสผ่านใหม่ (ไม่จำเป็น)' : 'รหัสผ่าน'}
                                                 </FormLabel>
                                                 <FormControl>
                                                     <div className="relative">
                                                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                                                         <Input
                                                             type="password"
-                                                            placeholder={customer ? "Leave blank to keep current" : "Create a secure password"}
+                                                            placeholder={customer ? "เว้นว่างไว้หากไม่ต้องการเปลี่ยน" : "กำหนดรหัสผ่านเพื่อความปลอดภัย"}
                                                             {...field}
                                                             className="pl-10 h-11 rounded-xl bg-gray-50 border-gray-200 focus:bg-white transition-all"
                                                         />
@@ -377,9 +377,9 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                         render={({ field }) => (
                                             <FormItem className="flex flex-row items-center justify-between rounded-xl border border-gray-100 p-4 bg-gray-50/50">
                                                 <div className="space-y-0.5">
-                                                    <FormLabel className="text-base font-medium text-gray-900">Active Account</FormLabel>
+                                                    <FormLabel className="text-base font-medium text-gray-900">เปิดใช้งานบัญชี</FormLabel>
                                                     <FormDescription className="text-gray-500">
-                                                        Allow this customer to log in and make purchases
+                                                        อนุญาตให้ลูกค้ารายนี้เข้าสู่ระบบและสั่งซื้อสินค้าได้
                                                     </FormDescription>
                                                 </div>
                                                 <FormControl>
@@ -400,7 +400,7 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                             onClick={() => onOpenChange(false)}
                                             className="rounded-xl border-gray-200 h-11 px-6 hover:bg-gray-50 hover:text-black"
                                         >
-                                            Cancel
+                                            ยกเลิก
                                         </Button>
                                         <Button
                                             type="submit"
@@ -410,10 +410,10 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                             {isLoading ? (
                                                 <>
                                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                    Saving...
+                                                    กำลังบันทึก...
                                                 </>
                                             ) : (
-                                                'Save Customer'
+                                                'บันทึกข้อมูล'
                                             )}
                                         </Button>
                                     </div>
@@ -427,7 +427,7 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                     <form onSubmit={addressForm.handleSubmit(onAddressSubmit)} className="space-y-4">
                                         <div className="flex items-center justify-between mb-4">
                                             <h3 className="text-lg font-bold text-gray-900">
-                                                {editingAddress ? 'Edit Address' : 'Add New Address'}
+                                                {editingAddress ? 'แก้ไขที่อยู่' : 'เพิ่มที่อยู่ใหม่'}
                                             </h3>
                                             <Button
                                                 type="button"
@@ -438,7 +438,7 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                                 }}
                                                 className="text-gray-500 hover:text-black"
                                             >
-                                                Cancel
+                                                ยกเลิก
                                             </Button>
                                         </div>
 
@@ -448,9 +448,9 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                                 name="addressLabel"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Label (Optional)</FormLabel>
+                                                        <FormLabel>ชื่อเรียกที่อยู่ (ไม่จำเป็น)</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder="Home, Office, etc." {...field} className="rounded-xl" />
+                                                            <Input placeholder="เช่น บ้าน, ที่ทำงาน ฯลฯ" {...field} className="rounded-xl" />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -461,9 +461,9 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                                 name="recipientName"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Recipient Name</FormLabel>
+                                                        <FormLabel>ชื่อผู้รับ</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder="John Doe" {...field} className="rounded-xl" />
+                                                            <Input placeholder="ระบุชื่อ-นามสกุล" {...field} className="rounded-xl" />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -476,9 +476,9 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                             name="streetAddress"
                                             render={({ field }) => (
                                                 <FormItem>
-                                                    <FormLabel>Street Address</FormLabel>
+                                                    <FormLabel>ที่อยู่</FormLabel>
                                                     <FormControl>
-                                                        <Input placeholder="123 Main St" {...field} className="rounded-xl" />
+                                                        <Input placeholder="เลขที่บ้าน, ถนน, ซอย..." {...field} className="rounded-xl" />
                                                     </FormControl>
                                                     <FormMessage />
                                                 </FormItem>
@@ -491,9 +491,9 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                                 name="subDistrict"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Sub-district</FormLabel>
+                                                        <FormLabel>แขวง/ตำบล</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder="Sub-district" {...field} className="rounded-xl" />
+                                                            <Input placeholder="แขวง/ตำบล" {...field} className="rounded-xl" />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -504,9 +504,9 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                                 name="district"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>District</FormLabel>
+                                                        <FormLabel>เขต/อำเภอ</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder="District" {...field} className="rounded-xl" />
+                                                            <Input placeholder="เขต/อำเภอ" {...field} className="rounded-xl" />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -520,9 +520,9 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                                 name="province"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Province</FormLabel>
+                                                        <FormLabel>จังหวัด</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder="Province" {...field} className="rounded-xl" />
+                                                            <Input placeholder="จังหวัด" {...field} className="rounded-xl" />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -533,9 +533,9 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                                 name="zipCode"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Zip Code</FormLabel>
+                                                        <FormLabel>รหัสไปรษณีย์</FormLabel>
                                                         <FormControl>
-                                                            <Input placeholder="10000" {...field} className="rounded-xl" />
+                                                            <Input placeholder="รหัสไปรษณีย์" {...field} className="rounded-xl" />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -549,9 +549,9 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                             render={({ field }) => (
                                                 <FormItem className="flex flex-row items-center justify-between rounded-xl border border-gray-100 p-4 bg-gray-50/50">
                                                     <div className="space-y-0.5">
-                                                        <FormLabel className="text-base font-medium text-gray-900">Default Address</FormLabel>
+                                                        <FormLabel className="text-base font-medium text-gray-900">ตั้งเป็นที่อยู่เริ่มต้น</FormLabel>
                                                         <FormDescription className="text-gray-500">
-                                                            Use this as the primary shipping address
+                                                            ใช้เป็นที่อยู่หลักสำหรับจัดส่งสินค้า
                                                         </FormDescription>
                                                     </div>
                                                     <FormControl>
@@ -574,10 +574,10 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                                 {isAddressLoading ? (
                                                     <>
                                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                        Saving...
+                                                        กำลังบันทึก...
                                                     </>
                                                 ) : (
-                                                    'Save Address'
+                                                    'บันทึกที่อยู่'
                                                 )}
                                             </Button>
                                         </div>
@@ -586,13 +586,13 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                             ) : (
                                 <div className="space-y-4">
                                     <div className="flex justify-between items-center mb-4">
-                                        <h3 className="text-lg font-bold text-gray-900">Saved Addresses</h3>
+                                        <h3 className="text-lg font-bold text-gray-900">ที่อยู่ที่บันทึกไว้</h3>
                                         <Button
                                             onClick={() => setIsAddressFormOpen(true)}
                                             className="rounded-xl bg-black text-white hover:bg-gray-800"
                                         >
                                             <Plus className="h-4 w-4 mr-2" />
-                                            Add Address
+                                            เพิ่มที่อยู่
                                         </Button>
                                     </div>
 
@@ -614,9 +614,9 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                                             </div>
                                                             <div>
                                                                 <div className="flex items-center gap-2">
-                                                                    <span className="font-bold text-gray-900">{addr.addressLabel || 'Address'}</span>
+                                                                    <span className="font-bold text-gray-900">{addr.addressLabel || 'ที่อยู่'}</span>
                                                                     {addr.isDefault && (
-                                                                        <Badge className="bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-100">Default</Badge>
+                                                                        <Badge className="bg-blue-50 text-blue-700 border-blue-100 hover:bg-blue-100">ค่าเริ่มต้น</Badge>
                                                                     )}
                                                                 </div>
                                                                 <p className="text-sm font-medium text-gray-900 mt-1">{addr.recipientName}</p>
@@ -654,8 +654,8 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                             <div className="bg-white h-12 w-12 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm">
                                                 <Home className="h-6 w-6 text-gray-300" />
                                             </div>
-                                            <p className="text-gray-500 font-medium">No addresses found</p>
-                                            <p className="text-gray-400 text-sm mt-1">Add an address for shipping and billing</p>
+                                            <p className="text-gray-500 font-medium">ไม่พบข้อมูลที่อยู่</p>
+                                            <p className="text-gray-400 text-sm mt-1">เพิ่มที่อยู่สำหรับการจัดส่งและออกบิล</p>
                                         </div>
                                     )}
                                 </div>

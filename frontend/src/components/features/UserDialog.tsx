@@ -28,11 +28,11 @@ export default function UserDialog({ user, open, onOpenChange }: UserDialogProps
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['users'] });
-            toast.success('User created successfully');
+            toast.success('สร้างผู้ใช้งานสำเร็จแล้ว');
             onOpenChange(false);
         },
         onError: (error: any) => {
-            toast.error(error.response?.data?.message || 'Failed to create user');
+            toast.error(error.response?.data?.message || 'ล้มเหลวในการสร้างผู้ใช้งาน');
         },
     });
 
@@ -43,11 +43,11 @@ export default function UserDialog({ user, open, onOpenChange }: UserDialogProps
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['users'] });
-            toast.success('User updated successfully');
+            toast.success('อัปเดตข้อมูลผู้ใช้งานสำเร็จแล้ว');
             onOpenChange(false);
         },
         onError: (error: any) => {
-            toast.error(error.response?.data?.message || 'Failed to update user');
+            toast.error(error.response?.data?.message || 'ล้มเหลวในการอัปเดตข้อมูลผู้ใช้งาน');
         },
     });
 
@@ -67,11 +67,11 @@ export default function UserDialog({ user, open, onOpenChange }: UserDialogProps
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-md bg-white">
                 <DialogHeader>
-                    <DialogTitle>{user ? 'Edit User' : 'Create New User'}</DialogTitle>
+                    <DialogTitle>{user ? 'แก้ไขผู้ใช้งาน' : 'สร้างผู้ใช้งานใหม่'}</DialogTitle>
                     <DialogDescription>
                         {user
-                            ? 'Update user details and permissions'
-                            : 'Add a new staff member or administrator'}
+                            ? 'อัปเดตรายละเอียดและสิทธิ์ของผู้ใช้งาน'
+                            : 'เพิ่มพนักงานหรือผู้ดูแลระบบคนใหม่'}
                     </DialogDescription>
                 </DialogHeader>
 

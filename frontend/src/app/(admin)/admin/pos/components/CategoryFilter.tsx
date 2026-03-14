@@ -37,7 +37,7 @@ export function CategoryFilter({ categories, selectedCategory, onSelectCategory 
                         )}
                     >
                         <Package className="mr-2 h-4 w-4" />
-                        All Items
+                        สินค้าทั้งหมด
                     </Button>
                     {categories?.map((cat: any) => (
                         <Button

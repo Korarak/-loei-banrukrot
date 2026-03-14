@@ -90,9 +90,9 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
             <div className="max-w-4xl mx-auto">
                 <Card className="p-12 text-center">
                     <Package className="h-16 w-16 mx-auto text-gray-400 mb-4" />
-                    <h2 className="text-xl font-semibold mb-2">Order not found</h2>
+                    <h2 className="text-xl font-semibold mb-2">ไม่พบคำสั่งซื้อ</h2>
                     <Button asChild className="mt-4">
-                        <Link href="/admin/orders">Back to Orders</Link>
+                        <Link href="/admin/orders">กลับไปยังหน้าคำสั่งซื้อ</Link>
                     </Button>
                 </Card>
             </div>
@@ -146,12 +146,12 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
     };
 
     const statusOptions = [
-        { value: 'pending', label: 'Pending' },
-        { value: 'confirmed', label: 'Confirmed' },
-        { value: 'processing', label: 'Processing' },
-        { value: 'shipped', label: 'Shipped' },
-        { value: 'delivered', label: 'Delivered' },
-        { value: 'cancelled', label: 'Cancelled' },
+        { value: 'pending', label: 'รอดำเนินการ' },
+        { value: 'confirmed', label: 'ยืนยันแล้ว' },
+        { value: 'processing', label: 'กำลังเตรียมสินค้า' },
+        { value: 'shipped', label: 'เริ่มการจัดส่ง' },
+        { value: 'delivered', label: 'จัดส่งสำเร็จ' },
+        { value: 'cancelled', label: 'ยกเลิกแล้ว' },
     ];
 
     return (
@@ -159,7 +159,7 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
             <Button variant="ghost" asChild>
                 <Link href="/admin/orders">
                     <ArrowLeft className="h-4 w-4 mr-2" />
-                    Back to Orders
+                    กลับไปยังหน้าคำสั่งซื้อ
                 </Link>
             </Button>
 
@@ -167,9 +167,9 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
             <Card className="p-6">
                 <div className="flex justify-between items-start">
                     <div>
-                        <h1 className="text-2xl font-bold mb-2">Order #{order.orderReference}</h1>
+                        <h1 className="text-2xl font-bold mb-2">คำสั่งซื้อ #{order.orderReference}</h1>
                         <p className="text-gray-600">
-                            Placed on {new Date(order.createdAt).toLocaleDateString('en-US', {
+                            สั่งซื้อเมื่อ {new Date(order.createdAt).toLocaleDateString('th-TH', {
                                 year: 'numeric',
                                 month: 'long',
                                 day: 'numeric',
@@ -203,19 +203,19 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                 {/* Order Items */}
                 <div className="lg:col-span-2">
                     <Card className="p-6">
-                        <h2 className="text-xl font-bold mb-4">Order Items</h2>
+                        <h2 className="text-xl font-bold mb-4">รายการสินค้า</h2>
                         <div className="space-y-4">
                             {order.items.map((item, index) => (
                                 <div key={index} className="flex justify-between items-center border-b pb-4 last:border-b-0">
                                     <div className="flex-1">
                                         <h3 className="font-semibold">{item.productName}</h3>
                                         <p className="text-sm text-gray-600">SKU: {item.sku}</p>
-                                        <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
+                                        <p className="text-sm text-gray-600">จำนวน: {item.quantity}</p>
                                     </div>
                                     <div className="text-right">
                                         <p className="font-semibold">฿{item.price.toFixed(2)}</p>
                                         <p className="text-sm text-gray-600">
-                                            Subtotal: ฿{(item.price * item.quantity).toFixed(2)}
+                                            รวม: ฿{(item.price * item.quantity).toFixed(2)}
                                         </p>
                                     </div>
                                 </div>
@@ -228,22 +228,22 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                 <div className="space-y-6">
                     {/* Order Summary */}
                     <Card className="p-6">
-                        <h2 className="text-xl font-bold mb-4">Order Summary</h2>
+                        <h2 className="text-xl font-bold mb-4">สรุปคำสั่งซื้อ</h2>
                         <div className="space-y-3">
                             <div className="flex justify-between">
-                                <span className="text-gray-600">Subtotal</span>
+                                <span className="text-gray-600">ยอดรวมย่อย</span>
                                 <span className="font-semibold">฿{order.totalAmount.toFixed(2)}</span>
                             </div>
                             <div className="flex justify-between">
-                                <span className="text-gray-600">Shipping</span>
+                                <span className="text-gray-600">ค่าจัดส่ง</span>
                                 <span className="font-semibold">
                                     {order.shippingInfo?.cost
                                         ? `฿${order.shippingInfo.cost.toFixed(2)}`
-                                        : `฿${calculateShippingCost().toFixed(2)} (Est.)`}
+                                        : `฿${calculateShippingCost().toFixed(2)} (โดยประมาณ)`}
                                 </span>
                             </div>
                             <div className="border-t pt-3 flex justify-between">
-                                <span className="text-lg font-bold">Total</span>
+                                <span className="text-lg font-bold">ยอดรวมทั้งหมด</span>
                                 <span className="text-lg font-bold text-orange-600">
                                     ฿{order.totalAmount.toFixed(2)}
                                 </span>
@@ -253,41 +253,41 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
 
                     {/* Customer Information */}
                     <Card className="p-6">
-                        <h2 className="text-xl font-bold mb-4">Customer</h2>
+                        <h2 className="text-xl font-bold mb-4">ข้อมูลลูกค้า</h2>
                         <div className="space-y-2">
                             <div>
-                                <p className="text-sm text-gray-600">Name</p>
+                                <p className="text-sm text-gray-600">ชื่อ</p>
                                 <p className="font-semibold">
-                                    {order.customer?.firstName || 'Walk-in'} {order.customer?.lastName || 'Customer'}
+                                    {order.customer?.firstName || 'ลูกค้า'} {order.customer?.lastName || 'หน้าร้าน'}
                                 </p>
                             </div>
                             <div>
-                                <p className="text-sm text-gray-600">Email</p>
-                                <p className="font-semibold">{order.customer?.email || 'N/A'}</p>
+                                <p className="text-sm text-gray-600">อีเมล</p>
+                                <p className="font-semibold">{order.customer?.email || 'ไม่มี'}</p>
                             </div>
                             <div>
-                                <p className="text-sm text-gray-600">Phone</p>
-                                <p className="font-semibold">{order.customer?.phone || 'N/A'}</p>
+                                <p className="text-sm text-gray-600">เบอร์โทรศัพท์</p>
+                                <p className="font-semibold">{order.customer?.phone || 'ไม่มี'}</p>
                             </div>
                         </div>
                     </Card>
 
                     {/* Payment Verification */}
                     <Card className="p-6">
-                        <h2 className="text-xl font-bold mb-4">Payment Information</h2>
+                        <h2 className="text-xl font-bold mb-4">ข้อมูลการชำระเงิน</h2>
                         <div className="space-y-4">
                             <div className="flex justify-between">
-                                <span className="text-gray-600">Method</span>
-                                <span className="font-semibold">{order.payments?.[0]?.paymentMethod || 'Transfer'}</span>
+                                <span className="text-gray-600">วิธีการ</span>
+                                <span className="font-semibold">{order.payments?.[0]?.paymentMethod === 'Cash' ? 'เงินสด' : (order.payments?.[0]?.paymentMethod || 'โอนผ่านบัญชี')}</span>
                             </div>
 
                             {order.payments?.[0]?.slipImage ? (
                                 <div className="space-y-3 border-t pt-3">
-                                    <p className="font-medium text-sm text-gray-900">Payment Slip</p>
+                                    <p className="font-medium text-sm text-gray-900">หลักฐานการชำระเงิน (Slip)</p>
                                     <div className="relative h-40 w-full rounded-lg overflow-hidden border border-gray-200 group cursor-pointer" onClick={() => setPreviewImage(order.payments![0].slipImage!)}>
                                         <Image
                                             src={getImageUrl(order.payments[0].slipImage)}
-                                            alt="Payment Slip"
+                                            alt="หลักฐานการชำระเงิน"
                                             fill
                                             className="object-cover"
                                             unoptimized
@@ -306,23 +306,23 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                                                 disabled={verifyPayment.isPending}
                                             >
                                                 <XCircle className="h-4 w-4 mr-2" />
-                                                Unverify
+                                                ยกเลิกการยืนยัน
                                             </Button>
                                         ) : (
                                             <Button
-                                                className="w-full bg-green-600 hover:bg-green-700"
+                                                className="w-full bg-green-600 hover:bg-green-700 text-white"
                                                 onClick={() => verifyPayment.mutate({ id: order._id, isVerified: true })}
                                                 disabled={verifyPayment.isPending}
                                             >
                                                 <CheckCircle className="h-4 w-4 mr-2" />
-                                                Verify Payment
+                                                ยืนยันการชำระเงิน
                                             </Button>
                                         )}
                                     </div>
                                 </div>
                             ) : (
                                 <div className="bg-gray-50 p-3 rounded text-sm text-gray-500 text-center">
-                                    No payment slip uploaded
+                                    ยังไม่มีการอัปโหลดหลักฐานการชำระเงิน
                                 </div>
                             )}
                         </div>
@@ -331,7 +331,7 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                     {/* Shipping Information */}
                     <Card className="p-6">
                         <div className="flex justify-between items-start mb-4">
-                            <h2 className="text-xl font-bold">Shipping Information</h2>
+                            <h2 className="text-xl font-bold">ข้อมูลการจัดส่ง</h2>
                             <Button
                                 variant="ghost"
                                 size="icon"
@@ -343,18 +343,18 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                         </div>
                         <div className="space-y-3">
                             <div>
-                                <p className="text-sm text-gray-600">Provider</p>
+                                <p className="text-sm text-gray-600">ผู้ให้บริการ</p>
                                 <div className="flex items-center gap-2">
                                     <Truck className="h-4 w-4 text-gray-400" />
-                                    <p className="font-semibold">{order.shippingInfo?.provider || 'Not set'}</p>
+                                    <p className="font-semibold">{order.shippingInfo?.provider || 'ไม่มีข้อมูล'}</p>
                                 </div>
                             </div>
                             <div>
-                                <p className="text-sm text-gray-600">Tracking Number</p>
-                                <p className="font-semibold font-mono">{order.shippingInfo?.trackingNumber || 'Not set'}</p>
+                                <p className="text-sm text-gray-600">หมายเลขติดตามพัสดุ</p>
+                                <p className="font-semibold font-mono">{order.shippingInfo?.trackingNumber || 'ไม่มีข้อมูล'}</p>
                             </div>
                             <div>
-                                <p className="text-sm text-gray-600">Shipping Cost</p>
+                                <p className="text-sm text-gray-600">ค่าจัดส่ง</p>
                                 <p className="font-semibold">
                                     {order.shippingInfo?.cost ? `฿${order.shippingInfo.cost.toFixed(2)}` : '-'}
                                 </p>
@@ -367,20 +367,20 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
             <Dialog open={shippingDialogOpen} onOpenChange={setShippingDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Update Shipping Information</DialogTitle>
+                        <DialogTitle>อัปเดตข้อมูลการจัดส่ง</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4 py-4">
                         <div className="space-y-2">
-                            <Label htmlFor="provider">Shipping Provider</Label>
+                            <Label htmlFor="provider">ผู้ให้บริการขนส่ง</Label>
                             <Input
                                 id="provider"
-                                placeholder="e.g. Kerry, Flash, Thai Post"
+                                placeholder="เช่น Kerry, Flash, Thai Post"
                                 value={shippingProvider}
                                 onChange={(e) => setShippingProvider(e.target.value)}
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label>Select Shipping Method (Optional)</Label>
+                            <Label>เลือกวิธีการจัดส่ง (ไม่บังคับ)</Label>
                             <Select onValueChange={(value) => {
                                 const method = shippingMethods?.find(m => m._id === value);
                                 if (method) {
@@ -389,7 +389,7 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                                 }
                             }}>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select a method to auto-fill" />
+                                    <SelectValue placeholder="เลือกจากรายการเพื่อเติมข้อมูลอัตโนมัติ" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {shippingMethods?.filter(m => m.isActive).map((method) => (
@@ -401,16 +401,16 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                             </Select>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="tracking">Tracking Number</Label>
+                            <Label htmlFor="tracking">หมายเลขติดตามพัสดุ</Label>
                             <Input
                                 id="tracking"
-                                placeholder="Tracking Number"
+                                placeholder="เช่น TH0123456789"
                                 value={trackingNumber}
                                 onChange={(e) => setTrackingNumber(e.target.value)}
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="cost">Shipping Cost</Label>
+                            <Label htmlFor="cost">ค่าจัดส่ง</Label>
                             <Input
                                 id="cost"
                                 type="number"
@@ -421,9 +421,9 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setShippingDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={handleUpdateShipping} disabled={updateStatus.isPending}>
-                            {updateStatus.isPending ? 'Saving...' : 'Save Changes'}
+                        <Button variant="outline" onClick={() => setShippingDialogOpen(false)}>ยกเลิก</Button>
+                        <Button onClick={handleUpdateShipping} disabled={updateStatus.isPending} className="text-white">
+                            {updateStatus.isPending ? 'กำลังบันทึก...' : 'บันทึกการเปลี่ยนแปลง'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -434,19 +434,19 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2 text-red-600">
                             <AlertCircle className="h-5 w-5" />
-                            Confirm Cancellation
+                            ยืนยันการยกเลิกคำสั่งซื้อ
                         </DialogTitle>
                         <DialogDescription>
-                            Are you sure you want to cancel this order?
+                            คุณแน่ใจหรือไม่ว่าต้องการยกเลิกคำสั่งซื้อนี้?
                             <br />
                             <span className="font-medium text-gray-900 mt-2 block">
-                                This will automatically restore the stock for all items in the order.
+                                การดำเนินการนี้จะคืนสินค้าเข้าสต็อกโดยอัตโนมัติ
                             </span>
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setCancelDialogOpen(false)}>Keep Order</Button>
-                        <Button variant="destructive" onClick={confirmCancel}>Yes, Cancel Order</Button>
+                        <Button variant="outline" onClick={() => setCancelDialogOpen(false)}>กลับไปดูแลออเดอร์</Button>
+                        <Button variant="destructive" onClick={confirmCancel}>ใช่, ยกเลิกคำสั่งซื้อ</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

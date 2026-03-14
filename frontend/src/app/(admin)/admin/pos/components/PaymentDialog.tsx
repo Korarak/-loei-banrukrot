@@ -67,7 +67,7 @@ export function PaymentDialog({ open, onOpenChange, totalAmount, onConfirm, isPr
                 <DialogHeader>
                     <DialogTitle className="text-center text-2xl font-bold flex items-center justify-center gap-2">
                         <Banknote className="h-6 w-6" />
-                        Cash Payment
+                        ชำระด้วยเงินสด
                     </DialogTitle>
                 </DialogHeader>
 
@@ -75,13 +75,13 @@ export function PaymentDialog({ open, onOpenChange, totalAmount, onConfirm, isPr
                     {/* Left Column: Summary & Input */}
                     <div className="space-y-6">
                         <div className="text-center bg-gray-50 p-6 rounded-2xl border border-gray-100">
-                            <p className="text-sm text-gray-500 mb-2 font-medium uppercase tracking-wide">Amount to Pay</p>
+                            <p className="text-sm text-gray-500 mb-2 font-medium uppercase tracking-wide">ยอดที่ต้องชำระ</p>
                             <p className="text-4xl lg:text-5xl font-black text-primary">฿{totalAmount.toLocaleString()}</p>
                         </div>
 
                         <div className={`p-5 rounded-xl border-2 transition-colors ${changeDue > 0 ? 'bg-green-50 border-green-100' : 'bg-gray-50 border-gray-100'}`}>
                             <div className="flex justify-between items-center">
-                                <span className="font-semibold text-gray-600">Change</span>
+                                <span className="font-semibold text-gray-600">เงินทอน</span>
                                 <span className={`text-2xl font-black ${changeDue > 0 ? 'text-green-600' : 'text-gray-400'}`}>
                                     ฿{changeDue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                 </span>
@@ -89,7 +89,7 @@ export function PaymentDialog({ open, onOpenChange, totalAmount, onConfirm, isPr
                         </div>
 
                         <div className="space-y-2">
-                            <Label className="text-base font-semibold">Received Amount</Label>
+                            <Label className="text-base font-semibold">ยอดเงินที่รับมา</Label>
                             <div className="relative group">
                                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-xl">฿</span>
                                 <Input
@@ -106,7 +106,7 @@ export function PaymentDialog({ open, onOpenChange, totalAmount, onConfirm, isPr
                     <div className="space-y-3">
                         {/* Quick Cash */}
                         <div className="grid grid-cols-2 gap-2 mb-2">
-                            <Button variant="outline" size="sm" onClick={() => handleQuickCash(totalAmount)} className="h-10 text-xs font-bold border-primary/20 text-primary bg-primary/5 hover:bg-primary/10">Exact</Button>
+                            <Button variant="outline" size="sm" onClick={() => handleQuickCash(totalAmount)} className="h-10 text-xs font-bold border-primary/20 text-primary bg-primary/5 hover:bg-primary/10">พอดี</Button>
                             <Button variant="outline" size="sm" onClick={() => handleQuickCash(100)} className="h-10 text-xs">฿100</Button>
                             <Button variant="outline" size="sm" onClick={() => handleQuickCash(500)} className="h-10 text-xs">฿500</Button>
                             <Button variant="outline" size="sm" onClick={() => handleQuickCash(1000)} className="h-10 text-xs">฿1,000</Button>
@@ -137,14 +137,14 @@ export function PaymentDialog({ open, onOpenChange, totalAmount, onConfirm, isPr
                             className="w-full h-10 mt-1"
                             onClick={() => handleNumpadClick('C')}
                         >
-                            Start Over
+                            เริ่มใหม่
                         </Button>
 
                     </div>
                 </div>
 
                 <DialogFooter className="gap-3 sm:gap-0 mt-2">
-                    <Button variant="outline" className="h-12 flex-1 text-base" onClick={() => onOpenChange(false)} disabled={isProcessing}>Cancel</Button>
+                    <Button variant="outline" className="h-12 flex-1 text-base" onClick={() => onOpenChange(false)} disabled={isProcessing}>ยกเลิก</Button>
                     <Button
                         className="h-12 flex-1 text-base font-bold shadow-lg shadow-primary/20"
                         onClick={handleConfirm}
@@ -153,9 +153,9 @@ export function PaymentDialog({ open, onOpenChange, totalAmount, onConfirm, isPr
                         {isProcessing ? (
                             <>
                                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                                Processing...
+                                กำลังประมวลผล...
                             </>
-                        ) : 'Confirm Payment'}
+                        ) : 'ยืนยันการชำระเงิน'}
                     </Button>
                 </DialogFooter>
             </DialogContent>

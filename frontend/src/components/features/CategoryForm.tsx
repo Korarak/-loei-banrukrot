@@ -169,7 +169,7 @@ export default function CategoryForm({ category, onSuccess, onCancel }: Category
                             disabled={isLoading}
                             className="h-11 px-6"
                         >
-                            Cancel
+                            ยกเลิก
                         </Button>
                     )}
                     <Button

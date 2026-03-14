@@ -107,3 +107,22 @@ export function useDeleteCategory() {
         }
     });
 }
+
+// Reorder categories
+export function useReorderCategories() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (categories: { id: string; sortOrder: number }[]) => {
+            const response = await api.put('/categories/reorder', { categories });
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['categories'] });
+            toast.success('Categories reordered successfully');
+        },
+        onError: (error: any) => {
+            toast.error(error.response?.data?.message || 'Failed to reorder categories');
+        }
+    });
+}

@@ -140,7 +140,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                         </div>
                         <div>
                             <h1 className="text-xl font-black tracking-tight text-white italic">VESPA<span className="text-primary not-italic">ADMIN</span></h1>
-                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] relative -top-1">Control Center</p>
+                            <p className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] relative -top-1">ศูนย์ควบคุม</p>
                         </div>
                     </div>
                     {/* Close button for mobile/tablet */}
@@ -247,7 +247,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                         onClick={handleLogout}
                     >
                         <LogOut className="h-5 w-5" />
-                        <span className="font-bold text-xs uppercase tracking-wider">Log Out</span>
+                        <span className="font-bold text-xs uppercase tracking-wider">ออกจากระบบ</span>
                     </Button>
                 </div>
             </aside>

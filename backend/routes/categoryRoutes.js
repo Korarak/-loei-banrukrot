@@ -10,6 +10,13 @@ router.get('/', categoryController.getAllCategories);
 router.get('/:id', validator.validateId, categoryController.getCategoryById);
 
 // Protected routes (staff/owner)
+// Note: /reorder must be placed before /:id to avoid interpreting "reorder" as an ID
+router.put(
+    '/reorder',
+    authenticateToken('user'),
+    requireRole('owner', 'staff'),
+    categoryController.reorderCategories
+);
 router.post(
     '/',
     authenticateToken('user'),

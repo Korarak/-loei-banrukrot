@@ -127,7 +127,7 @@ export default function AdminDashboard() {
             title: 'รายได้รวม',
             value: data ? data.revenue.total : 0,
             icon: DollarSign,
-            description: `Pos: ฿${data?.revenue.pos.toLocaleString()} | Online: ฿${data?.revenue.online.toLocaleString()}`,
+            description: `หน้าร้าน: ฿${data?.revenue.pos.toLocaleString()} | ออนไลน์: ฿${data?.revenue.online.toLocaleString()}`,
             color: 'text-emerald-500',
             bg: 'bg-emerald-500/10',
             border: 'border-emerald-100'
@@ -136,7 +136,7 @@ export default function AdminDashboard() {
             title: 'คำสั่งซื้อ',
             value: data ? data.orders.total : 0,
             icon: ShoppingCart,
-            description: `Pos: ${data?.orders.pos} | Online: ${data?.orders.online}`,
+            description: `หน้าร้าน: ${data?.orders.pos} | ออนไลน์: ${data?.orders.online}`,
             color: 'text-blue-500',
             bg: 'bg-blue-500/10',
             border: 'border-blue-100'
@@ -217,7 +217,7 @@ export default function AdminDashboard() {
                 <div className="flex items-center gap-2">
                     <div className="bg-white px-4 py-2 rounded-full border border-gray-200 shadow-sm flex items-center gap-2 text-sm font-bold text-gray-600">
                         <Calendar className="h-4 w-4 text-gray-400" />
-                        Last 30 Days
+                        30 วันที่ผ่านมา
                     </div>
                 </div>
             </motion.div>
@@ -365,7 +365,7 @@ export default function AdminDashboard() {
                                 </ResponsiveContainer>
                                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                                     <span className="text-3xl font-black text-gray-900">{data ? data.orders.total : 0}</span>
-                                    <span className="text-xs text-gray-500 font-bold uppercase tracking-wider">Total Orders</span>
+                                    <span className="text-xs text-gray-500 font-bold uppercase tracking-wider">คำสั่งซื้อทั้งหมด</span>
                                 </div>
                             </div>
                         </CardContent>
