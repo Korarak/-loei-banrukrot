@@ -54,4 +54,4 @@ EXPOSE 8081
 ENV PORT=8081
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["node", "server.js"]
+CMD ["node", "frontend/server.js"]

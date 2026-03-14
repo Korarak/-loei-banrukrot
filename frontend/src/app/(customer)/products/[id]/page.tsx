@@ -26,6 +26,7 @@ export default function ProductDetailPage() {
     const isCustomerAuthenticated = useAuthStore((state) => state.isCustomerAuthenticated);
     const [activeImage, setActiveImage] = useState<string | null>(null);
     const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
+    const [isDescriptionOpen, setIsDescriptionOpen] = useState(false);
 
     if (isProductLoading) {
         return (
@@ -89,7 +90,7 @@ export default function ProductDetailPage() {
     };
 
     return (
-        <div className="font-sans pb-24 md:pb-0 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="font-sans pb-24 md:pb-0 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {/* Breadcrumb / Back */}
             <div className="mb-6 flex items-center justify-between">
                 <Button variant="ghost" asChild className="group -ml-4 text-gray-500 hover:text-gray-900 hover:bg-transparent">
@@ -108,7 +109,7 @@ export default function ProductDetailPage() {
                 <div className="space-y-6">
                     <motion.div
                         layoutId={`product-image-${product._id}`}
-                        className="aspect-square bg-gray-50 rounded-[2.5rem] overflow-hidden relative border-2 border-transparent hover:border-gray-200 transition-colors cursor-zoom-in shadow-inner"
+                        className="aspect-square bg-gray-50 rounded-[2.5rem] overflow-hidden relative border-2 border-transparent hover:border-gray-200 transition-colors shadow-inner"
                         onClick={() => displayImage && setFullScreenImage(displayImage)}
                     >
                         {displayImage ? (
@@ -116,7 +117,7 @@ export default function ProductDetailPage() {
                                 src={getImageUrl(displayImage)}
                                 alt={product.productName}
                                 fill
-                                className="object-cover object-center hover:scale-105 transition-transform duration-700 ease-out"
+                                className="object-cover object-center transition-transform duration-700 ease-out"
                                 sizes="(max-width: 768px) 100vw, 50vw"
                                 priority
                                 unoptimized
@@ -132,14 +133,14 @@ export default function ProductDetailPage() {
                     </motion.div>
 
                     {product.images && product.images.length > 0 && (
-                        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide px-1">
+                        <div className="flex gap-4 overflow-x-auto pt-4 pb-2 scrollbar-hide px-1 border-t border-gray-50">
                             {product.images.map((img: any, index: number) => (
                                 <button
                                     key={index}
                                     onClick={() => setActiveImage(img.imagePath)}
-                                    className={`relative w-24 h-24 flex-shrink-0 rounded-2xl overflow-hidden border-2 transition-all ${(displayImage === img.imagePath)
-                                        ? 'border-primary ring-2 ring-primary/20 scale-105'
-                                        : 'border-transparent opacity-70 hover:opacity-100'
+                                    className={`relative w-20 h-20 md:w-24 md:h-24 flex-shrink-0 rounded-2xl overflow-hidden border-2 transition-all ${(displayImage === img.imagePath)
+                                        ? 'border-primary ring-2 ring-primary/20 bg-white'
+                                        : 'border-transparent opacity-60 hover:opacity-100 bg-gray-50'
                                         }`}
                                 >
                                     <Image
@@ -167,7 +168,7 @@ export default function ProductDetailPage() {
                                 {categoryName}
                             </span>
                         </div>
-                        <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-4 leading-tight">
+                        <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-4 leading-tight">
                             {product.productName}
                         </h1>
                         <div className="flex items-end gap-4">
@@ -242,11 +243,22 @@ export default function ProductDetailPage() {
                         </div>
                     </div>
 
-                    <div className="border-t border-gray-100 pt-8 mt-4">
-                        <h3 className="text-sm font-black uppercase tracking-widest text-gray-900 mb-4">Description</h3>
-                        <div className="prose prose-lg text-gray-500 max-w-none leading-relaxed whitespace-pre-wrap">
-                            {product.description || 'No description available for this product.'}
+                    <div className="bg-gray-50/50 rounded-3xl p-6 lg:p-8 border border-gray-100 mt-8 relative overflow-hidden group">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-sm font-black uppercase tracking-widest text-gray-900">รายละเอียดสินค้า</h3>
+                            <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="text-primary font-bold hover:bg-primary/5 rounded-full"
+                                onClick={() => setIsDescriptionOpen(true)}
+                            >
+                                ขยายดูทั้งหมด
+                            </Button>
                         </div>
+                        <div className="prose prose-lg text-gray-600 max-w-none leading-relaxed line-clamp-4 whitespace-pre-wrap italic">
+                            {product.description || 'ไม่มีข้อมูลรายละเอียดสำหรับสินค้านี้'}
+                        </div>
+                        <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-gray-50/80 to-transparent pointer-events-none" />
                     </div>
                 </div>
 
@@ -309,6 +321,43 @@ export default function ProductDetailPage() {
                                     unoptimized
                                 />
                             </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+                {/* Description Full Screen Modal */}
+                <AnimatePresence>
+                    {isDescriptionOpen && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-md flex items-center justify-center p-4"
+                            onClick={() => setIsDescriptionOpen(false)}
+                        >
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                                className="bg-white w-full max-w-2xl max-h-[80vh] rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col"
+                                onClick={(e) => e.stopPropagation()}
+                            >
+                                <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                                    <h3 className="text-lg font-black uppercase tracking-widest text-gray-900">รายละเอียดสินค้า</h3>
+                                    <Button variant="ghost" size="icon" className="rounded-full" onClick={() => setIsDescriptionOpen(false)}>
+                                        <X className="h-5 w-5" />
+                                    </Button>
+                                </div>
+                                <div className="p-8 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
+                                    <div className="prose prose-lg text-gray-700 max-w-none leading-relaxed whitespace-pre-wrap font-medium">
+                                        {product.description || 'ไม่มีข้อมูลรายละเอียดสำหรับสินค้านี้'}
+                                    </div>
+                                </div>
+                                <div className="p-6 border-t border-gray-100 bg-gray-50/50 text-center">
+                                    <Button onClick={() => setIsDescriptionOpen(false)} className="rounded-full px-8 font-bold">
+                                        ปิดหน้าต่าง
+                                    </Button>
+                                </div>
+                            </motion.div>
                         </motion.div>
                     )}
                 </AnimatePresence>
