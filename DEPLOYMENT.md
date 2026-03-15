@@ -30,3 +30,41 @@ To allow GitHub Actions to deploy automatically via SSH:
 
 ## 4. Persistent Volumes
 The stack uses a named volume `mongodb_data` for database persistence and a bind mount for backend uploads. Ensure the directory `./backend/public/uploads` exists on your host if using bind mounts, or adjust to named volumes for full container portability.
+
+## 5. Backup and Recovery
+
+### Automated Backup
+A script is provided in `./scripts/database/backup-db.sh` to automate backups.
+
+1.  **Setup local backups on server**:
+    ```bash
+    mkdir -p ~/loei-banrakrod/scripts
+    cp ./scripts/database/backup-db.sh ~/loei-banrakrod/scripts/
+    chmod +x ~/loei-banrakrod/scripts/backup-db.sh
+    ```
+
+2.  **Add to Cron (Daily at 3 AM)**:
+    ```bash
+    crontab -e
+    # Add this line:
+    0 3 * * * /home/adm1n_ltc/loei-banrakrod/scripts/backup-db.sh >> /home/adm1n_ltc/loei-banrakrod/backups/backup.log 2>&1
+    ```
+
+### Manual Backup
+```bash
+~/loei-banrakrod/scripts/backup-db.sh
+```
+
+### Database Restoration
+A restoration script is provided in `./scripts/database/restore-db.sh`.
+
+1.  **Manual Restoration**:
+    ```bash
+    ~/loei-banrakrod/scripts/restore-db.sh ~/loei-banrakrod/backups/backup_banrakrod_20240315_120000.tar.gz
+    ```
+    *Note: The script will ask for confirmation before overwriting the current database.*
+
+If you prefer to run it manually without the script:
+```bash
+gunzip < ~/loei-banrakrod/backups/backup_banrakrod_TIMESTAMP.tar.gz | docker exec -i loei-banrakrod-db mongorestore --username admin --password your_password --authenticationDatabase admin --archive --drop
+```

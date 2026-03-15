@@ -16,7 +16,8 @@ import {
     ChevronRight,
     Settings,
     History,
-    Menu
+    Menu,
+    Database
 } from 'lucide-react';
 import { cn, getImageUrl } from '@/lib/utils';
 import { useState, useEffect } from 'react';
@@ -93,6 +94,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                 { href: '/admin/dashboard', label: 'ภาพรวมระบบ', icon: LayoutDashboard },
                 { href: '/admin/users', label: 'ผู้ใช้งาน', icon: Users },
                 { href: '/admin/customers', label: 'ลูกค้า', icon: Users },
+                { href: '/admin/backups', label: 'สำรองข้อมูล', icon: Database },
             ]
         },
         'management': {

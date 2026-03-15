@@ -6,6 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { motion, useInView } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
+import { useProducts } from '@/hooks/useProducts';
+import { useCategories } from '@/hooks/useCategories';
+import { getImageUrl } from '@/lib/utils';
+import ProductCard from '@/components/features/ProductCard';
 
 // Animated Counter Hook
 function useCounter(end: number, duration: number = 2000, startOnView: boolean = true) {
@@ -60,6 +64,14 @@ const testimonials = [
 ];
 
 export default function Home() {
+    const { data: products, isLoading: productsLoading } = useProducts();
+    const { data: categories } = useCategories(true);
+
+    // Get 4 newest active products for the homepage
+    const featuredProducts = (products || [])
+        .filter(p => p.isActive && p.isOnline)
+        .slice(0, 4);
+
     return (
         <div className="space-y-0 pb-10 overflow-hidden">
             {/* Hero Section - POWERFUL & BOLD with Floating Shapes */}
@@ -87,13 +99,12 @@ export default function Home() {
                         </motion.div>
 
                         <motion.h1 variants={fadeInUp} className="text-5xl md:text-7xl lg:text-8xl font-black mb-8 tracking-tighter leading-[1.1] drop-shadow-lg">
-                            RIDE WITH <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-pink-500 italic pr-4">PRECISION</span>
+                            BANRAKROD <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-pink-500 italic pr-4">LOEI</span>
                         </motion.h1>
 
                         <motion.p variants={fadeInUp} className="text-xl md:text-2xl mb-12 text-gray-200 font-medium max-w-2xl leading-relaxed">
-                            ศูนย์รวมอะไหล่ บริการโมดิฟาย และ <span className="text-accent font-bold">งานโรงกลึงเทคโนโลยีสูง</span> สำหรับ Vespa
-                            ยกระดับประสิทธิภาพรถของคุณโดย ช่างโอ๊ต (Oat Engineering)
+                            ศูนย์รวมอะไหล่และบริการ Vespa ครบวงจร โดย <span className="text-accent font-bold">ช่างโอ๊ต (Oat Engineering)</span> สำหรับคนรักเวสป้าเมืองเลย
                         </motion.p>
 
                         <motion.div variants={fadeInUp} className="flex flex-wrap gap-6">
@@ -154,46 +165,79 @@ export default function Home() {
                     variants={fadeInUp}
                 >
                     <div>
-                        <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-2">SHOP BY <span className="gradient-text-primary">CATEGORY</span></h2>
+                        <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-2">หมวดหมู่ <span className="gradient-text-primary">สินค้า</span></h2>
                         <div className="h-2 w-24 bg-accent rounded-full"></div>
                     </div>
                     <Link href="/products" className="hidden md:flex items-center text-lg font-bold text-gray-500 hover:text-accent transition-colors group">
-                        View All Categories
+                        ดูทุกหมวดหมู่ (View All)
                         <ChevronRight className="ml-1 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                     </Link>
                 </motion.div>
 
                 <motion.div
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                    className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true, margin: "-50px" }}
                     variants={staggerContainer}
                 >
-                    {[
-                        { href: '/products?category=Engine Parts', icon: Settings, title: 'MODIFICATION', desc: 'งานโมดิฟายเครื่องยนต์ และงานโรงกลึงสร้างอะไหล่ Custom โดยช่างโอ๊ต', color: 'primary', hoverColor: 'group-hover:text-primary', bgHover: 'group-hover:bg-primary/20', bg: 'bg-primary/10', iconColor: 'text-primary', rotate: 'group-hover:rotate-6' },
-                        { href: '/products?category=Body & Frame', icon: Package, title: 'SPARE PARTS', desc: 'อะไหล่แท้และอะไหล่แต่ง Vespa ทุกรุ่น ครบจบในที่เดียว', color: 'blue-600', hoverColor: 'group-hover:text-blue-600', bgHover: 'group-hover:bg-blue-500/20', bg: 'bg-blue-500/10', iconColor: 'text-blue-600', rotate: 'group-hover:-rotate-6' },
-                        { href: '/products?category=Maintenance', icon: Wrench, title: 'MAINTENANCE', desc: 'บริการซ่อมบำรุง เช็คระยะ และดูแลรักษาเวสป้าแบบมืออาชีพ', color: 'accent', hoverColor: 'group-hover:text-accent', bgHover: 'group-hover:bg-accent/20', bg: 'bg-accent/10', iconColor: 'text-accent', rotate: 'group-hover:rotate-12' },
-                    ].map((cat, i) => (
-                        <motion.div key={i} variants={fadeInUp}>
-                            <Link href={cat.href} className="group block">
-                                <Card className="h-full border-0 bg-gray-50 hover:bg-white shadow-none hover:shadow-2xl transition-all duration-500 rounded-[2rem] overflow-hidden relative card-hover-lift">
-                                    <div className={`absolute top-0 right-0 w-32 h-32 ${cat.bg} rounded-bl-[4rem] transition-all ${cat.bgHover}`}></div>
-                                    <CardHeader className="p-10 relative z-10">
-                                        <div className={`h-20 w-20 bg-white rounded-3xl flex items-center justify-center mb-8 shadow-md group-hover:scale-110 ${cat.rotate} transition-all duration-500`}>
-                                            <cat.icon className={`h-10 w-10 ${cat.iconColor}`} />
+                    {(categories || []).slice(0, 4).map((category, i) => (
+                        <motion.div key={category._id} variants={fadeInUp}>
+                            <Link href={`/products?categoryId=${category.categoryId}`} className="group block">
+                                <Card className="h-full border-0 bg-gray-50 hover:bg-white shadow-none hover:shadow-xl transition-all duration-500 rounded-3xl overflow-hidden relative card-hover-lift">
+                                    <div className="p-8 text-center pt-10">
+                                        <div className="h-16 w-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
+                                            <Package className="h-8 w-8 text-primary" />
                                         </div>
-                                        <CardTitle className={`text-3xl font-black mb-2 text-gray-800 ${cat.hoverColor} transition-colors`}>{cat.title}</CardTitle>
-                                        <CardDescription className="text-lg text-gray-500 font-medium group-hover:text-gray-700">
-                                            {cat.desc}
+                                        <CardTitle className="text-xl font-bold mb-2 text-gray-800 group-hover:text-primary transition-colors line-clamp-1">{category.name}</CardTitle>
+                                        <CardDescription className="text-sm text-gray-400 group-hover:text-gray-600">
+                                            {category.description || 'เลือกชมสินค้าคุณภาพ'}
                                         </CardDescription>
-                                    </CardHeader>
+                                    </div>
                                 </Card>
                             </Link>
                         </motion.div>
                     ))}
                 </motion.div>
             </section>
+
+            {/* New Arrivals Section - REAL DATA */}
+            {featuredProducts.length > 0 && (
+                <section className="container mx-auto px-4 mt-24">
+                    <motion.div
+                        className="flex items-end justify-between mb-12"
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-80px" }}
+                        variants={fadeInUp}
+                    >
+                        <div>
+                            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-2">สินค้า <span className="gradient-text-accent">มาใหม่</span></h2>
+                            <div className="h-2 w-24 bg-primary rounded-full"></div>
+                        </div>
+                        <Link href="/products" className="hidden md:flex items-center text-lg font-bold text-gray-500 hover:text-primary transition-colors group">
+                            ดูสินค้าทั้งหมด
+                            <ChevronRight className="ml-1 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                        </Link>
+                    </motion.div>
+
+                    <motion.div
+                        className="grid grid-cols-2 lg:grid-cols-4 gap-6"
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-50px" }}
+                        variants={staggerContainer}
+                    >
+                        {featuredProducts.map((product) => (
+                            <motion.div key={product._id} variants={fadeInUp}>
+                                <div className="scale-90 origin-top">
+                                    <ProductCard product={product} />
+                                </div>
+                            </motion.div>
+                        ))}
+                    </motion.div>
+                </section>
+            )}
 
             {/* Features Section - Dark Mode Power */}
             <section className="bg-zinc-950 rounded-[3rem] p-10 md:p-20 text-center relative overflow-hidden mx-4 mt-24">
