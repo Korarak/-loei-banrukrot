@@ -42,8 +42,18 @@ export default function ProductsPage() {
     // Local State
     const [search, setSearch] = useState(searchParam || '');
     const [priceRange, setPriceRange] = useState([0, 20000]);
+    const [debouncedPriceRange, setDebouncedPriceRange] = useState(priceRange);
     const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
     const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+
+    // Debounce priceRange updates
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedPriceRange(priceRange);
+        }, 500); // 500ms debounce delay
+
+        return () => clearTimeout(handler);
+    }, [priceRange]);
 
     // Sync local search state with URL
     useEffect(() => {
@@ -85,7 +95,7 @@ export default function ProductsPage() {
 
     // Fetch Products
     const { data, isLoading } = useQuery({
-        queryKey: ['products', categoryParam, searchParam, sortParam, pageParam, priceRange, selectedBrands],
+        queryKey: ['products', categoryParam, searchParam, sortParam, pageParam, debouncedPriceRange, selectedBrands],
         queryFn: async () => {
             const params: any = {
                 page: pageParam || 1,
@@ -102,9 +112,9 @@ export default function ProductsPage() {
             if (sortParam) params.sort = sortParam;
             
             // Server-side filtering
-            if (priceRange) {
-                params.minPrice = priceRange[0];
-                params.maxPrice = priceRange[1];
+            if (debouncedPriceRange) {
+                params.minPrice = debouncedPriceRange[0];
+                params.maxPrice = debouncedPriceRange[1];
             }
             if (selectedBrands.length > 0) {
                 params.brand = selectedBrands.join(',');
@@ -390,7 +400,7 @@ export default function ProductsPage() {
                             </div>
 
                             {/* Sticky Footer for Mobile Buttons - Offset for BottomNav */}
-                            <div className="fixed bottom-16 md:bottom-0 inset-x-0 p-6 bg-gradient-to-t from-white via-white to-transparent pointer-events-none z-30">
+                            <div className="fixed bottom-0 inset-x-0 p-6 bg-gradient-to-t from-white via-white to-transparent pointer-events-none z-30">
                                 <div className="max-w-md mx-auto flex gap-3 pointer-events-auto">
                                     <Button 
                                         variant="outline" 
@@ -460,9 +470,9 @@ export default function ProductsPage() {
                                             show: { opacity: 1, scale: 1 }
                                         }}
                                         whileHover={{ y: -10, transition: { duration: 0.2 } }}
-                                        className="bg-white rounded-[2rem] p-4 shadow-sm hover:shadow-2xl transition-all border border-gray-100 group"
+                                        className="bg-white rounded-[2rem] p-4 shadow-sm hover:shadow-2xl transition-all border border-gray-100 group flex flex-col h-full"
                                     >
-                                        <ProductCard product={product} /> {/* Assuming ProductCard handles its own internal layout, but container styling helps */}
+                                        <ProductCard product={product} />
                                     </motion.div>
                                 ))}
                             </motion.div>

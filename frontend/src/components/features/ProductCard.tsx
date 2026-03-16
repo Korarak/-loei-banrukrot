@@ -80,6 +80,10 @@ export default function ProductCard({ product }: ProductCardProps) {
             : `฿${minPrice.toLocaleString()} - ฿${maxPrice.toLocaleString()}`
         : 'Price N/A';
 
+    const isOutOfStock = product.variants?.every((v: any) => v.stockAvailable <= 0);
+    const firstAvailableVariant = product.variants?.find((v: any) => v.stockAvailable > 0);
+    const hasInStock = !isOutOfStock;
+
     const handleWishlistToggle = (e: React.MouseEvent) => {
         e.preventDefault();
         e.stopPropagation();
@@ -104,7 +108,8 @@ export default function ProductCard({ product }: ProductCardProps) {
     const handleAddToCart = async (e: React.MouseEvent) => {
         e.preventDefault(); // Prevent navigation
 
-        if (!defaultVariant) return;
+        const targetVariant = firstAvailableVariant || defaultVariant;
+        if (!targetVariant) return;
 
         // Generate confetti particles here
         const particles = [...Array(12)].map(() => ({
@@ -122,7 +127,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         try {
             await addToCart.mutateAsync({
                 productId: product._id,
-                variantId: defaultVariant._id,
+                variantId: targetVariant._id,
                 quantity: 1
             });
             toast.success('เพิ่มลงตะกร้าเรียบร้อย', {
@@ -165,7 +170,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                         className="absolute w-[150%] h-[150%] z-20 opacity-0 group-hover:opacity-20 transition-opacity duration-500 rounded-full blur-3xl mix-blend-overlay"
                     />
 
-                    <div className="relative aspect-square bg-gray-50 overflow-hidden transform-gpu">
+                    <div className="relative aspect-square w-full bg-gray-50 overflow-hidden transform-gpu border-b border-gray-50">
                         {/* Wishlist Button */}
                         <motion.button
                             whileTap={{ scale: 0.8 }}
@@ -194,30 +199,20 @@ export default function ProductCard({ product }: ProductCardProps) {
                             </div>
                         )}
 
-                        {/* Overlay Actions */}
                         <div className="absolute inset-x-4 bottom-4 translate-y-0 md:translate-y-full md:group-hover:translate-y-0 transition-transform duration-500 ease-out z-20 opacity-100 md:opacity-0 md:group-hover:opacity-100 flex gap-2">
                             <motion.div className="flex-1" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                                 <Button
                                     className="w-full bg-white text-primary hover:bg-emerald-50 shadow-lg border border-emerald-100 font-bold rounded-xl h-10 text-[10px] uppercase tracking-wider"
                                     onClick={handleAddToCart}
-                                    disabled={!defaultVariant || defaultVariant.stockAvailable <= 0 || addToCart.isPending}
+                                    disabled={isOutOfStock || addToCart.isPending}
                                 >
-                                    {addToCart.isPending ? '...' : (defaultVariant && defaultVariant.stockAvailable > 0 ? 'ใส่ตะกร้า' : 'สินค้าหมด')}
-                                </Button>
-                            </motion.div>
-                            <motion.div className="flex-1" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                                <Button
-                                    variant="secondary"
-                                    className="w-full bg-black/80 backdrop-blur-md text-white hover:bg-black shadow-lg border-0 font-bold rounded-xl h-10 text-[10px] uppercase tracking-wider"
-                                    onClick={(e) => { e.preventDefault(); /* Open Quick View Modal */ }}
-                                >
-                                    ดูสินค้า
+                                    {addToCart.isPending ? '...' : (hasInStock ? 'ใส่ตะกร้า' : 'สินค้าหมด')}
                                 </Button>
                             </motion.div>
                         </div>
 
                         <div className="absolute top-3 left-3 z-20 flex flex-col gap-2">
-                            {product.variants.some((v: any) => v.stockAvailable <= 0) && (
+                            {isOutOfStock && (
                                 <Badge variant="destructive" className="rounded-lg px-2 py-1 text-[10px] font-bold uppercase tracking-wider shadow-sm animate-pulse">
                                     หมด
                                 </Badge>
@@ -250,26 +245,26 @@ export default function ProductCard({ product }: ProductCardProps) {
                     )}
 
                     <div className="p-5 flex flex-col flex-1 bg-white relative z-10">
-                        <div className="mb-2 flex items-center justify-between">
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground bg-gray-100 px-2 py-0.5 rounded-full">{product.brand}</span>
-                            {defaultVariant && defaultVariant.stockAvailable > 0 && (
+                        <div className="mb-2 flex items-center justify-between h-5">
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground bg-gray-100 px-2 py-0.5 rounded-full truncate max-w-[100px]">{product.brand}</span>
+                            {hasInStock && (
                                 <div className="flex items-center gap-1">
                                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
                                     <span className="text-[10px] font-medium text-emerald-600">In Stock</span>
                                 </div>
                             )}
                         </div>
-                        <h3 className="font-bold text-sm text-gray-900 line-clamp-2 mb-3 group-hover:text-primary transition-colors duration-300 flex-1 leading-tight">
+                        <h3 className="font-bold text-sm text-gray-900 truncate mb-3 group-hover:text-primary transition-colors duration-300 leading-tight h-5">
                             {product.productName}
                         </h3>
                         <div className="flex items-end justify-between mt-auto pt-4 border-t border-gray-50">
-                            <div className="flex flex-col">
+                            <div className="flex flex-row items-baseline gap-2">
                                 <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">Price</span>
-                                <div className="font-black text-xl text-primary tracking-tight font-kanit gradient-text-primary">
+                                <div className="font-black text-lg text-primary tracking-tight font-kanit gradient-text-primary truncate">
                                     {priceDisplay}
                                 </div>
                             </div>
-                            <div className="text-xs text-gray-400 font-medium bg-gray-50 px-2 py-1 rounded-md">
+                            <div className="text-xs text-gray-400 font-medium bg-gray-50 px-2 py-1 rounded-md whitespace-nowrap">
                                 {product.variants.length} options
                             </div>
                         </div>

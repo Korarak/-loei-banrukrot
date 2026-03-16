@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from '@/components/ui/button';
 import { Package, Printer, RefreshCcw } from 'lucide-react';
+import { siteConfig } from '@/config/site';
 
 interface ReceiptDialogProps {
     open: boolean;
@@ -29,7 +30,7 @@ export function ReceiptDialog({ open, onOpenChange, receiptData, onPrint, onNewS
                             <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center mx-auto mb-3">
                                 <Package className="h-6 w-6" />
                             </div>
-                            <h2 className="font-bold text-xl uppercase tracking-wider mb-1">บ้านรักรถ</h2>
+                            <h2 className="font-bold text-xl uppercase tracking-wider mb-1">{siteConfig.brand.name}</h2>
                             <p className="text-gray-500 text-xs">สาขาเลย</p>
                             <div className="my-4 border-b border-dashed border-gray-300" />
                             <div className="flex justify-between text-xs text-gray-500">

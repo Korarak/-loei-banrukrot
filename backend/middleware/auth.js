@@ -13,7 +13,7 @@ const authenticateToken = () => {
             if (!token) {
                 return res.status(401).json({
                     success: false,
-                    message: 'Access token is required'
+                    message: 'กรุณาเข้าสู่ระบบ'
                 });
             }
 
@@ -22,7 +22,7 @@ const authenticateToken = () => {
                 if (err) {
                     return res.status(403).json({
                         success: false,
-                        message: 'Invalid or expired token'
+                        message: 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่'
                     });
                 }
 
@@ -33,7 +33,7 @@ const authenticateToken = () => {
                     if (!user || !user.isActive) {
                         return res.status(403).json({
                             success: false,
-                            message: 'User not found or inactive'
+                            message: 'ไม่พบบัญชีผู้ใช้ หรือบัญชีถูกระงับ'
                         });
                     }
                     req.user = user;
@@ -42,7 +42,7 @@ const authenticateToken = () => {
                     if (!customer) {
                         return res.status(403).json({
                             success: false,
-                            message: 'Customer not found'
+                            message: 'ไม่พบข้อมูลลูกค้า กรุณาลงทะเบียน'
                         });
                     }
                     req.customer = customer;
@@ -103,7 +103,7 @@ const checkCustomerAccess = (req, res, next) => {
 
     return res.status(403).json({
         success: false,
-        message: 'Access denied'
+        message: 'คุณไม่มีสิทธิ์เข้าถึงส่วนนี้'
     });
 };
 

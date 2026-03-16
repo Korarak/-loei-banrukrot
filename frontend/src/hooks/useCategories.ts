@@ -8,6 +8,8 @@ export interface Category {
     name: string;
     slug: string;
     description?: string;
+    imageUrl?: string;
+    sampleImage?: string;
     isActive: boolean;
     sortOrder: number;
     dateCreated: string;

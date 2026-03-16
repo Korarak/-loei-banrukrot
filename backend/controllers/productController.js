@@ -478,11 +478,17 @@ exports.deleteProductImage = async (req, res, next) => {
     try {
         const { id: productId, imageId } = req.params;
 
-        const image = await ProductImage.findOneAndDelete({ _id: imageId, productId });
+        const mongoose = require('mongoose');
+        const image = await ProductImage.findOneAndDelete({ 
+            _id: new mongoose.Types.ObjectId(imageId), 
+            productId: new mongoose.Types.ObjectId(productId) 
+        });
+
         if (!image) {
+            console.warn(`Attempted to delete non-existent image: ${imageId} for product: ${productId}`);
             return res.status(404).json({
                 success: false,
-                message: 'Image not found'
+                message: 'Image not found or already deleted'
             });
         }
 

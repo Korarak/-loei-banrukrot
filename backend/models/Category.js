@@ -27,6 +27,10 @@ const categorySchema = new mongoose.Schema({
         default: true,
         required: true
     },
+    imageUrl: {
+        type: String,
+        maxlength: 500
+    },
     sortOrder: {
         type: Number,
         default: 0

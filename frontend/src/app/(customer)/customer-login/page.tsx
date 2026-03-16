@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -22,6 +23,7 @@ const formSchema = z.object({
 });
 
 export default function CustomerLoginPage() {
+    const queryClient = useQueryClient();
     const router = useRouter();
     const searchParams = useSearchParams();
     const redirect = searchParams.get('redirect') || '/';
@@ -43,8 +45,15 @@ export default function CustomerLoginPage() {
             if (response.data.success) {
                 const { token, ...customer } = response.data.data;
                 loginCustomer(customer, token);
+                
+                // Clear any cached data to ensure queries re-run with new token
+                queryClient.clear();
+                
                 toast.success('เข้าสู่ระบบสำเร็จ');
-                router.push(redirect);
+                
+                // Use window.location.href for a hard refresh to the redirect page
+                // This ensures layout-level effects and axios interceptors pick up the new token reliably
+                window.location.href = redirect;
             }
         } catch (error: any) {
             toast.error(error.response?.data?.message || 'การเข้าสู่ระบบล้มเหลว');

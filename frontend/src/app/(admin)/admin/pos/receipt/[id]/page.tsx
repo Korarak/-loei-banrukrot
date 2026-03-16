@@ -7,6 +7,7 @@ import { Receipt, Printer, ArrowLeft, MapPin, Phone } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useRef } from 'react';
+import { siteConfig } from '@/config/site';
 
 export default function ReceiptPage() {
     const params = useParams();
@@ -70,7 +71,7 @@ export default function ReceiptPage() {
                         <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 mb-2">
                             <Receipt className="h-6 w-6 text-primary" />
                         </div>
-                        <h1 className="text-2xl font-bold text-gray-800 tracking-tight">บ้านรักรถ จังหวัดเลย</h1>
+                        <h1 className="text-2xl font-bold text-gray-800 tracking-tight">{siteConfig.brand.name}</h1>
                         <div className="text-sm text-gray-500 space-y-1">
                             <p className="flex items-center justify-center gap-1">
                                 <MapPin className="h-3 w-3" />
@@ -163,7 +164,7 @@ export default function ReceiptPage() {
                     <div className="mt-10 text-center space-y-2 pt-6 border-t border-gray-100 relative z-10">
                         <p className="text-primary font-bold text-sm">ขอบคุณที่ใช้บริการ</p>
                         <p className="text-xs text-gray-400">Thank you for shopping with us</p>
-                        <p className="text-[10px] text-gray-300 font-mono mt-4">System powered by Banrakrod Loei</p>
+                        <p className="text-[10px] text-gray-300 font-mono mt-4">System powered by {siteConfig.brand.englishName}</p>
                     </div>
 
                     {/* Print Only Styles */}

@@ -42,7 +42,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response?.status === 401) {
+        if (error.response?.status === 401 || error.response?.status === 403) {
             // Check if we are on the client side
             if (typeof window !== 'undefined') {
                 const path = window.location.pathname;

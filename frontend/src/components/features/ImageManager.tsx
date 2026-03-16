@@ -54,24 +54,57 @@ export default function ImageManager({ productId, images: initialImages }: Image
     const deleteImage = useDeleteProductImage();
     const reorderImages = useReorderProductImages();
 
+    const cropImageToSquare = (file: File): Promise<Blob> => {
+        return new Promise((resolve, reject) => {
+            const img = new (window as any).Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const size = Math.min(img.width, img.height);
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+                if (!ctx) {
+                    reject(new Error('Canvas context not available'));
+                    return;
+                }
+
+                // Center crop
+                const x = (img.width - size) / 2;
+                const y = (img.height - size) / 2;
+                ctx.drawImage(img, x, y, size, size, 0, 0, size, size);
+
+                canvas.toBlob((blob) => {
+                    if (blob) resolve(blob);
+                    else reject(new Error('Canvas toBlob failed'));
+                }, 'image/webp', 0.9);
+            };
+            img.onerror = () => reject(new Error('Image load failed'));
+            img.src = URL.createObjectURL(file);
+        });
+    };
+
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+        const originalFile = e.target.files?.[0];
+        if (!originalFile) return;
 
         // Validate file type
-        if (!file.type.startsWith('image/')) {
+        if (!originalFile.type.startsWith('image/')) {
             toast.error('กรุณาอัปโหลดไฟล์รูปภาพ');
             return;
         }
 
         // Validate file size (5MB)
-        if (file.size > 5 * 1024 * 1024) {
+        if (originalFile.size > 5 * 1024 * 1024) {
             toast.error('ขนาดไฟล์ต้องไม่เกิน 5MB');
             return;
         }
 
         setIsUploading(true);
         try {
+            // Standardize to 1:1 aspect ratio before upload
+            const squareBlob = await cropImageToSquare(originalFile);
+            const file = new File([squareBlob], originalFile.name.replace(/\.[^/.]+$/, "") + ".webp", { type: 'image/webp' });
+
             const formData = new FormData();
             formData.append('image', file);
 
@@ -220,22 +253,22 @@ export default function ImageManager({ productId, images: initialImages }: Image
                                     unoptimized
                                 />
                                 {image.isPrimary && (
-                                    <div className="absolute top-2 left-2 bg-black/70 backdrop-blur-sm text-white px-2 py-1 rounded-md text-[10px] font-bold flex items-center gap-1 shadow-sm">
+                                    <div className="absolute top-2 left-2 bg-black text-white px-2 py-1 rounded-md text-[10px] font-bold flex items-center gap-1 shadow-sm">
                                         <Star className="h-3 w-3 fill-current text-yellow-400" />
                                         รูปหลัก
                                     </div>
                                 )}
 
-                                {/* Overlay Actions */}
-                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                { /* Static Delete Action - White Background */ }
+                                <div className="absolute bottom-2 right-2">
                                     <Button
                                         type="button"
                                         variant="secondary"
                                         size="icon"
-                                        className="h-8 w-8 rounded-full"
+                                        className="h-8 w-8 rounded-xl shadow-lg bg-white hover:bg-red-50 text-red-600 border border-gray-100 transition-all hover:scale-110 active:scale-95"
                                         onClick={() => setDeleteImageId(image._id)}
                                     >
-                                        <Trash2 className="h-4 w-4 text-red-600" />
+                                        <Trash2 className="h-4 w-4" />
                                     </Button>
                                 </div>
                             </div>

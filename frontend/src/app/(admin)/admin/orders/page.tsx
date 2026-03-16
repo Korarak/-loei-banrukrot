@@ -180,7 +180,7 @@ export default function AdminOrdersPage() {
 
             {/* Main Tabs for Source Filtering */}
             <Tabs defaultValue="all" value={sourceFilter} onValueChange={setSourceFilter} className="w-full">
-                <TabsList className="grid w-full md:w-[450px] grid-cols-3 bg-gray-100/50 p-1 rounded-xl">
+                <TabsList className="grid w-full md:w-[450px] grid-cols-3 bg-gray-100 p-1 rounded-xl">
                     <TabsTrigger value="all" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
                         ทั้งหมด ({countAll})
                     </TabsTrigger>

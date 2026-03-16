@@ -70,8 +70,8 @@ function SortableCategoryRow({
             ref={setNodeRef}
             style={style}
             className={cn(
-                "hover:bg-gray-50/50 transition-colors group relative bg-white",
-                isDragging && "shadow-xl border border-primary/20 bg-gray-50/80 scale-[1.01]"
+                "hover:bg-gray-100 transition-colors group relative bg-white",
+                isDragging && "shadow-xl border border-primary/20 bg-gray-100 scale-[1.01]"
             )}
         >
             <td className="px-3 py-4 w-10">
@@ -113,7 +113,7 @@ function SortableCategoryRow({
                 </Badge>
             </td>
             <td className="px-6 py-4 text-right">
-                <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex justify-end gap-2 transition-opacity">
                     <Button
                         variant="ghost"
                         size="icon"
@@ -300,7 +300,7 @@ export default function AdminCategoriesPage() {
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
-                                    <tr className="bg-gray-50/50 border-b border-gray-100">
+                                    <tr className="bg-gray-50 border-b border-gray-100">
                                             <th className="px-3 py-4 w-10"></th>
                                             <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">ลำดับ</th>
                                         <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500">หมวดหมู่</th>

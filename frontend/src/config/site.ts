@@ -1,7 +1,7 @@
 export const siteConfig = {
     brand: {
-        name: "บ้านรักรถเมืองเลย",
-        englishName: "Banrukrot Loei",
+        name: "บ้านรักรถ",
+        englishName: "BANRUKROT",
         tagline: "Vespa Specialist & Oat Engineering",
         description: "ยกระดับการขับขี่ของคุณด้วยอะไหล่เวสป้าคุณภาพเยี่ยม คัดสรรเพื่อคนรักรถตัวจริง พร้อมบริการดูแลซ่อมบำรุงและงานโรงกลึงครบวงจร โดยช่างโอ๊ต (Oat Engineering)",
     },
@@ -32,6 +32,6 @@ export const siteConfig = {
             { label: "นโยบายความเป็นส่วนตัว", href: "#" },
             { label: "เงื่อนไขการให้บริการ", href: "#" },
         ],
-        copyright: `© ${new Date().getFullYear()} บ้านรักรถเมืองเลย & OAT Engineering. สงวนลิขสิทธิ์.`
+        copyright: `© ${new Date().getFullYear()} บ้านรักรถ & OAT Engineering. สงวนลิขสิทธิ์.`
     }
 };

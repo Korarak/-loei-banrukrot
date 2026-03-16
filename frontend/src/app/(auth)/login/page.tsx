@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -29,6 +30,7 @@ const formSchema = z.object({
 });
 
 export default function LoginPage() {
+    const queryClient = useQueryClient();
     const router = useRouter();
     const loginUser = useAuthStore((state) => state.loginUser);
     const [isLoading, setIsLoading] = useState(false);
@@ -55,7 +57,12 @@ export default function LoginPage() {
 
             if (response.data.success) {
                 loginUser(response.data.data, response.data.data.token);
-                router.push('/admin/dashboard');
+                
+                // Clear any cached data to ensure queries re-run with new token
+                queryClient.clear();
+                
+                // Use window.location.href for a hard refresh to the dashboard
+                window.location.href = '/admin/dashboard';
             }
         } catch (err: any) {
             console.error(err);

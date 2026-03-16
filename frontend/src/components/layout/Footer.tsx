@@ -13,7 +13,7 @@ export default function Footer() {
     };
 
     return (
-        <footer className="bg-zinc-950 text-white mt-0 pt-20 pb-24 md:pb-12 rounded-t-[3rem] relative overflow-hidden">
+        <footer className="bg-zinc-950 text-white mt-0 pt-12 md:pt-20 pb-12 rounded-t-[3rem] relative overflow-hidden">
             {/* Animated Background */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(16,185,129,0.1),rgba(255,255,255,0))]" />
             <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-gray-800 to-transparent"></div>

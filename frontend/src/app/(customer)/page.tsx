@@ -10,6 +10,7 @@ import { useProducts } from '@/hooks/useProducts';
 import { useCategories } from '@/hooks/useCategories';
 import { getImageUrl } from '@/lib/utils';
 import ProductCard from '@/components/features/ProductCard';
+import { siteConfig } from '@/config/site';
 
 // Animated Counter Hook
 function useCounter(end: number, duration: number = 2000, startOnView: boolean = true) {
@@ -70,7 +71,25 @@ export default function Home() {
     // Get 4 newest active products for the homepage
     const featuredProducts = (products || [])
         .filter(p => p.isActive && p.isOnline)
-        .slice(0, 4);
+        .slice(0, 8); // Increased to 8 for a better carousel feel
+
+    const scrollRef = useRef<HTMLDivElement>(null);
+
+    const scroll = (direction: 'left' | 'right') => {
+        if (!scrollRef.current) return;
+        const container = scrollRef.current;
+        const firstCard = container.querySelector(':scope > div') as HTMLElement;
+        if (!firstCard) return;
+
+        const cardWidth = firstCard.offsetWidth;
+        const gap = 24; // gap-6 = 24px
+        const scrollAmount = cardWidth + gap;
+
+        container.scrollBy({
+            left: direction === 'left' ? -scrollAmount : scrollAmount,
+            behavior: 'smooth'
+        });
+    };
 
     return (
         <div className="space-y-0 pb-10 overflow-hidden">
@@ -99,8 +118,8 @@ export default function Home() {
                         </motion.div>
 
                         <motion.h1 variants={fadeInUp} className="text-5xl md:text-7xl lg:text-8xl font-black mb-8 tracking-tighter leading-[1.1] drop-shadow-lg">
-                            BANRAKROD <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-pink-500 italic pr-4">LOEI</span>
+                            {siteConfig.brand.name} <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-pink-500 italic pr-4">{siteConfig.brand.englishName}</span>
                         </motion.h1>
 
                         <motion.p variants={fadeInUp} className="text-xl md:text-2xl mb-12 text-gray-200 font-medium max-w-2xl leading-relaxed">
@@ -181,23 +200,45 @@ export default function Home() {
                     viewport={{ once: true, margin: "-50px" }}
                     variants={staggerContainer}
                 >
-                    {(categories || []).slice(0, 4).map((category, i) => (
-                        <motion.div key={category._id} variants={fadeInUp}>
-                            <Link href={`/products?categoryId=${category.categoryId}`} className="group block">
-                                <Card className="h-full border-0 bg-gray-50 hover:bg-white shadow-none hover:shadow-xl transition-all duration-500 rounded-3xl overflow-hidden relative card-hover-lift">
-                                    <div className="p-8 text-center pt-10">
-                                        <div className="h-16 w-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm group-hover:scale-110 group-hover:rotate-6 transition-all duration-500">
-                                            <Package className="h-8 w-8 text-primary" />
+                    {(categories || []).slice(0, 4).map((category, i) => {
+                        const catImage = category.imageUrl || category.sampleImage;
+                        return (
+                            <motion.div key={category._id} variants={fadeInUp}>
+                                <Link href={`/products?categoryId=${category.categoryId}`} className="group block h-full">
+                                    <Card className="h-full border-0 bg-gray-50 hover:bg-white shadow-none hover:shadow-xl transition-all duration-500 rounded-[2rem] overflow-hidden relative card-hover-lift group">
+                                        {/* Image Background for Category */}
+                                        {catImage && (
+                                            <div className="absolute inset-0 z-0 opacity-10 group-hover:opacity-20 transition-opacity duration-500 scale-110 group-hover:scale-125">
+                                                <img
+                                                    src={getImageUrl(catImage)}
+                                                    alt={category.name}
+                                                    className="w-full h-full object-cover grayscale"
+                                                />
+                                            </div>
+                                        )}
+
+                                        <div className="p-8 text-center pt-10 relative z-10 flex flex-col h-full">
+                                            <div className="h-20 w-20 bg-white rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-glow transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 border border-gray-50">
+                                                {catImage ? (
+                                                    <img
+                                                        src={getImageUrl(catImage)}
+                                                        alt={category.name}
+                                                        className="w-14 h-14 object-cover rounded-xl"
+                                                    />
+                                                ) : (
+                                                    <Package className="h-10 w-10 text-primary" />
+                                                )}
+                                            </div>
+                                            <CardTitle className="text-xl font-black mb-3 text-gray-800 group-hover:text-primary transition-colors line-clamp-1 uppercase tracking-tight">{category.name}</CardTitle>
+                                            <CardDescription className="text-sm text-gray-400 group-hover:text-gray-600 font-medium italic">
+                                                {category.description || 'Premium Specialist Parts'}
+                                            </CardDescription>
                                         </div>
-                                        <CardTitle className="text-xl font-bold mb-2 text-gray-800 group-hover:text-primary transition-colors line-clamp-1">{category.name}</CardTitle>
-                                        <CardDescription className="text-sm text-gray-400 group-hover:text-gray-600">
-                                            {category.description || 'เลือกชมสินค้าคุณภาพ'}
-                                        </CardDescription>
-                                    </div>
-                                </Card>
-                            </Link>
-                        </motion.div>
-                    ))}
+                                    </Card>
+                                </Link>
+                            </motion.div>
+                        );
+                    })}
                 </motion.div>
             </section>
 
@@ -211,28 +252,57 @@ export default function Home() {
                         viewport={{ once: true, margin: "-80px" }}
                         variants={fadeInUp}
                     >
-                        <div>
-                            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-2">สินค้า <span className="gradient-text-accent">มาใหม่</span></h2>
-                            <div className="h-2 w-24 bg-primary rounded-full"></div>
+                        <div className="flex items-center gap-3 mb-2">
+                            <h2 className="text-4xl md:text-5xl font-black text-gray-900">สินค้า <span className="gradient-text-accent">มาใหม่</span></h2>
+                            {/* Desktop Spacer */}
+                            <div className="hidden md:block h-2 w-24 bg-primary rounded-full"></div>
                         </div>
-                        <Link href="/products" className="hidden md:flex items-center text-lg font-bold text-gray-500 hover:text-primary transition-colors group">
-                            ดูสินค้าทั้งหมด
-                            <ChevronRight className="ml-1 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                        </Link>
+                        <div className="flex items-center gap-3">
+                            {/* Racing Style Navigation Buttons - Mobile Only */}
+                            <div className="flex md:hidden gap-2 mr-2">
+                                <Button
+                                    size="icon"
+                                    variant="outline"
+                                    onClick={() => scroll('left')}
+                                    className="h-10 w-10 rounded-lg border-2 border-gray-100 bg-white/80 backdrop-blur-sm -skew-x-12 hover:skew-x-0 transition-transform active:scale-95 shadow-sm"
+                                >
+                                    <ChevronRight className="h-5 w-5 rotate-180" />
+                                </Button>
+                                <Button
+                                    size="icon"
+                                    onClick={() => scroll('right')}
+                                    className="h-10 w-10 rounded-lg bg-gradient-to-r from-accent to-pink-500 text-white border-none -skew-x-12 hover:skew-x-0 transition-transform active:scale-95 shadow-lg shadow-accent/20"
+                                >
+                                    <ChevronRight className="h-5 w-5" />
+                                </Button>
+                            </div>
+                            <Link href="/products" className="hidden md:flex items-center text-lg font-bold text-gray-500 hover:text-primary transition-colors group">
+                                ดูสินค้าทั้งหมด
+                                <ChevronRight className="ml-1 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                            </Link>
+                        </div>
                     </motion.div>
 
                     <motion.div
-                        className="grid grid-cols-2 lg:grid-cols-4 gap-6"
+                        ref={scrollRef}
+                        className="flex lg:grid lg:grid-cols-4 gap-6 items-stretch overflow-x-auto lg:overflow-visible pb-10 lg:pb-0 snap-x snap-mandatory scrollbar-hide px-4 md:px-0"
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true, margin: "-50px" }}
                         variants={staggerContainer}
                     >
                         {featuredProducts.map((product) => (
-                            <motion.div key={product._id} variants={fadeInUp}>
-                                <div className="scale-90 origin-top">
-                                    <ProductCard product={product} />
+                            <motion.div
+                                key={product._id}
+                                variants={fadeInUp}
+                                className="relative w-[240px] sm:w-[300px] lg:w-auto lg:min-w-0 snap-start flex-shrink-0 lg:flex-shrink h-full"
+                            >
+                                <div className="absolute -top-2 -left-2 z-30 pointer-events-none">
+                                    <div className="bg-accent text-white text-[10px] font-black px-3 py-1 rounded-sm -skew-x-12 shadow-glow animate-pulse uppercase tracking-widest border border-white/20">
+                                        New Arrival
+                                    </div>
                                 </div>
+                                <ProductCard product={product} />
                             </motion.div>
                         ))}
                     </motion.div>

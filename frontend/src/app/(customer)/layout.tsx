@@ -27,6 +27,7 @@ import {
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet";
+import { siteConfig } from '@/config/site';
 
 
 export default function CustomerLayout({
@@ -106,10 +107,10 @@ export default function CustomerLayout({
                             </div>
                             <div>
                                 <div className="text-xl font-black tracking-tighter italic text-gray-900 group-hover:text-primary transition-colors">
-                                    บ้านรักรถ
+                                    {siteConfig.brand.name}
                                 </div>
                                 <div className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] group-hover:text-primary/70 transition-colors">
-                                    เมืองเลย
+                                    {siteConfig.brand.englishName}
                                 </div>
                             </div>
                         </Link>
@@ -205,10 +206,10 @@ export default function CustomerLayout({
                                         </DropdownMenu>
                                     ) : (
                                         <div className="flex items-center gap-2">
-                                            <Button variant="ghost" asChild className="text-gray-600 font-bold hover:text-primary hover:bg-primary/5 rounded-full px-5">
+                                            <Button variant="ghost" asChild className="text-gray-600 font-bold hover:text-accent hover:bg-accent/5 rounded-full px-5 transition-colors">
                                                 <Link href="/customer-login">Login</Link>
                                             </Button>
-                                            <Button asChild className="bg-gray-900 text-white hover:bg-black rounded-full shadow-lg shadow-gray-900/20 px-6 font-bold transition-all hover:-translate-y-0.5">
+                                            <Button asChild className="bg-gradient-to-r from-accent to-pink-500 text-white hover:brightness-110 rounded-full shadow-lg shadow-accent/20 px-6 font-bold transition-all hover:-translate-y-0.5 border-none">
                                                 <Link href="/customer-register">Register</Link>
                                             </Button>
                                         </div>
@@ -229,7 +230,7 @@ export default function CustomerLayout({
                         <div className="h-8 w-8 bg-gradient-to-br from-primary to-emerald-600 rounded-lg flex items-center justify-center text-white shadow-md">
                             <Wrench className="h-4 w-4" />
                         </div>
-                        <span className="font-black italic text-lg text-gray-900 tracking-tight">BANRAKROD</span>
+                        <span className="font-black italic text-lg text-gray-900 tracking-tight">{siteConfig.brand.englishName}</span>
                     </Link>
 
                     <div className="flex items-center gap-2">
@@ -251,7 +252,7 @@ export default function CustomerLayout({
                                     )}
                                 </Link>
                             ) : (
-                                <Button size="sm" asChild className="rounded-full h-8 px-4 text-xs font-bold bg-gray-900">
+                                <Button size="sm" asChild className="rounded-full h-8 px-4 text-xs font-bold bg-gradient-to-r from-accent to-pink-500 text-white border-none shadow-md shadow-accent/20">
                                     <Link href="/customer-login">Login</Link>
                                 </Button>
                             )

@@ -183,7 +183,7 @@ export default function AdminProductsPage() {
                 <div className="flex flex-col md:flex-row gap-4 justify-between">
                     {/* Stock Filter */}
                     <Tabs defaultValue="all" value={stockFilter} onValueChange={setStockFilter} className="w-full md:w-auto">
-                        <TabsList className="grid w-full md:w-[400px] grid-cols-4 bg-gray-100/50 p-1 rounded-xl">
+                        <TabsList className="grid w-full md:w-[400px] grid-cols-4 bg-gray-100 p-1 rounded-xl">
                             <TabsTrigger value="all" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
                                 ทั้งหมด ({totalProducts})
                             </TabsTrigger>
@@ -201,7 +201,7 @@ export default function AdminProductsPage() {
 
                     {/* Channel Filter */}
                     <Tabs defaultValue="all" value={channelFilter} onValueChange={(val) => setChannelFilter(val as any)} className="w-full md:w-auto">
-                        <TabsList className="grid w-full md:w-[350px] grid-cols-3 bg-gray-100/50 p-1 rounded-xl">
+                        <TabsList className="grid w-full md:w-[350px] grid-cols-3 bg-gray-100 p-1 rounded-xl">
                             <TabsTrigger value="all" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
                                 ทั้งหมด ({products?.stats?.total || 0})
                             </TabsTrigger>
@@ -293,8 +293,8 @@ export default function AdminProductsPage() {
                                     )}
                                     {/* Badges Overlay */}
                                     <div className="absolute top-2 left-2 flex flex-col gap-1">
-                                        {product.isPos && <Badge className="bg-orange-500/90 hover:bg-orange-600 text-white shadow-sm backdrop-blur-sm text-[10px] h-5 px-1.5"><Store className="h-3 w-3 mr-1" /> หน้าร้าน</Badge>}
-                                        {product.isOnline && <Badge className="bg-blue-500/90 hover:bg-blue-600 text-white shadow-sm backdrop-blur-sm text-[10px] h-5 px-1.5"><Globe className="h-3 w-3 mr-1" /> ออนไลน์</Badge>}
+                                        {product.isPos && <Badge className="bg-orange-500 hover:bg-orange-600 text-white shadow-sm text-[10px] h-5 px-1.5"><Store className="h-3 w-3 mr-1" /> หน้าร้าน</Badge>}
+                                        {product.isOnline && <Badge className="bg-blue-500 hover:bg-blue-600 text-white shadow-sm text-[10px] h-5 px-1.5"><Globe className="h-3 w-3 mr-1" /> ออนไลน์</Badge>}
                                     </div>
                                 </div>
 

@@ -9,12 +9,56 @@ exports.getAllCategories = async (req, res, next) => {
         console.log('GET /api/categories request received', req.query);
         const { isActive } = req.query;
 
-        const query = {};
+        const match = {};
         if (isActive !== undefined) {
-            query.isActive = isActive === 'true';
+            match.isActive = isActive === 'true';
         }
 
-        const categories = await Category.find(query).sort({ sortOrder: 1, name: 1 });
+        const categories = await Category.aggregate([
+            { $match: match },
+            { $sort: { sortOrder: 1, name: 1 } },
+            // Lookup one product for this category
+            {
+                $lookup: {
+                    from: 'products',
+                    let: { catId: '$categoryId' },
+                    pipeline: [
+                        { $match: { $expr: { $eq: ['$categoryId', '$$catId'] }, isActive: true, isOnline: true } },
+                        { $limit: 1 },
+                        // For this product, lookup its primary image
+                        {
+                            $lookup: {
+                                from: 'productimages',
+                                let: { prodId: '$_id' },
+                                pipeline: [
+                                    { $match: { $expr: { $eq: ['$productId', '$$prodId'] } } },
+                                    { $sort: { isPrimary: -1, sortOrder: 1 } },
+                                    { $limit: 1 }
+                                ],
+                                as: 'images'
+                            }
+                        }
+                    ],
+                    as: 'sampleProduct'
+                }
+            },
+            {
+                $addFields: {
+                    sampleImage: {
+                        $cond: {
+                            if: { $gt: [{ $size: '$sampleProduct' }, 0] },
+                            then: { $arrayElemAt: [{ $arrayElemAt: ['$sampleProduct.images.imagePath', 0] }, 0] },
+                            else: null
+                        }
+                    }
+                }
+            },
+            {
+                $project: {
+                    sampleProduct: 0
+                }
+            }
+        ]);
 
         res.json({
             success: true,
@@ -53,7 +97,7 @@ exports.getCategoryById = async (req, res, next) => {
 // @access  Private (staff/owner)
 exports.createCategory = async (req, res, next) => {
     try {
-        const { name, description, sortOrder } = req.body;
+        const { name, description, sortOrder, imageUrl } = req.body;
 
         // Generate base slug from name
         let baseSlug = name.toLowerCase()
@@ -81,7 +125,8 @@ exports.createCategory = async (req, res, next) => {
             name,
             slug,
             description,
-            sortOrder: sortOrder || 0
+            sortOrder: sortOrder || 0,
+            imageUrl
         });
 
         res.status(201).json({
@@ -99,7 +144,7 @@ exports.createCategory = async (req, res, next) => {
 // @access  Private (staff/owner)
 exports.updateCategory = async (req, res, next) => {
     try {
-        const { name, description, isActive, sortOrder } = req.body;
+        const { name, description, isActive, sortOrder, imageUrl } = req.body;
 
         const updateData = {};
         if (name) {
@@ -124,6 +169,7 @@ exports.updateCategory = async (req, res, next) => {
         if (description !== undefined) updateData.description = description;
         if (isActive !== undefined) updateData.isActive = isActive;
         if (sortOrder !== undefined) updateData.sortOrder = sortOrder;
+        if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
 
         const category = await Category.findByIdAndUpdate(
             req.params.id,
