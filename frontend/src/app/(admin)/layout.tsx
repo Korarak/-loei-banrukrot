@@ -15,6 +15,7 @@ export default function AdminLayout({
     const router = useRouter();
     const pathname = usePathname();
     const user = useAuthStore((state) => state.user);
+    const isHydrated = useAuthStore((state) => state.isHydrated);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     useEffect(() => {
@@ -22,10 +23,11 @@ export default function AdminLayout({
     }, [pathname]);
 
     useEffect(() => {
-        if (!user) {
+        // Wait for store to hydrate before making redirect decisions
+        if (isHydrated && !user) {
             router.push('/login');
         }
-    }, [user, router]);
+    }, [user, isHydrated, router]);
 
     const isActive = (path: string) => {
         return pathname.startsWith(path);
@@ -36,7 +38,7 @@ export default function AdminLayout({
         setMounted(true);
     }, []);
 
-    if (!mounted || !user) {
+    if (!mounted || !isHydrated || !user) {
         return (
             <div className="min-h-screen bg-gray-50 flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
