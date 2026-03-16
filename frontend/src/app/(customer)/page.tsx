@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Package, Wrench, Settings, ShoppingCart, Zap, Star, ShieldCheck, ChevronRight, Quote } from 'lucide-react';
+import { Package, Wrench, Settings, ShoppingCart, Zap, Star, ShieldCheck, ChevronRight, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { motion, useInView } from 'framer-motion';
@@ -59,11 +59,6 @@ const scaleIn = {
     visible: { opacity: 1, scale: 1, transition: { duration: 0.6, ease: "easeOut" as const } }
 };
 
-const testimonials = [
-    { name: 'คุณชาตรี', role: 'Vespa GTS Owner', text: 'งานโรงกลึงเนียนมากครับ เอาเสื้อสูบมาทำกับช่างโอ๊ต รถวิ่งดีขึ้นเยอะเลย แนะนำครับ', rating: 5 },
-    { name: 'คุณก้อง', role: 'Vespa Sprint Owner', text: 'อะไหล่แต่งเยอะมาก ช่างโอ๊ตให้คำแนะนำดีมากครับ เรื่องเวสป้าต้องที่นี่เลย', rating: 5 },
-    { name: 'คุณบอย', role: 'Vespa PX Owner', text: 'หาอะไหล่ยากๆ หรืออยากได้งานสร้าง ที่นี่จัดให้ได้หมด ประทับใจงานมืออาชีพครับ', rating: 5 },
-];
 
 export default function Home() {
     const { data: products, isLoading: productsLoading } = useProducts();
@@ -75,6 +70,7 @@ export default function Home() {
         .slice(0, 8); // Increased to 8 for a better carousel feel
 
     const scrollRef = useRef<HTMLDivElement>(null);
+    const catScrollRef = useRef<HTMLDivElement>(null);
 
     const scroll = (direction: 'left' | 'right') => {
         if (!scrollRef.current) return;
@@ -84,6 +80,22 @@ export default function Home() {
 
         const cardWidth = firstCard.offsetWidth;
         const gap = 24; // gap-6 = 24px
+        const scrollAmount = cardWidth + gap;
+
+        container.scrollBy({
+            left: direction === 'left' ? -scrollAmount : scrollAmount,
+            behavior: 'smooth'
+        });
+    };
+
+    const scrollCat = (direction: 'left' | 'right') => {
+        if (!catScrollRef.current) return;
+        const container = catScrollRef.current;
+        const firstCard = container.querySelector(':scope > div') as HTMLElement;
+        if (!firstCard) return;
+
+        const cardWidth = firstCard.offsetWidth;
+        const gap = 24;
         const scrollAmount = cardWidth + gap;
 
         container.scrollBy({
@@ -178,7 +190,7 @@ export default function Home() {
             {/* Categories Section - Clean & Modern */}
             <section className="container mx-auto px-4 mt-24">
                 <motion.div
-                    className="flex items-end justify-between mb-12"
+                    className="flex items-end justify-between mb-6"
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true, margin: "-80px" }}
@@ -188,14 +200,35 @@ export default function Home() {
                         <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-2">หมวดหมู่ <span className="gradient-text-primary">สินค้า</span></h2>
                         <div className="h-2 w-24 bg-accent rounded-full"></div>
                     </div>
-                    <Link href="/products" className="hidden md:flex items-center text-lg font-bold text-gray-500 hover:text-accent transition-colors group">
-                        ดูทุกหมวดหมู่ (View All)
-                        <ChevronRight className="ml-1 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                    </Link>
+                    <div className="flex items-center gap-2">
+                        {/* Scroll Arrows - Mobile Only */}
+                        <div className="flex md:hidden gap-2">
+                            <Button
+                                size="icon"
+                                variant="outline"
+                                onClick={() => scrollCat('left')}
+                                className="h-10 w-10 rounded-lg border-2 border-gray-100 bg-white/80 backdrop-blur-sm -skew-x-12 hover:skew-x-0 transition-transform active:scale-95 shadow-sm"
+                            >
+                                <ChevronLeft className="h-5 w-5" />
+                            </Button>
+                            <Button
+                                size="icon"
+                                onClick={() => scrollCat('right')}
+                                className="h-10 w-10 rounded-lg bg-gradient-to-r from-accent to-pink-500 text-white border-none -skew-x-12 hover:skew-x-0 transition-transform active:scale-95 shadow-lg shadow-accent/20"
+                            >
+                                <ChevronRight className="h-5 w-5" />
+                            </Button>
+                        </div>
+                        <Link href="/products" className="hidden md:flex items-center text-lg font-bold text-gray-500 hover:text-accent transition-colors group">
+                            ดูทุกหมวดหมู่ (View All)
+                            <ChevronRight className="ml-1 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                        </Link>
+                    </div>
                 </motion.div>
 
                 <motion.div
-                    className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+                    ref={catScrollRef}
+                    className="flex md:grid md:grid-cols-3 lg:grid-cols-4 gap-6 overflow-x-auto md:overflow-visible pb-4 md:pb-0 snap-x snap-mandatory scrollbar-hide"
                     initial="hidden"
                     animate={categoriesLoading ? "hidden" : "visible"}
                     variants={staggerContainer}
@@ -203,7 +236,7 @@ export default function Home() {
                     {categoriesLoading ? (
                         // Skeleton Grid
                         Array.from({ length: 4 }).map((_, i) => (
-                            <div key={`cat-skeleton-${i}`} className="h-[280px] rounded-[2rem] bg-gray-50 border-0 overflow-hidden relative p-8">
+                            <div key={`cat-skeleton-${i}`} className="h-[280px] w-[240px] md:w-auto flex-shrink-0 snap-start rounded-[2rem] bg-gray-50 border-0 overflow-hidden relative p-8">
                                 <div className="flex flex-col items-center justify-center h-full space-y-4">
                                     <Skeleton className="h-20 w-20 rounded-[1.5rem]" />
                                     <Skeleton className="h-6 w-32" />
@@ -215,7 +248,7 @@ export default function Home() {
                         (categories || []).slice(0, 4).map((category, i) => {
                             const catImage = category.imageUrl || category.sampleImage;
                             return (
-                                <motion.div key={category._id} variants={fadeInUp}>
+                                <motion.div key={category._id} variants={fadeInUp} className="w-[240px] md:w-auto flex-shrink-0 md:flex-shrink snap-start">
                                     <Link href={`/products?categoryId=${category.categoryId}`} className="group block h-full">
                                         <Card className="h-full border-0 bg-gray-50 hover:bg-white shadow-none hover:shadow-xl transition-all duration-500 rounded-[2rem] overflow-hidden relative card-hover-lift group">
                                             {/* Image Background for Category */}
@@ -366,51 +399,6 @@ export default function Home() {
                 </motion.div>
             </section>
 
-            {/* Testimonials Section - NEW */}
-            <section className="container mx-auto px-4 mt-24">
-                <motion.div
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, margin: "-80px" }}
-                    variants={staggerContainer}
-                >
-                    <motion.div variants={fadeInUp} className="text-center mb-16">
-                        <div className="inline-block px-4 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-sm font-bold uppercase tracking-widest mb-6">
-                            Customer Reviews
-                        </div>
-                        <h2 className="text-4xl md:text-5xl font-black text-gray-900">
-                            WHAT OUR <span className="gradient-text-accent">RIDERS</span> SAY
-                        </h2>
-                    </motion.div>
-
-                    <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-8" variants={staggerContainer}>
-                        {testimonials.map((t, i) => (
-                            <motion.div key={i} variants={fadeInUp}>
-                                <Card className="h-full border-0 bg-gray-50 hover:bg-white shadow-none hover:shadow-xl transition-all duration-500 rounded-[2rem] p-8 relative card-hover-lift">
-                                    <Quote className="h-10 w-10 text-primary/20 mb-4" />
-                                    <p className="text-gray-600 text-lg leading-relaxed mb-6 font-medium">
-                                        &ldquo;{t.text}&rdquo;
-                                    </p>
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary to-emerald-600 flex items-center justify-center text-white font-bold text-lg">
-                                            {t.name.charAt(3)}
-                                        </div>
-                                        <div>
-                                            <p className="font-bold text-gray-900">{t.name}</p>
-                                            <p className="text-sm text-gray-500">{t.role}</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex gap-1 mt-4">
-                                        {Array.from({ length: t.rating }).map((_, j) => (
-                                            <Star key={j} className="h-4 w-4 text-yellow-400 fill-yellow-400" />
-                                        ))}
-                                    </div>
-                                </Card>
-                            </motion.div>
-                        ))}
-                    </motion.div>
-                </motion.div>
-            </section>
         </div>
     );
 }

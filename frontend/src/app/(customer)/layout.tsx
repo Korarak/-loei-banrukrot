@@ -244,13 +244,22 @@ export default function CustomerLayout({
                         </Link>
                         {mounted && isHydrated ? (
                             customer ? (
-                                <Link href="/profile" className="h-8 w-8 rounded-full bg-gray-100 overflow-hidden border border-gray-200">
-                                    {customer.profilePicture ? (
-                                        <img src={getImageUrl(customer.profilePicture)} alt="Profile" className="h-full w-full object-cover" />
-                                    ) : (
-                                        <User className="h-full w-full p-1.5 text-gray-400" />
-                                    )}
-                                </Link>
+                                <div className="flex items-center gap-1">
+                                    <Link href="/profile" className="h-8 w-8 rounded-full bg-gray-100 overflow-hidden border border-gray-200">
+                                        {customer.profilePicture ? (
+                                            <img src={getImageUrl(customer.profilePicture)} alt="Profile" className="h-full w-full object-cover" />
+                                        ) : (
+                                            <User className="h-full w-full p-1.5 text-gray-400" />
+                                        )}
+                                    </Link>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors active:scale-95"
+                                        aria-label="Logout"
+                                    >
+                                        <LogOut className="h-5 w-5" />
+                                    </button>
+                                </div>
                             ) : (
                                 <Button size="sm" asChild className="rounded-full h-8 px-4 text-xs font-bold bg-gradient-to-r from-accent to-pink-500 text-white border-none shadow-md shadow-accent/20">
                                     <Link href="/customer-login">Login</Link>
