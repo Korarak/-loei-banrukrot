@@ -28,7 +28,7 @@ services:
     ports:
       - "8082:8080"
     volumes:
-      - ./backend/public/uploads:/app/public/uploads
+      - ./backend/public/uploads:/app/backend/public/uploads
 
   frontend:
     image: ${REGISTRY_URL:-docker5.loeitech.org}/loei-banrakrod-frontend:latest
