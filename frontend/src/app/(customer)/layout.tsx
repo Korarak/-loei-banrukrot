@@ -4,6 +4,7 @@
 import BottomNav from '@/components/layout/BottomNav';
 import Footer from '@/components/layout/Footer';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ShoppingCart, User, LogOut, Wrench, Package, Heart, Menu } from 'lucide-react';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useCart } from '@/hooks/useCart';
@@ -101,8 +102,14 @@ export default function CustomerLayout({
                         <Link href="/" className="flex items-center gap-3 group">
                             <div className="relative">
                                 {/* <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl group-hover:bg-primary/40 transition-all duration-500" /> */}
-                                <div className="relative h-10 w-10 bg-gradient-to-br from-primary to-emerald-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
-                                    <Wrench className="h-5 w-5" />
+                                <div className="relative h-10 w-10 overflow-hidden rounded-xl shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+                                    <Image
+                                        src="/logo.png"
+                                        alt={siteConfig.brand.name}
+                                        fill
+                                        className="object-cover"
+                                        priority
+                                    />
                                 </div>
                             </div>
                             <div>
@@ -227,8 +234,13 @@ export default function CustomerLayout({
             <nav className={`sticky top-0 z-50 transition-all duration-300 md:hidden ${scrolled ? 'glass-card border-b border-gray-100 shadow-sm' : 'bg-white'}`}>
                 <div className="px-4 h-16 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-2">
-                        <div className="h-8 w-8 bg-gradient-to-br from-primary to-emerald-600 rounded-lg flex items-center justify-center text-white shadow-md">
-                            <Wrench className="h-4 w-4" />
+                        <div className="h-8 w-8 relative overflow-hidden rounded-lg shadow-md">
+                            <Image
+                                src="/logo.png"
+                                alt={siteConfig.brand.name}
+                                fill
+                                className="object-cover"
+                            />
                         </div>
                         <span className="font-black italic text-lg text-gray-900 tracking-tight">{siteConfig.brand.englishName}</span>
                     </Link>
