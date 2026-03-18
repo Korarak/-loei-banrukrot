@@ -68,3 +68,33 @@ If you prefer to run it manually without the script:
 ```bash
 gunzip < ~/loei-banrakrod/backups/backup_banrakrod_TIMESTAMP.tar.gz | docker exec -i loei-banrakrod-db mongorestore --username admin --password your_password --authenticationDatabase admin --archive --drop
 ```
+
+## 6. Professional Deployment & Cleanup
+
+To maintain a clean server and ensure consistent deployments, it is recommended to use an automated script instead of manual commands.
+
+### The Professional Way: `deploy.sh`
+We have provided a `deploy.sh` script in the project root. This script automates:
+1. **Pulling** latest images from the registry.
+2. **Updating** containers without downtime.
+3. **Cleaning up** dangling (old) images automatically.
+4. **Health checking** the services.
+
+**How to use:**
+```bash
+# First time setup
+chmod +x ./deploy.sh
+
+# To deploy a new version
+./deploy.sh
+```
+
+### Why this is "Professional":
+- **Automation**: Reduces human error by running a consistent set of commands.
+- **Dangling Image Cleanup**: Uses `docker image prune -f` right after deployment to save disk space.
+- **Feedback**: Provides colored status messages to let you know what's happening.
+- **Zero-Downtime**: `docker compose up -d` handles the container recreation smoothly.
+
+### Monitoring Tip:
+You can use `docker stats` to monitor resource usage in real-time, or check Portainer's dashboard for a high-level overview. Always keep an eye on **Disk Usage** if you have many large images.
+
