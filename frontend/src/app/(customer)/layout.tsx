@@ -102,7 +102,7 @@ export default function CustomerLayout({
                         <Link href="/" className="flex items-center gap-3 group">
                             <div className="relative">
                                 {/* <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl group-hover:bg-primary/40 transition-all duration-500" /> */}
-                                <div className="relative h-10 w-10 overflow-hidden rounded-xl shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+                                <div className="relative h-10 w-10 overflow-hidden rounded-xl shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 logo-shimmer-container gold-glow-hover">
                                     <Image
                                         src="/logo.png"
                                         alt={siteConfig.brand.name}
@@ -110,6 +110,7 @@ export default function CustomerLayout({
                                         className="object-cover"
                                         priority
                                     />
+                                    <div className="logo-shimmer-effect" />
                                 </div>
                             </div>
                             <div>

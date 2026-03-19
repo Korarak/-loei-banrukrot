@@ -12,6 +12,7 @@ import { getImageUrl, cn } from '@/lib/utils';
 import ProductCard from '@/components/features/ProductCard';
 import { siteConfig } from '@/config/site';
 import { Skeleton } from '@/components/ui/skeleton';
+import Image from 'next/image';
 
 // Animated Counter Hook
 function useCounter(end: number, duration: number = 2000, startOnView: boolean = true) {
@@ -107,7 +108,7 @@ export default function Home() {
     return (
         <div className="space-y-0 pb-10 overflow-hidden">
             {/* Hero Section - POWERFUL & BOLD with Floating Shapes */}
-            <section className="relative bg-gradient-to-br from-primary via-emerald-900 to-black text-white rounded-[2rem] overflow-hidden shadow-2xl min-h-[600px] flex items-center">
+            <section className="relative bg-gradient-to-br from-primary via-emerald-900 to-black text-white rounded-[2rem] overflow-hidden shadow-2xl min-h-[700px] flex items-center">
                 {/* Floating Abstract Shapes */}
                 <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 animate-breathe"></div>
                 <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 animate-breathe" style={{ animationDelay: '2s' }}></div>
@@ -118,9 +119,9 @@ export default function Home() {
                 <div className="absolute top-40 left-[60%] w-8 h-8 bg-accent/10 rounded-lg animate-float-slow rotate-45"></div>
                 <div className="absolute bottom-20 left-20 w-20 h-20 border border-white/5 rounded-3xl animate-spin-slow"></div>
 
-                <div className="relative container mx-auto px-8 md:px-12 py-20">
+                <div className="relative container mx-auto px-8 md:px-12 py-20 flex flex-col md:flex-row items-center gap-12">
                     <motion.div
-                        className="max-w-4xl relative z-10"
+                        className="flex-1 relative z-10 text-center md:text-left"
                         initial="hidden"
                         animate="visible"
                         variants={staggerContainer}
@@ -139,7 +140,7 @@ export default function Home() {
                             ศูนย์รวมอะไหล่และบริการ Vespa ครบวงจร โดย <span className="text-accent font-bold">ช่างโอ๊ต (Oat Engineering)</span> สำหรับคนรักเวสป้าเมืองเลย
                         </motion.p>
 
-                        <motion.div variants={fadeInUp} className="flex flex-wrap gap-6">
+                        <motion.div variants={fadeInUp} className="flex flex-wrap gap-6 justify-center md:justify-start">
                             <Button size="lg" asChild className="bg-accent text-white hover:bg-accent/90 border-0 rounded-full px-10 h-16 text-xl font-bold shadow-[0_0_20px_rgba(236,72,153,0.5)] hover:shadow-[0_0_40px_rgba(236,72,153,0.7)] transition-all hover:scale-105 active:scale-95">
                                 <Link href="/products">
                                     <ShoppingCart className="mr-3 h-6 w-6" />
@@ -153,6 +154,52 @@ export default function Home() {
                                 </Link>
                             </Button>
                         </motion.div>
+                    </motion.div>
+
+                    {/* HERO LOGO - THE WOW FACTOR */}
+                    <motion.div
+                        className="flex-1 relative flex justify-center items-center"
+                        initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
+                        animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                        transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
+                    >
+                        {/* Glow Behind Logo */}
+                        <div className="absolute inset-0 bg-primary/30 rounded-full blur-[100px] animate-breathe"></div>
+                        
+                        <div className="relative group perspective-1000">
+                            <motion.div
+                                className="relative bg-white/5 backdrop-blur-sm p-4 rounded-[3rem] border border-white/10 shadow-3xl card-hover-lift animate-float"
+                                whileHover={{ rotateY: 15, rotateX: -5, scale: 1.05 }}
+                                transition={{ type: "spring", stiffness: 300 }}
+                            >
+                                <div className="relative w-64 h-64 md:w-80 md:h-80 lg:w-[450px] lg:h-[450px] rounded-[2.5rem] overflow-hidden gold-glow">
+                                    <Image
+                                        src="/logo.png"
+                                        alt="Banrakrod Logo"
+                                        fill
+                                        className="object-contain p-4 transition-transform duration-700 group-hover:scale-110"
+                                        priority
+                                    />
+                                    {/* Shimmer overlay for huge logo */}
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out"></div>
+                                </div>
+                            </motion.div>
+                            
+                            {/* Floating decorative elements around the logo */}
+                            <motion.div 
+                                className="absolute -top-10 -right-10 w-20 h-20 bg-accent/20 backdrop-blur-md rounded-2xl flex items-center justify-center animate-float-reverse border border-white/20 z-20"
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                            >
+                                <Zap className="h-10 w-10 text-accent animate-pulse" />
+                            </motion.div>
+                            
+                            <motion.div 
+                                className="absolute -bottom-12 -left-8 w-24 h-24 bg-primary/20 backdrop-blur-md rounded-full flex items-center justify-center animate-float border border-white/10 z-20"
+                            >
+                                <ShieldCheck className="h-12 w-12 text-primary" />
+                            </motion.div>
+                        </div>
                     </motion.div>
                 </div>
             </section>
