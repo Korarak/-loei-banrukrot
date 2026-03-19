@@ -104,12 +104,12 @@ export default function ProductDetailPage() {
                 </Button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
-                {/* Image Gallery - POWERFUL DISPLAY */}
-                <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+                {/* Image Gallery - STICKY ON DESKTOP */}
+                <div className="lg:sticky lg:top-8 space-y-6">
                     <motion.div
                         layoutId={`product-image-${product._id}`}
-                        className="aspect-square bg-gray-50 rounded-[2.5rem] overflow-hidden relative border-2 border-transparent hover:border-gray-200 transition-colors shadow-inner"
+                        className="aspect-square bg-white rounded-3xl overflow-hidden relative border border-gray-100 shadow-sm group cursor-zoom-in"
                         onClick={() => displayImage && setFullScreenImage(displayImage)}
                     >
                         {displayImage ? (
@@ -117,89 +117,116 @@ export default function ProductDetailPage() {
                                 src={getImageUrl(displayImage)}
                                 alt={product.productName}
                                 fill
-                                className="object-cover object-center transition-transform duration-700 ease-out"
+                                className="object-contain p-4 transition-transform duration-500 group-hover:scale-105"
                                 sizes="(max-width: 768px) 100vw, 50vw"
                                 priority
                                 unoptimized
                             />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-300">
-                                <span className="text-sm font-bold uppercase tracking-widest">No Image</span>
+                                <span className="text-sm font-bold uppercase tracking-widest text-gray-400">No Image Available</span>
                             </div>
                         )}
-                        <div className="absolute top-4 right-4 bg-white px-3 py-1.5 rounded-full text-xs font-bold text-gray-900 shadow-sm">
-                            {shippingSizeLabel}
-                        </div>
+                        {shippingSizeLabel && (
+                            <div className="absolute top-4 right-4 bg-gray-900/5 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] font-black text-gray-900 uppercase tracking-wider">
+                                {shippingSizeLabel}
+                            </div>
+                        )}
                     </motion.div>
 
                     {product.images && product.images.length > 0 && (
-                        <div className="flex gap-4 overflow-x-auto pt-4 pb-2 scrollbar-hide px-1 border-t border-gray-50">
-                            {product.images.map((img: any, index: number) => (
+                        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                            {product.images.map((img: any, index: number) => (displayImage === img.imagePath) ? (
+                                <div key={index} className="w-20 h-20 md:w-24 md:h-24 flex-shrink-0 rounded-2xl border-2 border-gray-900 p-1 bg-white shadow-sm">
+                                    <div className="relative w-full h-full rounded-xl overflow-hidden">
+                                        <Image
+                                            src={getImageUrl(img.imagePath)}
+                                            alt={`View ${index + 1}`}
+                                            fill
+                                            className="object-contain p-1"
+                                            sizes="96px"
+                                            unoptimized
+                                        />
+                                    </div>
+                                </div>
+                            ) : (
                                 <button
                                     key={index}
                                     onClick={() => setActiveImage(img.imagePath)}
-                                    className={`relative w-20 h-20 md:w-24 md:h-24 flex-shrink-0 rounded-2xl overflow-hidden border-2 transition-all ${(displayImage === img.imagePath)
-                                        ? 'border-primary ring-2 ring-primary/20 bg-white'
-                                        : 'border-transparent opacity-60 hover:opacity-100 bg-gray-50'
-                                        }`}
+                                    className="relative w-20 h-20 md:w-24 md:h-24 flex-shrink-0 rounded-2xl border border-gray-100 hover:border-gray-300 transition-all bg-white p-1"
                                 >
-                                    <Image
-                                        src={getImageUrl(img.imagePath)}
-                                        alt={`View ${index + 1}`}
-                                        fill
-                                        className="object-cover"
-                                        sizes="96px"
-                                        unoptimized
-                                    />
+                                    <div className="relative w-full h-full rounded-xl overflow-hidden opacity-60 hover:opacity-100 transition-opacity">
+                                        <Image
+                                            src={getImageUrl(img.imagePath)}
+                                            alt={`View ${index + 1}`}
+                                            fill
+                                            className="object-contain p-1"
+                                            sizes="96px"
+                                            unoptimized
+                                        />
+                                    </div>
                                 </button>
                             ))}
                         </div>
                     )}
                 </div>
 
-                {/* Product Info - CLEAN & BOLD */}
-                <div className="flex flex-col">
-                    <div className="mb-8 border-b border-gray-100 pb-8">
+                {/* Product Info - PREMIUM HIERARCHY */}
+                <div className="flex flex-col pt-2">
+                    <div className="mb-6">
                         <div className="flex items-center gap-2 mb-4">
-                            <span className="px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-black uppercase tracking-widest">
-                                {product.brand || 'Brand'}
+                            <span className="text-xs font-black uppercase tracking-widest text-primary">
+                                {product.brand || 'Premium Brand'}
                             </span>
-                            <span className="px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-bold uppercase tracking-widest">
+                            <span className="w-1 h-1 rounded-full bg-gray-300" />
+                            <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">
                                 {categoryName}
                             </span>
                         </div>
-                        <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-4 leading-tight">
+                        <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-6 leading-[1.15] font-kanit">
                             {product.productName}
                         </h1>
-                        <div className="flex items-end gap-4">
-                            <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-600 font-kanit">
+
+                        <div className="flex items-baseline gap-4 mb-8">
+                            <div className="text-4xl md:text-5xl font-black text-gray-900 font-kanit">
                                 ฿{selectedVariant?.price.toLocaleString()}
                             </div>
                             {(selectedVariant?.stock ?? 0) > 0 ? (
-                                <div className="mb-2 flex items-center gap-1.5 text-emerald-600 font-bold bg-emerald-50 px-3 py-1 rounded-full text-sm">
-                                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md uppercase tracking-wider">
                                     In Stock
-                                </div>
+                                </span>
                             ) : (
-                                <div className="mb-2 text-red-500 font-bold bg-red-50 px-3 py-1 rounded-full text-sm">
+                                <span className="text-xs font-bold text-red-500 bg-red-50 px-2.5 py-1 rounded-md uppercase tracking-wider">
                                     Out of Stock
-                                </div>
+                                </span>
                             )}
+                        </div>
+
+                        {/* Quick Highlights - 425degree style */}
+                        <div className="grid grid-cols-1 gap-4 py-6 border-y border-gray-100 mb-8">
+                            <div className="flex items-start gap-3">
+                                <div className="mt-1 w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                                <p className="text-sm font-medium text-gray-600">สินค้านำเข้าของแท้ 100% จากแบรนด์โดยตรง</p>
+                            </div>
+                            <div className="flex items-start gap-3">
+                                <div className="mt-1 w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                                <p className="text-sm font-medium text-gray-600">ดีไซน์ทันสมัย วัสดุพรีเมียม แข็งแรงทนทาน</p>
+                            </div>
                         </div>
                     </div>
 
                     {/* Variants */}
                     {variants.length > 1 && (
                         <div className="mb-8">
-                            <h3 className="text-sm font-black uppercase tracking-widest text-gray-900 mb-4">Select Option</h3>
-                            <div className="flex flex-wrap gap-3">
+                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-4">รูปแบบสินค้า</h3>
+                            <div className="flex flex-wrap gap-2.5">
                                 {variants.map((variant: any) => (
                                     <button
                                         key={variant._id}
                                         onClick={() => setSelectedVariantId(variant._id)}
-                                        className={`px-6 py-3 rounded-xl border-2 font-bold text-sm transition-all ${selectedVariant?._id === variant._id
-                                            ? 'border-gray-900 bg-gray-900 text-white shadow-lg'
-                                            : 'border-gray-200 text-gray-600 hover:border-gray-300'
+                                        className={`px-5 py-2.5 rounded-full border-2 text-xs font-bold transition-all ${selectedVariant?._id === variant._id
+                                            ? 'border-gray-900 bg-gray-900 text-white shadow-md'
+                                            : 'border-gray-100 bg-white text-gray-600 hover:border-gray-300'
                                             }`}
                                     >
                                         {variant.sku}
@@ -209,23 +236,24 @@ export default function ProductDetailPage() {
                         </div>
                     )}
 
-                    {/* Desktop Actions */}
-                    <div className="mb-10 hidden lg:block">
-                        <div className="flex items-center gap-6 p-6 bg-gray-50 rounded-[2rem] border border-gray-100">
-                            <div className="flex items-center gap-3 bg-white rounded-full p-1.5 border border-gray-200">
+                    {/* Quantity & Add to Cart */}
+                    <div className="space-y-4 hidden lg:block">
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">จำนวน</h3>
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center bg-gray-50 rounded-full p-1 border border-gray-100">
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-10 w-10 rounded-full hover:bg-gray-100"
+                                    className="h-10 w-10 rounded-full hover:bg-white hover:shadow-sm"
                                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                                 >
                                     <Minus className="h-4 w-4" />
                                 </Button>
-                                <span className="w-12 text-center font-bold text-lg">{quantity}</span>
+                                <span className="w-10 text-center font-bold text-gray-900">{quantity}</span>
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-10 w-10 rounded-full hover:bg-gray-100"
+                                    className="h-10 w-10 rounded-full hover:bg-white hover:shadow-sm"
                                     onClick={() => setQuantity(Math.min(selectedVariant?.stock || 1, quantity + 1))}
                                 >
                                     <Plus className="h-4 w-4" />
@@ -233,63 +261,92 @@ export default function ProductDetailPage() {
                             </div>
                             <Button
                                 size="lg"
-                                className="flex-1 h-14 rounded-full text-lg font-bold shadow-xl shadow-gray-900/20 hover:shadow-gray-900/30 transition-all hover:-translate-y-1 bg-gray-900 text-white hover:bg-black"
+                                className="flex-1 h-14 rounded-full text-lg font-black bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all hover:-translate-y-1 active:translate-y-0"
                                 onClick={handleAddToCart}
                                 disabled={!selectedVariant || (selectedVariant?.stock ?? 0) <= 0 || addToCart.isPending}
                             >
                                 <ShoppingCart className="mr-2 h-5 w-5" />
-                                {addToCart.isPending ? 'Adding...' : 'Add to Cart'}
+                                {addToCart.isPending ? 'กำลังเพิ่ม...' : 'เพิ่มลงรถเข็น'}
                             </Button>
                         </div>
                     </div>
 
-                    <div className="bg-gray-50/50 rounded-3xl p-6 lg:p-8 border border-gray-100 mt-8 relative overflow-hidden group">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-sm font-black uppercase tracking-widest text-gray-900">รายละเอียดสินค้า</h3>
-                            <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className="text-primary font-bold hover:bg-primary/5 rounded-full"
-                                onClick={() => setIsDescriptionOpen(true)}
-                            >
-                                ขยายดูทั้งหมด
-                            </Button>
+                    {/* Key Attributes */}
+                    <div className="grid grid-cols-3 gap-4 mt-10">
+                        <div className="flex flex-col items-center p-4 bg-gray-50/50 rounded-2xl text-center">
+                            <Package className="h-5 w-5 text-primary mb-2" />
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">จัดส่งด่วน</span>
+                            <span className="text-xs font-black text-gray-900 mt-1">1-3 วัน</span>
                         </div>
-                        <div className="prose prose-lg text-gray-600 max-w-none leading-relaxed line-clamp-4 whitespace-pre-wrap italic">
-                            {product.description || 'ไม่มีข้อมูลรายละเอียดสำหรับสินค้านี้'}
+                        <div className="flex flex-col items-center p-4 bg-gray-50/50 rounded-2xl text-center">
+                            <Tag className="h-5 w-5 text-primary mb-2" />
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">รับประกัน</span>
+                            <span className="text-xs font-black text-gray-900 mt-1">ของแท้</span>
                         </div>
-                        <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-gray-50/80 to-transparent pointer-events-none" />
+                        <div className="flex flex-col items-center p-4 bg-gray-50/50 rounded-2xl text-center">
+                            <Layers className="h-5 w-5 text-primary mb-2" />
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">ขนาด</span>
+                            <span className="text-xs font-black text-gray-900 mt-1">{shippingSizeLabel}</span>
+                        </div>
                     </div>
                 </div>
+            </div>
 
-                {/* Mobile Sticky Action Bar */}
-                <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100 lg:hidden z-40 safe-area-bottom">
-                    <div className="flex gap-4 max-w-lg mx-auto">
-                        <div className="flex items-center gap-2 bg-gray-100 rounded-xl px-2">
+            {/* FULL WIDTH DESCRIPTION SECTION */}
+            <div className="mt-20 border-t border-gray-100 pt-16">
+                <div className="max-w-3xl mx-auto">
+                    <div className="text-center mb-12">
+                        <h2 className="text-xs font-black uppercase tracking-[0.3em] text-primary mb-3">Product Details</h2>
+                        <h3 className="text-3xl font-black text-gray-900 font-kanit">รายละเอียดสินค้า</h3>
+                    </div>
+                    
+                    <div className="prose prose-lg prose-gray max-w-none">
+                        <div className="bg-white rounded-[2.5rem] p-8 md:p-12 border border-gray-100 shadow-sm relative overflow-hidden group">
+                            <div className="text-gray-600 leading-[1.8] whitespace-pre-wrap font-medium font-kanit italic text-lg">
+                                {product.description || 'ไม่มีข้อมูลรายละเอียดสำหรับสินค้านี้'}
+                            </div>
+                            <div className="mt-12 flex justify-center">
+                                <Button 
+                                    variant="outline" 
+                                    className="rounded-full px-8 font-black border-2 border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white transition-all uppercase tracking-widest text-xs h-12"
+                                    onClick={() => setIsDescriptionOpen(true)}
+                                >
+                                    รายละเอียดทั้งหมด
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+                {/* Mobile Sticky Action Bar - REFINED */}
+                <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-xl border-t border-gray-100 lg:hidden z-40 safe-area-bottom shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
+                    <div className="flex gap-3 max-w-lg mx-auto">
+                        <div className="flex items-center bg-gray-100 rounded-2xl px-1 py-1">
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-10 w-10 rounded-lg"
+                                className="h-10 w-10 rounded-xl"
                                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
                             >
                                 <Minus className="h-4 w-4" />
                             </Button>
-                            <span className="w-8 text-center font-bold">{quantity}</span>
+                            <span className="w-8 text-center font-bold text-gray-900">{quantity}</span>
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-10 w-10 rounded-lg"
+                                className="h-10 w-10 rounded-xl"
                                 onClick={() => setQuantity(Math.min(selectedVariant?.stock || 1, quantity + 1))}
                             >
                                 <Plus className="h-4 w-4" />
                             </Button>
                         </div>
                         <Button
-                            className="flex-1 h-12 rounded-xl font-bold text-base shadow-lg bg-gray-900 text-white hover:bg-black shadow-gray-900/20"
+                            className="flex-1 h-12 rounded-2xl font-black text-sm shadow-lg bg-primary hover:bg-primary/90 text-white shadow-primary/20 active:scale-95 transition-transform"
                             onClick={handleAddToCart}
                             disabled={!selectedVariant || (selectedVariant?.stock ?? 0) <= 0 || addToCart.isPending}
                         >
-                            Add to Cart
+                            {addToCart.isPending ? 'กำลังเพิ่ม...' : 'เพิ่มลงรถเข็น'}
                         </Button>
                     </div>
                 </div>
@@ -301,11 +358,11 @@ export default function ProductDetailPage() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 backdrop-blur-md"
+                            className="fixed inset-0 z-[200] bg-white/95 flex items-center justify-center p-4 backdrop-blur-md"
                             onClick={() => setFullScreenImage(null)}
                         >
                             <button
-                                className="absolute top-6 right-6 text-white/70 hover:text-white transition-colors bg-white/10 p-3 rounded-full backdrop-blur-md z-10"
+                                className="absolute top-6 right-6 text-gray-900/50 hover:text-gray-900 transition-colors bg-gray-100 p-3 rounded-full z-10"
                                 onClick={() => setFullScreenImage(null)}
                             >
                                 <X className="h-6 w-6" />
@@ -338,7 +395,7 @@ export default function ProductDetailPage() {
                                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                                className="bg-white w-full max-w-2xl max-h-[80vh] rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col"
+                                className="bg-white w-full max-w-4xl max-h-[90vh] rounded-[3rem] shadow-2xl overflow-hidden flex flex-col"
                                 onClick={(e) => e.stopPropagation()}
                             >
                                 <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
@@ -362,6 +419,5 @@ export default function ProductDetailPage() {
                     )}
                 </AnimatePresence>
             </div>
-        </div>
     );
 }
