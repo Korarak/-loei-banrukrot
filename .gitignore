@@ -54,3 +54,7 @@ create-local-admin.bat
 docker-compose.dev.yml
 test-local-dev.bat
 create-dev-admin.bat
+
+# Application Uploads
+backend/public/uploads/
+!backend/public/uploads/.gitkeep

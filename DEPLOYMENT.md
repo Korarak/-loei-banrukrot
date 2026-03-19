@@ -29,7 +29,13 @@ To allow GitHub Actions to deploy automatically via SSH:
 - **MongoDB**: Port `27017` (Internal only, or exposed if needed)
 
 ## 4. Persistent Volumes
-The stack uses a named volume `mongodb_data` for database persistence and a bind mount for backend uploads. Ensure the directory `./backend/public/uploads` exists on your host if using bind mounts, or adjust to named volumes for full container portability.
+The stack uses a named volume `mongodb_data` for database persistence and a **Bind Mount** for backend uploads. 
+
+Ensure the volume mapping in `docker-compose.yml` is exactly as follows to avoid data loss:
+`- ./backend/public/uploads:/app/backend/public/uploads`
+
+> [!WARNING]
+> If you are using a CI/CD system (like Portainer Git Stacks) that re-clones the repository on each update, the files in `./backend/public/uploads` will be wiped unless they are stored in an absolute path outside the repository directory.
 
 ## 5. Backup and Recovery
 
