@@ -62,6 +62,11 @@ export default function ProductDetailPage() {
         : variants[0];
     const categoryName = categories?.find(c => c.categoryId === product.categoryId)?.name || '-';
     const shippingSizeLabel = product.shippingSize === 'large' ? 'Large Item' : 'Standard Item';
+    const getVariantLabel = (v: any) => {
+        const parts = [v.option1Value, v.option2Value].filter(Boolean);
+        return parts.length > 0 ? parts.join(' / ') : v.sku;
+    };
+    const isVariantOOS = (v: any) => (v.stock ?? v.stockAvailable ?? 0) <= 0;
 
     const handleAddToCart = async () => {
         if (!selectedVariant) return;
@@ -109,7 +114,7 @@ export default function ProductDetailPage() {
                 <div className="lg:sticky lg:top-8 space-y-6">
                     <motion.div
                         layoutId={`product-image-${product._id}`}
-                        className="aspect-square bg-white rounded-3xl overflow-hidden relative border border-gray-100 shadow-sm group cursor-zoom-in"
+                        className="aspect-square bg-white rounded-3xl overflow-hidden relative border border-gray-100 shadow-md group cursor-zoom-in"
                         onClick={() => displayImage && setFullScreenImage(displayImage)}
                     >
                         {displayImage ? (
@@ -128,7 +133,7 @@ export default function ProductDetailPage() {
                             </div>
                         )}
                         {shippingSizeLabel && (
-                            <div className="absolute top-4 right-4 bg-gray-900/5 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] font-black text-gray-900 uppercase tracking-wider">
+                            <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full text-[10px] font-black text-white uppercase tracking-wider">
                                 {shippingSizeLabel}
                             </div>
                         )}
@@ -155,7 +160,7 @@ export default function ProductDetailPage() {
                                     onClick={() => setActiveImage(img.imagePath)}
                                     className="relative w-20 h-20 md:w-24 md:h-24 flex-shrink-0 rounded-2xl border border-gray-100 hover:border-gray-300 transition-all bg-white p-1"
                                 >
-                                    <div className="relative w-full h-full rounded-xl overflow-hidden opacity-60 hover:opacity-100 transition-opacity">
+                                    <div className="relative w-full h-full rounded-xl overflow-hidden opacity-80 hover:opacity-100 transition-opacity">
                                         <Image
                                             src={getImageUrl(img.imagePath)}
                                             alt={`View ${index + 1}`}
@@ -193,11 +198,11 @@ export default function ProductDetailPage() {
                             </div>
                             {(selectedVariant?.stock ?? 0) > 0 ? (
                                 <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md uppercase tracking-wider">
-                                    In Stock
+                                    มีสินค้า {selectedVariant?.stock} ชิ้น
                                 </span>
                             ) : (
                                 <span className="text-xs font-bold text-red-500 bg-red-50 px-2.5 py-1 rounded-md uppercase tracking-wider">
-                                    Out of Stock
+                                    สินค้าหมด
                                 </span>
                             )}
                         </div>
@@ -218,20 +223,31 @@ export default function ProductDetailPage() {
                     {/* Variants */}
                     {variants.length > 1 && (
                         <div className="mb-8">
-                            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-4">รูปแบบสินค้า</h3>
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">รูปแบบสินค้า</h3>
+                                {selectedVariant && (
+                                    <span className="text-xs font-bold text-gray-600">{getVariantLabel(selectedVariant)}</span>
+                                )}
+                            </div>
                             <div className="flex flex-wrap gap-2.5">
-                                {variants.map((variant: any) => (
-                                    <button
-                                        key={variant._id}
-                                        onClick={() => setSelectedVariantId(variant._id)}
-                                        className={`px-5 py-2.5 rounded-full border-2 text-xs font-bold transition-all ${selectedVariant?._id === variant._id
-                                            ? 'border-gray-900 bg-gray-900 text-white shadow-md'
-                                            : 'border-gray-100 bg-white text-gray-600 hover:border-gray-300'
-                                            }`}
-                                    >
-                                        {variant.sku}
-                                    </button>
-                                ))}
+                                {variants.map((variant: any) => {
+                                    const oos = isVariantOOS(variant);
+                                    return (
+                                        <button
+                                            key={variant._id}
+                                            onClick={() => !oos && setSelectedVariantId(variant._id)}
+                                            disabled={oos}
+                                            className={`px-5 py-2.5 rounded-full border-2 text-xs font-bold transition-all ${selectedVariant?._id === variant._id
+                                                ? 'border-gray-900 bg-gray-900 text-white shadow-md'
+                                                : oos
+                                                    ? 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed line-through'
+                                                    : 'border-gray-100 bg-white text-gray-600 hover:border-gray-300'
+                                                }`}
+                                        >
+                                            {getVariantLabel(variant)}
+                                        </button>
+                                    );
+                                })}
                             </div>
                         </div>
                     )}
@@ -253,15 +269,16 @@ export default function ProductDetailPage() {
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-10 w-10 rounded-full hover:bg-white hover:shadow-sm"
+                                    className="h-10 w-10 rounded-full hover:bg-white hover:shadow-sm disabled:opacity-30"
                                     onClick={() => setQuantity(Math.min(selectedVariant?.stock || 1, quantity + 1))}
+                                    disabled={quantity >= (selectedVariant?.stock || 1)}
                                 >
                                     <Plus className="h-4 w-4" />
                                 </Button>
                             </div>
                             <Button
                                 size="lg"
-                                className="flex-1 h-14 rounded-full text-lg font-black bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-all hover:-translate-y-1 active:translate-y-0"
+                                className="flex-1 h-14 rounded-full text-lg font-black bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20 transition-colors active:scale-[0.98]"
                                 onClick={handleAddToCart}
                                 disabled={!selectedVariant || (selectedVariant?.stock ?? 0) <= 0 || addToCart.isPending}
                             >
@@ -272,21 +289,21 @@ export default function ProductDetailPage() {
                     </div>
 
                     {/* Key Attributes */}
-                    <div className="grid grid-cols-3 gap-4 mt-10">
-                        <div className="flex flex-col items-center p-4 bg-gray-50/50 rounded-2xl text-center">
-                            <Package className="h-5 w-5 text-primary mb-2" />
-                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">จัดส่งด่วน</span>
-                            <span className="text-xs font-black text-gray-900 mt-1">1-3 วัน</span>
+                    <div className="mt-10 border border-gray-100 rounded-2xl overflow-hidden divide-y divide-gray-100">
+                        <div className="flex items-center gap-3 px-4 py-3 bg-gray-50/50">
+                            <Package className="h-4 w-4 text-primary flex-shrink-0" />
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex-1">จัดส่งด่วน</span>
+                            <span className="text-xs font-black text-gray-900">1-3 วัน</span>
                         </div>
-                        <div className="flex flex-col items-center p-4 bg-gray-50/50 rounded-2xl text-center">
-                            <Tag className="h-5 w-5 text-primary mb-2" />
-                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">รับประกัน</span>
-                            <span className="text-xs font-black text-gray-900 mt-1">ของแท้</span>
+                        <div className="flex items-center gap-3 px-4 py-3 bg-gray-50/50">
+                            <Tag className="h-4 w-4 text-primary flex-shrink-0" />
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex-1">รับประกัน</span>
+                            <span className="text-xs font-black text-gray-900">ของแท้</span>
                         </div>
-                        <div className="flex flex-col items-center p-4 bg-gray-50/50 rounded-2xl text-center">
-                            <Layers className="h-5 w-5 text-primary mb-2" />
-                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">ขนาด</span>
-                            <span className="text-xs font-black text-gray-900 mt-1">{shippingSizeLabel}</span>
+                        <div className="flex items-center gap-3 px-4 py-3 bg-gray-50/50">
+                            <Layers className="h-4 w-4 text-primary flex-shrink-0" />
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex-1">ขนาดพัสดุ</span>
+                            <span className="text-xs font-black text-gray-900">{shippingSizeLabel}</span>
                         </div>
                     </div>
                 </div>
@@ -302,7 +319,7 @@ export default function ProductDetailPage() {
                     
                     <div className="prose prose-lg prose-gray max-w-none">
                         <div className="bg-white rounded-[2.5rem] p-8 md:p-12 border border-gray-100 shadow-sm relative overflow-hidden group">
-                            <div className="text-gray-600 leading-[1.8] whitespace-pre-wrap font-medium font-kanit italic text-lg">
+                            <div className="text-gray-600 leading-[1.8] font-medium font-kanit text-base line-clamp-4 overflow-hidden">
                                 {product.description || 'ไม่มีข้อมูลรายละเอียดสำหรับสินค้านี้'}
                             </div>
                             <div className="mt-12 flex justify-center">
@@ -335,14 +352,15 @@ export default function ProductDetailPage() {
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-10 w-10 rounded-xl"
+                                className="h-10 w-10 rounded-xl disabled:opacity-30"
                                 onClick={() => setQuantity(Math.min(selectedVariant?.stock || 1, quantity + 1))}
+                                disabled={quantity >= (selectedVariant?.stock || 1)}
                             >
                                 <Plus className="h-4 w-4" />
                             </Button>
                         </div>
                         <Button
-                            className="flex-1 h-12 rounded-2xl font-black text-sm shadow-lg bg-primary hover:bg-primary/90 text-white shadow-primary/20 active:scale-95 transition-transform"
+                            className="flex-1 h-12 rounded-2xl font-black text-sm shadow-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20 active:scale-95 transition-transform"
                             onClick={handleAddToCart}
                             disabled={!selectedVariant || (selectedVariant?.stock ?? 0) <= 0 || addToCart.isPending}
                         >
@@ -392,9 +410,9 @@ export default function ProductDetailPage() {
                             onClick={() => setIsDescriptionOpen(false)}
                         >
                             <motion.div
-                                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                                initial={{ opacity: 0, y: 24 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: 24 }}
                                 className="bg-white w-full max-w-4xl max-h-[90vh] rounded-[3rem] shadow-2xl overflow-hidden flex flex-col"
                                 onClick={(e) => e.stopPropagation()}
                             >
