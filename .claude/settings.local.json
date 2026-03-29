@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "defaultMode": "bypassPermissions",
+    "allow": [
+      "Bash(find \"D:\\\\@loei-banrakrod\\\\backend\\\\controllers\" -name \"*.js\" -exec wc -l {} +)",
+      "Bash(find D:@loei-banrakrod -maxdepth 2 -type f -name *.json -o -type f -name *.md -o -type f -name *.yml -o -type f -name .env*)"
+    ]
+  }
+}

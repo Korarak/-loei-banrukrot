@@ -17,7 +17,8 @@ import {
     Settings,
     History,
     Menu,
-    Database
+    Database,
+    FileText
 } from 'lucide-react';
 import { cn, getImageUrl } from '@/lib/utils';
 import { useState, useEffect } from 'react';
@@ -86,12 +87,12 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
             : "text-gray-500 group-hover:text-primary"
     );
 
-    // Menu Definitions
     const menuGroups: Record<string, MenuGroup> = {
         'overview': {
             title: 'ภาพรวม',
             items: [
                 { href: '/admin/dashboard', label: 'ภาพรวมระบบ', icon: LayoutDashboard },
+                { href: '/admin/reports', label: 'รายงาน', icon: FileText },
                 { href: '/admin/users', label: 'ผู้ใช้งาน', icon: Users },
                 { href: '/admin/customers', label: 'ลูกค้า', icon: Users },
                 { href: '/admin/backups', label: 'สำรองข้อมูล', icon: Database },
