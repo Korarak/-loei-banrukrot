@@ -90,7 +90,32 @@ export default function ProductDetailPage() {
             });
         } catch (error: any) {
             const message = error?.response?.data?.message || 'Failed to add to cart';
-            toast.error(message);
+        }
+    };
+
+    const handleShare = async () => {
+        const shareData = {
+            title: product.productName,
+            text: `Check out ${product.productName} - Loei Banrakrod`,
+            url: window.location.href,
+        };
+
+        try {
+            if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+                await navigator.share(shareData);
+            } else {
+                await navigator.clipboard.writeText(window.location.href);
+                toast.success('Link copied to clipboard!', {
+                    description: 'You can now paste it anywhere to share.',
+                    icon: <Share2 className="h-4 w-4" />,
+                    className: 'bg-white border-gray-200'
+                });
+            }
+        } catch (error) {
+            if ((error as Error).name !== 'AbortError') {
+                console.error('Error sharing:', error);
+                toast.error('Could not share the link');
+            }
         }
     };
 
@@ -104,7 +129,12 @@ export default function ProductDetailPage() {
                         <span className="font-bold">Back to Products</span>
                     </Link>
                 </Button>
-                <Button variant="ghost" size="icon" className="rounded-full hover:bg-gray-100">
+                <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="rounded-full hover:bg-gray-100"
+                    onClick={handleShare}
+                >
                     <Share2 className="h-5 w-5 text-gray-600" />
                 </Button>
             </div>
