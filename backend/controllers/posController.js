@@ -1,5 +1,6 @@
 // controllers/posController.js
 const { Order, OrderDetail, Payment, ProductVariant } = require('../models');
+const { deductStock } = require('../utils/stockUtils');
 
 // @desc    Create POS sale (walk-in customer)
 // @route   POST /api/pos/sales
@@ -75,11 +76,8 @@ exports.createPOSSale = async (req, res, next) => {
             });
             orderDetails.push(detail);
 
-            // ลดสต็อก
-            await ProductVariant.findByIdAndUpdate(
-                item.variant._id,
-                { $inc: { stockAvailable: -item.quantity } }
-            );
+            // ลดสต็อก + log movement
+            await deductStock(item.variant._id, item.quantity, 'sale_pos', order._id, 'Order', req.user._id);
         }
 
         // สร้าง payment record

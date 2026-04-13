@@ -7,6 +7,7 @@ const validator = require('../middleware/validator');
 
 // Public routes
 router.get('/', productController.getAllProducts);
+router.get('/popular', productController.getPopularProducts);
 router.get('/:id', validator.validateId, productController.getProductById);
 
 // Protected routes (staff/owner)

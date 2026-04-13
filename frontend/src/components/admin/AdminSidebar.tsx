@@ -18,12 +18,14 @@ import {
     History,
     Menu,
     Database,
-    FileText
+    FileText,
+    Warehouse
 } from 'lucide-react';
 import { cn, getImageUrl } from '@/lib/utils';
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useOrders } from '@/hooks/useOrders';
+import { useLowStockAlerts } from '@/hooks/useInventory';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface AdminSidebarProps {
@@ -49,6 +51,10 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
     // Fetch orders for notification badge
     const { data: orders } = useOrders({ refetchInterval: 30000 });
     const pendingOrdersCount = orders?.filter(o => o.orderStatus === 'pending').length || 0;
+
+    // Low stock badge
+    const { data: lowStockData } = useLowStockAlerts();
+    const lowStockCount = lowStockData?.data?.length || 0;
 
     // State for collapsible sections
     const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
@@ -103,6 +109,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
             items: [
                 { href: '/admin/products', label: 'สินค้า', icon: Package },
                 { href: '/admin/categories', label: 'หมวดหมู่', icon: Folder },
+                { href: '/admin/inventory', label: 'คลังสินค้า', icon: Warehouse },
                 { href: '/admin/orders', label: 'คำสั่งซื้อ', icon: ShoppingCart },
                 { href: '/admin/shipping', label: 'การจัดส่ง', icon: Truck },
             ]
@@ -126,13 +133,13 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 xl:hidden"
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 xl:hidden"
                     />
                 )}
             </AnimatePresence>
 
             <aside className={cn(
-                "w-72 bg-[#0a0a0a] border-r border-white/5 flex flex-col fixed h-full z-40 transition-transform duration-300 xl:translate-x-0 shadow-2xl xl:shadow-none text-gray-200",
+                "w-72 bg-[#0a0a0a] border-r border-white/5 flex flex-col fixed h-full z-[60] transition-transform duration-300 xl:translate-x-0 shadow-2xl xl:shadow-none text-gray-200",
                 isOpen ? "translate-x-0" : "-translate-x-full"
             )}>
                 {/* Header */}
@@ -228,9 +235,14 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                                                 )}
                                                 <item.icon className={iconClass(item.href)} />
                                                 <span className="flex-1">{item.label}</span>
-                                                {item.label === 'คำสั่งซื้อ' && pendingOrdersCount > 0 && (
+                                                {item.href === '/admin/orders' && pendingOrdersCount > 0 && (
                                                     <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] h-5 flex items-center justify-center shadow-lg shadow-red-500/20 animate-pulse">
                                                         {pendingOrdersCount}
+                                                    </span>
+                                                )}
+                                                {item.href === '/admin/inventory' && lowStockCount > 0 && (
+                                                    <span className="bg-yellow-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] h-5 flex items-center justify-center shadow-lg shadow-yellow-500/20">
+                                                        {lowStockCount}
                                                     </span>
                                                 )}
                                             </Link>

@@ -1,4 +1,6 @@
 // controllers/productController.js
+const mongoose = require('mongoose');
+const { changeStock } = require('../utils/stockUtils');
 const { Product, ProductVariant, ProductImage } = require('../models');
 
 // @desc    Get all products with variants and images
@@ -199,6 +201,78 @@ exports.getProductById = async (req, res, next) => {
     }
 };
 
+// @desc    Get popular products by order history (public, falls back to newest)
+// @route   GET /api/products/popular
+// @access  Public
+exports.getPopularProducts = async (req, res, next) => {
+    try {
+        const limit = Math.min(parseInt(req.query.limit) || 8, 20);
+        const { OrderDetail } = require('../models');
+
+        // Aggregate: variant sales → product sales
+        const topProductIds = await OrderDetail.aggregate([
+            { $group: { _id: '$variantId', totalSold: { $sum: '$quantity' } } },
+            {
+                $lookup: {
+                    from: 'productvariants',
+                    localField: '_id',
+                    foreignField: '_id',
+                    as: 'variant'
+                }
+            },
+            { $unwind: '$variant' },
+            { $group: { _id: '$variant.productId', totalSold: { $sum: '$totalSold' } } },
+            { $sort: { totalSold: -1 } },
+            { $limit: limit * 2 } // over-fetch to account for inactive/offline products
+        ]);
+
+        let products = [];
+
+        if (topProductIds.length > 0) {
+            const ids = topProductIds.map(p => p._id);
+            const salesMap = Object.fromEntries(topProductIds.map(p => [p._id.toString(), p.totalSold]));
+
+            const pipeline = [
+                { $match: { _id: { $in: ids }, isActive: true, isOnline: true } },
+                { $lookup: { from: 'productvariants', localField: '_id', foreignField: 'productId', as: 'variants' } },
+                { $addFields: { variants: { $map: { input: '$variants', as: 'v', in: { $mergeObjects: ['$$v', { stock: '$$v.stockAvailable' }] } } } } },
+                { $lookup: { from: 'productimages', localField: '_id', foreignField: 'productId', as: 'images' } },
+                { $limit: limit }
+            ];
+
+            const raw = await Product.aggregate(pipeline);
+            // Sort by sales rank and attach totalSold
+            raw.sort((a, b) => (salesMap[b._id.toString()] || 0) - (salesMap[a._id.toString()] || 0));
+            products = raw.map(p => ({ ...p, totalSold: salesMap[p._id.toString()] || 0 }));
+        }
+
+        // Fallback to newest if no order history
+        if (products.length < limit) {
+            const needed = limit - products.length;
+            const existingIds = products.map(p => p._id);
+            const pipeline = [
+                { $match: { isActive: true, isOnline: true, _id: { $nin: existingIds } } },
+                { $sort: { dateCreated: -1 } },
+                { $limit: needed },
+                { $lookup: { from: 'productvariants', localField: '_id', foreignField: 'productId', as: 'variants' } },
+                { $addFields: { variants: { $map: { input: '$variants', as: 'v', in: { $mergeObjects: ['$$v', { stock: '$$v.stockAvailable' }] } } } } },
+                { $lookup: { from: 'productimages', localField: '_id', foreignField: 'productId', as: 'images' } },
+            ];
+            const fallback = await Product.aggregate(pipeline);
+            products = [...products, ...fallback];
+        }
+
+        // Sort images
+        products.forEach(p => {
+            if (p.images) p.images.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+        });
+
+        res.json({ success: true, data: products });
+    } catch (error) {
+        next(error);
+    }
+};
+
 // @desc    Create new product
 // @route   POST /api/products
 // @access  Private (staff/owner)
@@ -211,7 +285,6 @@ exports.createProduct = async (req, res, next) => {
             productName,
             description,
             categoryId,
-            brand,
             brand,
             shippingSize: shippingSize || 'small',
             isOnline: req.body.isOnline !== undefined ? req.body.isOnline : true,
@@ -352,20 +425,33 @@ exports.deleteProduct = async (req, res, next) => {
 // @access  Private (staff/owner)
 exports.updateVariantStock = async (req, res, next) => {
     try {
-        const { stockAvailable } = req.body;
+        // Accept both 'stock' (frontend) and 'stockAvailable' (legacy)
+        const newStock = req.body.stock ?? req.body.stockAvailable;
+        const note = req.body.note || 'ปรับสต็อกจากหน้าจัดการสินค้า';
 
-        const variant = await ProductVariant.findByIdAndUpdate(
-            req.params.id,
-            { stockAvailable },
-            { new: true, runValidators: true }
-        );
-
-        if (!variant) {
-            return res.status(404).json({
-                success: false,
-                message: 'Variant not found'
-            });
+        if (newStock === undefined || newStock === null || newStock < 0) {
+            return res.status(400).json({ success: false, message: 'Stock value is required and must be >= 0' });
         }
+
+        const current = await ProductVariant.findById(req.params.id);
+        if (!current) {
+            return res.status(404).json({ success: false, message: 'Variant not found' });
+        }
+
+        const delta = newStock - current.stockAvailable;
+        if (delta === 0) {
+            return res.json({ success: true, message: 'Stock unchanged', data: current });
+        }
+
+        const { variant } = await changeStock(
+            req.params.id,
+            delta,
+            'adjustment',
+            null,
+            null,
+            req.user._id,
+            note
+        );
 
         res.json({
             success: true,
@@ -478,8 +564,7 @@ exports.deleteProductImage = async (req, res, next) => {
     try {
         const { id: productId, imageId } = req.params;
 
-        const mongoose = require('mongoose');
-        const image = await ProductImage.findOneAndDelete({ 
+        const image = await ProductImage.findOneAndDelete({
             _id: new mongoose.Types.ObjectId(imageId), 
             productId: new mongoose.Types.ObjectId(productId) 
         });

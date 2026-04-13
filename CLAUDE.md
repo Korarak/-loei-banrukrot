@@ -62,9 +62,11 @@ Express app organized as: `controllers/` → `routes/` → `models/` → `middle
 
 **Security stack:** Helmet headers → CORS (strict, FRONTEND_URL only) → 500 req/10min rate limit → 10KB body limit → mongo-sanitize → hpp.
 
-**Models** (12 Mongoose collections): User, Customer, CustomerAddress, Store, Product, ProductVariant, ProductImage, Cart, CartItem, Order, OrderDetail, Payment. See `backend/models/README.md` for schema diagrams.
+**Models** (15 Mongoose collections): User, Customer, CustomerAddress, Store, Product, ProductVariant, ProductImage, Category, Cart, CartItem, Order, OrderDetail, Payment, ShippingMethod, StockMovement, Setting. All exported from `backend/models/index.js`. See `backend/models/README.md` for schema diagrams.
 
 **Validation:** Zod schemas in `models/validationSchemas.js`, express-validator in route middleware.
+
+**Stock management:** All stock changes must go through `backend/utils/stockUtils.js` (`changeStock`, `deductStock`, `addStock`). This ensures every change is logged in `StockMovement`. Movement types: `sale_pos`, `sale_online`, `cancel_online`, `stock_in`, `adjustment`.
 
 ### Frontend (`frontend/src/`)
 Next.js App Router with three route groups:
@@ -81,12 +83,15 @@ Next.js App Router with three route groups:
 
 **UI stack:** TailwindCSS 4 + Radix UI headless components + Lucide React icons + Framer Motion + Recharts (dashboard charts) + dnd-kit (drag-and-drop).
 
-### Dual Authentication System
+**Order status flow:** `pending` → `confirmed` → `processing` → `shipped` → `delivered`/`completed`. Cancelled is terminal. Labels/colors defined in `lib/order-status.ts`.
+
+### Authentication System
 Two completely separate auth flows sharing the same JWT infrastructure:
 - **Staff/Owner:** POST `/api/auth/login` → `userToken` in localStorage → routes under `/(admin)`
 - **Customer:** POST `/api/auth/customer/login` → `customerToken` in localStorage → routes under `/(customer)`
+- **Google OAuth (customers only):** Handled by `config/passport.js` using `passport-google-oauth20`. Requires `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` env vars (optional — disabled if absent).
 
-The Axios interceptor in `lib/api.ts` automatically picks the correct token per request.
+JWT payload includes a `type` field (`'user'` or `'customer'`). The `authenticateToken` middleware uses this to populate either `req.user` (staff) or `req.customer`. Staff access control uses `requireRole('owner', 'staff', 'admin')`. Combined customer+staff access uses `checkCustomerAccess`.
 
 ### Environment Variables
 Root `.env` is used by Docker Compose. Backend reads its own `.env`. Frontend reads `.env.local`.
@@ -95,10 +100,11 @@ Critical variables:
 - `NEXT_PUBLIC_API_URL` — frontend API base URL (e.g., `http://localhost:8080/api`)
 - `MONGODB_URI` — full MongoDB connection string with auth
 - `JWT_SECRET` — shared secret for all token signing
-- `FRONTEND_URL` — backend CORS allowlist
+- `FRONTEND_URL` — backend CORS allowlist (comma-separated for multiple origins)
+- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` — optional, enables Google OAuth for customers
 
 ### API Structure
-All endpoints under `/api`. Key route groups: `/auth`, `/products`, `/categories`, `/cart`, `/orders`, `/pos/sales`, `/users`, `/customer`, `/dashboard`, `/reports`, `/upload`, `/shipping-methods`, `/status`.
+All endpoints under `/api`. Route groups: `/auth`, `/products`, `/categories`, `/cart`, `/orders`, `/pos`, `/users`, `/customer`, `/dashboard`, `/reports`, `/upload`, `/shipping-methods`, `/inventory`, `/status`.
 
 See `backend/API_DOCUMENTATION.md` for full endpoint reference.
 

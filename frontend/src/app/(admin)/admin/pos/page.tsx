@@ -187,7 +187,7 @@ export default function POSPage() {
             </div>
 
             {/* Mobile Bottom Bar (Above Admin Nav) */}
-            <div className="md:hidden fixed bottom-16 left-0 right-0 p-4 bg-white border-t z-40 pb-4 shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.05)]">
+            <div className="md:hidden fixed bottom-16 left-0 right-0 p-4 bg-white border-t z-30 pb-4 shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.05)]">
                 <Button
                     className="w-full h-14 rounded-xl shadow-lg flex items-center justify-between px-6 text-lg font-bold"
                     onClick={() => setMobileCartOpen(true)}

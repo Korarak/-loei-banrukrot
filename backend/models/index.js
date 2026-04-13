@@ -14,5 +14,6 @@ module.exports = {
     OrderDetail: require('./OrderDetail'),
     Payment: require('./Payment'),
     Store: require('./Store'),
-    ShippingMethod: require('./ShippingMethod')
+    ShippingMethod: require('./ShippingMethod'),
+    StockMovement: require('./StockMovement')
 };

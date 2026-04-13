@@ -3,7 +3,8 @@
 import { useOrder, useUpdateOrderStatus, useVerifyPayment } from '@/hooks/useOrders';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ArrowLeft, Package, Truck, Pencil, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Package, Truck, Pencil, AlertCircle, Copy, ExternalLink, CheckCircle2, ScanLine } from 'lucide-react';
+import { BarcodeScanner } from '@/components/features/BarcodeScanner';
 import Link from 'next/link';
 import {
     Dialog,
@@ -25,9 +26,13 @@ import {
 import { useShippingMethods } from '@/hooks/useShippingMethods';
 import { useState, use, useEffect } from 'react';
 import Image from 'next/image';
+import { COURIERS, getCourier, getTrackingUrl } from '@/lib/couriers';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 import ImagePreviewDialog from '@/components/features/ImagePreviewDialog';
 import { CheckCircle, XCircle, Eye } from 'lucide-react';
 import { getImageUrl } from '@/lib/utils';
+import { getOrderStatusColor } from '@/lib/order-status';
 
 export default function AdminOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -43,6 +48,7 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
     const [shippingCost, setShippingCost] = useState('');
     const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
     const [newStatusToApply, setNewStatusToApply] = useState<string | null>(null);
+    const [scannerOpen, setScannerOpen] = useState(false);
 
     const calculateShippingCost = () => {
         if (!order?.items) return 0;
@@ -62,19 +68,41 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
 
     const handleUpdateShipping = async () => {
         if (!order) return;
+        const trimmed = trackingNumber.trim();
         try {
             await updateStatus.mutateAsync({
                 id: order._id,
                 shippingInfo: {
                     provider: shippingProvider,
-                    trackingNumber: trackingNumber,
+                    trackingNumber: trimmed,
                     cost: parseFloat(shippingCost) || 0,
                 }
             });
             setShippingDialogOpen(false);
+            const url = getTrackingUrl(shippingProvider, trimmed);
+            toast.success('บันทึกข้อมูลการจัดส่งแล้ว', {
+                description: trimmed || undefined,
+                action: url ? {
+                    label: 'ติดตามพัสดุ',
+                    onClick: () => window.open(url, '_blank'),
+                } : undefined,
+                duration: 6000,
+            });
         } catch (error) {
             // Error handled by mutation
         }
+    };
+
+    const copyTrackingNumber = () => {
+        const t = order?.shippingInfo?.trackingNumber;
+        if (!t) return;
+        navigator.clipboard.writeText(t);
+        toast.success('คัดลอกเลขพัสดุแล้ว');
+    };
+
+    const copyDraftTrackingNumber = () => {
+        navigator.clipboard.writeText(trackingNumber.trim());
+        toast.success('คัดลอกเลขพัสดุแล้ว');
     };
 
     if (isLoading) {
@@ -126,24 +154,9 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
         }
     };
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'pending':
-                return 'bg-yellow-100 text-yellow-800';
-            case 'confirmed':
-                return 'bg-blue-100 text-blue-800';
-            case 'processing':
-                return 'bg-purple-100 text-purple-800';
-            case 'shipped':
-                return 'bg-indigo-100 text-indigo-800';
-            case 'delivered':
-                return 'bg-green-100 text-green-800';
-            case 'cancelled':
-                return 'bg-red-100 text-red-800';
-            default:
-                return 'bg-gray-100 text-gray-800';
-        }
-    };
+    const savedTrackingUrl = order.shippingInfo?.trackingNumber
+        ? getTrackingUrl(order.shippingInfo.provider ?? '', order.shippingInfo.trackingNumber)
+        : null;
 
     const statusOptions = [
         { value: 'pending', label: 'รอดำเนินการ' },
@@ -184,7 +197,7 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                             onValueChange={handleStatusChange}
                             disabled={updateStatus.isPending}
                         >
-                            <SelectTrigger className={`w-[180px] ${getStatusColor(order.orderStatus || 'pending')}`}>
+                            <SelectTrigger className={`w-[180px] ${getOrderStatusColor(order.orderStatus || 'pending')}`}>
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -346,13 +359,46 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                                 <p className="text-sm text-gray-600">ผู้ให้บริการ</p>
                                 <div className="flex items-center gap-2">
                                     <Truck className="h-4 w-4 text-gray-400" />
-                                    <p className="font-semibold">{order.shippingInfo?.provider || 'ไม่มีข้อมูล'}</p>
+                                    <p className={cn('font-semibold', getCourier(order.shippingInfo?.provider ?? '')?.color)}>
+                                        {getCourier(order.shippingInfo?.provider ?? '')?.label || order.shippingInfo?.provider || 'ไม่มีข้อมูล'}
+                                    </p>
                                 </div>
                             </div>
                             <div>
-                                <p className="text-sm text-gray-600">หมายเลขติดตามพัสดุ</p>
-                                <p className="font-semibold font-mono">{order.shippingInfo?.trackingNumber || 'ไม่มีข้อมูล'}</p>
+                                <p className="text-sm text-gray-600">เลขพัสดุ (Tracking Number)</p>
+                                {order.shippingInfo?.trackingNumber ? (
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <p className="font-semibold font-mono tracking-wider text-sm">
+                                            {order.shippingInfo.trackingNumber}
+                                        </p>
+                                        <button
+                                            type="button"
+                                            onClick={copyTrackingNumber}
+                                            className="text-gray-400 hover:text-gray-700 transition-colors shrink-0"
+                                            title="คัดลอกเลขพัสดุ"
+                                        >
+                                            <Copy className="h-3.5 w-3.5" />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <p className="text-gray-400 text-sm mt-1">ยังไม่ได้กรอกเลขพัสดุ</p>
+                                )}
                             </div>
+                            {savedTrackingUrl && (
+                                <a
+                                    href={savedTrackingUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={cn(
+                                        'flex items-center gap-2 text-xs px-3 py-2 rounded-lg border w-full transition-colors',
+                                        getCourier(order.shippingInfo!.provider ?? '')?.bg ?? 'bg-gray-50 border-gray-200',
+                                        getCourier(order.shippingInfo!.provider ?? '')?.color ?? 'text-gray-700'
+                                    )}
+                                >
+                                    <ExternalLink className="h-3.5 w-3.5 shrink-0" />
+                                    <span>ติดตามพัสดุที่ {getCourier(order.shippingInfo!.provider ?? '')?.label || order.shippingInfo!.provider}</span>
+                                </a>
+                            )}
                             <div>
                                 <p className="text-sm text-gray-600">ค่าจัดส่ง</p>
                                 <p className="font-semibold">
@@ -365,64 +411,140 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
             </div>
 
             <Dialog open={shippingDialogOpen} onOpenChange={setShippingDialogOpen}>
-                <DialogContent>
+                <DialogContent className="sm:max-w-md">
                     <DialogHeader>
-                        <DialogTitle>อัปเดตข้อมูลการจัดส่ง</DialogTitle>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Truck className="h-5 w-5 text-primary" />
+                            อัปเดตข้อมูลการจัดส่ง
+                        </DialogTitle>
                     </DialogHeader>
-                    <div className="space-y-4 py-4">
+                    <div className="space-y-4 py-2">
+                        {/* Courier selector */}
                         <div className="space-y-2">
-                            <Label htmlFor="provider">ผู้ให้บริการขนส่ง</Label>
-                            <Input
-                                id="provider"
-                                placeholder="เช่น Kerry, Flash, Thai Post"
+                            <Label>บริษัทขนส่ง</Label>
+                            <Select
                                 value={shippingProvider}
-                                onChange={(e) => setShippingProvider(e.target.value)}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>เลือกวิธีการจัดส่ง (ไม่บังคับ)</Label>
-                            <Select onValueChange={(value) => {
-                                const method = shippingMethods?.find(m => m._id === value);
-                                if (method) {
-                                    setShippingProvider(method.name);
-                                    setShippingCost(method.price.toString());
-                                }
-                            }}>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="เลือกจากรายการเพื่อเติมข้อมูลอัตโนมัติ" />
+                                onValueChange={(value) => {
+                                    setShippingProvider(value);
+                                    // Also try to auto-fill cost from shippingMethods
+                                    const method = shippingMethods?.find(m => m.name === value && m.isActive);
+                                    if (method) setShippingCost(method.price.toString());
+                                }}
+                            >
+                                <SelectTrigger className="h-11">
+                                    <SelectValue placeholder="เลือกบริษัทขนส่ง" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {shippingMethods?.filter(m => m.isActive).map((method) => (
-                                        <SelectItem key={method._id} value={method._id}>
-                                            {method.name} - ฿{method.price}
+                                    {COURIERS.map((c) => (
+                                        <SelectItem key={c.value} value={c.value}>
+                                            <span className={cn('font-medium', c.color)}>{c.label}</span>
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                         </div>
+
+                        {/* Shipping method override (cost autofill) */}
+                        {shippingMethods && shippingMethods.filter(m => m.isActive).length > 0 && (
+                            <div className="space-y-2">
+                                <Label className="text-xs text-gray-500">หรือเลือกจากวิธีจัดส่งที่ตั้งค่าไว้ (เติมค่าอัตโนมัติ)</Label>
+                                <Select onValueChange={(value) => {
+                                    const method = shippingMethods?.find(m => m._id === value);
+                                    if (method) {
+                                        setShippingProvider(method.name);
+                                        setShippingCost(method.price.toString());
+                                    }
+                                }}>
+                                    <SelectTrigger className="h-9 text-sm text-gray-500">
+                                        <SelectValue placeholder="เลือกจากรายการ..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {shippingMethods.filter(m => m.isActive).map((method) => (
+                                            <SelectItem key={method._id} value={method._id}>
+                                                {method.name} — ฿{method.price}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        )}
+
+                        {/* Tracking number */}
                         <div className="space-y-2">
-                            <Label htmlFor="tracking">หมายเลขติดตามพัสดุ</Label>
-                            <Input
-                                id="tracking"
-                                placeholder="เช่น TH0123456789"
-                                value={trackingNumber}
-                                onChange={(e) => setTrackingNumber(e.target.value)}
-                            />
+                            <Label htmlFor="tracking">เลขพัสดุ (Tracking Number)</Label>
+                            <div className="flex gap-2">
+                                <div className="relative flex-1">
+                                    <Input
+                                        id="tracking"
+                                        placeholder={getCourier(shippingProvider)?.placeholder ?? 'กรอกเลขพัสดุ'}
+                                        value={trackingNumber}
+                                        onChange={(e) => setTrackingNumber(e.target.value.toUpperCase())}
+                                        className="h-11 pr-10 font-mono tracking-wider"
+                                        autoComplete="off"
+                                    />
+                                    {trackingNumber && (
+                                        <button
+                                            type="button"
+                                            onClick={copyDraftTrackingNumber}
+                                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors"
+                                            title="คัดลอก"
+                                        >
+                                            <Copy className="h-4 w-4" />
+                                        </button>
+                                    )}
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setScannerOpen(true)}
+                                    className="h-11 w-11 shrink-0 flex items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
+                                    title="สแกนบาร์โค้ดจากกล้อง"
+                                >
+                                    <ScanLine className="h-5 w-5" />
+                                </button>
+                            </div>
+                            {getCourier(shippingProvider)?.hint && (
+                                <p className="text-xs text-gray-500 flex items-center gap-1">
+                                    <CheckCircle2 className="h-3.5 w-3.5 text-gray-400 shrink-0" />
+                                    {getCourier(shippingProvider)!.hint}
+                                </p>
+                            )}
+                            {(() => {
+                                const draftUrl = trackingNumber.trim() ? getTrackingUrl(shippingProvider, trackingNumber) : null;
+                                return draftUrl ? (
+                                    <a
+                                        href={draftUrl}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={cn(
+                                            'flex items-center gap-2 text-xs px-3 py-2 rounded-lg border transition-colors',
+                                            getCourier(shippingProvider)?.bg ?? 'bg-gray-50 border-gray-200',
+                                            getCourier(shippingProvider)?.color ?? 'text-gray-700'
+                                        )}
+                                    >
+                                        <ExternalLink className="h-3.5 w-3.5 shrink-0" />
+                                        <span className="truncate">ดูข้อมูลติดตาม: {trackingNumber.trim()}</span>
+                                    </a>
+                                ) : null;
+                            })()}
                         </div>
+
+                        {/* Shipping cost */}
                         <div className="space-y-2">
-                            <Label htmlFor="cost">ค่าจัดส่ง</Label>
+                            <Label htmlFor="cost">ค่าจัดส่ง (บาท)</Label>
                             <Input
                                 id="cost"
                                 type="number"
+                                min="0"
                                 placeholder="0.00"
                                 value={shippingCost}
                                 onChange={(e) => setShippingCost(e.target.value)}
+                                className="h-11"
                             />
                         </div>
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setShippingDialogOpen(false)}>ยกเลิก</Button>
-                        <Button onClick={handleUpdateShipping} disabled={updateStatus.isPending} className="text-white">
+                        <Button onClick={handleUpdateShipping} disabled={updateStatus.isPending}>
                             {updateStatus.isPending ? 'กำลังบันทึก...' : 'บันทึกการเปลี่ยนแปลง'}
                         </Button>
                     </DialogFooter>
@@ -455,6 +577,12 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                 onOpenChange={(open: boolean) => !open && setPreviewImage(null)}
                 images={previewImage ? [{ _id: 'slip', imagePath: previewImage, isPrimary: true, sortOrder: 0 }] : []}
                 productName="Payment Slip"
+            />
+
+            <BarcodeScanner
+                open={scannerOpen}
+                onScan={(value) => setTrackingNumber(value)}
+                onClose={() => setScannerOpen(false)}
             />
         </div >
     );

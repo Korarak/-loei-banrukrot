@@ -7,6 +7,8 @@ export interface ProductVariant {
     sku: string;
     price: number;
     stock: number;
+    option1Value?: string;
+    option2Value?: string;
 }
 
 export interface ProductImage {

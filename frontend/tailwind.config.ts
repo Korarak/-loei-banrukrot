@@ -60,6 +60,15 @@ export default {
                 md: "calc(var(--radius) - 2px)",
                 sm: "calc(var(--radius) - 4px)",
             },
+            keyframes: {
+                'scan-line': {
+                    '0%, 100%': { top: '8px' },
+                    '50%': { top: 'calc(100% - 8px)' },
+                },
+            },
+            animation: {
+                'scan-line': 'scan-line 2s ease-in-out infinite',
+            },
         },
     },
     plugins: [require("tailwindcss-animate")],

@@ -89,9 +89,24 @@ app.use('/api/upload', require('./routes/uploadRoutes'));
 app.use('/api/shipping-methods', require('./routes/shippingMethodRoutes'));
 app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 app.use('/api/reports', require('./routes/reportRoutes'));
+app.use('/api/inventory', require('./routes/inventoryRoutes'));
 
 app.get('/', (req, res) => {
     res.send('API is running...');
+});
+
+// Public store stats (no auth required)
+app.get('/api/public-stats', async (req, res) => {
+    try {
+        const { Product, Customer } = require('./models');
+        const [productCount, customerCount] = await Promise.all([
+            Product.countDocuments({ isActive: true, isOnline: true }),
+            Customer.countDocuments({})
+        ]);
+        res.json({ success: true, data: { productCount, customerCount } });
+    } catch (error) {
+        res.status(500).json({ success: false });
+    }
 });
 
 // Health check

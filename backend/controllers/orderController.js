@@ -8,6 +8,7 @@ const fs = require('fs');
 const path = require('path');
 
 const { generateQRCodeDataURL } = require('../utils/promptpay');
+const { deductStock, addStock } = require('../utils/stockUtils');
 
 // @desc    Create order from cart (E-commerce)
 // @route   POST /api/orders
@@ -135,11 +136,8 @@ exports.createOrderFromCart = async (req, res, next) => {
             });
             orderDetails.push(detail);
 
-            // ลดสต็อก
-            await ProductVariant.findByIdAndUpdate(
-                item.variantId._id,
-                { $inc: { stockAvailable: -item.quantity } }
-            );
+            // ลดสต็อก + log movement (performedBy null — triggered by customer checkout)
+            await deductStock(item.variantId._id, item.quantity, 'sale_online', order._id, 'Order', null);
         }
 
         // สร้าง payment record
@@ -315,13 +313,10 @@ exports.updateOrderStatus = async (req, res, next) => {
         if (orderStatus === 'cancelled' && order.orderStatus !== 'cancelled') {
             const orderDetails = await OrderDetail.find({ orderId: order._id });
 
-            // Restore stock
-            for (const item of orderDetails) {
-                await ProductVariant.findByIdAndUpdate(
-                    item.variantId,
-                    { $inc: { stockAvailable: item.quantity } }
-                );
-            }
+            // Restore stock + log movement (parallel — cancellations are staff-triggered, low concurrency risk)
+            await Promise.all(orderDetails.map(item =>
+                addStock(item.variantId, item.quantity, 'cancel_online', order._id, 'Order', req.user?._id || null)
+            ));
         }
 
         // Update fields

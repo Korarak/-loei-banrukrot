@@ -21,12 +21,14 @@ import {
     DialogFooter,
     DialogDescription,
 } from '@/components/ui/dialog';
-import { Search, Eye, Plus, AlertCircle, Store, Globe, Calendar, CreditCard, Banknote, User } from 'lucide-react';
+import { Search, Eye, Plus, AlertCircle, Store, Globe, Calendar, CreditCard, Banknote, User, Copy, ExternalLink, Truck, CheckCircle2, ScanLine } from 'lucide-react';
+import { BarcodeScanner } from '@/components/features/BarcodeScanner';
 import Link from 'next/link';
 import { useRef, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Label } from '@/components/ui/label';
+import { COURIERS, getCourier, getTrackingUrl } from '@/lib/couriers';
 
 const statusOptions = [
     { value: 'all', label: 'ทั้งหมด' },
@@ -51,18 +53,13 @@ export default function AdminOrdersPage() {
     const [trackingOrder, setTrackingOrder] = useState<string | null>(null);
     const [trackingNumber, setTrackingNumber] = useState('');
     const [courier, setCourier] = useState('Flash Express');
+    const [scannerOpen, setScannerOpen] = useState(false);
 
     const { data: orders, isLoading } = useOrders({ refetchInterval: 10000 }); // Poll every 10s
     const updateStatus = useUpdateOrderStatus();
 
     // Notification Logic
     const previousOrderCount = useRef(0);
-    const audioRef = useRef<HTMLAudioElement | null>(null);
-
-    useEffect(() => {
-        // Simple beep sound data URI
-        audioRef.current = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU'); // Placeholder, might need real file
-    }, []);
 
     useEffect(() => {
         if (orders) {
@@ -107,22 +104,37 @@ export default function AdminOrdersPage() {
 
     const confirmTracking = async () => {
         if (!trackingOrder) return;
+        const trimmed = trackingNumber.trim();
         try {
             await updateStatus.mutateAsync({
                 id: trackingOrder,
                 status: 'shipped',
                 shippingInfo: {
                     provider: courier,
-                    trackingNumber: trackingNumber,
+                    trackingNumber: trimmed,
                     cost: 0
                 }
             });
             setTrackingDialogOpen(false);
             setTrackingOrder(null);
-            toast.success('อัปเดตสถานะการจัดส่งเรียบร้อยแล้ว');
+            const url = getTrackingUrl(courier, trimmed);
+            toast.success('อัปเดตสถานะการจัดส่งเรียบร้อยแล้ว', {
+                description: trimmed,
+                action: url ? {
+                    label: 'ติดตามพัสดุ',
+                    onClick: () => window.open(url, '_blank'),
+                } : undefined,
+                duration: 6000,
+            });
         } catch (error) {
             // Error handled by mutation
         }
+    };
+
+    const copyTracking = () => {
+        if (!trackingNumber.trim()) return;
+        navigator.clipboard.writeText(trackingNumber.trim());
+        toast.success('คัดลอกหมายเลขพัสดุแล้ว');
     };
 
     const confirmCancel = async () => {
@@ -371,48 +383,110 @@ export default function AdminOrdersPage() {
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
-                            <Store className="h-5 w-5 text-primary" />
-                            รายละเอียดการจัดส่ง
+                            <Truck className="h-5 w-5 text-primary" />
+                            กรอกเลขพัสดุ
                         </DialogTitle>
                         <DialogDescription>
-                            กรอกหมายเลขติดตามพัสดุเพื่อเปลี่ยนสถานะเป็น "เริ่มการจัดส่ง"
+                            เปลี่ยนสถานะเป็น "เริ่มการจัดส่ง" พร้อมบันทึกเลขพัสดุ
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="grid gap-4 py-4">
+                    <div className="grid gap-4 py-2">
+                        {/* Courier selector */}
                         <div className="grid gap-2">
                             <Label htmlFor="courier">บริษัทขนส่ง</Label>
                             <Select value={courier} onValueChange={setCourier}>
-                                <SelectTrigger id="courier">
+                                <SelectTrigger id="courier" className="h-11">
                                     <SelectValue placeholder="เลือกบริษัทขนส่ง" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="Flash Express">Flash Express</SelectItem>
-                                    <SelectItem value="Kerry Express">Kerry Express</SelectItem>
-                                    <SelectItem value="J&T Express">J&T Express</SelectItem>
-                                    <SelectItem value="Thailand Post">ไปรษณีย์ไทย</SelectItem>
-                                    <SelectItem value="Other">อื่นๆ</SelectItem>
+                                    {COURIERS.map((c) => (
+                                        <SelectItem key={c.value} value={c.value}>
+                                            <span className={cn('font-medium', c.color)}>{c.label}</span>
+                                        </SelectItem>
+                                    ))}
                                 </SelectContent>
                             </Select>
                         </div>
+
+                        {/* Tracking number input */}
                         <div className="grid gap-2">
-                            <Label htmlFor="tracking">หมายเลขติดตามพัสดุ (Tracking Number)</Label>
-                            <Input
-                                id="tracking"
-                                value={trackingNumber}
-                                onChange={(e) => setTrackingNumber(e.target.value)}
-                                placeholder="เช่น TH0123456789"
-                                autoFocus
-                            />
+                            <Label htmlFor="tracking">เลขพัสดุ (Tracking Number)</Label>
+                            <div className="flex gap-2">
+                                <div className="relative flex-1">
+                                    <Input
+                                        id="tracking"
+                                        value={trackingNumber}
+                                        onChange={(e) => setTrackingNumber(e.target.value.toUpperCase())}
+                                        onKeyDown={(e) => e.key === 'Enter' && trackingNumber.trim() && confirmTracking()}
+                                        placeholder={getCourier(courier)?.placeholder ?? 'กรอกเลขพัสดุ'}
+                                        className="h-11 pr-10 font-mono tracking-wider"
+                                        autoFocus
+                                        autoComplete="off"
+                                    />
+                                    {trackingNumber && (
+                                        <button
+                                            type="button"
+                                            onClick={copyTracking}
+                                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors"
+                                            title="คัดลอกเลขพัสดุ"
+                                        >
+                                            <Copy className="h-4 w-4" />
+                                        </button>
+                                    )}
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setScannerOpen(true)}
+                                    className="h-11 w-11 shrink-0 flex items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
+                                    title="สแกนบาร์โค้ดจากกล้อง"
+                                >
+                                    <ScanLine className="h-5 w-5" />
+                                </button>
+                            </div>
+                            {getCourier(courier)?.hint && (
+                                <p className="text-xs text-gray-500 flex items-center gap-1">
+                                    <CheckCircle2 className="h-3.5 w-3.5 text-gray-400 shrink-0" />
+                                    {getCourier(courier)!.hint}
+                                </p>
+                            )}
                         </div>
+
+                        {/* Live tracking link preview */}
+                        {trackingNumber.trim() && getTrackingUrl(courier, trackingNumber) && (
+                            <a
+                                href={getTrackingUrl(courier, trackingNumber)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={cn(
+                                    'flex items-center gap-2 text-sm px-3 py-2 rounded-lg border transition-colors',
+                                    getCourier(courier)?.bg ?? 'bg-gray-50 border-gray-200',
+                                    getCourier(courier)?.color ?? 'text-gray-700'
+                                )}
+                            >
+                                <ExternalLink className="h-3.5 w-3.5 shrink-0" />
+                                <span className="truncate">ดูข้อมูลติดตาม: {trackingNumber.trim()}</span>
+                            </a>
+                        )}
                     </div>
 
                     <DialogFooter className="gap-2 sm:space-x-0">
                         <Button variant="outline" onClick={() => setTrackingDialogOpen(false)}>ยกเลิก</Button>
-                        <Button onClick={confirmTracking} disabled={!trackingNumber} className="text-white">ยืนยันการจัดส่ง</Button>
+                        <Button
+                            onClick={confirmTracking}
+                            disabled={!trackingNumber.trim() || updateStatus.isPending}
+                        >
+                            {updateStatus.isPending ? 'กำลังบันทึก...' : 'ยืนยันการจัดส่ง'}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            <BarcodeScanner
+                open={scannerOpen}
+                onScan={(value) => setTrackingNumber(value)}
+                onClose={() => setScannerOpen(false)}
+            />
         </div>
     );
 }

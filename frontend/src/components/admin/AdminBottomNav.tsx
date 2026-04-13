@@ -47,7 +47,7 @@ export function AdminBottomNav({ onMenuClick }: AdminBottomNavProps) {
 
     return (
         <>
-            <div className="fixed bottom-0 left-0 right-0 z-[100] bg-white border-t border-gray-200 pb-[env(safe-area-inset-bottom)] xl:hidden">
+            <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 pb-[env(safe-area-inset-bottom)] xl:hidden">
                 <div className="flex items-center justify-around h-16 w-full px-2">
                     {/* Menu Toggle Button */}
                     <button
@@ -73,8 +73,6 @@ export function AdminBottomNav({ onMenuClick }: AdminBottomNavProps) {
                     ))}
                 </div>
             </div>
-            {/* Spacer for bottom nav */}
-            <div className="h-16 xl:hidden shrink-0 pb-[env(safe-area-inset-bottom)]" />
         </>
     );
 }
