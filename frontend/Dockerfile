@@ -15,6 +15,9 @@ COPY frontend/package.json ./frontend/
 # Use npm ci for deterministic installs and cache mounts to speed up repeated builds
 # We use --workspace to only install frontend dependencies
 RUN --mount=type=cache,target=/root/.npm \
+    npm config set fetch-retries 5 && \
+    npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000 && \
     npm ci --workspace=frontend --legacy-peer-deps
 
 # Rebuild the source code only when needed
@@ -24,7 +27,7 @@ WORKDIR /app
 # Re-declare build arg for this stage (ARGs don't carry across stages)
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -37,7 +40,7 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs

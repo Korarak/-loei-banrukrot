@@ -12,6 +12,9 @@ COPY backend/package.json ./backend/
 
 # Use npm ci for deterministic installs and cache mounts
 RUN --mount=type=cache,target=/root/.npm \
+    npm config set fetch-retries 5 && \
+    npm config set fetch-retry-mintimeout 20000 && \
+    npm config set fetch-retry-maxtimeout 120000 && \
     npm ci --workspace=backend --legacy-peer-deps
 
 # Create final production image
