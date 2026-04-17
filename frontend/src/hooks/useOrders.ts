@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { toast } from 'sonner';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 export interface Order {
     _id: string;
@@ -78,12 +79,16 @@ export function useOrders(options?: any) {
 
 // Fetch customer orders
 export function useCustomerOrders() {
+    const isCustomerAuthenticated = useAuthStore((state) => state.isCustomerAuthenticated);
+    const isAuth = isCustomerAuthenticated();
+
     return useQuery({
         queryKey: ['orders', 'customer'],
         queryFn: async () => {
             const response = await api.get('/orders');
             return response.data.data as Order[];
         },
+        enabled: isAuth,
     });
 }
 
