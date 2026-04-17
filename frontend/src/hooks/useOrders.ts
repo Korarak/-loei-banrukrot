@@ -5,7 +5,6 @@ import { toast } from 'sonner';
 export interface Order {
     _id: string;
     orderReference: string;
-    paymentMethod?: string;
     hasSlip?: boolean;
     slipVerified?: boolean;
     customer: {
