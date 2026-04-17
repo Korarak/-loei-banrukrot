@@ -6,7 +6,7 @@ export const ORDER_STATUS_LABELS: Record<string, string> = {
     shipped: 'เริ่มการจัดส่ง',
     delivered: 'จัดส่งสำเร็จ',
     cancelled: 'ยกเลิก',
-    completed: 'จัดส่งสำเร็จ', // Mapping completed to delivered for simplicity if needed, or maintain distinct
+    completed: 'เสร็จรับเงิน',
 };
 
 export const ORDER_STATUS_COLORS: Record<string, string> = {
@@ -16,7 +16,7 @@ export const ORDER_STATUS_COLORS: Record<string, string> = {
     shipped: 'bg-indigo-100 text-indigo-800',
     delivered: 'bg-green-100 text-green-800',
     cancelled: 'bg-red-100 text-red-800',
-    completed: 'bg-green-100 text-green-800',
+    completed: 'bg-teal-100 text-teal-800',
 };
 
 export function getOrderStatusLabel(status: string): string {

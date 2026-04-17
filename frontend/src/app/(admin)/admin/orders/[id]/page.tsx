@@ -3,7 +3,8 @@
 import { useOrder, useUpdateOrderStatus, useVerifyPayment } from '@/hooks/useOrders';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ArrowLeft, Package, Truck, Pencil, AlertCircle, Copy, ExternalLink, CheckCircle2, ScanLine } from 'lucide-react';
+import { ArrowLeft, Package, Truck, Pencil, AlertCircle, Copy, ExternalLink, CheckCircle2, ScanLine, ReceiptText } from 'lucide-react';
+import { OrderReceiptDialog } from '@/components/admin/OrderReceiptDialog';
 import { BarcodeScanner } from '@/components/features/BarcodeScanner';
 import Link from 'next/link';
 import {
@@ -49,6 +50,7 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
     const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
     const [newStatusToApply, setNewStatusToApply] = useState<string | null>(null);
     const [scannerOpen, setScannerOpen] = useState(false);
+    const [receiptOpen, setReceiptOpen] = useState(false);
 
     const calculateShippingCost = () => {
         if (!order?.items) return 0;
@@ -164,6 +166,7 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
         { value: 'processing', label: 'กำลังเตรียมสินค้า' },
         { value: 'shipped', label: 'เริ่มการจัดส่ง' },
         { value: 'delivered', label: 'จัดส่งสำเร็จ' },
+        { value: 'completed', label: 'เสร็จรับเงิน' },
         { value: 'cancelled', label: 'ยกเลิกแล้ว' },
     ];
 
@@ -191,7 +194,16 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                             })}
                         </p>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setReceiptOpen(true)}
+                            className="h-9 gap-2 text-sm font-medium"
+                        >
+                            <ReceiptText className="h-4 w-4" />
+                            ดูใบเสร็จ
+                        </Button>
                         <Select
                             value={order.orderStatus}
                             onValueChange={handleStatusChange}
@@ -584,6 +596,29 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                 onScan={(value) => setTrackingNumber(value)}
                 onClose={() => setScannerOpen(false)}
             />
+
+            {receiptOpen && (
+                <OrderReceiptDialog
+                    open={receiptOpen}
+                    onOpenChange={setReceiptOpen}
+                    order={order}
+                />
+            )}
+
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                @media print {
+                    body * { visibility: hidden; }
+                    #receipt-content, #receipt-content * { visibility: visible; }
+                    #receipt-content {
+                        position: absolute;
+                        left: 0; top: 0;
+                        width: 100%;
+                        padding: 0; margin: 0;
+                    }
+                    [role="dialog"] { box-shadow: none !important; border: none !important; }
+                }
+            `}} />
         </div >
     );
 }

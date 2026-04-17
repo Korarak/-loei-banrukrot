@@ -441,9 +441,9 @@ export default function ProductsPage() {
                     </div>
 
                     {isLoading ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                             {[1, 2, 3, 4, 5, 6].map((i) => (
-                                <div key={i} className="aspect-[4/5] bg-gray-100 rounded-[2.5rem] animate-pulse" />
+                                <div key={i} className="aspect-[4/3] bg-gray-100 rounded-2xl animate-pulse" />
                             ))}
                         </div>
                     ) : products.length > 0 ? (
@@ -460,7 +460,7 @@ export default function ProductsPage() {
                                 }}
                                 initial="hidden"
                                 animate="show"
-                                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+                                className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
                             >
                                 {products.map((product: any) => (
                                     <motion.div
@@ -469,8 +469,6 @@ export default function ProductsPage() {
                                             hidden: { opacity: 0, scale: 0.9 },
                                             show: { opacity: 1, scale: 1 }
                                         }}
-                                        whileHover={{ y: -10, transition: { duration: 0.2 } }}
-                                        className="bg-white rounded-[2rem] p-4 shadow-sm hover:shadow-2xl transition-all border border-gray-100 group flex flex-col h-full"
                                     >
                                         <ProductCard product={product} />
                                     </motion.div>

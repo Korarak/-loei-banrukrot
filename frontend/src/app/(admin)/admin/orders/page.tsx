@@ -36,6 +36,7 @@ const statusOptions = [
     { value: 'processing', label: 'กำลังเตรียมสินค้า' },
     { value: 'shipped', label: 'เริ่มการจัดส่ง' },
     { value: 'delivered', label: 'จัดส่งสำเร็จ' },
+    { value: 'completed', label: 'เสร็จรับเงิน' },
     { value: 'cancelled', label: 'ยกเลิก' },
 ];
 

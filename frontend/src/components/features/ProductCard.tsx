@@ -1,12 +1,11 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { useAddToCart } from '@/hooks/useCart';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { toast } from 'sonner';
 import { getImageUrl } from '@/lib/utils';
-import { Heart } from 'lucide-react';
+import { Heart, ShoppingCart } from 'lucide-react';
 import { useWishlistStore } from '@/stores/useWishlistStore';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
@@ -30,59 +29,32 @@ export default function ProductCard({ product }: ProductCardProps) {
     const ref = useRef<HTMLDivElement>(null);
     const x = useMotionValue(0);
     const y = useMotionValue(0);
-
-    const mouseXSpring = useSpring(x);
-    const mouseYSpring = useSpring(y);
-
-    const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["7deg", "-7deg"]);
-    const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-7deg", "7deg"]);
-
-    // Gloss effect movement
-    const glossX = useTransform(mouseXSpring, [-0.5, 0.5], ["0%", "100%"]);
-    const glossY = useTransform(mouseYSpring, [-0.5, 0.5], ["0%", "100%"]);
+    const mouseXSpring = useSpring(x, { stiffness: 150, damping: 20 });
+    const mouseYSpring = useSpring(y, { stiffness: 150, damping: 20 });
+    const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["6deg", "-6deg"]);
+    const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-6deg", "6deg"]);
 
     const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
         if (!ref.current) return;
-
         const rect = ref.current.getBoundingClientRect();
-        const width = rect.width;
-        const height = rect.height;
-
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-
-        const xPct = mouseX / width - 0.5;
-        const yPct = mouseY / height - 0.5;
-
-        x.set(xPct);
-        y.set(yPct);
+        x.set((e.clientX - rect.left) / rect.width - 0.5);
+        y.set((e.clientY - rect.top) / rect.height - 0.5);
     };
+    const handleMouseLeave = () => { x.set(0); y.set(0); };
 
-    const handleMouseLeave = () => {
-        x.set(0);
-        y.set(0);
-    };
-
-    // Get primary image or first image
     const primaryImage = product.images?.find((img: any) => img.isPrimary) || product.images?.[0];
-
-    // Get default variant (first one)
-    const defaultVariant = product.variants?.[0];
-
-    // Calculate price range or display single price
     const prices = product.variants?.map((v: any) => v.price) || [];
     const minPrice = Math.min(...prices);
     const maxPrice = Math.max(...prices);
-
     const priceDisplay = prices.length > 0
         ? minPrice === maxPrice
             ? `฿${minPrice.toLocaleString()}`
-            : `฿${minPrice.toLocaleString()} - ฿${maxPrice.toLocaleString()}`
-        : 'Price N/A';
+            : `฿${minPrice.toLocaleString()} – ฿${maxPrice.toLocaleString()}`
+        : 'N/A';
 
     const isOutOfStock = product.variants?.every((v: any) => v.stockAvailable <= 0);
     const firstAvailableVariant = product.variants?.find((v: any) => v.stockAvailable > 0);
-    const hasInStock = !isOutOfStock;
+    const defaultVariant = product.variants?.[0];
 
     const handleWishlistToggle = (e: React.MouseEvent) => {
         e.preventDefault();
@@ -91,13 +63,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             removeFromWishlist(product._id);
             toast.success('ลบออกจากรายการโปรดแล้ว');
         } else {
-            addToWishlist({
-                _id: product._id,
-                productName: product.productName,
-                imageUrl: primaryImage?.imagePath,
-                price: minPrice,
-                slug: product._id
-            });
+            addToWishlist({ _id: product._id, productName: product.productName, imageUrl: primaryImage?.imagePath, price: minPrice, slug: product._id });
             toast.success('เพิ่มในรายการโปรดแล้ว');
         }
     };
@@ -106,12 +72,10 @@ export default function ProductCard({ product }: ProductCardProps) {
     const [confettiParticles, setConfettiParticles] = useState<any[]>([]);
 
     const handleAddToCart = async (e: React.MouseEvent) => {
-        e.preventDefault(); // Prevent navigation
-
+        e.preventDefault();
         const targetVariant = firstAvailableVariant || defaultVariant;
         if (!targetVariant) return;
 
-        // Generate confetti particles here
         const particles = [...Array(12)].map(() => ({
             x: (Math.random() - 0.5) * 200,
             y: (Math.random() - 0.5) * 200,
@@ -119,26 +83,14 @@ export default function ProductCard({ product }: ProductCardProps) {
             color: ['#FFC107', '#FF5722', '#4CAF50', '#2196F3', '#E91E63'][Math.floor(Math.random() * 5)]
         }));
         setConfettiParticles(particles);
-
-        // Trigger visual confetti
         setShowConfetti(true);
         setTimeout(() => setShowConfetti(false), 1000);
 
         try {
-            await addToCart.mutateAsync({
-                productId: product._id,
-                variantId: targetVariant._id,
-                quantity: 1
-            });
-            toast.success('เพิ่มลงตะกร้าเรียบร้อย', {
-                description: `${product.productName} ถูกเพิ่มลงในตะกร้าแล้ว`,
-                id: 'add-to-cart-success' // Prevent stack
-            });
+            await addToCart.mutateAsync({ productId: product._id, variantId: targetVariant._id, quantity: 1 });
+            toast.success('เพิ่มลงตะกร้าเรียบร้อย', { description: product.productName, id: 'add-to-cart-success' });
         } catch (error: any) {
-            const message = error?.response?.data?.message || 'ไม่สามารถเพิ่มสินค้าได้';
-            toast.error(message, {
-                id: 'add-to-cart-error' // Prevent stack
-            });
+            toast.error(error?.response?.data?.message || 'ไม่สามารถเพิ่มสินค้าได้', { id: 'add-to-cart-error' });
         }
     };
 
@@ -147,130 +99,121 @@ export default function ProductCard({ product }: ProductCardProps) {
             ref={ref}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
-            style={{
-                rotateY,
-                rotateX,
-                transformStyle: "preserve-3d",
-            }}
-            className="group h-full perspective-1000 relative"
+            whileHover={{ y: -6 }}
+            transition={{ duration: 0.2 }}
+            style={{ rotateY, rotateX, transformStyle: "preserve-3d" }}
+            className="group perspective-1000 relative"
         >
-            <Link href={`/products/${product._id}`} className="block h-full">
-                <div className="bg-white rounded-3xl overflow-hidden border border-gray-100 h-full flex flex-col relative shadow-sm group-hover:shadow-2xl transition-shadow duration-500">
+            <Link href={`/products/${product._id}`} className="block">
+                {/* Single card — no double nesting */}
+                <div className="relative rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-md group-hover:shadow-xl group-hover:border-gray-200 transition-all duration-300">
 
-                    {/* Gloss Overlay */}
-                    <motion.div
-                        style={{
-                            background: `radial-gradient(circle at center, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 60%)`,
-                            left: glossX,
-                            top: glossY,
-                            x: "-50%",
-                            y: "-50%",
-                            pointerEvents: "none"
-                        }}
-                        className="absolute w-[150%] h-[150%] z-20 opacity-0 group-hover:opacity-20 transition-opacity duration-500 rounded-full blur-3xl mix-blend-overlay"
-                    />
-
-                    <div className="relative aspect-square w-full bg-gray-50 overflow-hidden transform-gpu border-b border-gray-50">
-                        {/* Wishlist Button */}
-                        <motion.button
-                            whileTap={{ scale: 0.8 }}
-                            whileHover={{ scale: 1.1 }}
-                            onClick={handleWishlistToggle}
-                            className={`absolute top-3 right-3 z-30 p-2 rounded-full backdrop-blur-sm transition-all duration-200 shadow-sm ${(inWishlist && mounted)
-                                ? 'bg-red-50 text-red-500 hover:bg-red-100'
-                                : 'bg-white/80 text-gray-400 hover:bg-white hover:text-red-500'
-                                }`}
-                        >
-                            <Heart className={`h-4 w-4 ${(inWishlist && mounted) ? 'fill-current' : ''}`} />
-                        </motion.button>
-
+                    {/* ── Image ── */}
+                    <div className="relative aspect-[4/3] w-full bg-gray-50 overflow-hidden">
                         {primaryImage ? (
                             <Image
                                 src={getImageUrl(primaryImage.imagePath)}
                                 alt={product.productName}
                                 fill
-                                className="object-cover object-center group-hover:scale-110 transition-transform duration-700 ease-out z-10"
-                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                className="object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
+                                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                                 unoptimized
                             />
                         ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
-                                <span className="text-xs font-medium uppercase tracking-wider">No Image</span>
+                            <div className="w-full h-full flex items-center justify-center text-gray-300 bg-gradient-to-br from-gray-50 to-gray-100">
+                                <span className="text-xs font-semibold uppercase tracking-widest">No Image</span>
                             </div>
                         )}
 
-                        <div className="absolute inset-x-4 bottom-4 translate-y-0 md:translate-y-full md:group-hover:translate-y-0 transition-transform duration-500 ease-out z-20 opacity-100 md:opacity-0 md:group-hover:opacity-100 flex gap-2">
-                            <motion.div className="flex-1" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                                <Button
-                                    className="w-full bg-white text-primary hover:bg-emerald-50 shadow-lg border border-emerald-100 font-bold rounded-xl h-10 text-[10px] uppercase tracking-wider"
-                                    onClick={handleAddToCart}
-                                    disabled={isOutOfStock || addToCart.isPending}
-                                >
-                                    {addToCart.isPending ? '...' : (hasInStock ? 'ใส่ตะกร้า' : 'สินค้าหมด')}
-                                </Button>
-                            </motion.div>
-                        </div>
+                        {/* Gradient overlay — always visible, stronger on hover */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                        <div className="absolute top-3 left-3 z-20 flex flex-col gap-2">
-                            {isOutOfStock && (
-                                <Badge variant="destructive" className="rounded-lg px-2 py-1 text-[10px] font-bold uppercase tracking-wider shadow-sm animate-pulse">
-                                    หมด
-                                </Badge>
-                            )}
+                        {/* Out of stock badge */}
+                        {isOutOfStock && (
+                            <div className="absolute top-3 left-3 z-20">
+                                <span className="bg-red-500 text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full shadow">
+                                    สินค้าหมด
+                                </span>
+                            </div>
+                        )}
+
+                        {/* Wishlist button */}
+                        <motion.button
+                            whileTap={{ scale: 0.8 }}
+                            onClick={handleWishlistToggle}
+                            className={`absolute top-3 right-3 z-30 p-2 rounded-full backdrop-blur-sm shadow transition-all duration-200 ${(inWishlist && mounted)
+                                ? 'bg-red-500 text-white'
+                                : 'bg-white/80 text-gray-400 hover:bg-white hover:text-red-500'
+                            }`}
+                        >
+                            <Heart className={`h-4 w-4 ${(inWishlist && mounted) ? 'fill-current' : ''}`} />
+                        </motion.button>
+
+                        {/* Add to cart — slides up on hover */}
+                        <div className="absolute inset-x-3 bottom-3 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-out z-20">
+                            <Button
+                                className="w-full bg-white/95 text-gray-900 hover:bg-white shadow-lg font-bold rounded-xl h-10 text-xs uppercase tracking-wider backdrop-blur-sm border-0"
+                                onClick={handleAddToCart}
+                                disabled={isOutOfStock || addToCart.isPending}
+                            >
+                                <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
+                                {addToCart.isPending ? '...' : isOutOfStock ? 'สินค้าหมด' : 'ใส่ตะกร้า'}
+                            </Button>
                         </div>
                     </div>
 
-                    {/* Confetti Particles */}
-                    {showConfetti && (
-                        <div className="absolute inset-0 z-50 pointer-events-none flex items-center justify-center">
-                            {confettiParticles.map((particle, i) => (
-                                <motion.div
-                                    key={i}
-                                    initial={{ x: 0, y: 0, scale: 0.5, opacity: 1 }}
-                                    animate={{
-                                        x: particle.x,
-                                        y: particle.y,
-                                        rotate: particle.rotate,
-                                        scale: 0,
-                                        opacity: 0
-                                    }}
-                                    transition={{ duration: 0.8, ease: "easeOut" }}
-                                    className="absolute w-2 h-2 rounded-full"
-                                    style={{
-                                        backgroundColor: particle.color
-                                    }}
-                                />
-                            ))}
-                        </div>
-                    )}
-
-                    <div className="p-5 flex flex-col flex-1 bg-white relative z-10">
-                        <div className="mb-2 flex items-center justify-between h-5">
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground bg-gray-100 px-2 py-0.5 rounded-full truncate max-w-[100px]">{product.brand}</span>
-                            {hasInStock && (
-                                <div className="flex items-center gap-1">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                                    <span className="text-[10px] font-medium text-emerald-600">In Stock</span>
-                                </div>
+                    {/* ── Info ── */}
+                    <div className="px-4 py-3">
+                        {/* Brand + stock indicator */}
+                        <div className="flex items-center justify-between mb-1.5">
+                            {product.brand ? (
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                                    {product.brand}
+                                </span>
+                            ) : <span />}
+                            {!isOutOfStock && (
+                                <span className="flex items-center gap-1 text-[10px] font-semibold text-emerald-500">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
+                                    In Stock
+                                </span>
                             )}
                         </div>
-                        <h3 className="font-bold text-sm text-gray-900 truncate mb-3 group-hover:text-primary transition-colors duration-300 leading-tight h-5">
+
+                        {/* Product name */}
+                        <h3 className="font-bold text-sm text-gray-900 line-clamp-2 leading-snug group-hover:text-primary transition-colors duration-200 mb-2 min-h-[2.5rem]">
                             {product.productName}
                         </h3>
-                        <div className="flex items-end justify-between mt-auto pt-4 border-t border-gray-50">
-                            <div className="flex flex-row items-baseline gap-2">
-                                <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">Price</span>
-                                <div className="font-black text-lg text-primary tracking-tight font-kanit gradient-text-primary truncate">
-                                    {priceDisplay}
-                                </div>
-                            </div>
-                            <div className="text-xs text-gray-400 font-medium bg-gray-50 px-2 py-1 rounded-md whitespace-nowrap">
-                                {product.variants.length} options
-                            </div>
+
+                        {/* Price row */}
+                        <div className="flex items-baseline justify-between">
+                            <span className="text-base font-black text-primary tracking-tight font-kanit">
+                                {priceDisplay}
+                            </span>
+                            {product.variants?.length > 1 && (
+                                <span className="text-[10px] text-gray-400 font-medium">
+                                    {product.variants.length} ตัวเลือก
+                                </span>
+                            )}
                         </div>
                     </div>
                 </div>
             </Link>
+
+            {/* Confetti */}
+            {showConfetti && (
+                <div className="absolute inset-0 z-50 pointer-events-none flex items-center justify-center">
+                    {confettiParticles.map((p, i) => (
+                        <motion.div
+                            key={i}
+                            initial={{ x: 0, y: 0, scale: 0.5, opacity: 1 }}
+                            animate={{ x: p.x, y: p.y, rotate: p.rotate, scale: 0, opacity: 0 }}
+                            transition={{ duration: 0.8, ease: "easeOut" }}
+                            className="absolute w-2 h-2 rounded-full"
+                            style={{ backgroundColor: p.color }}
+                        />
+                    ))}
+                </div>
+            )}
         </motion.div>
     );
 }
