@@ -5,9 +5,10 @@ import BottomNav from '@/components/layout/BottomNav';
 import Footer from '@/components/layout/Footer';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ShoppingCart, User, LogOut, Wrench, Package, Heart, Menu } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Wrench, Package, Heart, Menu, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useCart } from '@/hooks/useCart';
+import { useCustomerOrders } from '@/hooks/useOrders';
 import { Button } from '@/components/ui/button';
 import { getImageUrl } from '@/lib/utils';
 import {
@@ -20,6 +21,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
+import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Sheet,
@@ -45,7 +47,26 @@ export default function CustomerLayout({
     const [scrollProgress, setScrollProgress] = useState(0);
 
     const { data: cart } = useCart();
+    const { data: orders } = useCustomerOrders();
     const totalItems = (cart?.items || []).reduce((sum, item) => sum + item.quantity, 0);
+    const pendingSlipCount = customer
+        ? (orders || []).filter(o => o.orderStatus === 'pending' && o.paymentMethod !== 'Cash' && !o.hasSlip).length
+        : 0;
+
+    const toastShownRef = useRef(false);
+    useEffect(() => {
+        if (pendingSlipCount > 0 && !toastShownRef.current) {
+            toastShownRef.current = true;
+            toast.warning(
+                `มี ${pendingSlipCount} คำสั่งซื้อรอการแนบสลิป`,
+                {
+                    description: 'กรุณาอัปโหลดหลักฐานการโอนเงินเพื่อดำเนินการต่อ',
+                    duration: 6000,
+                    action: { label: 'ดูคำสั่งซื้อ', onClick: () => router.push('/orders?tab=pending') },
+                }
+            );
+        }
+    }, [pendingSlipCount]);
 
     // Cart Bump Animation
     const [bump, setBump] = useState(false);
@@ -130,7 +151,7 @@ export default function CustomerLayout({
                                     href="/products"
                                     className="relative px-4 py-2 text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors group overflow-hidden rounded-full hover:bg-gray-50"
                                 >
-                                    <span className="relative z-10">ALL PRODUCTS</span>
+                                    <span className="relative z-10">สินค้าทั้งหมด</span>
                                 </Link>
                             </div>
 
@@ -179,46 +200,51 @@ export default function CustomerLayout({
                                                     </div>
                                                     <div className="text-left hidden lg:block">
                                                         <div className="text-xs font-bold text-gray-900">{customer.firstName}</div>
-                                                        <div className="text-[10px] text-gray-500 font-medium">Member</div>
+                                                        <div className="text-[10px] text-gray-500 font-medium">สมาชิก</div>
                                                     </div>
                                                     <Menu className="h-4 w-4 text-gray-400" />
                                                 </Button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 shadow-2xl border-gray-100 bg-white z-[60]">
-                                                <DropdownMenuLabel className="px-2 py-1.5 text-xs font-black text-gray-400 uppercase tracking-wider">My Account</DropdownMenuLabel>
+                                                <DropdownMenuLabel className="px-2 py-1.5 text-xs font-black text-gray-400 uppercase tracking-wider">บัญชีของฉัน</DropdownMenuLabel>
                                                 <DropdownMenuSeparator className="bg-gray-100" />
                                                 <DropdownMenuItem asChild className="rounded-xl cursor-pointer focus:bg-primary/10 focus:text-primary">
                                                     <Link href="/profile" className="w-full flex items-center gap-2 font-bold text-gray-600">
                                                         <User className="h-4 w-4" />
-                                                        <span>Profile</span>
+                                                        <span>โปรไฟล์</span>
                                                     </Link>
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem asChild className="rounded-xl cursor-pointer focus:bg-primary/10 focus:text-primary">
                                                     <Link href="/wishlist" className="w-full flex items-center gap-2 font-bold text-gray-600">
                                                         <Heart className="h-4 w-4" />
-                                                        <span>Wishlist</span>
+                                                        <span>รายการโปรด</span>
                                                     </Link>
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem asChild className="rounded-xl cursor-pointer focus:bg-primary/10 focus:text-primary">
                                                     <Link href="/orders" className="w-full flex items-center gap-2 font-bold text-gray-600">
                                                         <Package className="h-4 w-4" />
-                                                        <span>Orders</span>
+                                                        <span>คำสั่งซื้อ</span>
+                                                        {pendingSlipCount > 0 && (
+                                                            <span className="ml-auto bg-orange-500 text-white text-[10px] font-black rounded-full min-w-[1.1rem] h-[1.1rem] px-1 flex items-center justify-center">
+                                                                {pendingSlipCount}
+                                                            </span>
+                                                        )}
                                                     </Link>
                                                 </DropdownMenuItem>
                                                 <DropdownMenuSeparator className="bg-gray-100" />
                                                 <DropdownMenuItem onClick={handleLogout} className="text-red-500 rounded-xl cursor-pointer focus:text-red-600 focus:bg-red-50 font-bold">
                                                     <LogOut className="h-4 w-4 mr-2" />
-                                                    Log Out
+                                                    ออกจากระบบ
                                                 </DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                     ) : (
                                         <div className="flex items-center gap-2">
                                             <Button variant="ghost" asChild className="text-gray-600 font-bold hover:text-accent hover:bg-accent/5 rounded-full px-5 transition-colors">
-                                                <Link href="/customer-login">Login</Link>
+                                                <Link href="/customer-login">เข้าสู่ระบบ</Link>
                                             </Button>
                                             <Button asChild className="bg-gradient-to-r from-accent to-pink-500 text-white hover:brightness-110 rounded-full shadow-lg shadow-accent/20 px-6 font-bold transition-all hover:-translate-y-0.5 border-none">
-                                                <Link href="/customer-register">Register</Link>
+                                                <Link href="/customer-register">สมัครสมาชิก</Link>
                                             </Button>
                                         </div>
                                     )
@@ -275,7 +301,7 @@ export default function CustomerLayout({
                                 </div>
                             ) : (
                                 <Button size="sm" asChild className="rounded-full h-8 px-4 text-xs font-bold bg-gradient-to-r from-accent to-pink-500 text-white border-none shadow-md shadow-accent/20">
-                                    <Link href="/customer-login">Login</Link>
+                                    <Link href="/customer-login">เข้าสู่ระบบ</Link>
                                 </Button>
                             )
                         ) : (
@@ -285,7 +311,32 @@ export default function CustomerLayout({
                 </div>
             </nav >
 
-            <main className="pt-0 md:pt-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+            {/* Global pending-slip banner — sits below sticky mobile nav; on desktop offset by fixed nav height */}
+            <div className="md:pt-20">
+                <AnimatePresence>
+                    {mounted && isHydrated && customer && pendingSlipCount > 0 && (
+                        <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="overflow-hidden"
+                        >
+                            <Link
+                                href="/orders?tab=pending"
+                                className="flex items-center justify-center gap-2 bg-orange-500 text-white text-sm font-bold px-4 py-2.5 hover:bg-orange-600 transition-colors"
+                            >
+                                <AlertCircle className="h-4 w-4 shrink-0" />
+                                <span>
+                                    มี {pendingSlipCount} คำสั่งซื้อรอการแนบสลิปโอนเงิน — แตะที่นี่เพื่อดำเนินการ
+                                </span>
+                            </Link>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </div>
+
+            <main className="pt-0 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
                 {children}
             </main>
 

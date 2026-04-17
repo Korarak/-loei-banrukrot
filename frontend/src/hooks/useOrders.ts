@@ -5,6 +5,9 @@ import { toast } from 'sonner';
 export interface Order {
     _id: string;
     orderReference: string;
+    paymentMethod?: string;
+    hasSlip?: boolean;
+    slipVerified?: boolean;
     customer: {
         _id: string;
         firstName: string;
@@ -117,6 +120,24 @@ export function useCreateOrder() {
             toast.error('Failed to create order', {
                 description: error.response?.data?.message || 'Please try again',
             });
+        },
+    });
+}
+
+// Cancel order by customer
+export function useCancelOrder() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (id: string) => {
+            const response = await api.post(`/orders/${id}/cancel`);
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['orders'] });
+            toast.success('ยกเลิกคำสั่งซื้อสำเร็จ');
+        },
+        onError: (error: any) => {
+            toast.error(error.response?.data?.message || 'ไม่สามารถยกเลิกได้');
         },
     });
 }

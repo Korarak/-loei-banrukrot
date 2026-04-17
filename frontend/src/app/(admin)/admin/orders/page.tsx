@@ -348,9 +348,10 @@ export default function AdminOrdersPage() {
                                             </SelectContent>
                                         </Select>
 
-                                        <Button variant="ghost" size="icon" className="h-9 w-9 text-gray-400 hover:text-primary hover:bg-primary/5" asChild>
+                                        <Button variant="ghost" size="sm" className="text-gray-500 hover:text-primary hover:bg-primary/5 gap-1.5 rounded-lg" asChild>
                                             <Link href={`/admin/orders/${order._id}`}>
-                                                <Eye className="h-5 w-5" />
+                                                <Eye className="h-4 w-4" />
+                                                ตรวจสอบ
                                             </Link>
                                         </Button>
                                     </div>

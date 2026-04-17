@@ -1,18 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const { getSettings, updateSetting } = require('../controllers/settingController');
+const { getSettings, getPublicSettings, updateSetting } = require('../controllers/settingController');
 const { listBackups, triggerBackup } = require('../controllers/backupController');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 
-// Check authentication and staff role
+// Public — only whitelisted keys (bank info etc.)
+router.get('/public', getPublicSettings);
+
+// Admin-only below
 router.use(authenticateToken());
 router.use(requireRole('owner', 'admin', 'staff'));
 
-router.route('/')
-    .get(getSettings);
-
-router.route('/:key')
-    .put(updateSetting);
+router.get('/', getSettings);
+router.put('/:key', updateSetting);
 
 // Backup management
 router.get('/backups', listBackups);

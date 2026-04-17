@@ -71,9 +71,15 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
     const handleUpdateShipping = async () => {
         if (!order) return;
         const trimmed = trackingNumber.trim();
+        if (!trimmed) {
+            toast.error('กรุณากรอกเลขพัสดุก่อนบันทึก');
+            return;
+        }
         try {
+            // Save shipping info + auto-advance status to shipped in one call
             await updateStatus.mutateAsync({
                 id: order._id,
+                status: 'shipped',
                 shippingInfo: {
                     provider: shippingProvider,
                     trackingNumber: trimmed,
@@ -82,8 +88,8 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
             });
             setShippingDialogOpen(false);
             const url = getTrackingUrl(shippingProvider, trimmed);
-            toast.success('บันทึกข้อมูลการจัดส่งแล้ว', {
-                description: trimmed || undefined,
+            toast.success('เริ่มการจัดส่งแล้ว', {
+                description: `เลขพัสดุ: ${trimmed}`,
                 action: url ? {
                     label: 'ติดตามพัสดุ',
                     onClick: () => window.open(url, '_blank'),
@@ -427,8 +433,17 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <Truck className="h-5 w-5 text-primary" />
-                            อัปเดตข้อมูลการจัดส่ง
+                            กรอกเลขพัสดุ — เริ่มการจัดส่ง
                         </DialogTitle>
+                        {order.shippingAddressId && (
+                            <DialogDescription asChild>
+                                <div className="bg-gray-50 rounded-lg px-3 py-2 text-left text-xs text-gray-600 space-y-0.5 mt-1">
+                                    <p className="font-bold text-gray-800">{order.shippingAddressId.recipientName}</p>
+                                    <p>{order.shippingAddressId.streetAddress}</p>
+                                    <p>{[order.shippingAddressId.subDistrict, order.shippingAddressId.district, order.shippingAddressId.province, order.shippingAddressId.zipCode].filter(Boolean).join(', ')}</p>
+                                </div>
+                            </DialogDescription>
+                        )}
                     </DialogHeader>
                     <div className="space-y-4 py-2">
                         {/* Courier selector */}
@@ -556,8 +571,9 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                     </div>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setShippingDialogOpen(false)}>ยกเลิก</Button>
-                        <Button onClick={handleUpdateShipping} disabled={updateStatus.isPending}>
-                            {updateStatus.isPending ? 'กำลังบันทึก...' : 'บันทึกการเปลี่ยนแปลง'}
+                        <Button onClick={handleUpdateShipping} disabled={updateStatus.isPending || !trackingNumber.trim()} className="gap-1.5">
+                            <Truck className="h-4 w-4" />
+                            {updateStatus.isPending ? 'กำลังบันทึก...' : 'บันทึก + เริ่มการจัดส่ง'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

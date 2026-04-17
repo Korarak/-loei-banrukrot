@@ -102,6 +102,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                 { href: '/admin/users', label: 'ผู้ใช้งาน', icon: Users },
                 { href: '/admin/customers', label: 'ลูกค้า', icon: Users },
                 { href: '/admin/backups', label: 'สำรองข้อมูล', icon: Database },
+                { href: '/admin/settings', label: 'ตั้งค่าระบบ', icon: Settings },
             ]
         },
         'management': {

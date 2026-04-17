@@ -45,10 +45,10 @@ export default function ProductDetailPage() {
                 <div className="h-24 w-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
                     <Package className="h-10 w-10 text-gray-400" />
                 </div>
-                <h2 className="text-3xl font-black text-gray-900 mb-2">PRODUCT NOT FOUND</h2>
-                <p className="text-gray-500 mb-8 max-w-md">The product you are looking for might have been removed or is temporarily unavailable.</p>
+                <h2 className="text-3xl font-black text-gray-900 mb-2">ไม่พบสินค้า</h2>
+                <p className="text-gray-500 mb-8 max-w-md">สินค้าที่คุณค้นหาอาจถูกลบออกไปแล้ว หรืออยู่ระหว่างพักขาย</p>
                 <Button asChild size="lg" className="rounded-full font-bold px-8">
-                    <Link href="/products">Back to Shop</Link>
+                    <Link href="/products">กลับไปยังสินค้า</Link>
                 </Button>
             </div>
         );
@@ -72,7 +72,7 @@ export default function ProductDetailPage() {
         if (!selectedVariant) return;
 
         if (!isCustomerAuthenticated()) {
-            toast.error("Please login to add items to cart");
+            toast.error("กรุณาเข้าสู่ระบบเพื่อเพิ่มสินค้าลงตะกร้า");
             router.push('/customer-login');
             return;
         }
@@ -105,8 +105,8 @@ export default function ProductDetailPage() {
                 await navigator.share(shareData);
             } else {
                 await navigator.clipboard.writeText(window.location.href);
-                toast.success('Link copied to clipboard!', {
-                    description: 'You can now paste it anywhere to share.',
+                toast.success('คัดลอกลิงก์แล้ว!', {
+                    description: 'สามารถนำไปแบ่งปันได้เลย',
                     icon: <Share2 className="h-4 w-4" />,
                     className: 'bg-white border-gray-200'
                 });
@@ -114,7 +114,7 @@ export default function ProductDetailPage() {
         } catch (error) {
             if ((error as Error).name !== 'AbortError') {
                 console.error('Error sharing:', error);
-                toast.error('Could not share the link');
+                toast.error('ไม่สามารถแชร์ลิงก์ได้');
             }
         }
     };
@@ -126,14 +126,15 @@ export default function ProductDetailPage() {
                 <Button variant="ghost" asChild className="group -ml-4 text-gray-500 hover:text-gray-900 hover:bg-transparent">
                     <Link href="/products" className="flex items-center gap-1">
                         <ChevronLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
-                        <span className="font-bold">Back to Products</span>
+                        <span className="font-bold">กลับไปยังสินค้า</span>
                     </Link>
                 </Button>
-                <Button 
-                    variant="ghost" 
-                    size="icon" 
+                <Button
+                    variant="ghost"
+                    size="icon"
                     className="rounded-full hover:bg-gray-100"
                     onClick={handleShare}
+                    aria-label="แชร์สินค้านี้"
                 >
                     <Share2 className="h-5 w-5 text-gray-600" />
                 </Button>

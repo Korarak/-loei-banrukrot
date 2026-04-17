@@ -198,11 +198,11 @@ export default function ProductsPage() {
                         {/* Search */}
                         <div className="space-y-4">
                             <h3 className="text-sm font-black uppercase tracking-widest text-gray-900 flex items-center gap-2">
-                                <Search className="h-4 w-4 text-primary" /> SEARCH
+                                <Search className="h-4 w-4 text-primary" /> ค้นหา
                             </h3>
                             <form onSubmit={handleSearch} className="relative group">
                                 <Input
-                                    placeholder="Search products..."
+                                    placeholder="ค้นหาสินค้า..."
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                     className="pl-4 bg-gray-50 border-2 border-transparent focus:border-primary focus:bg-white rounded-xl h-12 transition-all font-medium"
@@ -215,7 +215,7 @@ export default function ProductsPage() {
 
                         {/* Categories */}
                         <div className="space-y-4">
-                            <h3 className="text-sm font-black uppercase tracking-widest text-gray-900 border-b border-gray-100 pb-2">CATEGORIES</h3>
+                            <h3 className="text-sm font-black uppercase tracking-widest text-gray-900 border-b border-gray-100 pb-2">หมวดหมู่</h3>
                             <div className="space-y-2">
                                 <button
                                     onClick={() => handleCategoryChange(null)}
@@ -224,7 +224,7 @@ export default function ProductsPage() {
                                         : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-900'
                                         }`}
                                 >
-                                    ALL PRODUCTS
+                                    สินค้าทั้งหมด
                                     {!categoryParam && <div className="h-2 w-2 rounded-full bg-white animate-pulse" />}
                                 </button>
                                 {categories?.map((cat) => (
@@ -245,7 +245,7 @@ export default function ProductsPage() {
 
                         {/* Price Range */}
                         <div className="space-y-6">
-                            <h3 className="text-sm font-black uppercase tracking-widest text-gray-900 border-b border-gray-100 pb-2">PRICE RANGE</h3>
+                            <h3 className="text-sm font-black uppercase tracking-widest text-gray-900 border-b border-gray-100 pb-2">ช่วงราคา</h3>
                             <div className="px-2">
                                 <Slider
                                     defaultValue={[0, 20000]}
@@ -265,7 +265,7 @@ export default function ProductsPage() {
 
                         {/* Brands */}
                         <div className="space-y-4">
-                            <h3 className="text-sm font-black uppercase tracking-widest text-gray-900 border-b border-gray-100 pb-2">BRANDS</h3>
+                            <h3 className="text-sm font-black uppercase tracking-widest text-gray-900 border-b border-gray-100 pb-2">แบรนด์</h3>
                             <div className="flex flex-wrap gap-2">
                                 {availableBrands.map((brand) => (
                                     <button
@@ -287,7 +287,7 @@ export default function ProductsPage() {
                             onClick={clearFilters}
                             className="w-full h-12 border-2 border-gray-200 text-gray-500 hover:text-red-500 hover:border-red-200 hover:bg-red-50 rounded-xl font-bold uppercase tracking-wider"
                         >
-                            Reset Filters
+                            ล้างตัวกรอง
                         </Button>
                     </div>
                 </aside>
@@ -296,7 +296,7 @@ export default function ProductsPage() {
                 <div className="lg:hidden w-full mb-6 sticky top-20 z-20 bg-white p-4 rounded-2xl border border-gray-100 shadow-lg flex gap-3">
                     <form onSubmit={handleSearch} className="flex-1">
                         <Input
-                            placeholder="Search..."
+                            placeholder="ค้นหาสินค้า..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             className="bg-white border-gray-200 rounded-xl"
@@ -399,8 +399,8 @@ export default function ProductsPage() {
                                 </div>
                             </div>
 
-                            {/* Sticky Footer for Mobile Buttons - Offset for BottomNav */}
-                            <div className="fixed bottom-0 inset-x-0 p-6 bg-gradient-to-t from-white via-white to-transparent pointer-events-none z-30">
+                            {/* Sticky Footer for Mobile Buttons - raised above BottomNav (h-16) */}
+                            <div className="fixed bottom-16 md:bottom-0 inset-x-0 p-6 bg-gradient-to-t from-white via-white to-transparent pointer-events-none z-30">
                                 <div className="max-w-md mx-auto flex gap-3 pointer-events-auto">
                                     <Button 
                                         variant="outline" 
@@ -425,17 +425,17 @@ export default function ProductsPage() {
                     {/* Sort Bar */}
                     <div className="flex justify-between items-center mb-8">
                         <p className="text-gray-500 font-medium">
-                            Showing <span className="text-gray-900 font-bold">{products.length}</span> results
+                            แสดง <span className="text-gray-900 font-bold">{products.length}</span> รายการ
                         </p>
                         <Select onValueChange={handleSortChange} defaultValue={sortParam || 'newest'}>
                             <SelectTrigger className="w-[180px] bg-transparent border-none text-right font-bold text-gray-900 focus:ring-0">
-                                <SelectValue placeholder="Sort By" />
+                                <SelectValue placeholder="เรียงตาม" />
                             </SelectTrigger>
                             <SelectContent align="end" className="font-medium">
-                                <SelectItem value="newest">Newest Arrivals</SelectItem>
-                                <SelectItem value="price_asc">Price: Low to High</SelectItem>
-                                <SelectItem value="price_desc">Price: High to Low</SelectItem>
-                                <SelectItem value="name_asc">Name: A to Z</SelectItem>
+                                <SelectItem value="newest">สินค้ามาใหม่</SelectItem>
+                                <SelectItem value="price_asc">ราคา: ต่ำ – สูง</SelectItem>
+                                <SelectItem value="price_desc">ราคา: สูง – ต่ำ</SelectItem>
+                                <SelectItem value="name_asc">ชื่อสินค้า: A – Z</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -483,8 +483,16 @@ export default function ProductsPage() {
                             </div>
                         </>
                     ) : (
-                        <div className="text-center py-24">
-                            <h3 className="text-2xl font-bold text-gray-300 uppercase tracking-widest">No Products Found</h3>
+                        <div className="text-center py-24 space-y-6">
+                            <h3 className="text-2xl font-bold text-gray-300 uppercase tracking-widest">ไม่พบสินค้า</h3>
+                            <p className="text-gray-400 font-medium">ลองเปลี่ยนตัวกรองหรือคีย์ค้นหาใหม่</p>
+                            <Button
+                                variant="outline"
+                                onClick={clearFilters}
+                                className="rounded-full border-2 border-gray-200 font-bold hover:border-primary hover:text-primary transition-all"
+                            >
+                                ล้างตัวกรองทั้งหมด
+                            </Button>
                         </div>
                     )}
                 </div>

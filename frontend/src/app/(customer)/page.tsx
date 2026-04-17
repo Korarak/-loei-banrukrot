@@ -200,7 +200,7 @@ export default function Home() {
                         </motion.form>
 
                         <motion.div variants={fadeInUp} className="flex flex-wrap gap-4 justify-center md:justify-start">
-                            <Button size="lg" asChild className="bg-white text-primary hover:bg-gray-100 border-0 rounded-full px-8 h-14 text-lg font-bold transition-all hover:scale-105 active:scale-95 shadow-lg">
+                            <Button size="lg" asChild className="bg-white text-emerald-600 hover:bg-gray-100 border-0 rounded-full px-8 h-14 text-lg font-bold transition-all hover:scale-105 active:scale-95 shadow-lg hover:brightness-110 duration-200 has-[>svg]:px-4">
                                 <Link href="/products">
                                     <ShoppingCart className="mr-2 h-5 w-5" />
                                     ช้อปเลย

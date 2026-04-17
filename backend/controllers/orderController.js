@@ -43,9 +43,18 @@ exports.createOrderFromCart = async (req, res, next) => {
             });
         }
 
-        const cartItems = await CartItem.find({ cartId: cart._id }).populate('variantId');
+        const allCartItems = await CartItem.find({ cartId: cart._id }).populate('variantId');
+
+        // Filter out ghost items (variant was deleted) — mirrors what getCart already does in the UI
+        const ghostItems = allCartItems.filter(item => !item.variantId);
+        if (ghostItems.length > 0) {
+            log(`Removing ${ghostItems.length} ghost cart item(s) with deleted variants`);
+            await CartItem.deleteMany({ _id: { $in: ghostItems.map(i => i._id) } });
+        }
+
+        const cartItems = allCartItems.filter(item => item.variantId);
         if (cartItems.length === 0) {
-            log('Cart is empty');
+            log('Cart is empty after filtering ghost items');
             return res.status(400).json({
                 success: false,
                 message: 'Cart is empty'
@@ -56,20 +65,20 @@ exports.createOrderFromCart = async (req, res, next) => {
         let totalAmount = 0;
         for (const item of cartItems) {
             if (item.variantId.stockAvailable < item.quantity) {
-                console.log('Insufficient stock:', item.variantId.sku);
+                log(`Insufficient stock: sku=${item.variantId.sku} available=${item.variantId.stockAvailable} requested=${item.quantity}`);
                 return res.status(400).json({
                     success: false,
-                    message: `Insufficient stock for ${item.variantId.sku}`
+                    message: `สินค้า ${item.variantId.sku} มีสต็อกไม่เพียงพอ`
                 });
             }
             totalAmount += item.quantity * item.variantId.price;
         }
 
         // ตรวจสอบที่อยู่จัดส่ง
-        console.log('Validating Address ID:', shippingAddressId);
+        log(`Validating Address ID: ${shippingAddressId}`);
         const address = await CustomerAddress.findById(shippingAddressId);
         if (!address) {
-            console.log('Address not found');
+            log(`Address not found: ${shippingAddressId}`);
             return res.status(400).json({
                 success: false,
                 message: 'Invalid shipping address: Address not found'
@@ -77,10 +86,7 @@ exports.createOrderFromCart = async (req, res, next) => {
         }
 
         if (address.customerId.toString() !== req.customer._id.toString()) {
-            console.log('Address does not belong to customer:', {
-                addressCustomerId: address.customerId,
-                reqCustomerId: req.customer._id
-            });
+            log(`Address ownership mismatch: address.customerId=${address.customerId} req.customer._id=${req.customer._id}`);
             return res.status(400).json({
                 success: false,
                 message: 'Invalid shipping address: Does not belong to customer'
@@ -203,11 +209,16 @@ exports.getCustomerOrders = async (req, res, next) => {
                     };
                 });
 
+                const payment = await Payment.findOne({ orderId: order._id });
+
                 return {
                     ...order.toObject(),
                     orderReference: order.saleReference || order._id.toString().slice(-6).toUpperCase(),
                     createdAt: order.orderDate,
-                    items: formattedItems
+                    items: formattedItems,
+                    paymentMethod: payment?.paymentMethod || 'Transfer',
+                    hasSlip: !!payment?.slipImage,
+                    slipVerified: !!payment?.isVerified,
                 };
             })
         );
@@ -532,6 +543,45 @@ exports.getOrderQRCode = async (req, res, next) => {
                 qrCode
             }
         });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// @desc    Cancel order by customer (only when pending + no slip)
+// @route   POST /api/orders/:id/cancel
+// @access  Private (customer)
+exports.cancelOrderByCustomer = async (req, res, next) => {
+    try {
+        const order = await Order.findById(req.params.id);
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'ไม่พบคำสั่งซื้อ' });
+        }
+
+        if (order.customerId.toString() !== req.customer._id.toString()) {
+            return res.status(403).json({ success: false, message: 'ไม่มีสิทธิ์ยกเลิกคำสั่งซื้อนี้' });
+        }
+
+        if (order.orderStatus !== 'pending') {
+            return res.status(400).json({ success: false, message: 'ยกเลิกได้เฉพาะคำสั่งซื้อที่รอดำเนินการเท่านั้น' });
+        }
+
+        // Block if slip already uploaded
+        const payment = await Payment.findOne({ orderId: order._id });
+        if (payment?.slipImage) {
+            return res.status(400).json({ success: false, message: 'ไม่สามารถยกเลิกได้ เนื่องจากได้แนบสลิปชำระเงินแล้ว กรุณาติดต่อทีมงาน' });
+        }
+
+        // Restore stock
+        const orderDetails = await OrderDetail.find({ orderId: order._id });
+        await Promise.all(orderDetails.map(item =>
+            addStock(item.variantId, item.quantity, 'cancel_online', order._id, 'Order', null)
+        ));
+
+        order.orderStatus = 'cancelled';
+        await order.save();
+
+        res.json({ success: true, message: 'ยกเลิกคำสั่งซื้อสำเร็จ', data: order });
     } catch (error) {
         next(error);
     }

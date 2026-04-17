@@ -5,41 +5,47 @@ import { usePathname } from 'next/navigation';
 import { Home, Package, ShoppingBag, ShoppingCart, User } from 'lucide-react';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useCart } from '@/hooks/useCart';
+import { useCustomerOrders } from '@/hooks/useOrders';
 import { cn } from '@/lib/utils';
 
 export default function BottomNav() {
     const pathname = usePathname();
     const customer = useAuthStore((state) => state.customer);
     const { data: cart } = useCart();
+    const { data: orders } = useCustomerOrders();
 
-    // Calculate total items in cart
     const totalItems = (cart?.items || []).reduce((sum, item) => sum + item.quantity, 0);
+    const pendingSlipCount = customer
+        ? (orders || []).filter(o => o.orderStatus === 'pending' && o.paymentMethod !== 'Cash' && !o.hasSlip).length
+        : 0;
 
     const navItems = [
         {
             href: '/',
-            label: 'Home',
+            label: 'หน้าหลัก',
             icon: Home,
         },
         {
             href: '/products',
-            label: 'Catalog',
+            label: 'สินค้า',
             icon: ShoppingBag,
         },
         {
             href: '/cart',
-            label: 'Cart',
+            label: 'ตะกร้า',
             icon: ShoppingCart,
             badge: customer && totalItems > 0 ? totalItems : undefined,
         },
         {
             href: '/orders',
-            label: 'Orders',
+            label: 'คำสั่งซื้อ',
             icon: Package,
+            badge: pendingSlipCount > 0 ? pendingSlipCount : undefined,
+            badgeColor: 'bg-orange-500',
         },
         {
             href: customer ? '/profile' : '/customer-login',
-            label: customer ? 'Profile' : 'Login',
+            label: customer ? 'โปรไฟล์' : 'เข้าสู่ระบบ',
             icon: User,
         },
     ];
@@ -69,7 +75,7 @@ export default function BottomNav() {
                             <div className="relative">
                                 <Icon className={cn("h-6 w-6", isActive && "fill-current")} />
                                 {item.badge !== undefined && (
-                                    <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[1rem] h-4 px-1 flex items-center justify-center border border-white">
+                                    <span className={`absolute -top-1.5 -right-1.5 ${(item as any).badgeColor || 'bg-red-500'} text-white text-[10px] font-bold rounded-full min-w-[1rem] h-4 px-1 flex items-center justify-center border border-white`}>
                                         {item.badge > 99 ? '99+' : item.badge}
                                     </span>
                                 )}

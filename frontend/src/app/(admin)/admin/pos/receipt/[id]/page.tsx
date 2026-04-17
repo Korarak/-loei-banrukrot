@@ -3,7 +3,7 @@
 import { useSaleReceipt } from '@/hooks/usePOS';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Receipt, Printer, ArrowLeft, MapPin, Phone } from 'lucide-react';
+import { Receipt, Printer, ArrowLeft, MapPin, Phone, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useRef } from 'react';
@@ -164,6 +164,16 @@ export default function ReceiptPage() {
                     <div className="mt-10 text-center space-y-2 pt-6 border-t border-gray-100 relative z-10">
                         <p className="text-primary font-bold text-sm">ขอบคุณที่ใช้บริการ</p>
                         <p className="text-xs text-gray-400">Thank you for shopping with us</p>
+                        
+                        <div className="pt-8 pb-4 print:hidden">
+                            <Button size="lg" asChild className="bg-white text-emerald-600 hover:bg-gray-100 border-2 border-primary/10 rounded-full px-8 h-14 text-lg font-bold transition-all hover:scale-105 active:scale-95 shadow-lg hover:brightness-110 duration-200 has-[>svg]:px-4">
+                                <Link href="/products">
+                                    <ShoppingCart className="mr-2 h-5 w-5" />
+                                    ช้อปเลย
+                                </Link>
+                            </Button>
+                        </div>
+
                         <p className="text-[10px] text-gray-300 font-mono mt-4">System powered by {siteConfig.brand.englishName}</p>
                     </div>
 

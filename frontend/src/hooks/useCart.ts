@@ -72,7 +72,37 @@ export function useAddToCart() {
             });
             return response.data;
         },
-        onSuccess: () => {
+        onMutate: async (newItem) => {
+            await queryClient.cancelQueries({ queryKey: ['cart'] });
+            const previousCart = queryClient.getQueryData<Cart>(['cart']);
+
+            queryClient.setQueryData<Cart>(['cart'], (old) => {
+                if (!old) return old;
+                const existingIdx = old.items.findIndex(i => i.variant._id === newItem.variantId);
+                if (existingIdx >= 0) {
+                    const items = [...old.items];
+                    items[existingIdx] = { ...items[existingIdx], quantity: items[existingIdx].quantity + newItem.quantity };
+                    return { ...old, items };
+                }
+                return {
+                    ...old,
+                    items: [...old.items, {
+                        _id: `optimistic-${Date.now()}`,
+                        product: { _id: newItem.productId, productName: '' },
+                        variant: { _id: newItem.variantId, sku: '', price: 0 },
+                        quantity: newItem.quantity,
+                    }],
+                };
+            });
+
+            return { previousCart };
+        },
+        onError: (_err, _newItem, context) => {
+            if (context?.previousCart) {
+                queryClient.setQueryData(['cart'], context.previousCart);
+            }
+        },
+        onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ['cart'] });
         },
     });

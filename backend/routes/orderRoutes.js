@@ -9,7 +9,8 @@ const {
     getAllOrders,
     uploadPaymentSlip,
     verifyPayment,
-    getOrderQRCode
+    getOrderQRCode,
+    cancelOrderByCustomer
 } = require('../controllers/orderController');
 const { authenticateToken, requireRole, checkCustomerAccess } = require('../middleware/auth');
 const validator = require('../middleware/validator');
@@ -33,6 +34,13 @@ router.get(
     '/:id',
     authenticateToken(),
     getOrderById
+);
+
+// Customer cancel — only allowed when pending and no slip uploaded
+router.post(
+    '/:id/cancel',
+    authenticateToken('customer'),
+    cancelOrderByCustomer
 );
 
 // Staff/Owner routes

@@ -5,6 +5,17 @@ import { useCreateOrder } from '@/hooks/useOrders';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -101,11 +112,11 @@ export default function CartPage() {
 
     const handleCheckout = async () => {
         if (!selectedAddressId) {
-            toast.error('Please select a shipping address');
+            toast.error('กรุณาเลือกที่อยู่จัดส่ง');
             return;
         }
         if (!selectedShippingId) {
-            toast.error('Please select a shipping method');
+            toast.error('กรุณาเลือกวิธีการจัดส่ง');
             return;
         }
         try {
@@ -140,17 +151,34 @@ export default function CartPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
                 <h1 className="text-3xl md:text-4xl font-black tracking-tight text-gray-900">
-                    SHOPPING <span className="gradient-text-primary">CART</span>
+                    รถเข็น<span className="gradient-text-primary">สินค้า</span>
                 </h1>
-                <Button
-                    variant="outline"
-                    onClick={() => clearCart.mutate()}
-                    disabled={clearCart.isPending}
-                    className="rounded-full border-2 hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all font-bold"
-                >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Clear Cart
-                </Button>
+                <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button
+                            variant="outline"
+                            disabled={clearCart.isPending}
+                            className="rounded-full border-2 hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all font-bold"
+                        >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            ล้างรถเข็น
+                        </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>ล้างรถเข็นทั้งหมด?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                สินค้าทั้งหมดในรถเข็นจะถูกลบออก ไม่สามารถย้อนกลับได้
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => clearCart.mutate()} className="bg-red-500 hover:bg-red-600">
+                                ล้างรถเข็น
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
@@ -203,7 +231,7 @@ export default function CartPage() {
                                             </span>
                                             {item.product.shippingSize === 'large' && (
                                                 <span className="text-[10px] font-bold uppercase tracking-widest text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">
-                                                    Large Item
+                                                    สินค้าขนาดใหญ่
                                                 </span>
                                             )}
                                         </div>
@@ -211,7 +239,7 @@ export default function CartPage() {
 
                                     <div className="flex flex-wrap items-end justify-between mt-6 gap-4">
                                         <div className="flex flex-col">
-                                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Price per unit</span>
+                                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">ราคาต่อชิ้น</span>
                                             <p className="text-xl font-black text-primary">
                                                 ฿{item.variant.price.toLocaleString()}
                                             </p>
@@ -243,7 +271,7 @@ export default function CartPage() {
                                         </div>
 
                                         <div className="flex flex-col items-end">
-                                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Subtotal</span>
+                                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">ราคารวม</span>
                                             <p className="text-2xl font-black text-gray-900">
                                                 ฿{(item.variant.price * item.quantity).toLocaleString()}
                                             </p>
@@ -258,17 +286,17 @@ export default function CartPage() {
                 {/* Order Summary */}
                 <div className="lg:col-span-1">
                     <Card className="p-8 sticky top-24 border-0 shadow-2xl shadow-gray-200/50 rounded-[2.5rem] bg-white border border-gray-100">
-                        <h2 className="text-2xl font-black mb-8 text-gray-900 tracking-tight uppercase">Order <span className="text-primary">Summary</span></h2>
+                        <h2 className="text-2xl font-black mb-8 text-gray-900 tracking-tight uppercase">สรุป<span className="text-primary">คำสั่งซื้อ</span></h2>
 
                         <div className="space-y-6 mb-8">
                             <div className="flex justify-between items-center text-lg">
-                                <span className="text-gray-500 font-medium">Subtotal</span>
+                                <span className="text-gray-500 font-medium">ยอดสินค้า</span>
                                 <span className="font-bold text-gray-900">฿{cartSubtotal.toLocaleString()}</span>
                             </div>
                             <div className="flex justify-between items-center text-lg">
-                                <span className="text-gray-500 font-medium">Shipping</span>
+                                <span className="text-gray-500 font-medium">ค่าจัดส่ง</span>
                                 <span className="font-bold text-primary">
-                                    {shippingCost > 0 ? `฿${shippingCost.toLocaleString()}` : 'FREE'}
+                                    {shippingCost > 0 ? `฿${shippingCost.toLocaleString()}` : 'ฟรี'}
                                 </span>
                             </div>
 
@@ -276,7 +304,7 @@ export default function CartPage() {
                             <div className="pt-6 border-t border-gray-100">
                                 <p className="font-black text-xs uppercase tracking-[0.2em] text-gray-400 mb-4 flex items-center gap-2">
                                     <MapPin className="h-4 w-4 text-primary" />
-                                    Shipping Address
+                                    ที่อยู่จัดส่ง
                                 </p>
                                 {addresses && addresses.length > 0 ? (
                                     <RadioGroup value={selectedAddressId} onValueChange={setSelectedAddressId} className="space-y-3">
@@ -297,9 +325,9 @@ export default function CartPage() {
                                     </RadioGroup>
                                 ) : (
                                     <div className="text-center py-6 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
-                                        <p className="text-sm text-gray-400 font-bold mb-3 uppercase tracking-wider">No Addresses Found</p>
+                                        <p className="text-sm text-gray-400 font-bold mb-3 uppercase tracking-wider">ยังไม่มีที่อยู่จัดส่ง</p>
                                         <Button variant="outline" size="sm" asChild className="rounded-full border-2 font-bold hover:bg-primary hover:text-white hover:border-primary transition-all">
-                                            <Link href="/profile">Add New Address</Link>
+                                            <Link href="/profile">เพิ่มที่อยู่ใหม่</Link>
                                         </Button>
                                     </div>
                                 )}
@@ -309,7 +337,7 @@ export default function CartPage() {
                             <div className="pt-4">
                                 <p className="font-black text-xs uppercase tracking-[0.2em] text-gray-400 mb-4 flex items-center gap-2">
                                     <Truck className="h-4 w-4 text-primary" />
-                                    Shipping Method
+                                    วิธีการจัดส่ง
                                 </p>
                                 {availableShippingMethods.length > 0 ? (
                                     <RadioGroup value={selectedShippingId} onValueChange={setSelectedShippingId} className="space-y-3">
@@ -319,7 +347,7 @@ export default function CartPage() {
                                                     <RadioGroupItem value={method._id} id={method._id} />
                                                     <Label htmlFor={method._id} className="cursor-pointer">
                                                         <span className="font-bold text-gray-900 block">{method.name}</span>
-                                                        <span className="block text-[10px] text-gray-400 font-bold uppercase tracking-wider">{method.description || 'Standard Delivery'}</span>
+                                                        <span className="block text-[10px] text-gray-400 font-bold uppercase tracking-wider">{method.description || 'จัดส่งมาตรฐาน'}</span>
                                                     </Label>
                                                 </div>
                                                 <span className="font-black text-gray-900">฿{method.price.toLocaleString()}</span>
@@ -328,7 +356,7 @@ export default function CartPage() {
                                     </RadioGroup>
                                 ) : (
                                     <div className="p-4 bg-red-50 rounded-2xl border border-red-100">
-                                        <p className="text-xs text-red-600 font-bold">No shipping methods available for this order size.</p>
+                                        <p className="text-xs text-red-600 font-bold">ไม่มีวิธีการจัดส่งสำหรับขนาดพัสดุนี้</p>
                                     </div>
                                 )}
                             </div>
@@ -338,28 +366,21 @@ export default function CartPage() {
                         <div className="pt-4 pb-8">
                             <p className="font-black text-xs uppercase tracking-[0.2em] text-gray-400 mb-4 flex items-center gap-2">
                                 <span className="text-lg">💳</span>
-                                Payment Method
+                                ช่องทางชำระเงิน
                             </p>
-                            <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="grid grid-cols-2 gap-3">
+                            <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="grid grid-cols-1 gap-3">
                                 <div className={`flex flex-col items-center justify-center space-y-2 border-2 rounded-2xl p-4 cursor-pointer transition-all ${paymentMethod === 'Transfer' ? 'border-primary bg-primary/5 shadow-md shadow-primary/10' : 'border-gray-50 hover:border-gray-200 bg-gray-50/50'}`}>
                                     <RadioGroupItem value="Transfer" id="transfer" className="sr-only" />
                                     <Label htmlFor="transfer" className="cursor-pointer text-center">
-                                        <span className="font-bold text-gray-900 block text-sm">Transfer</span>
-                                        <span className="block text-[9px] text-gray-400 font-bold uppercase tracking-wider mt-1">Bank Slip</span>
-                                    </Label>
-                                </div>
-                                <div className={`flex flex-col items-center justify-center space-y-2 border-2 rounded-2xl p-4 cursor-pointer transition-all ${paymentMethod === 'Cash' ? 'border-primary bg-primary/5 shadow-md shadow-primary/10' : 'border-gray-50 hover:border-gray-200 bg-gray-50/50'}`}>
-                                    <RadioGroupItem value="Cash" id="cash" className="sr-only" />
-                                    <Label htmlFor="cash" className="cursor-pointer text-center">
-                                        <span className="font-bold text-gray-900 block text-sm">COD</span>
-                                        <span className="block text-[9px] text-gray-400 font-bold uppercase tracking-wider mt-1">Pay on Delivery</span>
+                                        <span className="font-bold text-gray-900 block text-sm">โอนเงิน</span>
+                                        <span className="block text-[9px] text-gray-400 font-bold uppercase tracking-wider mt-1">แนบสลิป</span>
                                     </Label>
                                 </div>
                             </RadioGroup>
                         </div>
 
                         <div className="border-t-2 border-gray-50 pt-6 mb-8 flex justify-between items-center">
-                            <span className="text-xl font-black text-gray-400 uppercase tracking-tighter">Total</span>
+                            <span className="text-xl font-black text-gray-400 uppercase tracking-tighter">ยอดรวม</span>
                             <span className="text-4xl font-black text-primary tracking-tighter drop-shadow-sm">
                                 ฿{totalAmount.toLocaleString()}
                             </span>
@@ -369,9 +390,9 @@ export default function CartPage() {
                             className="w-full bg-gray-900 text-white hover:bg-black rounded-3xl h-16 text-xl font-black uppercase tracking-widest shadow-xl shadow-gray-200 transition-all hover:-translate-y-1 active:scale-95 disabled:opacity-50"
                             size="lg"
                             onClick={handleCheckout}
-                            disabled={createOrder.isPending}
+                            disabled={createOrder.isPending || !selectedAddressId || !selectedShippingId}
                         >
-                            {createOrder.isPending ? 'Processing...' : 'Checkout Now'}
+                            {createOrder.isPending ? 'กำลังดำเนินการ...' : 'สั่งซื้อเลย'}
                         </Button>
 
                         <Button
@@ -379,7 +400,7 @@ export default function CartPage() {
                             className="w-full mt-4 text-gray-400 hover:text-primary font-bold transition-colors"
                             asChild
                         >
-                            <Link href="/products">← Continue Shopping</Link>
+                            <Link href="/products">← เลือกสินค้าต่อ</Link>
                         </Button>
                     </Card>
                 </div>

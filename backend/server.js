@@ -90,6 +90,7 @@ app.use('/api/shipping-methods', require('./routes/shippingMethodRoutes'));
 app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 app.use('/api/reports', require('./routes/reportRoutes'));
 app.use('/api/inventory', require('./routes/inventoryRoutes'));
+app.use('/api/settings', require('./routes/settingRoutes'));
 
 app.get('/', (req, res) => {
     res.send('API is running...');
