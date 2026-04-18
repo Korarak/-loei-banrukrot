@@ -62,7 +62,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
                         variant={currentPage === page ? "default" : "outline"}
                         size="sm"
                         onClick={() => onPageChange(page)}
-                        className={`h-8 w-8 ${currentPage === page ? 'bg-black text-white hover:bg-gray-800' : ''}`}
+                        className="h-8 w-8"
                     >
                         {page}
                     </Button>

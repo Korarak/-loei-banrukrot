@@ -171,7 +171,7 @@ export default function AdminProductsPage() {
                 </div>
                 <Button
                     onClick={handleCreateProduct}
-                    className="bg-black hover:bg-gray-800 text-white rounded-xl px-6 py-6 shadow-lg shadow-gray-200 transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5"
+                    className="rounded-xl px-6 shadow-lg shadow-primary/20 transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5"
                 >
                     <Plus className="h-5 w-5 mr-2" />
                     <span className="font-medium">เพิ่มสินค้า</span>

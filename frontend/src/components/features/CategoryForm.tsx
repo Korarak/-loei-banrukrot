@@ -317,7 +317,7 @@ export default function CategoryForm({ category, onSuccess, onCancel }: Category
                     <Button
                         type="submit"
                         disabled={isLoading}
-                        className="bg-black hover:bg-gray-800 text-white h-11 px-6 min-w-[140px]"
+                        className="h-11 px-6 min-w-[140px]"
                     >
                         {isLoading ? (
                             <>

@@ -438,7 +438,7 @@ export default function ProductForm({ product, onSubmit, onCancel, isLoading }: 
                     <Button
                         type="submit"
                         disabled={isLoading}
-                        className="bg-black hover:bg-gray-800 text-white h-11 px-8 min-w-[140px]"
+                        className="h-11 px-8 min-w-[140px]"
                     >
                         {isLoading ? (
                             <>

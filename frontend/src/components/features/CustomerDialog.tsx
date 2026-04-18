@@ -416,7 +416,7 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                         <Button
                                             type="submit"
                                             disabled={isLoading}
-                                            className="rounded-xl bg-black hover:bg-gray-800 text-white h-11 px-6 shadow-lg shadow-gray-200"
+                                            className="rounded-xl h-11 px-6 shadow-lg shadow-primary/20"
                                         >
                                             {isLoading ? (
                                                 <>
@@ -580,7 +580,7 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                             <Button
                                                 type="submit"
                                                 disabled={isAddressLoading}
-                                                className="rounded-xl bg-black hover:bg-gray-800 text-white h-11 px-6 shadow-lg shadow-gray-200"
+                                                className="rounded-xl h-11 px-6 shadow-lg shadow-primary/20"
                                             >
                                                 {isAddressLoading ? (
                                                     <>
@@ -600,7 +600,7 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                         <h3 className="text-lg font-bold text-gray-900">ที่อยู่ที่บันทึกไว้</h3>
                                         <Button
                                             onClick={() => setIsAddressFormOpen(true)}
-                                            className="rounded-xl bg-black text-white hover:bg-gray-800"
+                                            className="rounded-xl"
                                         >
                                             <Plus className="h-4 w-4 mr-2" />
                                             เพิ่มที่อยู่

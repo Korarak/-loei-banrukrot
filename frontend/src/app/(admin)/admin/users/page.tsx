@@ -73,7 +73,7 @@ export default function UsersPage() {
                     <h1 className="text-3xl font-bold tracking-tight">ผู้ใช้งาน</h1>
                     <p className="text-gray-500 mt-2">จัดการบัญชีพนักงานและผู้ดูแลระบบ</p>
                 </div>
-                <Button onClick={handleCreate} className="bg-blue-600 hover:bg-blue-700 text-white">
+                <Button onClick={handleCreate}>
                     <UserPlus className="h-4 w-4 mr-2" />
                     เพิ่มผู้ใช้งาน
                 </Button>

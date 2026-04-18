@@ -23,6 +23,7 @@ import {
     Legend
 } from 'recharts';
 import { Badge } from '@/components/ui/badge';
+import { getOrderStatusLabel } from '@/lib/order-status';
 import {
     Table,
     TableBody,
@@ -45,15 +46,6 @@ const STATUS_COLORS: Record<string, string> = {
     completed: '#059669',
 };
 
-const STATUS_LABELS: Record<string, string> = {
-    pending: 'รอดำเนินการ',
-    confirmed: 'ยืนยันแล้ว',
-    processing: 'กำลังเตรียมสินค้า',
-    shipped: 'อยู่ระหว่างจัดส่ง',
-    delivered: 'จัดส่งสำเร็จ',
-    cancelled: 'ยกเลิก',
-    completed: 'เสร็จสิ้น',
-};
 
 const CATEGORY_COLORS = ['#10B981', '#3B82F6', '#EC4899', '#F59E0B', '#8B5CF6', '#EF4444', '#06B6D4', '#84CC16'];
 
@@ -198,7 +190,7 @@ export default function AdminDashboard() {
     })) || [];
 
     const pieData = data?.orderStatusDistribution?.map((s: any) => ({
-        name: STATUS_LABELS[s._id] || s._id,
+        name: getOrderStatusLabel(s._id),
         value: s.count,
         color: STATUS_COLORS[s._id] || '#8884d8'
     })) || [];
@@ -268,11 +260,7 @@ export default function AdminDashboard() {
                             variant={dateRange === range ? 'default' : 'outline'}
                             size="sm"
                             onClick={() => setDateRange(range)}
-                            className={`rounded-full text-xs font-bold transition-all ${
-                                dateRange === range
-                                    ? 'bg-gray-900 text-white hover:bg-gray-800 shadow-lg'
-                                    : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
-                            }`}
+                            className="rounded-full text-xs font-bold"
                         >
                             <Calendar className="h-3 w-3 mr-1" />
                             {RANGE_LABELS[range]}
@@ -627,7 +615,7 @@ export default function AdminDashboard() {
                                                         className="rounded-lg font-bold shadow-none border-0 text-xs"
                                                         style={{ backgroundColor: `${STATUS_COLORS[order.orderStatus]}20`, color: STATUS_COLORS[order.orderStatus] }}
                                                     >
-                                                        {STATUS_LABELS[order.orderStatus] || order.orderStatus}
+                                                        {getOrderStatusLabel(order.orderStatus)}
                                                     </Badge>
                                                 </TableCell>
                                                 <TableCell className="text-right">

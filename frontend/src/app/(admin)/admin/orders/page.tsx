@@ -183,7 +183,7 @@ export default function AdminOrdersPage() {
                     <h1 className="text-3xl font-bold text-gray-900 tracking-tight">คำสั่งซื้อ</h1>
                     <p className="text-gray-500 text-sm mt-1">จัดการคำสั่งซื้อออนไลน์และรายการขายหน้าร้าน (POS)</p>
                 </div>
-                <Button asChild className="bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 rounded-xl text-black">
+                <Button asChild className="shadow-lg shadow-primary/20 rounded-xl">
                     <Link href="/admin/pos">
                         <Plus className="mr-2 h-4 w-4" />
                         เริ่มการขาย POS ใหม่

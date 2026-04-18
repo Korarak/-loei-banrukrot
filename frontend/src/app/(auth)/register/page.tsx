@@ -118,7 +118,7 @@ export default function RegisterPage() {
                             </FormItem>
                         )}
                     />
-                    <Button type="submit" className="w-full text-black" disabled={isLoading}>
+                    <Button type="submit" className="w-full" disabled={isLoading}>
                         {isLoading ? 'กำลังสร้างบัญชี...' : 'สร้างบัญชี'}
                     </Button>
                 </form>

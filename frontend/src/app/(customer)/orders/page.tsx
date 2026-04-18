@@ -23,7 +23,7 @@ export default function OrdersPage() {
     const customer = useAuthStore((state) => state.customer);
     const { data: orders, isLoading } = useCustomerOrders();
     const [searchQuery, setSearchQuery] = useState('');
-    const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'all');
+    const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'pending');
 
     useEffect(() => {
         if (!customer) {
@@ -320,15 +320,7 @@ export default function OrdersPage() {
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="flex w-full overflow-x-auto md:grid md:grid-cols-6 mb-6 h-auto p-1 bg-gray-100/50 rounded-2xl gap-1 no-scrollbar">
-                    <TabsTrigger value="all" className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm py-2 text-xs md:text-sm relative">
-                        ทั้งหมด
-                        {pendingSlipOrders.length > 0 && (
-                            <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center">
-                                {pendingSlipOrders.length}
-                            </span>
-                        )}
-                    </TabsTrigger>
+                <TabsList className="flex w-full overflow-x-auto md:grid md:grid-cols-5 mb-6 h-auto p-1 bg-gray-100/50 rounded-2xl gap-1 no-scrollbar">
                     <TabsTrigger value="pending" className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm py-2 text-xs md:text-sm relative">
                         ที่ต้องชำระ
                         {pendingSlipOrders.length > 0 && (
@@ -350,7 +342,6 @@ export default function OrdersPage() {
                     <TabsTrigger value="cancelled" className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm py-2 text-xs md:text-sm">ยกเลิก</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="all" className="mt-0">{renderOrderList(filterOrders([]))}</TabsContent>
                 <TabsContent value="pending" className="mt-0">{renderOrderList(filterOrders(['pending']))}</TabsContent>
                 <TabsContent value="processing" className="mt-0">{renderOrderList(filterOrders(['confirmed', 'processing']))}</TabsContent>
                 <TabsContent value="shipped" className="mt-0">{renderOrderList(filterOrders(['shipped']))}</TabsContent>
