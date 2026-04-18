@@ -33,6 +33,7 @@ jobs:
           file: ./backend/Dockerfile
           push: true
           tags: ${{ secrets.REGISTRY_URL }}/loei-banrakrod-backend:latest
+          labels: project=loei-banrakrod
           cache-from: type=gha,scope=backend
           cache-to: type=gha,mode=max,scope=backend
 
@@ -60,6 +61,7 @@ jobs:
           file: ./frontend/Dockerfile
           push: true
           tags: ${{ secrets.REGISTRY_URL }}/loei-banrakrod-frontend:latest
+          labels: project=loei-banrakrod
           build-args: |
             NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
           cache-from: type=gha,scope=frontend
@@ -90,4 +92,7 @@ jobs:
             # Pull latest images and recreate containers
             docker-compose down
             docker-compose pull
-            docker-compose up -d      
+            docker-compose up -d
+            
+            # Clean up leftover images
+            docker image prune -f --filter "label=project=loei-banrakrod"
