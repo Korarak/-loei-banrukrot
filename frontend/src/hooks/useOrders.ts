@@ -79,8 +79,7 @@ export function useOrders(options?: any) {
 
 // Fetch customer orders
 export function useCustomerOrders() {
-    const isCustomerAuthenticated = useAuthStore((state) => state.isCustomerAuthenticated);
-    const isAuth = isCustomerAuthenticated();
+    const customer = useAuthStore((state) => state.customer);
 
     return useQuery({
         queryKey: ['orders', 'customer'],
@@ -88,7 +87,7 @@ export function useCustomerOrders() {
             const response = await api.get('/orders');
             return response.data.data as Order[];
         },
-        enabled: isAuth,
+        enabled: !!customer,
     });
 }
 
