@@ -29,10 +29,6 @@ export default function AdminLayout({
         }
     }, [user, isHydrated, router]);
 
-    const isActive = (path: string) => {
-        return pathname.startsWith(path);
-    };
-
     const [mounted, setMounted] = useState(false);
     useEffect(() => {
         setMounted(true);
@@ -60,7 +56,7 @@ export default function AdminLayout({
 
             <main className={cn(
                 "flex-1 xl:ml-72 w-full transition-all duration-300 min-h-screen flex flex-col overflow-x-hidden",
-                isActive('/admin/pos')
+                pathname.startsWith('/admin/pos')
                     ? "p-0 max-w-full"
                     : "pt-4 px-4 pb-24 md:pt-6 md:px-6 md:pb-24 lg:pt-8 lg:px-8 lg:pb-24 xl:pb-8 max-w-7xl mx-auto"
             )}>

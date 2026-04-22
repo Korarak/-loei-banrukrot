@@ -214,22 +214,22 @@ export default function AdminDashboard() {
 
     if (isLoading) {
         return (
-            <div className="space-y-8 p-6">
-                <div className="flex justify-between items-center mb-8">
+            <div className="space-y-6 md:space-y-8">
+                <div className="flex justify-between items-center">
                     <div className="space-y-2">
-                        <Skeleton className="h-8 w-64" />
-                        <Skeleton className="h-4 w-48" />
+                        <Skeleton className="h-8 w-56 md:w-64" />
+                        <Skeleton className="h-4 w-40 md:w-48" />
                     </div>
-                    <Skeleton className="h-10 w-32" />
+                    <Skeleton className="h-9 w-32 rounded-full" />
                 </div>
-                <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                     {Array.from({ length: 4 }).map((_, i) => (
                         <Skeleton key={i} className="h-36 rounded-3xl" />
                     ))}
                 </div>
                 <div className="grid gap-4 grid-cols-1 lg:grid-cols-7">
-                    <Skeleton className="col-span-4 h-[400px] rounded-3xl" />
-                    <Skeleton className="col-span-3 h-[400px] rounded-3xl" />
+                    <Skeleton className="col-span-4 h-[380px] rounded-3xl" />
+                    <Skeleton className="col-span-3 h-[380px] rounded-3xl" />
                 </div>
             </div>
         );
@@ -237,7 +237,7 @@ export default function AdminDashboard() {
 
     return (
         <motion.div
-            className="space-y-8 pb-10"
+            className="space-y-6 md:space-y-8 pb-10"
             variants={containerVariant}
             initial="hidden"
             animate="visible"
@@ -245,9 +245,10 @@ export default function AdminDashboard() {
             {/* Header Section */}
             <motion.div variants={itemVariant} className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl md:text-4xl font-black tracking-tight text-gray-900 flex items-center gap-3">
-                        <GreetingIcon className="h-7 w-7 md:h-8 md:w-8 text-primary animate-pulse-glow" />
-                        {greeting}, <span className="gradient-text-primary">{user?.username || 'Admin'}</span>
+                    <h1 className="text-2xl md:text-4xl font-black tracking-tight text-gray-900 flex items-center gap-2 md:gap-3 flex-wrap">
+                        <GreetingIcon className="h-6 w-6 md:h-8 md:w-8 text-primary animate-pulse-glow shrink-0" />
+                        <span>{greeting},</span>
+                        <span className="gradient-text-primary">{user?.username || 'Admin'}</span>
                     </h1>
                     <p className="text-gray-500 mt-2 font-medium text-sm md:text-base">
                         วันนี้คือวัน{format(new Date(), 'eeee ที่ d MMMM yyyy', { locale: th })}

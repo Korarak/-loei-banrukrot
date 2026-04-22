@@ -46,33 +46,34 @@ export function AdminBottomNav({ onMenuClick }: AdminBottomNavProps) {
     );
 
     return (
-        <>
-            <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 pb-[env(safe-area-inset-bottom)] xl:hidden">
-                <div className="flex items-center justify-around h-16 w-full px-2">
-                    {/* Menu Toggle Button */}
-                    <button
-                        onClick={onMenuClick}
-                        className="flex flex-col items-center justify-center w-full h-full space-y-1 text-gray-400 hover:text-gray-600 transition-colors"
-                    >
-                        <Menu className="h-6 w-6" />
-                        <span className="text-[10px] font-medium">เมนู</span>
-                    </button>
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-200 pb-[env(safe-area-inset-bottom)] xl:hidden">
+            <div className="flex items-center justify-around h-16 w-full">
+                {/* Menu Toggle Button */}
+                <button
+                    onClick={onMenuClick}
+                    aria-label="เปิดเมนูหลัก"
+                    className="flex flex-col items-center justify-center w-full h-full space-y-1 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                    <Menu className="h-6 w-6" />
+                    <span className="text-[10px] font-medium">เมนู</span>
+                </button>
 
-                    {navItems.map((item) => (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            className={linkClass(item.href)}
-                        >
-                            <item.icon className={cn("h-6 w-6", isActive(item.href) && "fill-current/10")} />
-                            <span className="text-[10px] font-medium">{item.label}</span>
-                            {isActive(item.href) && (
-                                <span className="absolute top-0 w-8 h-1 bg-primary rounded-b-full" />
-                            )}
-                        </Link>
-                    ))}
-                </div>
+                {navItems.map((item) => (
+                    <Link
+                        key={item.href}
+                        href={item.href}
+                        aria-label={item.label}
+                        aria-current={isActive(item.href) ? 'page' : undefined}
+                        className={linkClass(item.href)}
+                    >
+                        <item.icon className="h-6 w-6" />
+                        <span className="text-[10px] font-medium">{item.label}</span>
+                        {isActive(item.href) && (
+                            <span className="absolute top-0 w-8 h-1 bg-primary rounded-b-full" />
+                        )}
+                    </Link>
+                ))}
             </div>
-        </>
+        </div>
     );
 }

@@ -10,16 +10,16 @@ import {
     Store,
     Folder,
     Users,
+    User,
     LogOut,
     Truck,
     ChevronDown,
-    ChevronRight,
     Settings,
     History,
-    Menu,
     Database,
     FileText,
-    Warehouse
+    Warehouse,
+    X,
 } from 'lucide-react';
 import { cn, getImageUrl } from '@/lib/utils';
 import { useState, useEffect } from 'react';
@@ -99,7 +99,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
             items: [
                 { href: '/admin/dashboard', label: 'ภาพรวมระบบ', icon: LayoutDashboard },
                 { href: '/admin/reports', label: 'รายงาน', icon: FileText },
-                { href: '/admin/users', label: 'ผู้ใช้งาน', icon: Users },
+                { href: '/admin/users', label: 'ผู้ใช้งาน', icon: User },
                 { href: '/admin/customers', label: 'ลูกค้า', icon: Users },
                 { href: '/admin/backups', label: 'สำรองข้อมูล', icon: Database },
                 { href: '/admin/settings', label: 'ตั้งค่าระบบ', icon: Settings },
@@ -157,9 +157,10 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                     {/* Close button for mobile/tablet */}
                     <button
                         onClick={onClose}
-                        className="p-2 -mr-2 text-gray-400 hover:text-white xl:hidden"
+                        aria-label="ปิดเมนู"
+                        className="p-2 -mr-2 text-gray-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors xl:hidden"
                     >
-                        <ChevronDown className="h-6 w-6 rotate-90" />
+                        <X className="h-5 w-5" />
                     </button>
                 </div>
 
