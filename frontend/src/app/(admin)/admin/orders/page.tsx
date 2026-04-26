@@ -21,8 +21,9 @@ import {
     DialogFooter,
     DialogDescription,
 } from '@/components/ui/dialog';
-import { Search, Eye, Plus, AlertCircle, Store, Globe, Calendar, CreditCard, Banknote, User, Copy, ExternalLink, Truck, CheckCircle2, ScanLine } from 'lucide-react';
+import { Search, Eye, Plus, AlertCircle, Store, Globe, Calendar, CreditCard, Banknote, User, Copy, ExternalLink, Truck, CheckCircle2, ScanLine, Printer } from 'lucide-react';
 import { BarcodeScanner } from '@/components/features/BarcodeScanner';
+import { ShippingLabelDialog } from '@/components/admin/ShippingLabelDialog';
 import Link from 'next/link';
 import { useRef, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -48,6 +49,7 @@ export default function AdminOrdersPage() {
     const [sourceFilter, setSourceFilter] = useState('all'); // 'all' | 'online' | 'pos'
     const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
     const [orderToCancel, setOrderToCancel] = useState<string | null>(null);
+    const [labelOrder, setLabelOrder] = useState<Order | null>(null);
 
     // Tracking Dialog State
     const [trackingDialogOpen, setTrackingDialogOpen] = useState(false);
@@ -348,6 +350,18 @@ export default function AdminOrdersPage() {
                                             </SelectContent>
                                         </Select>
 
+                                        {order.source === 'online' && (
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="text-gray-500 hover:text-gray-900 hover:bg-gray-100 gap-1.5 rounded-lg"
+                                                onClick={() => setLabelOrder(order)}
+                                                title="พิมพ์สติ้กเกอร์จัดส่ง"
+                                            >
+                                                <Printer className="h-4 w-4" />
+                                                สติ้กเกอร์
+                                            </Button>
+                                        )}
                                         <Button variant="ghost" size="sm" className="text-gray-500 hover:text-primary hover:bg-primary/5 gap-1.5 rounded-lg" asChild>
                                             <Link href={`/admin/orders/${order._id}`}>
                                                 <Eye className="h-4 w-4" />
@@ -489,6 +503,14 @@ export default function AdminOrdersPage() {
                 onScan={(value) => setTrackingNumber(value)}
                 onClose={() => setScannerOpen(false)}
             />
+
+            {labelOrder && (
+                <ShippingLabelDialog
+                    open={!!labelOrder}
+                    onOpenChange={(open) => { if (!open) setLabelOrder(null); }}
+                    order={labelOrder}
+                />
+            )}
         </div>
     );
 }

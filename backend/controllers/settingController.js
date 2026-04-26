@@ -7,6 +7,7 @@ const PUBLIC_KEYS = [
     'payment_bank_account_name',
     'store_name',
     'store_phone',
+    'store_address',
 ];
 
 const DEFAULT_SETTINGS = [
@@ -15,6 +16,7 @@ const DEFAULT_SETTINGS = [
     { key: 'payment_bank_account_name', value: 'บจก. บ้านรักรถ จ.เลย', description: 'ชื่อบัญชีธนาคาร' },
     { key: 'store_name', value: 'บ้านรักรถ', description: 'ชื่อร้าน' },
     { key: 'store_phone', value: '', description: 'เบอร์โทรร้าน' },
+    { key: 'store_address', value: '', description: 'ที่อยู่ร้าน' },
 ];
 
 // Seed defaults that don't exist yet

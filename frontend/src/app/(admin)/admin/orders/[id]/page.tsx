@@ -3,8 +3,9 @@
 import { useOrder, useUpdateOrderStatus, useVerifyPayment } from '@/hooks/useOrders';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { ArrowLeft, Package, Truck, Pencil, AlertCircle, Copy, ExternalLink, CheckCircle2, ScanLine, ReceiptText } from 'lucide-react';
+import { ArrowLeft, Package, Truck, Pencil, AlertCircle, Copy, ExternalLink, CheckCircle2, ScanLine, ReceiptText, Printer } from 'lucide-react';
 import { OrderReceiptDialog } from '@/components/admin/OrderReceiptDialog';
+import { ShippingLabelDialog } from '@/components/admin/ShippingLabelDialog';
 import { BarcodeScanner } from '@/components/features/BarcodeScanner';
 import Link from 'next/link';
 import {
@@ -51,6 +52,7 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
     const [newStatusToApply, setNewStatusToApply] = useState<string | null>(null);
     const [scannerOpen, setScannerOpen] = useState(false);
     const [receiptOpen, setReceiptOpen] = useState(false);
+    const [labelOpen, setLabelOpen] = useState(false);
 
     const calculateShippingCost = () => {
         if (!order?.items) return 0;
@@ -201,6 +203,17 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                         </p>
                     </div>
                     <div className="flex items-center gap-3">
+                        {order.source === 'online' && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setLabelOpen(true)}
+                                className="h-9 gap-2 text-sm font-medium"
+                            >
+                                <Printer className="h-4 w-4" />
+                                พิมพ์สติ้กเกอร์
+                            </Button>
+                        )}
                         <Button
                             variant="outline"
                             size="sm"
@@ -617,6 +630,14 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                 <OrderReceiptDialog
                     open={receiptOpen}
                     onOpenChange={setReceiptOpen}
+                    order={order}
+                />
+            )}
+
+            {labelOpen && (
+                <ShippingLabelDialog
+                    open={labelOpen}
+                    onOpenChange={setLabelOpen}
                     order={order}
                 />
             )}

@@ -28,6 +28,13 @@ import {
     Package,
     ChevronLeft,
     ChevronRight,
+    ShoppingBag,
+    CheckCircle2,
+    XCircle,
+    Pencil,
+    Trash2,
+    X,
+    Check,
 } from 'lucide-react';
 import {
     useInventorySummary,
@@ -38,6 +45,14 @@ import {
     type MovementFilters,
     type StockMovementType,
 } from '@/hooks/useInventory';
+import {
+    useShopeeStatus,
+    useShopeeMapping,
+    useUpdateShopeeMapping,
+    useRemoveShopeeMapping,
+    type ShopeeMappingFilter,
+    type ShopeeVariantMapping,
+} from '@/hooks/useShopee';
 import { useProducts, type Product } from '@/hooks/useProducts';
 import { cn, getImageUrl } from '@/lib/utils';
 import Image from 'next/image';
@@ -45,11 +60,13 @@ import Image from 'next/image';
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const MOVEMENT_TYPE_META: Record<StockMovementType, { label: string; color: string; bg: string; sign: '+' | '-' }> = {
-    sale_pos:      { label: 'ขายหน้าร้าน',   color: 'text-red-700',    bg: 'bg-red-50 border-red-200',    sign: '-' },
-    sale_online:   { label: 'ขายออนไลน์',    color: 'text-red-700',    bg: 'bg-red-50 border-red-200',    sign: '-' },
+    sale_pos:      { label: 'ขายหน้าร้าน',   color: 'text-red-700',    bg: 'bg-red-50 border-red-200',       sign: '-' },
+    sale_online:   { label: 'ขายออนไลน์',    color: 'text-red-700',    bg: 'bg-red-50 border-red-200',       sign: '-' },
     cancel_online: { label: 'ยกเลิกออเดอร์', color: 'text-yellow-700', bg: 'bg-yellow-50 border-yellow-200', sign: '+' },
-    stock_in:      { label: 'รับสินค้าเข้า', color: 'text-green-700',  bg: 'bg-green-50 border-green-200',  sign: '+' },
-    adjustment:    { label: 'ปรับสต็อก',      color: 'text-blue-700',   bg: 'bg-blue-50 border-blue-200',   sign: '+' },
+    stock_in:      { label: 'รับสินค้าเข้า', color: 'text-green-700',  bg: 'bg-green-50 border-green-200',   sign: '+' },
+    adjustment:    { label: 'ปรับสต็อก',      color: 'text-blue-700',   bg: 'bg-blue-50 border-blue-200',    sign: '+' },
+    shopee_sale:   { label: 'ขายบน Shopee',  color: 'text-orange-700', bg: 'bg-orange-50 border-orange-200', sign: '-' },
+    shopee_sync:   { label: 'Shopee Sync',   color: 'text-orange-600', bg: 'bg-orange-50 border-orange-200', sign: '+' },
 };
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
@@ -423,6 +440,229 @@ function MovementHistoryTab() {
     );
 }
 
+// ─── Tab: Shopee Sync ─────────────────────────────────────────────────────────
+
+function ShopeeTab() {
+    const { data: status, isLoading: statusLoading } = useShopeeStatus();
+    const [filter, setFilter] = useState<ShopeeMappingFilter>('all');
+    const [page, setPage] = useState(1);
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editForm, setEditForm] = useState({ shopeeItemId: '', shopeeModelId: '' });
+
+    const { data, isLoading } = useShopeeMapping({ page, limit: 30, filter });
+    const updateMapping = useUpdateShopeeMapping();
+    const removeMapping = useRemoveShopeeMapping();
+
+    const variants = data?.data ?? [];
+    const pagination = data?.pagination;
+
+    const startEdit = (v: ShopeeVariantMapping) => {
+        setEditingId(v._id);
+        setEditForm({ shopeeItemId: v.shopeeItemId ?? '', shopeeModelId: v.shopeeModelId ?? '' });
+    };
+
+    const cancelEdit = () => setEditingId(null);
+
+    const saveEdit = async (variantId: string) => {
+        await updateMapping.mutateAsync({ variantId, shopeeItemId: editForm.shopeeItemId, shopeeModelId: editForm.shopeeModelId || undefined });
+        setEditingId(null);
+    };
+
+    const handleRemove = async (variantId: string) => {
+        await removeMapping.mutateAsync(variantId);
+    };
+
+    const FILTERS: { value: ShopeeMappingFilter; label: string }[] = [
+        { value: 'all', label: 'ทั้งหมด' },
+        { value: 'mapped', label: 'ผูกแล้ว' },
+        { value: 'unmapped', label: 'ยังไม่ผูก' },
+    ];
+
+    return (
+        <div className="space-y-5">
+            {/* Status card */}
+            {!statusLoading && (
+                <Card className="p-5">
+                    <div className="flex items-start gap-4">
+                        <div className={cn('p-3 rounded-xl shrink-0', status?.configured ? 'bg-orange-500' : 'bg-gray-200')}>
+                            <ShoppingBag className={cn('h-5 w-5', status?.configured ? 'text-white' : 'text-gray-500')} />
+                        </div>
+                        <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                                <p className="font-bold text-gray-900">Shopee Integration</p>
+                                {status?.configured ? (
+                                    <span className="flex items-center gap-1 text-xs font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full">
+                                        <CheckCircle2 className="h-3 w-3" /> พร้อมใช้งาน
+                                    </span>
+                                ) : (
+                                    <span className="flex items-center gap-1 text-xs font-semibold text-gray-500 bg-gray-100 border border-gray-200 px-2 py-0.5 rounded-full">
+                                        <XCircle className="h-3 w-3" /> ยังไม่ได้ตั้งค่า
+                                    </span>
+                                )}
+                            </div>
+                            {status?.configured ? (
+                                <p className="text-sm text-gray-500">Partner ID: <span className="font-mono">{status.partnerId}</span> · Shop ID: <span className="font-mono">{status.shopId}</span></p>
+                            ) : (
+                                <div className="text-sm text-gray-500 space-y-1">
+                                    <p>เพิ่ม env vars ต่อไปนี้ใน <span className="font-mono bg-gray-100 px-1 rounded">backend/.env</span> เพื่อเปิดใช้งาน:</p>
+                                    <pre className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-xs font-mono text-gray-700 mt-2 select-all">
+{`SHOPEE_PARTNER_ID=your_partner_id
+SHOPEE_PARTNER_KEY=your_partner_key
+SHOPEE_SHOP_ID=your_shop_id`}
+                                    </pre>
+                                    <p className="text-xs text-gray-400 mt-1">สามารถผูกสินค้ากับ Shopee ID ไว้ล่วงหน้าได้เลย แม้ยังไม่มี credentials</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    {status?.configured && (
+                        <div className="mt-4 pt-4 border-t text-sm text-gray-500">
+                            <p>Webhook URL สำหรับตั้งค่าใน Shopee Partner Portal:</p>
+                            <p className="font-mono bg-gray-50 border border-gray-200 rounded px-3 py-1.5 mt-1 text-xs select-all break-all">
+                                {typeof window !== 'undefined' ? `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') ?? ''}/api/shopee/webhook` : '/api/shopee/webhook'}
+                            </p>
+                        </div>
+                    )}
+                </Card>
+            )}
+
+            {/* Filter + table */}
+            <Card className="overflow-hidden">
+                <div className="p-4 border-b flex items-center justify-between flex-wrap gap-3">
+                    <div className="flex gap-2">
+                        {FILTERS.map(f => (
+                            <button
+                                key={f.value}
+                                onClick={() => { setFilter(f.value); setPage(1); }}
+                                className={cn(
+                                    'px-3 py-1.5 rounded-lg text-sm font-medium transition-colors',
+                                    filter === f.value ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                )}
+                            >
+                                {f.label}
+                            </button>
+                        ))}
+                    </div>
+                    {pagination && <p className="text-sm text-gray-400">{pagination.total} รายการ</p>}
+                </div>
+
+                {isLoading ? (
+                    <div className="flex justify-center py-16"><RefreshCw className="h-7 w-7 animate-spin text-gray-300" /></div>
+                ) : variants.length === 0 ? (
+                    <div className="flex flex-col items-center py-14 text-gray-400">
+                        <ShoppingBag className="h-10 w-10 mb-2 opacity-30" />
+                        <p className="text-sm">ไม่มีข้อมูล</p>
+                    </div>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="border-b bg-gray-50 text-xs text-gray-500 uppercase tracking-wider">
+                                    <th className="text-left px-4 py-3 font-semibold">สินค้า / SKU</th>
+                                    <th className="text-left px-4 py-3 font-semibold">Shopee Item ID</th>
+                                    <th className="text-left px-4 py-3 font-semibold">Shopee Model ID</th>
+                                    <th className="text-right px-4 py-3 font-semibold">สต็อก</th>
+                                    <th className="px-4 py-3" />
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50">
+                                {variants.map((v) => (
+                                    <tr key={v._id} className="hover:bg-gray-50 transition-colors">
+                                        <td className="px-4 py-3">
+                                            <p className="font-medium text-gray-900 truncate max-w-[200px]">{v.productId?.productName}</p>
+                                            <p className="text-xs font-mono text-gray-400">{v.sku}</p>
+                                            {(v.option1Value || v.option2Value) && (
+                                                <p className="text-xs text-gray-400">{[v.option1Value, v.option2Value].filter(Boolean).join(' / ')}</p>
+                                            )}
+                                        </td>
+
+                                        {editingId === v._id ? (
+                                            <>
+                                                <td className="px-4 py-3">
+                                                    <Input
+                                                        value={editForm.shopeeItemId}
+                                                        onChange={e => setEditForm(f => ({ ...f, shopeeItemId: e.target.value }))}
+                                                        placeholder="Item ID"
+                                                        className="h-8 w-36 font-mono text-xs"
+                                                        autoFocus
+                                                    />
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    <Input
+                                                        value={editForm.shopeeModelId}
+                                                        onChange={e => setEditForm(f => ({ ...f, shopeeModelId: e.target.value }))}
+                                                        placeholder="Model ID (ถ้ามี variant)"
+                                                        className="h-8 w-40 font-mono text-xs"
+                                                    />
+                                                </td>
+                                                <td className="px-4 py-3 text-right font-mono text-gray-500">{v.stockAvailable}</td>
+                                                <td className="px-4 py-3">
+                                                    <div className="flex items-center gap-1 justify-end">
+                                                        <Button size="sm" className="h-7 bg-orange-500 hover:bg-orange-600 gap-1"
+                                                            disabled={!editForm.shopeeItemId || updateMapping.isPending}
+                                                            onClick={() => saveEdit(v._id)}>
+                                                            <Check className="h-3.5 w-3.5" /> บันทึก
+                                                        </Button>
+                                                        <Button size="sm" variant="ghost" className="h-7" onClick={cancelEdit}>
+                                                            <X className="h-3.5 w-3.5" />
+                                                        </Button>
+                                                    </div>
+                                                </td>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <td className="px-4 py-3">
+                                                    {v.shopeeItemId
+                                                        ? <span className="font-mono text-xs bg-orange-50 text-orange-700 border border-orange-200 px-2 py-0.5 rounded">{v.shopeeItemId}</span>
+                                                        : <span className="text-gray-300 text-xs italic">—</span>}
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    {v.shopeeModelId
+                                                        ? <span className="font-mono text-xs bg-orange-50 text-orange-700 border border-orange-200 px-2 py-0.5 rounded">{v.shopeeModelId}</span>
+                                                        : <span className="text-gray-300 text-xs italic">—</span>}
+                                                </td>
+                                                <td className="px-4 py-3 text-right font-mono text-gray-500">{v.stockAvailable}</td>
+                                                <td className="px-4 py-3">
+                                                    <div className="flex items-center gap-1 justify-end">
+                                                        <Button size="sm" variant="outline" className="h-7 gap-1" onClick={() => startEdit(v)}>
+                                                            <Pencil className="h-3 w-3" /> {v.shopeeItemId ? 'แก้ไข' : 'ผูก'}
+                                                        </Button>
+                                                        {v.shopeeItemId && (
+                                                            <Button size="sm" variant="ghost" className="h-7 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                                                disabled={removeMapping.isPending}
+                                                                onClick={() => handleRemove(v._id)}>
+                                                                <Trash2 className="h-3.5 w-3.5" />
+                                                            </Button>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </>
+                                        )}
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+
+                {pagination && pagination.pages > 1 && (
+                    <div className="flex items-center justify-between p-4 border-t">
+                        <p className="text-sm text-gray-500">หน้า {pagination.page} / {pagination.pages}</p>
+                        <div className="flex gap-2">
+                            <Button variant="outline" size="sm" disabled={pagination.page <= 1} onClick={() => setPage(p => p - 1)}>
+                                <ChevronLeft className="h-4 w-4" />
+                            </Button>
+                            <Button variant="outline" size="sm" disabled={pagination.page >= pagination.pages} onClick={() => setPage(p => p + 1)}>
+                                <ChevronRight className="h-4 w-4" />
+                            </Button>
+                        </div>
+                    </div>
+                )}
+            </Card>
+        </div>
+    );
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function InventoryPage() {
@@ -459,12 +699,16 @@ export default function InventoryPage() {
                     <TabsTrigger value="history" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm gap-2">
                         <History className="h-4 w-4" /> ประวัติการเคลื่อนไหว
                     </TabsTrigger>
+                    <TabsTrigger value="shopee" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm gap-2">
+                        <ShoppingBag className="h-4 w-4" /> Shopee Sync
+                    </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="overview"><OverviewTab /></TabsContent>
                 <TabsContent value="receive"><ReceiveStockTab /></TabsContent>
                 <TabsContent value="alerts"><LowStockTab /></TabsContent>
                 <TabsContent value="history"><MovementHistoryTab /></TabsContent>
+                <TabsContent value="shopee"><ShopeeTab /></TabsContent>
             </Tabs>
         </div>
     );

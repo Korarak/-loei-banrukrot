@@ -31,6 +31,15 @@ const productVariantSchema = new mongoose.Schema({
         required: true,
         min: 0,
         default: 0
+    },
+    shopeeItemId: {
+        type: String,
+        default: null,
+        index: true
+    },
+    shopeeModelId: {
+        type: String,
+        default: null
     }
 });
 

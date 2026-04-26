@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-export type StockMovementType = 'sale_pos' | 'sale_online' | 'cancel_online' | 'stock_in' | 'adjustment';
+export type StockMovementType = 'sale_pos' | 'sale_online' | 'cancel_online' | 'stock_in' | 'adjustment' | 'shopee_sale' | 'shopee_sync';
 
 export interface StockMovement {
     _id: string;

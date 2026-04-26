@@ -23,6 +23,7 @@ export interface Order {
         _id: string;
         addressLabel?: string;
         recipientName: string;
+        phone?: string;
         streetAddress: string;
         subDistrict?: string;
         district: string;

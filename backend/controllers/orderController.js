@@ -362,6 +362,7 @@ exports.getAllOrders = async (req, res, next) => {
         const orders = await Order.find(query)
             .populate('customerId')
             .populate('cashierUserId')
+            .populate('shippingAddressId')
             .limit(parseInt(limit))
             .skip(skip)
             .sort({ orderDate: -1 });

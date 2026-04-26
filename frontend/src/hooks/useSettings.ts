@@ -15,6 +15,7 @@ export interface PublicSettings {
     payment_bank_account_name?: string;
     store_name?: string;
     store_phone?: string;
+    store_address?: string;
 }
 
 export function usePublicSettings() {

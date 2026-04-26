@@ -16,7 +16,7 @@ const stockMovementSchema = new mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ['sale_pos', 'sale_online', 'cancel_online', 'stock_in', 'adjustment'],
+        enum: ['sale_pos', 'sale_online', 'cancel_online', 'stock_in', 'adjustment', 'shopee_sale', 'shopee_sync'],
         required: true
     },
     quantityChange: {
@@ -37,7 +37,7 @@ const stockMovementSchema = new mongoose.Schema({
     },
     referenceType: {
         type: String,
-        enum: ['Order', null],
+        enum: ['Order', 'ShopeeWebhook', null],
         default: null
     },
     note: {

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Package, Printer, X } from 'lucide-react';
 import { siteConfig } from '@/config/site';
 import { Order } from '@/hooks/useOrders';
+import { usePublicSettings } from '@/hooks/useSettings';
 
 interface OrderReceiptDialogProps {
     open: boolean;
@@ -18,6 +19,7 @@ interface OrderReceiptDialogProps {
 
 export function OrderReceiptDialog({ open, onOpenChange, order }: OrderReceiptDialogProps) {
     const isPOS = order.source === 'pos';
+    const { data: settings } = usePublicSettings();
     const payment = order.payments?.[0];
     const cashReceived = payment?.amountPaid ?? 0;
     const change = isPOS ? Math.max(0, cashReceived - order.totalAmount) : 0;
@@ -46,9 +48,13 @@ export function OrderReceiptDialog({ open, onOpenChange, order }: OrderReceiptDi
                                 <Package className="h-6 w-6" />
                             </div>
                             <h2 className="font-bold text-xl uppercase tracking-wider mb-1">
-                                {siteConfig.brand.name}
+                                {settings?.store_name || siteConfig.brand.name}
                             </h2>
-                            <p className="text-gray-500 text-xs">สาขาเลย</p>
+                            {(settings?.store_address || settings?.store_phone) && (
+                                <p className="text-gray-500 text-xs">
+                                    {settings.store_address || settings.store_phone}
+                                </p>
+                            )}
                             <div className="my-4 border-b border-dashed border-gray-300" />
                             <div className="flex justify-between text-xs text-gray-500">
                                 <span>

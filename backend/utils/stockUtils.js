@@ -6,7 +6,7 @@ const { ProductVariant, StockMovement } = require('../models');
  * Change stock for a variant and log the movement.
  * @param {string} variantId
  * @param {number} delta - signed change (+10 add, -3 deduct)
- * @param {'sale_pos'|'sale_online'|'cancel_online'|'stock_in'|'adjustment'} type
+ * @param {'sale_pos'|'sale_online'|'cancel_online'|'stock_in'|'adjustment'|'shopee_sale'|'shopee_sync'} type
  * @param {string|null} referenceId - orderId for sales/cancels, null for manual
  * @param {'Order'|null} referenceType
  * @param {string} performedBy - user _id

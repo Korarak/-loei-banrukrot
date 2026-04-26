@@ -60,7 +60,10 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Body Parsers
-app.use(express.json({ limit: '10kb' })); // Limit body size
+app.use(express.json({
+    limit: '10kb',
+    verify: (req, _res, buf) => { req.rawBody = buf; }
+}));
 app.use(express.urlencoded({ extended: true }));
 
 // Data Sanitization against NoSQL Injection
@@ -91,6 +94,7 @@ app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 app.use('/api/reports', require('./routes/reportRoutes'));
 app.use('/api/inventory', require('./routes/inventoryRoutes'));
 app.use('/api/settings', require('./routes/settingRoutes'));
+app.use('/api/shopee', require('./routes/shopeeRoutes'));
 
 app.get('/', (req, res) => {
     res.send('API is running...');

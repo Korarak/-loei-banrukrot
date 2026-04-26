@@ -6,8 +6,17 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+} from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Save, Landmark, Store } from 'lucide-react';
+import { Save, Landmark, Store, Trash2, AlertTriangle, ShoppingBag, ListOrdered, Users, LayoutGrid, RotateCcw } from 'lucide-react';
+import api from '@/lib/api';
 
 const SETTING_GROUPS: { label: string; icon: React.ElementType; keys: { key: string; label: string; placeholder: string }[] }[] = [
     {
@@ -25,15 +34,59 @@ const SETTING_GROUPS: { label: string; icon: React.ElementType; keys: { key: str
         keys: [
             { key: 'store_name', label: 'ชื่อร้าน', placeholder: 'เช่น บ้านรักรถ' },
             { key: 'store_phone', label: 'เบอร์โทรร้าน', placeholder: 'เช่น 042-000-000' },
+            { key: 'store_address', label: 'ที่อยู่ร้าน', placeholder: 'เช่น 519/2 ม.5 ต.เมือง อ.เมือง จ.เลย 42000' },
         ],
     },
 ];
+
+const RESET_ACTIONS = [
+    {
+        key: 'orders',
+        label: 'ล้างคำสั่งซื้อทั้งหมด',
+        desc: 'ลบ Orders, รายละเอียดออเดอร์ และ Payments ทั้งหมด',
+        icon: ListOrdered,
+        confirmWord: 'ลบออเดอร์',
+    },
+    {
+        key: 'products',
+        label: 'ล้างสินค้าทั้งหมด',
+        desc: 'ลบสินค้า, Variants, รูปภาพ และประวัติสต็อกทั้งหมด',
+        icon: ShoppingBag,
+        confirmWord: 'ลบสินค้า',
+    },
+    {
+        key: 'categories',
+        label: 'ล้างหมวดหมู่ทั้งหมด',
+        desc: 'ลบหมวดหมู่ทั้งหมด (สินค้าที่อยู่ในหมวดหมู่จะยังคงอยู่)',
+        icon: LayoutGrid,
+        confirmWord: 'ลบหมวดหมู่',
+    },
+    {
+        key: 'customers',
+        label: 'ล้างข้อมูลลูกค้าทั้งหมด',
+        desc: 'ลบบัญชีลูกค้า, ที่อยู่ และตะกร้าสินค้าทั้งหมด',
+        icon: Users,
+        confirmWord: 'ลบลูกค้า',
+    },
+    {
+        key: 'all',
+        label: 'เริ่มต้นใหม่ทั้งหมด',
+        desc: 'ลบข้อมูลสินค้า, ออเดอร์, ลูกค้า และหมวดหมู่ทั้งหมด (คงไว้เฉพาะ Staff และ Settings)',
+        icon: RotateCcw,
+        confirmWord: 'เริ่มต้นใหม่',
+        danger: true,
+    },
+] as const;
 
 export default function SettingsPage() {
     const { data: settings, isLoading } = useAdminSettings();
     const updateSetting = useUpdateSetting();
     const [values, setValues] = useState<Record<string, string>>({});
     const [dirty, setDirty] = useState<Record<string, boolean>>({});
+
+    const [resetTarget, setResetTarget] = useState<typeof RESET_ACTIONS[number] | null>(null);
+    const [confirmInput, setConfirmInput] = useState('');
+    const [resetting, setResetting] = useState(false);
 
     useEffect(() => {
         if (settings) {
@@ -56,6 +109,25 @@ export default function SettingsPage() {
             toast.success('บันทึกเรียบร้อย');
         } catch {
             toast.error('บันทึกไม่สำเร็จ');
+        }
+    };
+
+    const openReset = (action: typeof RESET_ACTIONS[number]) => {
+        setResetTarget(action);
+        setConfirmInput('');
+    };
+
+    const handleReset = async () => {
+        if (!resetTarget || confirmInput !== resetTarget.confirmWord) return;
+        setResetting(true);
+        try {
+            await api.delete(`/settings/reset/${resetTarget.key}`);
+            toast.success(resetTarget.label + ' เรียบร้อยแล้ว');
+            setResetTarget(null);
+        } catch (err: any) {
+            toast.error('เกิดข้อผิดพลาด', { description: err.response?.data?.message });
+        } finally {
+            setResetting(false);
         }
     };
 
@@ -106,6 +178,85 @@ export default function SettingsPage() {
                     ))}
                 </Card>
             ))}
+
+            {/* ─── Danger Zone ─── */}
+            <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                    <AlertTriangle className="h-4 w-4 text-red-500" />
+                    <h2 className="font-bold text-base text-red-600">Danger Zone — เริ่มต้นใหม่</h2>
+                </div>
+                <p className="text-xs text-gray-500">
+                    ใช้สำหรับล้างข้อมูลเพื่อเริ่มต้นร้านใหม่ การดำเนินการเหล่านี้ไม่สามารถยกเลิกได้
+                </p>
+                <Card className="border-red-100 rounded-2xl divide-y divide-red-50 overflow-hidden">
+                    {RESET_ACTIONS.map(action => (
+                        <div
+                            key={action.key}
+                            className={`flex items-center justify-between gap-4 px-5 py-4 ${action.danger ? 'bg-red-50/60' : 'bg-white'}`}
+                        >
+                            <div className="flex items-start gap-3 min-w-0">
+                                <action.icon className={`h-4 w-4 mt-0.5 shrink-0 ${action.danger ? 'text-red-500' : 'text-gray-400'}`} />
+                                <div className="min-w-0">
+                                    <p className={`text-sm font-semibold ${action.danger ? 'text-red-700' : 'text-gray-800'}`}>
+                                        {action.label}
+                                    </p>
+                                    <p className="text-xs text-gray-500 mt-0.5">{action.desc}</p>
+                                </div>
+                            </div>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className={`shrink-0 gap-1.5 ${action.danger ? 'border-red-300 text-red-600 hover:bg-red-50' : 'border-gray-200 text-gray-600 hover:bg-gray-50'}`}
+                                onClick={() => openReset(action)}
+                            >
+                                <Trash2 className="h-3.5 w-3.5" />
+                                ล้างข้อมูล
+                            </Button>
+                        </div>
+                    ))}
+                </Card>
+            </div>
+
+            {/* ─── Confirm Dialog ─── */}
+            <Dialog open={!!resetTarget} onOpenChange={(o) => { if (!o) setResetTarget(null); }}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2 text-red-600">
+                            <AlertTriangle className="h-5 w-5" />
+                            {resetTarget?.label}
+                        </DialogTitle>
+                        <DialogDescription className="pt-1">
+                            {resetTarget?.desc}
+                            <br /><br />
+                            การดำเนินการนี้<strong>ไม่สามารถยกเลิกได้</strong> กรุณาพิมพ์{' '}
+                            <code className="bg-gray-100 px-1.5 py-0.5 rounded text-red-700 font-bold text-sm">
+                                {resetTarget?.confirmWord}
+                            </code>{' '}
+                            เพื่อยืนยัน
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <Input
+                        value={confirmInput}
+                        onChange={e => setConfirmInput(e.target.value)}
+                        placeholder={resetTarget?.confirmWord}
+                        className="mt-2"
+                        onKeyDown={e => e.key === 'Enter' && confirmInput === resetTarget?.confirmWord && handleReset()}
+                        autoFocus
+                    />
+
+                    <DialogFooter className="gap-2 mt-4">
+                        <Button variant="outline" onClick={() => setResetTarget(null)}>ยกเลิก</Button>
+                        <Button
+                            variant="destructive"
+                            onClick={handleReset}
+                            disabled={confirmInput !== resetTarget?.confirmWord || resetting}
+                        >
+                            {resetting ? 'กำลังลบ...' : 'ยืนยัน ลบข้อมูล'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
