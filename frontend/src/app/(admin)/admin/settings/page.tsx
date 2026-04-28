@@ -46,6 +46,7 @@ const RESET_ACTIONS = [
         desc: 'ลบ Orders, รายละเอียดออเดอร์ และ Payments ทั้งหมด',
         icon: ListOrdered,
         confirmWord: 'ลบออเดอร์',
+        danger: false,
     },
     {
         key: 'products',
@@ -53,6 +54,7 @@ const RESET_ACTIONS = [
         desc: 'ลบสินค้า, Variants, รูปภาพ และประวัติสต็อกทั้งหมด',
         icon: ShoppingBag,
         confirmWord: 'ลบสินค้า',
+        danger: false,
     },
     {
         key: 'categories',
@@ -60,6 +62,7 @@ const RESET_ACTIONS = [
         desc: 'ลบหมวดหมู่ทั้งหมด (สินค้าที่อยู่ในหมวดหมู่จะยังคงอยู่)',
         icon: LayoutGrid,
         confirmWord: 'ลบหมวดหมู่',
+        danger: false,
     },
     {
         key: 'customers',
@@ -67,6 +70,7 @@ const RESET_ACTIONS = [
         desc: 'ลบบัญชีลูกค้า, ที่อยู่ และตะกร้าสินค้าทั้งหมด',
         icon: Users,
         confirmWord: 'ลบลูกค้า',
+        danger: false,
     },
     {
         key: 'all',
