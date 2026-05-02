@@ -19,6 +19,16 @@ const nextConfig: NextConfig = {
         hostname: '**.loeitech.org',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: '**.railway.app',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.up.railway.app',
+        pathname: '/**',
+      },
     ],
   },
   output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
