@@ -134,8 +134,14 @@ app.get('/api/status', async (req, res) => {
                 dbName: mongoose.connection.name,
                 host: mongoose.connection.host
             });
+        } else if (dbStatus === 2) {
+            // Still connecting — server is alive, DB not ready yet
+            res.status(200).json({
+                status: 'Server Running',
+                database: statusMap[dbStatus]
+            });
         } else {
-            res.status(500).json({
+            res.status(503).json({
                 status: 'Server Running',
                 database: statusMap[dbStatus] || 'Unknown'
             });
