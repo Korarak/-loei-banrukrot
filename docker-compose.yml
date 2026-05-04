@@ -19,7 +19,7 @@ services:
       - mongodb
     environment:
       - PORT=8080
-      - MONGODB_URI=mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password123}@mongodb:27017/banrukrodb?authSource=admin
+      - MONGODB_URI=mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password123}@mongodb:27017/banrukrotdb?authSource=admin
       - JWT_SECRET=${JWT_SECRET}
       - NODE_ENV=production
       - FRONTEND_URL=${FRONTEND_URL:-http://localhost:8083}
