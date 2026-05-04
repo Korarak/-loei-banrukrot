@@ -29,6 +29,11 @@ const nextConfig: NextConfig = {
         hostname: '**.up.railway.app',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '/**',
+      },
     ],
   },
   output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,

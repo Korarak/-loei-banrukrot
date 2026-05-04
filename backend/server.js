@@ -76,9 +76,6 @@ app.use(hpp());
 
 app.use(require('./config/passport').initialize());
 
-// Serve static files
-app.use('/uploads', express.static('public/uploads'));
-
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));

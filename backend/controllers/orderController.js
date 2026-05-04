@@ -453,8 +453,7 @@ exports.uploadPaymentSlip = async (req, res, next) => {
         }
 
         // Update payment with slip
-        const slipPath = `/uploads/slips/${req.file.filename}`;
-        payment.slipImage = slipPath;
+        payment.slipImage = req.file.path;
         payment.isVerified = false; // Reset verification on new upload
         await payment.save();
 
@@ -462,7 +461,7 @@ exports.uploadPaymentSlip = async (req, res, next) => {
             success: true,
             message: 'Payment slip uploaded successfully',
             data: {
-                slipImage: slipPath
+                slipImage: req.file.path
             }
         });
     } catch (error) {

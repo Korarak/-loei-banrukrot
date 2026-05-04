@@ -1,48 +1,34 @@
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
-// Configure storage
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        let uploadDir = 'public/uploads/others';
+const storage = new CloudinaryStorage({
+    cloudinary,
+    params: async (req, file) => {
+        let folder = 'banrakrod/others';
+        if (file.fieldname === 'image') folder = 'banrakrod/products';
+        else if (file.fieldname === 'slip') folder = 'banrakrod/slips';
+        else if (file.fieldname === 'profile') folder = 'banrakrod/profiles';
 
-        // Determine folder based on field name or route
-        if (file.fieldname === 'image') { // Product images usually
-            uploadDir = 'public/uploads/products';
-        } else if (file.fieldname === 'slip') {
-            uploadDir = 'public/uploads/slips';
-        } else if (file.fieldname === 'profile') {
-            uploadDir = 'public/uploads/profiles';
-        }
-
-        // Create directory if it doesn't exist
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-        }
-        cb(null, uploadDir);
+        return {
+            folder,
+            allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+            transformation: [{ quality: 'auto', fetch_format: 'auto' }],
+        };
     },
-    filename: function (req, file, cb) {
-        // Create unique filename: type-timestamp-random.ext
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        const prefix = file.fieldname === 'slip' ? 'slip' : 'file';
-        cb(null, prefix + '-' + uniqueSuffix + path.extname(file.originalname));
-    }
 });
 
-// File filter
 const fileFilter = (req, file, cb) => {
-    // Accept images only
-    if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
+    if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
         return cb(new Error('Only image files are allowed!'), false);
     }
     cb(null, true);
 };
 
 const upload = multer({
-    storage: storage,
-    fileFilter: fileFilter,
-    limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit
+    storage,
+    fileFilter,
+    limits: { fileSize: 50 * 1024 * 1024 },
 });
 
 module.exports = upload;
