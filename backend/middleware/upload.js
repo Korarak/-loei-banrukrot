@@ -2,25 +2,33 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
+// Base uploads directory — anchored to this file, not process CWD
+const UPLOADS_BASE = path.join(__dirname, '..', 'public', 'uploads');
+
 // Configure storage
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        let uploadDir = 'public/uploads/others';
+        let subDir = 'others';
 
         // Determine folder based on field name or route
         if (file.fieldname === 'image') { // Product images usually
-            uploadDir = 'public/uploads/products';
+            subDir = 'products';
         } else if (file.fieldname === 'slip') {
-            uploadDir = 'public/uploads/slips';
+            subDir = 'slips';
         } else if (file.fieldname === 'profile') {
-            uploadDir = 'public/uploads/profiles';
+            subDir = 'profiles';
         }
 
-        // Create directory if it doesn't exist
-        if (!fs.existsSync(uploadDir)) {
+        const uploadDir = path.join(UPLOADS_BASE, subDir);
+
+        // mkdir failure (e.g. EACCES on bind mount) must fail this request,
+        // not crash the process
+        try {
             fs.mkdirSync(uploadDir, { recursive: true });
+            cb(null, uploadDir);
+        } catch (err) {
+            cb(err);
         }
-        cb(null, uploadDir);
     },
     filename: function (req, file, cb) {
         // Create unique filename: type-timestamp-random.ext
