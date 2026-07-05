@@ -170,7 +170,7 @@ export default function Home() {
 
                         <motion.h1 variants={fadeInUp} className="text-5xl md:text-7xl lg:text-8xl font-black mb-6 tracking-tighter leading-[1.1] drop-shadow-lg">
                             {siteConfig.brand.name} <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-pink-500 italic pr-4">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-amber-600 italic pr-4">
                                 {siteConfig.brand.englishName}
                             </span>
                         </motion.h1>
@@ -232,7 +232,7 @@ export default function Home() {
                                 <div className="text-base md:text-xl text-accent font-black italic tracking-[0.3em] mb-5">
                                     BANRUKROT
                                 </div>
-                                <div className="w-20 h-1.5 bg-gradient-to-r from-accent to-pink-500 rounded-full mx-auto mb-5" />
+                                <div className="w-20 h-1.5 bg-gradient-to-r from-accent to-amber-600 rounded-full mx-auto mb-5" />
                                 <div className="text-sm text-white/50 font-medium tracking-wider uppercase">
                                     Vespa Specialist
                                 </div>
@@ -288,7 +288,7 @@ export default function Home() {
                             <Button size="icon" variant="outline" onClick={() => scroll(catScrollRef, 'left')} className="h-10 w-10 rounded-lg border-2 border-gray-100 bg-white/80 backdrop-blur-sm -skew-x-12 hover:skew-x-0 transition-transform active:scale-95 shadow-sm" aria-label="เลื่อนซ้าย">
                                 <ChevronLeft className="h-5 w-5" />
                             </Button>
-                            <Button size="icon" onClick={() => scroll(catScrollRef, 'right')} className="h-10 w-10 rounded-lg bg-gradient-to-r from-accent to-pink-500 text-white border-none -skew-x-12 hover:skew-x-0 transition-transform active:scale-95 shadow-lg shadow-accent/20" aria-label="เลื่อนขวา">
+                            <Button size="icon" onClick={() => scroll(catScrollRef, 'right')} className="h-10 w-10 rounded-lg bg-gradient-to-r from-accent to-amber-600 text-white border-none -skew-x-12 hover:skew-x-0 transition-transform active:scale-95 shadow-lg shadow-accent/20" aria-label="เลื่อนขวา">
                                 <ChevronRight className="h-5 w-5" />
                             </Button>
                         </div>
@@ -368,7 +368,7 @@ export default function Home() {
                             <Button size="icon" variant="outline" onClick={() => scroll(popScrollRef, 'left')} className="h-10 w-10 rounded-lg border-2 border-gray-100 bg-white/80 backdrop-blur-sm -skew-x-12 hover:skew-x-0 transition-transform active:scale-95 shadow-sm" aria-label="เลื่อนซ้าย">
                                 <ChevronLeft className="h-5 w-5" />
                             </Button>
-                            <Button size="icon" onClick={() => scroll(popScrollRef, 'right')} className="h-10 w-10 rounded-lg bg-gradient-to-r from-primary to-emerald-600 text-white border-none -skew-x-12 hover:skew-x-0 transition-transform active:scale-95 shadow-lg shadow-primary/20" aria-label="เลื่อนขวา">
+                            <Button size="icon" onClick={() => scroll(popScrollRef, 'right')} className="h-10 w-10 rounded-lg bg-gradient-to-r from-primary to-red-900 text-white border-none -skew-x-12 hover:skew-x-0 transition-transform active:scale-95 shadow-lg shadow-primary/20" aria-label="เลื่อนขวา">
                                 <ChevronRight className="h-5 w-5" />
                             </Button>
                         </div>
@@ -436,7 +436,7 @@ export default function Home() {
                                 <Button size="icon" variant="outline" onClick={() => scroll(newScrollRef, 'left')} className="h-10 w-10 rounded-lg border-2 border-gray-100 bg-white/80 backdrop-blur-sm -skew-x-12 hover:skew-x-0 transition-transform active:scale-95 shadow-sm" aria-label="เลื่อนซ้าย">
                                     <ChevronLeft className="h-5 w-5" />
                                 </Button>
-                                <Button size="icon" onClick={() => scroll(newScrollRef, 'right')} className="h-10 w-10 rounded-lg bg-gradient-to-r from-accent to-pink-500 text-white border-none -skew-x-12 hover:skew-x-0 transition-transform active:scale-95 shadow-lg shadow-accent/20" aria-label="เลื่อนขวา">
+                                <Button size="icon" onClick={() => scroll(newScrollRef, 'right')} className="h-10 w-10 rounded-lg bg-gradient-to-r from-accent to-amber-600 text-white border-none -skew-x-12 hover:skew-x-0 transition-transform active:scale-95 shadow-lg shadow-accent/20" aria-label="เลื่อนขวา">
                                     <ChevronRight className="h-5 w-5" />
                                 </Button>
                             </div>
@@ -499,8 +499,8 @@ export default function Home() {
                     </motion.h2>
                     <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-12" variants={staggerContainer}>
                         {[
-                            { icon: ShieldCheck, title: 'Authentic 100%', desc: 'มั่นใจได้ในคุณภาพ สินค้าแท้และเกรดพรีเมียมจากผู้ผลิตชั้นนำเท่านั้น', gradient: 'from-primary to-emerald-600', shadow: 'shadow-[0_10px_30px_-10px_rgba(16,185,129,0.5)]' },
-                            { icon: Zap, title: 'Fast & Secure', desc: 'จัดส่งรวดเร็วทั่วประเทศ แพ็คสินค้าอย่างดี ปลอดภัยหายห่วง', gradient: 'from-accent to-pink-600', shadow: 'shadow-[0_10px_30px_-10px_rgba(236,72,153,0.5)]' },
+                            { icon: ShieldCheck, title: 'Authentic 100%', desc: 'มั่นใจได้ในคุณภาพ สินค้าแท้และเกรดพรีเมียมจากผู้ผลิตชั้นนำเท่านั้น', gradient: 'from-primary to-red-900', shadow: 'shadow-[0_10px_30px_-10px_rgba(16,185,129,0.5)]' },
+                            { icon: Zap, title: 'Fast & Secure', desc: 'จัดส่งรวดเร็วทั่วประเทศ แพ็คสินค้าอย่างดี ปลอดภัยหายห่วง', gradient: 'from-accent to-amber-600', shadow: 'shadow-[0_10px_30px_-10px_rgba(236,72,153,0.5)]' },
                             { icon: Star, title: 'Expert Support', desc: 'ทีมงานมืออาชีพพร้อมให้คำปรึกษา ทุกปัญหาเรื่องเวสป้าเราช่วยได้', gradient: 'from-blue-500 to-indigo-600', shadow: 'shadow-[0_10px_30px_-10px_rgba(59,130,246,0.5)]' },
                         ].map((feature, i) => (
                             <motion.div key={i} variants={scaleIn} className="text-center group p-8 rounded-3xl transition-all hover:bg-white/5">
@@ -533,8 +533,8 @@ export default function Home() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {[
                             { step: '01', icon: Search, title: 'เลือกสินค้า', desc: 'ค้นหาและเลือกอะไหล่ที่ต้องการ กรองตามหมวดหมู่หรือรุ่นรถ', color: 'from-blue-500 to-indigo-600', shadow: 'shadow-blue-100' },
-                            { step: '02', icon: ShoppingCart, title: 'ใส่ตะกร้า', desc: 'เพิ่มสินค้าลงตะกร้า เลือกตัวเลือกและจำนวนตามต้องการ', color: 'from-accent to-pink-600', shadow: 'shadow-pink-100' },
-                            { step: '03', icon: CheckCircle, title: 'ยืนยันคำสั่งซื้อ', desc: 'ระบุที่อยู่จัดส่ง เลือกวิธีส่ง และชำระเงินผ่าน QR Code', color: 'from-primary to-emerald-600', shadow: 'shadow-emerald-100' },
+                            { step: '02', icon: ShoppingCart, title: 'ใส่ตะกร้า', desc: 'เพิ่มสินค้าลงตะกร้า เลือกตัวเลือกและจำนวนตามต้องการ', color: 'from-accent to-amber-600', shadow: 'shadow-pink-100' },
+                            { step: '03', icon: CheckCircle, title: 'ยืนยันคำสั่งซื้อ', desc: 'ระบุที่อยู่จัดส่ง เลือกวิธีส่ง และชำระเงินผ่าน QR Code', color: 'from-primary to-red-900', shadow: 'shadow-emerald-100' },
                             { step: '04', icon: Truck, title: 'รอรับสินค้า', desc: 'เราแพ็คและส่งสินค้าภายใน 1-2 วันทำการหลังยืนยันการชำระ', color: 'from-orange-500 to-amber-600', shadow: 'shadow-orange-100' },
                         ].map((item, i) => (
                             <motion.div key={i} variants={fadeInUp} className="relative bg-white rounded-3xl p-8 border border-gray-200 shadow-lg hover:shadow-2xl transition-all duration-500 group card-hover-lift overflow-hidden">
@@ -556,7 +556,7 @@ export default function Home() {
                     </div>
 
                     <motion.div variants={fadeInUp} className="text-center mt-10">
-                        <Button size="lg" asChild className="rounded-full px-10 h-14 text-lg font-bold bg-gradient-to-r from-primary to-emerald-600 border-0 shadow-lg shadow-primary/30 hover:brightness-110 hover:scale-105 transition-all">
+                        <Button size="lg" asChild className="rounded-full px-10 h-14 text-lg font-bold bg-gradient-to-r from-primary to-red-900 border-0 shadow-lg shadow-primary/30 hover:brightness-110 hover:scale-105 transition-all">
                             <Link href="/products">
                                 <ShoppingCart className="mr-2 h-5 w-5" />
                                 เริ่มช้อปเลย

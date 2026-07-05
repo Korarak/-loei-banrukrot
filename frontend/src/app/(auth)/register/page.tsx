@@ -71,7 +71,7 @@ export default function RegisterPage() {
                     Staff Only
                 </div>
                 <h1 className="text-3xl font-black tracking-tight text-gray-900">
-                    สร้างบัญชี<span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-500">พนักงาน</span>
+                    สร้างบัญชี<span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-red-900">พนักงาน</span>
                 </h1>
                 <p className="text-gray-400 text-sm font-medium">ลงทะเบียนบัญชีสำหรับพนักงานและผู้ดูแลระบบ</p>
             </div>

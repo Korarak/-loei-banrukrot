@@ -2,67 +2,67 @@
 
 @layer base {
   :root {
-    /* Powerful Colorful Accents - High Energy & Contrast */
-    --background: 0 0% 100%;
-    /* Pure White */
-    --foreground: 154 34% 15%;
-    /* Deep charcoal with hint of green */
+    /* Retro Vespa Italian — warm cream, Vespa red, antique gold */
+    --background: 36 60% 97%;
+    /* Warm cream */
+    --foreground: 24 22% 14%;
+    /* Warm dark brown-charcoal */
 
-    --card: 0 0% 100%;
-    --card-foreground: 150 90% 10%;
+    --card: 36 45% 98%;
+    --card-foreground: 24 22% 14%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 150 90% 10%;
+    --popover: 36 45% 98%;
+    --popover-foreground: 24 22% 14%;
 
-    /* PRIMARY: DEEP EMERALD - Adjusted for better text contrast */
-    --primary: 152 76% 36%;
-    --primary-foreground: 0 0% 100%;
+    /* PRIMARY: VESPA RED */
+    --primary: 350 72% 40%;
+    --primary-foreground: 36 60% 97%;
 
-    /* SECONDARY: VIBRANT CYAN TINT */
-    --secondary: 180 50% 96%;
-    --secondary-foreground: 150 90% 35%;
+    /* SECONDARY: WARM TAN SURFACE */
+    --secondary: 36 35% 92%;
+    --secondary-foreground: 350 60% 30%;
 
-    /* MUTED: COOL BLUE-GRAY */
-    --muted: 220 20% 94%;
-    --muted-foreground: 220 20% 45%;
+    /* MUTED: WARM BEIGE */
+    --muted: 30 20% 92%;
+    --muted-foreground: 25 15% 40%;
 
-    /* ACCENT: HOT MAGENTA */
-    --accent: 320 85% 55%;
-    --accent-foreground: 0 0% 100%;
+    /* ACCENT: ANTIQUE GOLD */
+    --accent: 46 65% 45%;
+    --accent-foreground: 24 30% 12%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 4 78% 48%;
+    --destructive-foreground: 36 60% 97%;
 
-    --border: 150 30% 90%;
-    --input: 150 30% 90%;
-    --ring: 320 85% 55%;
-    /* Ring matches Accent for pop */
+    --border: 30 25% 85%;
+    --input: 30 25% 85%;
+    --ring: 46 65% 45%;
+    /* Ring matches Accent so focus states read distinct from destructive/error red */
 
-    --radius: 1rem;
-    /* Keep modern curve */
+    --radius: 0.75rem;
+    /* Slightly less rounded — machined-metal feel over "bubble" modern SaaS look */
 
-    /* HIGH SATURATION RAINBOW CHARTS */
-    --chart-1: 150 90% 40%;
-    /* Emerald */
-    --chart-2: 320 85% 55%;
-    /* Magenta */
-    --chart-3: 45 100% 55%;
-    /* Bright Orange/Yellow */
-    --chart-4: 200 90% 50%;
-    /* Bright Blue */
-    --chart-5: 280 80% 60%;
-    /* Bright Purple */
+    /* CHART PALETTE — Vespa red, gold, vintage forest, muted steel, warm taupe */
+    --chart-1: 350 72% 40%;
+    /* Vespa Red */
+    --chart-2: 46 65% 45%;
+    /* Antique Gold */
+    --chart-3: 153 40% 30%;
+    /* Vintage Forest Green */
+    --chart-4: 200 30% 40%;
+    /* Muted Steel Blue */
+    --chart-5: 30 25% 55%;
+    /* Warm Taupe */
 
     /* === CUSTOM POWER-UP TOKENS === */
-    --glass-bg: 0 0% 100% / 0.7;
-    --glass-border: 0 0% 100% / 0.2;
-    --glow-primary: 150 90% 40%;
-    --glow-accent: 320 85% 55%;
-    --sidebar-bg: 240 10% 6%;
-    --sidebar-fg: 0 0% 95%;
-    --sidebar-muted: 240 5% 35%;
-    --sidebar-active: 150 90% 45%;
-    --sidebar-hover: 240 10% 12%;
+    --glass-bg: 36 60% 97% / 0.7;
+    --glass-border: 36 30% 90% / 0.3;
+    --glow-primary: 350 72% 40%;
+    --glow-accent: 46 65% 45%;
+    --sidebar-bg: 24 25% 8%;
+    --sidebar-fg: 36 40% 92%;
+    --sidebar-muted: 30 15% 45%;
+    --sidebar-active: 350 72% 45%;
+    --sidebar-hover: 24 20% 14%;
   }
 }
 
@@ -215,8 +215,8 @@
 }
 
 @keyframes gold-glow {
-  0%, 100% { filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.3)); }
-  50% { filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.6)); }
+  0%, 100% { filter: drop-shadow(0 0 5px rgba(201, 162, 39, 0.3)); }
+  50% { filter: drop-shadow(0 0 20px rgba(201, 162, 39, 0.6)); }
 }
 
 /* ===========================
@@ -240,14 +240,14 @@
 
   /* Gradient Text */
   .gradient-text-primary {
-    background: linear-gradient(135deg, hsl(var(--primary)), hsl(160 90% 50%));
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(4 78% 48%));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .gradient-text-accent {
-    background: linear-gradient(135deg, hsl(var(--accent)), hsl(340 90% 65%));
+    background: linear-gradient(135deg, hsl(var(--accent)), hsl(30 80% 50%));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -334,7 +334,7 @@
   }
 
   .gold-glow-hover:hover {
-    filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.7));
+    filter: drop-shadow(0 0 15px rgba(201, 162, 39, 0.7));
     transition: filter 0.3s ease;
   }
 

@@ -73,7 +73,7 @@ export default function CustomerLoginPage() {
             <Card className="w-full max-w-md border-0 shadow-2xl shadow-gray-200/60 rounded-[2rem] relative z-10">
                 <CardHeader className="space-y-2 pt-8">
                     <CardTitle className="text-3xl font-black tracking-tight text-center text-gray-900">
-                        ยินดี<span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-500">ต้อนรับกลับ</span>
+                        ยินดี<span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-red-900">ต้อนรับกลับ</span>
                     </CardTitle>
                     <CardDescription className="text-center text-gray-400 font-medium">
                         กรอกอีเมลและรหัสผ่านเพื่อเข้าสู่บัญชีของคุณ

@@ -30,6 +30,16 @@ import {
     SheetTitle,
     SheetTrigger,
 } from "@/components/ui/sheet";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { siteConfig } from '@/config/site';
 
 
@@ -99,14 +109,15 @@ export default function CustomerLayout({
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
-    const handleLogout = (e: React.MouseEvent) => {
-        e.preventDefault();
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+    const handleLogout = () => {
         logoutCustomer();
         router.push('/');
     };
 
     return (
-        <div className="min-h-screen bg-white font-sans selection:bg-primary selection:text-white pb-20 md:pb-0">
+        <div className="min-h-screen bg-background font-sans selection:bg-primary selection:text-white pb-20 md:pb-0">
             {/* Scroll Progress Bar */}
             <div className="fixed top-0 left-0 right-0 z-[60] h-[3px] bg-transparent">
                 <div
@@ -126,7 +137,7 @@ export default function CustomerLayout({
                     <div className="flex justify-between h-16 items-center">
                         {/* Logo */}
                         <Link href="/" className="flex items-center gap-3 group">
-                            <div className="h-10 px-2.5 rounded-xl bg-gradient-to-br from-primary to-emerald-600 flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 shrink-0">
+                            <div className="h-10 px-2.5 rounded-xl bg-gradient-to-br from-primary to-red-900 flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 shrink-0">
                                 <span className="text-white font-black text-[10px] italic tracking-tight leading-none">VESPA</span>
                             </div>
                             <div>
@@ -229,7 +240,10 @@ export default function CustomerLayout({
                                                     </Link>
                                                 </DropdownMenuItem>
                                                 <DropdownMenuSeparator className="bg-gray-100" />
-                                                <DropdownMenuItem onClick={handleLogout} className="text-red-500 rounded-xl cursor-pointer focus:text-red-600 focus:bg-red-50 font-bold">
+                                                <DropdownMenuItem
+                                                    onSelect={(e) => { e.preventDefault(); setShowLogoutConfirm(true); }}
+                                                    className="text-red-500 rounded-xl cursor-pointer focus:text-red-600 focus:bg-red-50 font-bold"
+                                                >
                                                     <LogOut className="h-4 w-4 mr-2" />
                                                     ออกจากระบบ
                                                 </DropdownMenuItem>
@@ -240,7 +254,7 @@ export default function CustomerLayout({
                                             <Button variant="ghost" asChild className="text-gray-600 font-bold hover:text-accent hover:bg-accent/5 rounded-full px-5 transition-colors">
                                                 <Link href="/customer-login">เข้าสู่ระบบ</Link>
                                             </Button>
-                                            <Button asChild className="bg-gradient-to-r from-accent to-pink-500 text-white hover:brightness-110 rounded-full shadow-lg shadow-accent/20 px-6 font-bold transition-all hover:-translate-y-0.5 border-none">
+                                            <Button asChild className="bg-gradient-to-r from-accent to-amber-600 text-white hover:brightness-110 rounded-full shadow-lg shadow-accent/20 px-6 font-bold transition-all hover:-translate-y-0.5 border-none">
                                                 <Link href="/customer-register">สมัครสมาชิก</Link>
                                             </Button>
                                         </div>
@@ -258,7 +272,7 @@ export default function CustomerLayout({
             <nav className={`sticky top-0 z-50 transition-all duration-300 md:hidden ${scrolled ? 'glass-card border-b border-gray-100 shadow-sm' : 'bg-white'}`}>
                 <div className="px-4 h-16 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-2">
-                        <div className="h-8 px-2 rounded-lg bg-gradient-to-br from-primary to-emerald-600 flex items-center justify-center shadow-md shrink-0">
+                        <div className="h-8 px-2 rounded-lg bg-gradient-to-br from-primary to-red-900 flex items-center justify-center shadow-md shrink-0">
                             <span className="text-white font-black text-[9px] italic tracking-tight leading-none">VESPA</span>
                         </div>
                         <span className="font-black italic text-lg text-gray-900 tracking-tight">{siteConfig.brand.name}</span>
@@ -284,7 +298,7 @@ export default function CustomerLayout({
                                         )}
                                     </Link>
                                     <button
-                                        onClick={handleLogout}
+                                        onClick={() => setShowLogoutConfirm(true)}
                                         className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors active:scale-95"
                                         aria-label="ออกจากระบบ"
                                     >
@@ -292,7 +306,7 @@ export default function CustomerLayout({
                                     </button>
                                 </div>
                             ) : (
-                                <Button size="sm" asChild className="rounded-full h-8 px-4 text-xs font-bold bg-gradient-to-r from-accent to-pink-500 text-white border-none shadow-md shadow-accent/20">
+                                <Button size="sm" asChild className="rounded-full h-8 px-4 text-xs font-bold bg-gradient-to-r from-accent to-amber-600 text-white border-none shadow-md shadow-accent/20">
                                     <Link href="/customer-login">เข้าสู่ระบบ</Link>
                                 </Button>
                             )
@@ -334,6 +348,23 @@ export default function CustomerLayout({
 
             <BottomNav />
             <Footer />
+
+            <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>ออกจากระบบ?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            คุณต้องการออกจากระบบใช่หรือไม่ ต้องเข้าสู่ระบบใหม่อีกครั้งเพื่อกลับมาใช้งาน
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleLogout} className="bg-red-500 hover:bg-red-600">
+                            ออกจากระบบ
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div >
     );
 }

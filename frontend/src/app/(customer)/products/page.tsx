@@ -163,7 +163,7 @@ export default function ProductsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-white pb-20">
+        <div className="min-h-screen bg-background pb-20">
             {/* Hero Section - POWERFUL DARK THEME */}
             <div className="relative overflow-hidden bg-zinc-950 mb-12 rounded-b-[3rem] shadow-2xl">
                 {/* Abstract Background — static gradient (no blur animation to save GPU) */}
@@ -181,8 +181,8 @@ export default function ProductsPage() {
                             Official Store
                         </div>
                         <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-white mb-8 leading-[0.9]">
-                            SPEED. <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-400">STYLE.</span> <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-pink-500 italic">PERFORMANCE.</span>
+                            SPEED. <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-red-900">STYLE.</span> <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-amber-600 italic">PERFORMANCE.</span>
                         </h1>
                         <p className="text-xl text-gray-400 leading-relaxed max-w-2xl font-medium border-l-4 border-primary pl-6">
                             ค้นพบอะไหล่และอุปกรณ์ตกแต่งระดับพรีเมียม ที่คัดสรรมาเพื่อเวสป้าคันโปรดของคุณโดยเฉพาะ

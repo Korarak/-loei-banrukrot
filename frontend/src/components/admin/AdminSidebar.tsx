@@ -23,6 +23,17 @@ import {
     X,
 } from 'lucide-react';
 import { cn, getImageUrl } from '@/lib/utils';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useOrders, Order } from '@/hooks/useOrders';
@@ -146,7 +157,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                 {/* Header */}
                 <div className="p-6 pb-4 flex items-center justify-between xl:justify-start">
                     <div className="flex items-center gap-3">
-                        <div className="h-10 px-2.5 bg-gradient-to-br from-primary to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
+                        <div className="h-10 px-2.5 bg-gradient-to-br from-primary to-red-900 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
                             <span className="font-black text-[10px] italic tracking-tight leading-none text-white">VESPA</span>
                         </div>
                         <div>
@@ -260,14 +271,31 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
 
                 {/* Footer / Logout */}
                 <div className="p-4 border-t border-white/5 bg-[#0a0a0a]">
-                    <Button
-                        variant="ghost"
-                        className="w-full justify-start gap-3 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl py-6 transition-all duration-200"
-                        onClick={handleLogout}
-                    >
-                        <LogOut className="h-5 w-5" />
-                        <span className="font-bold text-xs uppercase tracking-wider">ออกจากระบบ</span>
-                    </Button>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                className="w-full justify-start gap-3 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl py-6 transition-all duration-200"
+                            >
+                                <LogOut className="h-5 w-5" />
+                                <span className="font-bold text-xs uppercase tracking-wider">ออกจากระบบ</span>
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>ออกจากระบบ?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    คุณต้องการออกจากระบบผู้ดูแลใช่หรือไม่ ต้องเข้าสู่ระบบใหม่อีกครั้งเพื่อกลับเข้าใช้งาน
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+                                <AlertDialogAction onClick={handleLogout} className="bg-red-500 hover:bg-red-600">
+                                    ออกจากระบบ
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </div>
             </aside>
         </>

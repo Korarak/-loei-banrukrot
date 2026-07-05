@@ -17,7 +17,7 @@ export default function Footer() {
                     {/* Brand Section */}
                     <div className="col-span-1 md:col-span-1">
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="h-10 px-2.5 bg-gradient-to-br from-primary to-emerald-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
+                            <div className="h-10 px-2.5 bg-gradient-to-br from-primary to-red-900 rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
                                 <span className="font-black text-[10px] italic tracking-tight leading-none">VESPA</span>
                             </div>
                             <div>

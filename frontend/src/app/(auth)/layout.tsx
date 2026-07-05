@@ -35,7 +35,7 @@ export default function AuthLayout({
                     </div>
                     <h1 className="text-5xl xl:text-6xl font-black tracking-tighter leading-[1.05] mb-6">
                         ระบบจัดการร้าน<br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-pink-500 italic pr-2">
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-amber-600 italic pr-2">
                             บ้านรักรถ
                         </span>
                     </h1>

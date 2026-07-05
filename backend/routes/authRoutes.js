@@ -33,7 +33,7 @@ router.post('/login-customer', validateRequest(schemas.loginSchema), authControl
 // Google Auth — only registered when credentials are configured
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     const passport = require('passport');
-    router.get('/google', authLimiter, passport.authenticate('google', { scope: ['profile', 'email'] }));
+    router.get('/google', authLimiter, passport.authenticate('google', { scope: ['profile', 'email'], prompt: 'select_account' }));
     router.get('/google/callback',
         authLimiter,
         passport.authenticate('google', { failureRedirect: '/login?error=failed', session: false }),

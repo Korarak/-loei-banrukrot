@@ -80,7 +80,7 @@ export default function LoginPage() {
                     Staff Only
                 </div>
                 <h1 className="text-3xl font-black tracking-tight text-gray-900">
-                    เข้าสู่ระบบ<span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-500">หลังร้าน</span>
+                    เข้าสู่ระบบ<span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-red-900">หลังร้าน</span>
                 </h1>
                 <p className="text-gray-400 text-sm font-medium">กรอกอีเมลและรหัสผ่านพนักงานเพื่อเข้าส่วนจัดการร้าน</p>
             </div>
