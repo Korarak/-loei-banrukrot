@@ -117,8 +117,10 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256M
+          memory: 512M
           cpus: '0.50'
+        reservations:
+          memory: 256M
 
 volumes:
   mongodb_data:
