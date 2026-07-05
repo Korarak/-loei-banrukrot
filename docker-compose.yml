@@ -1,45 +1,127 @@
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   mongodb:
-    image: mongo:latest
+    image: mongo:7.0
     container_name: loei-banrakrod-db
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-admin}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-password123}
-    ports:
-      - "27017:27017"
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:?MONGO_ROOT_PASSWORD is required}
     volumes:
       - mongodb_data:/data/db
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.50'
+        reservations:
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   backend:
-    image: ${REGISTRY_URL:-docker5.loeitech.org}/loei-banrakrod-backend:latest
+    image: ${REGISTRY_URL:-registry.banrukrot.com}/loei-banrakrod-backend:latest
     container_name: loei-banrakrod-backend
     restart: always
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     environment:
       - PORT=8080
-      - MONGODB_URI=mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password123}@mongodb:27017/banrakrod?authSource=admin
-      - JWT_SECRET=${JWT_SECRET}
+      - MONGODB_URI=mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:?MONGO_ROOT_PASSWORD is required}@mongodb:27017/banrakrod?authSource=admin
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET is required}
       - NODE_ENV=production
-      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:8083}
+      - FRONTEND_URL=${FRONTEND_URL:?FRONTEND_URL is required (e.g. https://yourdomain.com)}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-    ports:
-      - "8082:8080"
     volumes:
       - ./backend/public/uploads:/app/backend/public/uploads
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.50'
+        reservations:
+          memory: 128M
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/api/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
 
   frontend:
-    image: ${REGISTRY_URL:-docker5.loeitech.org}/loei-banrakrod-frontend:latest
+    image: ${REGISTRY_URL:-registry.banrukrot.com}/loei-banrakrod-frontend:latest
     container_name: loei-banrakrod-frontend
     restart: always
     depends_on:
-      - backend
-    ports:
-      - "8083:8081"
+      backend:
+        condition: service_healthy
     environment:
       - NODE_ENV=production
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.50'
+        reservations:
+          memory: 128M
+
+  registry:
+    image: registry:2.8.3
+    container_name: loei-banrakrod-registry
+    restart: always
+    environment:
+      REGISTRY_AUTH: htpasswd
+      REGISTRY_AUTH_HTPASSWD_REALM: Registry Realm
+      REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
+    volumes:
+      - registry_data:/var/lib/registry
+      - ./registry/auth:/auth:ro
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+
+  npm:
+    image: jc21/nginx-proxy-manager:2.15.1
+    container_name: loei-banrakrod-npm
+    restart: always
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_started
+    ports:
+      - "80:80"
+      - "443:443"
+      - "127.0.0.1:81:81"
+    volumes:
+      - npm_data:/data
+      - npm_letsencrypt:/etc/letsencrypt
+    logging: *default-logging
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.50'
 
 volumes:
   mongodb_data:
+  registry_data:
+  npm_data:
+  npm_letsencrypt:
