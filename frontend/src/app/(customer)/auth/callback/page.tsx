@@ -20,7 +20,7 @@ function AuthCallbackContent() {
         }
 
         if (error) {
-            toast.error('Authentication failed');
+            toast.error('เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
             router.push('/customer-login');
             return;
         }
@@ -38,7 +38,7 @@ function AuthCallbackContent() {
                 .then(response => {
                     const customer = response.data;
                     useAuthStore.getState().loginCustomer(customer, token);
-                    toast.success('Login successful!');
+                    toast.success('เข้าสู่ระบบสำเร็จ');
 
                     if (!customer.phone) {
                         router.push('/profile?action=complete_profile');
@@ -48,7 +48,7 @@ function AuthCallbackContent() {
                 })
                 .catch(err => {
                     console.error(err);
-                    toast.error('Failed to verify login');
+                    toast.error('ไม่สามารถยืนยันตัวตนได้ กรุณาเข้าสู่ระบบอีกครั้ง');
                     router.push('/customer-login');
                 });
         }
@@ -57,8 +57,8 @@ function AuthCallbackContent() {
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-50">
             <div className="flex flex-col items-center gap-4">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-                <p className="text-gray-500 font-medium">Authenticating...</p>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" role="status" aria-live="polite" />
+                <p className="text-gray-500 font-medium">กำลังตรวจสอบสิทธิ์เข้าใช้งาน...</p>
             </div>
         </div>
     );
@@ -66,7 +66,14 @@ function AuthCallbackContent() {
 
 export default function AuthCallbackPage() {
     return (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={
+            <div className="flex items-center justify-center min-h-screen bg-gray-50">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" role="status" aria-live="polite" />
+                    <p className="text-gray-500 font-medium">กำลังโหลด...</p>
+                </div>
+            </div>
+        }>
             <AuthCallbackContent />
         </Suspense>
     );

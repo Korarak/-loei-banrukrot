@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { MapPin, Plus, Trash2, Check, Pencil, Camera, User, Home, Star, Package, Heart, ShoppingBag, Settings } from 'lucide-react';
+import { MapPin, Plus, Trash2, Check, Pencil, Camera, User, Home, Star, Package, Heart, ShoppingBag, Settings, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -51,6 +51,7 @@ export default function ProfilePage() {
     const [isEditingAddress, setIsEditingAddress] = useState(false);
     const [editingAddress, setEditingAddress] = useState<CustomerAddress | null>(null);
     const [isUploading, setIsUploading] = useState(false);
+    const [phoneError, setPhoneError] = useState('');
     const [editForm, setEditForm] = useState({
         firstName: '',
         lastName: '',
@@ -58,6 +59,21 @@ export default function ProfilePage() {
         password: '',
         confirmPassword: ''
     });
+
+    const THAI_PHONE_REGEX = /^0\d{8,9}$/;
+
+    const validatePhone = (value: string, required: boolean): boolean => {
+        if (!value) {
+            setPhoneError(required ? 'กรุณากรอกเบอร์โทรศัพท์' : '');
+            return !required;
+        }
+        if (!THAI_PHONE_REGEX.test(value)) {
+            setPhoneError('เบอร์โทรศัพท์ไม่ถูกต้อง (ขึ้นต้นด้วย 0 ความยาว 9-10 หลัก)');
+            return false;
+        }
+        setPhoneError('');
+        return true;
+    };
 
     const [newAddress, setNewAddress] = useState({
         recipientName: '',
@@ -85,9 +101,10 @@ export default function ProfilePage() {
             const action = searchParams.get('action');
             if (action === 'complete_profile' && !customer.phone) {
                 setTimeout(() => {
-                    toast.warning('กรุณากรอกเบอร์โทรศัพท์เพื่อความสะดวกในการจัดส่ง', {
+                    toast.warning('กรุณากรอกเบอร์โทรศัพท์เพื่อความสะดวกในการจัดส่งและติดต่อกลับ', {
                         duration: 5000,
                     });
+                    setPhoneError('');
                     setIsEditingProfile(true);
                 }, 500);
             }
@@ -97,6 +114,12 @@ export default function ProfilePage() {
     const handleUpdateProfile = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!customer) return;
+
+        const isCompletingProfile = searchParams.get('action') === 'complete_profile' && !customer.phone;
+
+        if (!validatePhone(editForm.phone, isCompletingProfile)) {
+            return;
+        }
 
         if (editForm.password && editForm.password !== editForm.confirmPassword) {
             toast.error('รหัสผ่านไม่ตรงกัน');
@@ -134,8 +157,17 @@ export default function ProfilePage() {
     }, [customer, router]);
 
     if (!customer) {
-        return null;
+        return (
+            <div className="flex items-center justify-center min-h-[60vh]">
+                <div className="flex flex-col items-center gap-3 text-gray-400" role="status" aria-live="polite">
+                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
+                    <span className="text-sm font-medium">กำลังโหลดข้อมูล...</span>
+                </div>
+            </div>
+        );
     }
+
+    const isCompletingProfile = searchParams.get('action') === 'complete_profile' && !customer.phone;
 
     const handleAddAddress = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -349,18 +381,36 @@ export default function ProfilePage() {
                             </div>
                             <div>
                                 <Label className="text-gray-500 mb-1 block">เบอร์โทรศัพท์</Label>
-                                <div className="font-medium text-lg text-gray-900">{customer.phone || '-'}</div>
+                                {customer.phone ? (
+                                    <div className="font-medium text-lg text-gray-900">{customer.phone}</div>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => { setPhoneError(''); setIsEditingProfile(true); }}
+                                        className="flex items-center gap-1.5 text-sm font-medium text-amber-600 hover:text-amber-700 transition-colors"
+                                    >
+                                        <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                                        ยังไม่ได้เพิ่มเบอร์โทร — เพิ่มตอนนี้
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
-                <Dialog open={isEditingProfile} onOpenChange={setIsEditingProfile}>
-                    <DialogContent className="sm:max-w-[500px] rounded-2xl">
+                <Dialog open={isEditingProfile} onOpenChange={(open) => { setIsEditingProfile(open); if (!open) setPhoneError(''); }}>
+                    <DialogContent
+                        className="sm:max-w-[500px] rounded-2xl"
+                        showCloseButton={!isCompletingProfile}
+                        onInteractOutside={(e) => { if (isCompletingProfile) e.preventDefault(); }}
+                        onEscapeKeyDown={(e) => { if (isCompletingProfile) e.preventDefault(); }}
+                    >
                         <DialogHeader>
-                            <DialogTitle>แก้ไขข้อมูลส่วนตัว</DialogTitle>
+                            <DialogTitle>{isCompletingProfile ? 'กรอกข้อมูลให้ครบถ้วน' : 'แก้ไขข้อมูลส่วนตัว'}</DialogTitle>
                             <DialogDescription>
-                                อัปเดตข้อมูลของคุณ (อีเมลไม่สามารถเปลี่ยนได้)
+                                {isCompletingProfile
+                                    ? 'กรุณากรอกเบอร์โทรศัพท์ เพื่อให้เราติดต่อและจัดส่งสินค้าถึงคุณได้สะดวกยิ่งขึ้น'
+                                    : 'อัปเดตข้อมูลของคุณ (อีเมลไม่สามารถเปลี่ยนได้)'}
                             </DialogDescription>
                         </DialogHeader>
                         <form onSubmit={handleUpdateProfile} className="space-y-6">
@@ -400,15 +450,33 @@ export default function ProfilePage() {
                                     <p className="text-xs text-gray-400">อีเมลใช้สำหรับเข้าสู่ระบบ ไม่สามารถเปลี่ยนได้</p>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="phone">เบอร์โทรศัพท์</Label>
+                                    <Label htmlFor="phone" className="flex items-center gap-1">
+                                        เบอร์โทรศัพท์
+                                        {isCompletingProfile && <span className="text-destructive" aria-hidden="true">*</span>}
+                                    </Label>
                                     <Input
                                         id="phone"
                                         type="tel"
+                                        inputMode="numeric"
                                         value={editForm.phone}
-                                        onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                                        onChange={(e) => {
+                                            setEditForm({ ...editForm, phone: e.target.value });
+                                            if (phoneError) setPhoneError('');
+                                        }}
+                                        onBlur={() => validatePhone(editForm.phone, isCompletingProfile)}
                                         autoComplete="tel"
+                                        autoFocus={isCompletingProfile}
+                                        required={isCompletingProfile}
+                                        aria-invalid={!!phoneError}
+                                        aria-describedby={phoneError ? 'phone-error' : undefined}
                                         className="rounded-xl"
                                     />
+                                    {phoneError && (
+                                        <p id="phone-error" role="alert" className="flex items-center gap-1 text-xs text-destructive">
+                                            <AlertCircle className="h-3 w-3 flex-shrink-0" />
+                                            {phoneError}
+                                        </p>
+                                    )}
                                 </div>
                             </div>
 
@@ -441,7 +509,9 @@ export default function ProfilePage() {
                             </div>
 
                             <DialogFooter>
-                                <Button type="button" variant="outline" onClick={() => setIsEditingProfile(false)} className="rounded-xl">ยกเลิก</Button>
+                                <Button type="button" variant="outline" onClick={() => { setIsEditingProfile(false); setPhoneError(''); }} className="rounded-xl">
+                                    {isCompletingProfile ? 'ข้ามไปก่อน' : 'ยกเลิก'}
+                                </Button>
                                 <Button type="submit" disabled={updateCustomer.isPending} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full">
                                     {updateCustomer.isPending ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}
                                 </Button>
