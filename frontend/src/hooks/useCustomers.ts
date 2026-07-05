@@ -34,6 +34,7 @@ export function useCustomers() {
             const res = await api.get('/customer');
             return res.data.data as Customer[];
         },
+        staleTime: 60_000,
     });
 }
 
@@ -86,6 +87,7 @@ export function useCustomerAddresses(customerId: string | undefined) {
             return res.data.data as CustomerAddress[];
         },
         enabled: !!customerId,
+        staleTime: 60_000,
     });
 }
 

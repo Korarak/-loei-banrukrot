@@ -22,6 +22,8 @@ import {
     Cell,
     Legend
 } from 'recharts';
+import Image from 'next/image';
+import { getImageUrl } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { getOrderStatusLabel } from '@/lib/order-status';
 import {
@@ -33,7 +35,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { motion, Variants } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useAuthStore } from '@/stores/useAuthStore';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -78,29 +80,12 @@ const RANGE_LABELS: Record<DateRange, string> = {
     '90d': '90 วัน',
 };
 
-// Hook for time-based greeting
-function useGreeting() {
-    const [greeting, setGreeting] = useState('');
-    const [icon, setIcon] = useState<any>(Sun);
-
-    useEffect(() => {
-        const hour = new Date().getHours();
-        if (hour >= 5 && hour < 12) {
-            setGreeting('สวัสดีตอนเช้า');
-            setIcon(CloudSun);
-        } else if (hour >= 12 && hour < 17) {
-            setGreeting('สวัสดีตอนบ่าย');
-            setIcon(Sun);
-        } else if (hour >= 17 && hour < 21) {
-            setGreeting('สวัสดีตอนเย็น');
-            setIcon(Moon);
-        } else {
-            setGreeting('สวัสดีตอนดึก');
-            setIcon(Moon);
-        }
-    }, []);
-
-    return { greeting, icon };
+function getGreeting() {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) return { greeting: 'สวัสดีตอนเช้า', icon: CloudSun };
+    if (hour >= 12 && hour < 17) return { greeting: 'สวัสดีตอนบ่าย', icon: Sun };
+    if (hour >= 17 && hour < 21) return { greeting: 'สวัสดีตอนเย็น', icon: Moon };
+    return { greeting: 'สวัสดีตอนดึก', icon: Moon };
 }
 
 // Animated Counter Component
@@ -137,7 +122,7 @@ export default function AdminDashboard() {
     const { data: topCategoriesData } = useTopCategories(params);
 
     const { user } = useAuthStore();
-    const { greeting, icon: GreetingIcon } = useGreeting();
+    const { greeting, icon: GreetingIcon } = getGreeting();
 
     const stats = [
         {
@@ -182,35 +167,35 @@ export default function AdminDashboard() {
         },
     ];
 
-    // Chart Data
-    const monthlyData = data?.monthlyRevenue?.map((m: any) => ({
-        name: new Date(2024, m._id - 1).toLocaleDateString('th-TH', { month: 'short' }),
+    const currentYear = new Date().getFullYear();
+
+    // Chart Data — memoised to avoid recalculation on every render
+    const monthlyData = useMemo(() => data?.monthlyRevenue?.map((m: any) => ({
+        name: new Date(currentYear, m._id - 1).toLocaleDateString('th-TH', { month: 'short' }),
         revenue: m.revenue,
         orders: m.orders || 0
-    })) || [];
+    })) || [], [data?.monthlyRevenue, currentYear]);
 
-    const pieData = data?.orderStatusDistribution?.map((s: any) => ({
+    const pieData = useMemo(() => data?.orderStatusDistribution?.map((s: any) => ({
         name: getOrderStatusLabel(s._id),
         value: s.count,
         color: STATUS_COLORS[s._id] || '#8884d8'
-    })) || [];
+    })) || [], [data?.orderStatusDistribution]);
 
-    // Daily Revenue Chart Data
-    const dailyChartData = (dailyData || []).map((d: any) => ({
+    const dailyChartData = useMemo(() => (dailyData || []).map((d: any) => ({
         date: new Date(d.date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' }),
         revenue: d.revenue,
         pos: d.posRevenue,
         online: d.onlineRevenue,
         orders: d.orders
-    }));
+    })), [dailyData]);
 
-    // Top Categories for Pie
-    const categoryPieData = (topCategoriesData || []).map((c: any, i: number) => ({
+    const categoryPieData = useMemo(() => (topCategoriesData || []).map((c: any, i: number) => ({
         name: c.categoryName,
         value: c.revenue,
         items: c.itemsSold,
         color: CATEGORY_COLORS[i % CATEGORY_COLORS.length]
-    }));
+    })), [topCategoriesData]);
 
     if (isLoading) {
         return (
@@ -246,7 +231,7 @@ export default function AdminDashboard() {
             <motion.div variants={itemVariant} className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl md:text-4xl font-black tracking-tight text-gray-900 flex items-center gap-2 md:gap-3 flex-wrap">
-                        <GreetingIcon className="h-6 w-6 md:h-8 md:w-8 text-primary animate-pulse-glow shrink-0" />
+                        <GreetingIcon className="h-6 w-6 md:h-8 md:w-8 text-primary shrink-0" />
                         <span>{greeting},</span>
                         <span className="gradient-text-primary">{user?.username || 'Admin'}</span>
                     </h1>
@@ -653,9 +638,9 @@ export default function AdminDashboard() {
                                 {data.lowStockProducts.slice(0, 6).map((product: any, i: number) => (
                                     <div key={i} className="flex items-center justify-between p-3 bg-red-50/30 hover:bg-red-50/60 rounded-2xl border border-red-100/50 transition-colors group">
                                         <div className="flex items-center gap-3">
-                                            <div className="h-10 w-10 bg-white rounded-xl border border-red-100 flex items-center justify-center overflow-hidden shadow-sm">
+                                            <div className="h-10 w-10 bg-white rounded-xl border border-red-100 flex items-center justify-center overflow-hidden shadow-sm relative">
                                                 {product.imageUrl ? (
-                                                    <img src={product.imageUrl} alt={product.productName} className="h-full w-full object-cover" />
+                                                    <Image src={getImageUrl(product.imageUrl)} alt={product.productName} fill className="object-cover" sizes="40px" />
                                                 ) : (
                                                     <Package className="h-5 w-5 text-red-300" />
                                                 )}

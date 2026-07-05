@@ -69,6 +69,7 @@ export function useProducts(filters?: { categoryId?: number; search?: string; ch
             data.stats = response.data.stats;
             return data;
         },
+        staleTime: 60_000,
     });
 }
 
@@ -81,6 +82,7 @@ export function useProduct(id: string) {
             return response.data.data as Product;
         },
         enabled: !!id,
+        staleTime: 5 * 60_000,
     });
 }
 

@@ -14,6 +14,11 @@ function AuthCallbackContent() {
         const token = searchParams.get('token');
         const error = searchParams.get('error');
 
+        // Clear token from URL immediately to prevent it leaking via history/referrer
+        if (typeof window !== 'undefined') {
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
         if (error) {
             toast.error('Authentication failed');
             router.push('/customer-login');
@@ -21,10 +26,6 @@ function AuthCallbackContent() {
         }
 
         if (token) {
-            if (typeof window !== 'undefined') {
-                localStorage.setItem('customerToken', token);
-            }
-
             fetch(`${getServerUrl()}/api/customer/me`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -34,11 +35,12 @@ function AuthCallbackContent() {
                     if (!res.ok) throw new Error('Failed to fetch profile');
                     return res.json();
                 })
-                .then(data => {
-                    useAuthStore.getState().loginCustomer(data, token);
+                .then(response => {
+                    const customer = response.data;
+                    useAuthStore.getState().loginCustomer(customer, token);
                     toast.success('Login successful!');
 
-                    if (!data.phone) {
+                    if (!customer.phone) {
                         router.push('/profile?action=complete_profile');
                     } else {
                         router.push('/');

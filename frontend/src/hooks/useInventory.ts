@@ -83,6 +83,7 @@ export function useStockMovements(filters: MovementFilters = {}) {
             return res.data as { data: StockMovement[]; pagination: { page: number; limit: number; total: number; pages: number } };
         },
         placeholderData: (prev) => prev,
+        staleTime: 60_000,
     });
 }
 

@@ -51,5 +51,8 @@ const productSchema = new mongoose.Schema({
 productSchema.index({ productName: 1 });
 productSchema.index({ categoryId: 1 });
 productSchema.index({ isActive: 1 });
+productSchema.index({ categoryId: 1, isActive: 1 }); // Covers category-filtered product listings
+productSchema.index({ isOnline: 1, isActive: 1 });
+productSchema.index({ isPos: 1, isActive: 1 });
 
 module.exports = mongoose.model('Product', productSchema);

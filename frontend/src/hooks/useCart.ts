@@ -49,6 +49,7 @@ export function useCart() {
             }
         },
         retry: 1,
+        staleTime: 30_000,
         enabled: isAuth,
     });
 }

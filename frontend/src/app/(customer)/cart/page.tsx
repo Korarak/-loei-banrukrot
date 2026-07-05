@@ -16,7 +16,7 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
+import { Minus, Plus, Trash2, ShoppingBag, CreditCard } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -40,8 +40,8 @@ export default function CartPage() {
     const clearCart = useClearCart();
     const createOrder = useCreateOrder();
 
-    const [selectedShippingId, setSelectedShippingId] = useState<string>('');
-    const [selectedAddressId, setSelectedAddressId] = useState<string>('');
+    const [manualShippingId, setManualShippingId] = useState<string | null>(null);
+    const [manualAddressId, setManualAddressId] = useState<string | null>(null);
     const [paymentMethod, setPaymentMethod] = useState<string>('Transfer');
 
     const items = cart?.items || [];
@@ -61,20 +61,16 @@ export default function CartPage() {
         );
     }, [shippingMethods, cartSize]);
 
-    // Auto-select first available method if none selected
-    useEffect(() => {
-        if (availableShippingMethods.length > 0 && !selectedShippingId) {
-            setSelectedShippingId(availableShippingMethods[0]._id);
-        }
-    }, [availableShippingMethods, selectedShippingId]);
+    // Derive selections — fall back to first option when user hasn't chosen
+    const selectedShippingId = manualShippingId ?? availableShippingMethods[0]?._id ?? '';
+    const selectedAddressId = useMemo(() => {
+        if (manualAddressId) return manualAddressId;
+        if (!addresses?.length) return '';
+        return addresses.find(a => a.isDefault)?._id ?? addresses[0]._id;
+    }, [manualAddressId, addresses]);
 
-    // Auto-select default address
-    useEffect(() => {
-        if (addresses && addresses.length > 0 && !selectedAddressId) {
-            const defaultAddress = addresses.find(a => a.isDefault);
-            setSelectedAddressId(defaultAddress?._id || addresses[0]._id);
-        }
-    }, [addresses, selectedAddressId]);
+    const setSelectedShippingId = setManualShippingId;
+    const setSelectedAddressId = setManualAddressId;
 
     // Redirect to login if not authenticated
     useEffect(() => {
@@ -89,8 +85,9 @@ export default function CartPage() {
 
     if (isLoading) {
         return (
-            <div className="flex justify-center items-center min-h-[400px]">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+            <div className="flex justify-center items-center min-h-[400px]" role="status">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                <span className="sr-only">กำลังโหลดรถเข็น...</span>
             </div>
         );
     }
@@ -133,7 +130,7 @@ export default function CartPage() {
 
     if (items.length === 0) {
         return (
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
                 <h1 className="text-3xl font-bold mb-8">รถเข็นของคุณ</h1>
                 <Card className="p-12 text-center border-0 shadow-lg rounded-[2.5rem]">
                     <ShoppingBag className="h-16 w-16 mx-auto text-gray-400 mb-4" />
@@ -197,11 +194,10 @@ export default function CartPage() {
                                                 fill
                                                 className="object-cover"
                                                 sizes="(max-width: 768px) 128px, 160px"
-                                                unoptimized
                                             />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-xs text-gray-400 bg-gray-50">
-                                                No Image
+                                                ไม่มีรูปภาพ
                                             </div>
                                         )}
                                     </div>
@@ -220,6 +216,7 @@ export default function CartPage() {
                                                 size="icon"
                                                 onClick={() => handleRemoveItem(item._id)}
                                                 disabled={removeCartItem.isPending}
+                                                aria-label={`ลบ ${item.product.productName} ออกจากรถเข็น`}
                                                 className="text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-full shrink-0 h-10 w-10"
                                             >
                                                 <Trash2 className="h-5 w-5" />
@@ -253,16 +250,18 @@ export default function CartPage() {
                                                     size="icon"
                                                     onClick={() => handleUpdateQuantity(item._id, item.quantity, -1)}
                                                     disabled={updateCartItem.isPending}
+                                                    aria-label="ลดจำนวน"
                                                     className="h-10 w-10 rounded-xl hover:bg-white hover:shadow-sm"
                                                 >
                                                     <Minus className="h-4 w-4" />
                                                 </Button>
-                                                <span className="w-10 text-center font-black text-gray-900">{item.quantity}</span>
+                                                <span className="w-10 text-center font-black text-gray-900" aria-live="polite">{item.quantity}</span>
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
                                                     onClick={() => handleUpdateQuantity(item._id, item.quantity, 1)}
                                                     disabled={updateCartItem.isPending}
+                                                    aria-label="เพิ่มจำนวน"
                                                     className="h-10 w-10 rounded-xl hover:bg-white hover:shadow-sm"
                                                 >
                                                     <Plus className="h-4 w-4" />
@@ -296,7 +295,7 @@ export default function CartPage() {
                             <div className="flex justify-between items-center text-lg">
                                 <span className="text-gray-500 font-medium">ค่าจัดส่ง</span>
                                 <span className="font-bold text-primary">
-                                    {shippingCost > 0 ? `฿${shippingCost.toLocaleString()}` : 'ฟรี'}
+                                    {!selectedMethod ? '—' : shippingCost > 0 ? `฿${shippingCost.toLocaleString()}` : 'ฟรี'}
                                 </span>
                             </div>
 
@@ -314,7 +313,7 @@ export default function CartPage() {
                                                 <Label htmlFor={address._id} className="cursor-pointer flex-1 flex flex-col gap-1.5">
                                                     <div className="flex items-center justify-between">
                                                         <span className="font-bold text-gray-900 text-base leading-none">{address.recipientName}</span>
-                                                        {address.isDefault && <span className="text-[10px] font-black uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">Default</span>}
+                                                        {address.isDefault && <span className="text-[10px] font-black tracking-wider text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">ที่อยู่หลัก</span>}
                                                     </div>
                                                     <span className="text-xs text-gray-500 font-medium leading-relaxed">
                                                         {address.streetAddress}, {address.subDistrict}, {address.district}, {address.province} {address.zipCode}
@@ -365,7 +364,7 @@ export default function CartPage() {
                         {/* Payment Method Selection */}
                         <div className="pt-4 pb-8">
                             <p className="font-black text-xs uppercase tracking-[0.2em] text-gray-400 mb-4 flex items-center gap-2">
-                                <span className="text-lg">💳</span>
+                                <CreditCard className="h-4 w-4 text-primary" />
                                 ช่องทางชำระเงิน
                             </p>
                             <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="grid grid-cols-1 gap-3">

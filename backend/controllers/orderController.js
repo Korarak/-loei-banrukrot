@@ -4,9 +4,6 @@ const { Order, OrderDetail, Payment, ProductVariant, Cart, CartItem, CustomerAdd
 // @desc    Create order from cart (E-commerce)
 // @route   POST /api/orders
 // @access  Private (customer)
-const fs = require('fs');
-const path = require('path');
-
 const { generateQRCodeDataURL } = require('../utils/promptpay');
 const { deductStock, addStock } = require('../utils/stockUtils');
 
@@ -17,26 +14,14 @@ exports.createOrderFromCart = async (req, res, next) => {
     try {
         let { shippingAddressId, paymentMethod, shippingMethodId } = req.body;
 
-        const logFile = path.join(__dirname, '../debug_order.log');
-        const log = (msg) => {
-            try {
-                fs.appendFileSync(logFile, new Date().toISOString() + ': ' + msg + '\n');
-            } catch (e) {
-                console.error('Logging failed:', e);
-            }
-        };
-
         // Default payment method if not provided
         if (!paymentMethod) {
             paymentMethod = 'Transfer';
         }
 
-        log(`Create Order Request: Body=${JSON.stringify(req.body)}, Customer=${req.customer?._id}`);
-
         // ดึง cart และ items
         const cart = await Cart.findOne({ customerId: req.customer._id });
         if (!cart) {
-            log(`Cart not found for customer: ${req.customer._id}`);
             return res.status(404).json({
                 success: false,
                 message: 'Cart not found'
@@ -45,16 +30,14 @@ exports.createOrderFromCart = async (req, res, next) => {
 
         const allCartItems = await CartItem.find({ cartId: cart._id }).populate('variantId');
 
-        // Filter out ghost items (variant was deleted) — mirrors what getCart already does in the UI
+        // Filter out ghost items (variant was deleted)
         const ghostItems = allCartItems.filter(item => !item.variantId);
         if (ghostItems.length > 0) {
-            log(`Removing ${ghostItems.length} ghost cart item(s) with deleted variants`);
             await CartItem.deleteMany({ _id: { $in: ghostItems.map(i => i._id) } });
         }
 
         const cartItems = allCartItems.filter(item => item.variantId);
         if (cartItems.length === 0) {
-            log('Cart is empty after filtering ghost items');
             return res.status(400).json({
                 success: false,
                 message: 'Cart is empty'
@@ -65,7 +48,6 @@ exports.createOrderFromCart = async (req, res, next) => {
         let totalAmount = 0;
         for (const item of cartItems) {
             if (item.variantId.stockAvailable < item.quantity) {
-                log(`Insufficient stock: sku=${item.variantId.sku} available=${item.variantId.stockAvailable} requested=${item.quantity}`);
                 return res.status(400).json({
                     success: false,
                     message: `สินค้า ${item.variantId.sku} มีสต็อกไม่เพียงพอ`
@@ -75,10 +57,8 @@ exports.createOrderFromCart = async (req, res, next) => {
         }
 
         // ตรวจสอบที่อยู่จัดส่ง
-        log(`Validating Address ID: ${shippingAddressId}`);
         const address = await CustomerAddress.findById(shippingAddressId);
         if (!address) {
-            log(`Address not found: ${shippingAddressId}`);
             return res.status(400).json({
                 success: false,
                 message: 'Invalid shipping address: Address not found'
@@ -86,7 +66,6 @@ exports.createOrderFromCart = async (req, res, next) => {
         }
 
         if (address.customerId.toString() !== req.customer._id.toString()) {
-            log(`Address ownership mismatch: address.customerId=${address.customerId} req.customer._id=${req.customer._id}`);
             return res.status(400).json({
                 success: false,
                 message: 'Invalid shipping address: Does not belong to customer'
@@ -94,10 +73,8 @@ exports.createOrderFromCart = async (req, res, next) => {
         }
 
         // ตรวจสอบ Shipping Method
-        log(`Validating Shipping Method ID: ${shippingMethodId}`);
         const shippingMethod = await ShippingMethod.findById(shippingMethodId);
         if (!shippingMethod || !shippingMethod.isActive) {
-            log('Invalid shipping method');
             return res.status(400).json({
                 success: false,
                 message: 'Invalid shipping method'
@@ -130,19 +107,19 @@ exports.createOrderFromCart = async (req, res, next) => {
             }
         });
 
-        // สร้าง order details และลดสต็อก
-        const orderDetails = [];
-        for (const item of cartItems) {
-            const detail = await OrderDetail.create({
+        // สร้าง order details (bulk insert)
+        const orderDetails = await OrderDetail.insertMany(
+            cartItems.map(item => ({
                 orderId: order._id,
                 variantId: item.variantId._id,
                 quantity: item.quantity,
                 pricePerUnit: item.variantId.price,
                 subtotal: item.quantity * item.variantId.price
-            });
-            orderDetails.push(detail);
+            }))
+        );
 
-            // ลดสต็อก + log movement (performedBy null — triggered by customer checkout)
+        // ลดสต็อก (sequential — each must be atomic)
+        for (const item of cartItems) {
             await deductStock(item.variantId._id, item.quantity, 'sale_online', order._id, 'Order', null);
         }
 
@@ -179,49 +156,68 @@ exports.getCustomerOrders = async (req, res, next) => {
     try {
         const orders = await Order.find({ customerId: req.customer._id })
             .populate('shippingAddressId')
-            .sort({ orderDate: -1 });
+            .sort({ orderDate: -1 })
+            .limit(50);
 
-        // Get order details for each order
-        const ordersWithDetails = await Promise.all(
-            orders.map(async (order) => {
-                const details = await OrderDetail.find({ orderId: order._id })
-                    .populate({
-                        path: 'variantId',
-                        populate: { path: 'productId' }
-                    });
+        const orderIds = orders.map(o => o._id);
 
-                // Get images
-                const productIds = details.map(d => d.variantId?.productId?._id).filter(id => id);
-                const productImages = await ProductImage.find({ productId: { $in: productIds } });
+        // Batch fetch all related data in 3 parallel queries instead of N*3
+        const [allDetails, allPayments] = await Promise.all([
+            OrderDetail.find({ orderId: { $in: orderIds } })
+                .populate({ path: 'variantId', populate: { path: 'productId' } }),
+            Payment.find({ orderId: { $in: orderIds } })
+        ]);
 
-                const formattedItems = details.map(item => {
-                    const product = item.variantId?.productId;
-                    const primaryImg = productImages.find(img => img.productId.toString() === product?._id?.toString() && img.isPrimary);
-                    const anyImg = productImages.find(img => img.productId.toString() === product?._id?.toString());
+        const productIds = [...new Set(
+            allDetails.map(d => d.variantId?.productId?._id?.toString()).filter(Boolean)
+        )];
+        const allImages = await ProductImage.find({ productId: { $in: productIds } });
 
-                    return {
-                        productName: product?.productName || 'Unknown Product',
-                        sku: item.variantId?.sku,
-                        quantity: item.quantity,
-                        price: item.pricePerUnit,
-                        shippingSize: product?.shippingSize || 'small',
-                        imageUrl: primaryImg?.imagePath || anyImg?.imagePath || product?.imageUrl // Add image
-                    };
-                });
+        // Build lookup maps for O(1) access
+        const detailsByOrder = new Map();
+        allDetails.forEach(d => {
+            const key = d.orderId.toString();
+            if (!detailsByOrder.has(key)) detailsByOrder.set(key, []);
+            detailsByOrder.get(key).push(d);
+        });
 
-                const payment = await Payment.findOne({ orderId: order._id });
+        const paymentByOrder = new Map(allPayments.map(p => [p.orderId.toString(), p]));
 
+        const imagesByProduct = new Map();
+        allImages.forEach(img => {
+            const key = img.productId.toString();
+            if (!imagesByProduct.has(key)) imagesByProduct.set(key, []);
+            imagesByProduct.get(key).push(img);
+        });
+
+        const ordersWithDetails = orders.map(order => {
+            const details = detailsByOrder.get(order._id.toString()) || [];
+            const payment = paymentByOrder.get(order._id.toString());
+
+            const formattedItems = details.map(item => {
+                const product = item.variantId?.productId;
+                const imgs = imagesByProduct.get(product?._id?.toString()) || [];
+                const primaryImg = imgs.find(img => img.isPrimary) || imgs[0];
                 return {
-                    ...order.toObject(),
-                    orderReference: order.saleReference || order._id.toString().slice(-6).toUpperCase(),
-                    createdAt: order.orderDate,
-                    items: formattedItems,
-                    paymentMethod: payment?.paymentMethod || 'Transfer',
-                    hasSlip: !!payment?.slipImage,
-                    slipVerified: !!payment?.isVerified,
+                    productName: product?.productName || 'Unknown Product',
+                    sku: item.variantId?.sku,
+                    quantity: item.quantity,
+                    price: item.pricePerUnit,
+                    shippingSize: product?.shippingSize || 'small',
+                    imageUrl: primaryImg?.imagePath || product?.imageUrl
                 };
-            })
-        );
+            });
+
+            return {
+                ...order.toObject(),
+                orderReference: order.saleReference || order._id.toString().slice(-6).toUpperCase(),
+                createdAt: order.orderDate,
+                items: formattedItems,
+                paymentMethod: payment?.paymentMethod || 'Transfer',
+                hasSlip: !!payment?.slipImage,
+                slipVerified: !!payment?.isVerified,
+            };
+        });
 
         res.json({
             success: true,
@@ -250,39 +246,47 @@ exports.getOrderById = async (req, res, next) => {
         }
 
         // ตรวจสอบสิทธิ์ (customer สามารถดูได้เฉพาะ order ของตัวเอง)
-        if (req.customer && order.customerId._id.toString() !== req.customer._id.toString()) {
-            return res.status(403).json({
-                success: false,
-                message: 'Access denied'
-            });
+        // POS orders have no customerId — deny customer tokens from accessing them
+        if (req.customer) {
+            if (!order.customerId || order.customerId._id.toString() !== req.customer._id.toString()) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Access denied'
+                });
+            }
         }
 
-        const details = await OrderDetail.find({ orderId: order._id })
-            .populate({
-                path: 'variantId',
-                populate: { path: 'productId' }
-            });
+        const [details, payments] = await Promise.all([
+            OrderDetail.find({ orderId: order._id })
+                .populate({ path: 'variantId', populate: { path: 'productId' } }),
+            Payment.find({ orderId: order._id }),
+        ]);
 
-        // Get images
         const productIds = details.map(d => d.variantId?.productId?._id).filter(id => id);
         const productImages = await ProductImage.find({ productId: { $in: productIds } });
 
+        // Build map for O(1) lookup instead of O(N) find per item
+        const imagesByProduct = new Map();
+        for (const img of productImages) {
+            const key = img.productId.toString();
+            if (!imagesByProduct.has(key)) imagesByProduct.set(key, { primary: null, any: null });
+            const entry = imagesByProduct.get(key);
+            if (img.isPrimary) entry.primary = img;
+            else if (!entry.any) entry.any = img;
+        }
+
         const formattedItems = details.map(item => {
             const product = item.variantId?.productId;
-            const primaryImg = productImages.find(img => img.productId.toString() === product?._id?.toString() && img.isPrimary);
-            const anyImg = productImages.find(img => img.productId.toString() === product?._id?.toString());
-
+            const imgs = imagesByProduct.get(product?._id?.toString());
             return {
                 productName: product?.productName || 'Unknown Product',
                 sku: item.variantId?.sku,
                 quantity: item.quantity,
                 price: item.pricePerUnit,
                 shippingSize: product?.shippingSize || 'small',
-                imageUrl: primaryImg?.imagePath || anyImg?.imagePath || product?.imageUrl
+                imageUrl: imgs?.primary?.imagePath || imgs?.any?.imagePath || product?.imageUrl
             };
         });
-
-        const payments = await Payment.find({ orderId: order._id });
 
         res.json({
             success: true,
@@ -351,51 +355,69 @@ exports.updateOrderStatus = async (req, res, next) => {
 // @access  Private (staff/owner)
 exports.getAllOrders = async (req, res, next) => {
     try {
-        const { page = 1, limit = 20, status, source } = req.query;
+        const { page = 1, limit = 50, status, source } = req.query;
 
         const query = {};
         if (status) query.orderStatus = status;
         if (source) query.source = source;
 
-        const skip = (page - 1) * limit;
+        const skip = (parseInt(page) - 1) * parseInt(limit);
 
-        const orders = await Order.find(query)
-            .populate('customerId')
-            .populate('cashierUserId')
-            .populate('shippingAddressId')
-            .limit(parseInt(limit))
-            .skip(skip)
-            .sort({ orderDate: -1 });
+        const [orders, total] = await Promise.all([
+            Order.find(query)
+                .populate('customerId')
+                .populate('cashierUserId')
+                .populate('shippingAddressId')
+                .limit(parseInt(limit))
+                .skip(skip)
+                .sort({ orderDate: -1 }),
+            Order.countDocuments(query),
+        ]);
 
-        const total = await Order.countDocuments(query);
+        // Batch-fetch all order details and payments in parallel
+        const orderIds = orders.map(o => o._id);
+        const [allDetails, allPayments] = await Promise.all([
+            OrderDetail.find({ orderId: { $in: orderIds } })
+                .populate({ path: 'variantId', populate: { path: 'productId' } }),
+            Payment.find({ orderId: { $in: orderIds } })
+        ]);
 
-        // Attach items to each order
-        const ordersWithItems = await Promise.all(orders.map(async (order) => {
-            const items = await OrderDetail.find({ orderId: order._id })
-                .populate({
-                    path: 'variantId',
-                    populate: { path: 'productId' } // Populate product info
-                });
+        const detailsByOrder = new Map();
+        for (const d of allDetails) {
+            const key = d.orderId.toString();
+            if (!detailsByOrder.has(key)) detailsByOrder.set(key, []);
+            detailsByOrder.get(key).push(d);
+        }
 
-            // Format items to match frontend expectation if needed, or just return details
-            // Frontend expects: items: [{ productName, quantity, price, ... }]
-            // OrderDetail has: variantId (populated), quantity, pricePerUnit
+        const paymentsByOrder = new Map();
+        for (const p of allPayments) {
+            const key = p.orderId.toString();
+            if (!paymentsByOrder.has(key)) paymentsByOrder.set(key, []);
+            paymentsByOrder.get(key).push(p);
+        }
 
+        const ordersWithItems = orders.map(order => {
+            const items = detailsByOrder.get(order._id.toString()) || [];
+            const payments = paymentsByOrder.get(order._id.toString()) || [];
+            const payment = payments[0];
             const formattedItems = items.map(item => ({
                 productName: item.variantId?.productId?.productName || 'Unknown Product',
                 sku: item.variantId?.sku,
                 quantity: item.quantity,
                 price: item.pricePerUnit
             }));
-
             return {
                 ...order.toObject(),
                 orderReference: order.saleReference || order._id.toString().slice(-6).toUpperCase(),
                 createdAt: order.orderDate,
-                customer: order.customerId, // Map customerId to customer
-                items: formattedItems
+                customer: order.customerId,
+                items: formattedItems,
+                paymentMethod: payment?.paymentMethod || null,
+                hasSlip: !!payment?.slipImage,
+                slipVerified: !!payment?.isVerified,
+                payments,
             };
-        }));
+        });
 
         res.json({
             success: true,

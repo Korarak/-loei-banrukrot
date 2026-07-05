@@ -9,7 +9,7 @@ const { authenticateToken, requireRole } = require('../middleware/auth');
 router.get('/public', getPublicSettings);
 
 // Admin-only below
-router.use(authenticateToken());
+router.use(authenticateToken('user'));
 router.use(requireRole('owner', 'admin', 'staff'));
 
 router.get('/', getSettings);

@@ -19,6 +19,7 @@ export const useShippingMethods = () => {
             const response = await api.get('/shipping-methods');
             return response.data.data;
         },
+        staleTime: 5 * 60_000,
     });
 };
 
@@ -29,6 +30,7 @@ export const useAdminShippingMethods = () => {
             const response = await api.get('/shipping-methods/admin');
             return response.data.data;
         },
+        staleTime: 5 * 60_000,
     });
 };
 

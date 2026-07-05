@@ -66,14 +66,15 @@ export interface CreateOrderData {
     shippingAddressId?: string;
 }
 
-// Fetch all orders (admin)
+// Fetch all orders (admin) — request enough to support client-side filtering
 export function useOrders(options?: any) {
     return useQuery<Order[]>({
         queryKey: ['orders', 'all'],
         queryFn: async () => {
-            const response = await api.get('/orders/all/list');
+            const response = await api.get('/orders/all/list?limit=500');
             return response.data.data as Order[];
         },
+        staleTime: 30_000,
         ...options
     });
 }
@@ -89,6 +90,7 @@ export function useCustomerOrders() {
             return response.data.data as Order[];
         },
         enabled: !!customer,
+        staleTime: 60_000,
     });
 }
 
@@ -101,6 +103,7 @@ export function useOrder(id: string) {
             return response.data.data as Order;
         },
         enabled: !!id,
+        staleTime: 5 * 60_000,
     });
 }
 
@@ -218,14 +221,15 @@ export function useVerifyPayment() {
     });
 }
 
-// Get PromptPay QR Code
-export function useOrderQRCode(id: string) {
+// Get PromptPay QR Code — immutable once generated
+export function useOrderQRCode(id: string, enabled = true) {
     return useQuery({
         queryKey: ['order', id, 'qrcode'],
         queryFn: async () => {
             const response = await api.get(`/orders/${id}/qrcode`);
             return response.data.data.qrCode as string;
         },
-        enabled: !!id,
+        enabled: !!id && enabled,
+        staleTime: Infinity,
     });
 }

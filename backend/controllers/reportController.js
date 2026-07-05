@@ -1,6 +1,9 @@
 // controllers/reportController.js
 const { Order, OrderDetail, Product, ProductVariant, Customer, Category } = require('../models');
 
+const escapeCSV = (val) => `"${String(val ?? '').replace(/"/g, '""')}"`;
+const CSV_EXPORT_LIMIT = 2000;
+
 // Helper: Parse date range from query params
 const getDateRange = (startDate, endDate) => {
     let start, end;
@@ -105,7 +108,7 @@ exports.getProductReport = async (req, res, next) => {
             },
             { $unwind: '$product' },
             // Optional: filter by category
-            ...(categoryId && categoryId !== 'all' ? [{ $match: { 'product.categoryId': require('mongoose').Types.ObjectId(categoryId) } }] : []),
+            ...(categoryId && categoryId !== 'all' ? [{ $match: { 'product.categoryId': Number(categoryId) } }] : []),
             {
                 $group: {
                     _id: '$product._id',
@@ -200,7 +203,8 @@ exports.exportCSV = async (req, res, next) => {
             const orders = await Order.find(matchStage)
                 .populate('customerId', 'firstName lastName')
                 .populate('shippingMethodId', 'name')
-                .sort({ orderDate: -1 });
+                .sort({ orderDate: -1 })
+                .limit(CSV_EXPORT_LIMIT);
 
             // CSV Header
             csvData += '\uFEFF'; // BOM for Excel UTF-8
@@ -210,7 +214,7 @@ exports.exportCSV = async (req, res, next) => {
                 const date = order.orderDate.toISOString().split('T')[0];
                 const customer = order.customerId ? `${order.customerId.firstName} ${order.customerId.lastName}` : 'N/A';
                 const shipping = order.shippingMethodId ? order.shippingMethodId.name : order.shippingInfo?.provider || 'N/A';
-                csvData += `${date},${order.saleReference || order._id},"${customer}",${order.source},${order.orderStatus},"${shipping}",${order.totalAmount}\n`;
+                csvData += `${date},${escapeCSV(order.saleReference || order._id)},${escapeCSV(customer)},${order.source},${order.orderStatus},${escapeCSV(shipping)},${order.totalAmount}\n`;
             });
 
         } else if (type === 'products') {
@@ -256,12 +260,12 @@ exports.exportCSV = async (req, res, next) => {
                 { $sort: { revenue: -1 } }
             ]);
 
-            csvData += '\uFEFF'; 
+            csvData += '\uFEFF';
             csvData += 'Product Name,SKU,Items Sold,Revenue\n';
             productData.forEach(p => {
-                csvData += `"${p.productName}","${p.sku}",${p.itemsSold},${p.revenue}\n`;
+                csvData += `${escapeCSV(p.productName)},${escapeCSV(p.sku)},${p.itemsSold},${p.revenue}\n`;
             });
-            
+
         } else if (type === 'customers') {
             const customerData = await Order.aggregate([
                 { $match: { orderDate: { $gte: start, $lte: end }, customerId: { $ne: null } } },
@@ -283,14 +287,10 @@ exports.exportCSV = async (req, res, next) => {
                 { $unwind: '$customer' },
             ]);
 
-            csvData += '\uFEFF'; 
+            csvData += '\uFEFF';
             csvData += 'First Name,Last Name,Email,Phone,Total Spent,Orders Count\n';
             customerData.forEach(c => {
-                const fname = c.customer.firstName || '';
-                const lname = c.customer.lastName || '';
-                const email = c.customer.email || '';
-                const phone = c.customer.phone || '';
-                csvData += `"${fname}","${lname}","${email}","${phone}",${c.totalSpent},${c.ordersCount}\n`;
+                csvData += `${escapeCSV(c.customer.firstName)},${escapeCSV(c.customer.lastName)},${escapeCSV(c.customer.email)},${escapeCSV(c.customer.phone)},${c.totalSpent},${c.ordersCount}\n`;
             });
         }
 

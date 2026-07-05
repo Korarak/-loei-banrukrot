@@ -2,11 +2,7 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const Customer = require('../models/Customer');
 
-console.log('🔹 Initializing Passport...');
-console.log('🔹 Google Client ID present:', !!process.env.GOOGLE_CLIENT_ID);
-
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-    console.log('✅ Google Auth Enabled');
     passport.use(new GoogleStrategy({
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -65,8 +61,6 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
                 return done(err, null);
             }
         }));
-} else {
-    console.warn('⚠️ Google Client ID/Secret not found. Google Auth disabled.');
 }
 
 module.exports = passport;

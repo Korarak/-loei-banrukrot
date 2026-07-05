@@ -61,10 +61,11 @@ const orderSchema = new mongoose.Schema({
 });
 
 // Indexes
-orderSchema.index({ customerId: 1 });
+orderSchema.index({ customerId: 1, orderDate: -1 }); // Covers getCustomerOrders (filter + sort)
 orderSchema.index({ orderDate: -1 });
 orderSchema.index({ source: 1 });
 orderSchema.index({ orderStatus: 1 });
+orderSchema.index({ orderStatus: 1, orderDate: -1 }); // Covers status filter + date sort (reports + admin orders)
 // orderSchema.index({ saleReference: 1 }); // Already defined as unique
 
 module.exports = mongoose.model('Order', orderSchema);

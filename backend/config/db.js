@@ -16,7 +16,7 @@ const connectDB = async () => {
     } catch (error) {
         console.error('❌ MongoDB Connection Failed!');
         console.error('Error Message:', error.message);
-        console.error('Connection URI:', process.env.MONGODB_URI.replace(/:[^:]*@/, ':****@')); // Hide password
+        console.error('Connection URI:', process.env.MONGODB_URI?.replace(/:[^:]*@/, ':****@') ?? '(not set)'); // Hide password
         process.exit(1); // Exit process with failure
     }
 };

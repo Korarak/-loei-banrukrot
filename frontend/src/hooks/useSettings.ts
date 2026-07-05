@@ -36,6 +36,7 @@ export function useAdminSettings() {
             const res = await api.get('/settings');
             return res.data.data as Setting[];
         },
+        staleTime: 5 * 60_000,
     });
 }
 

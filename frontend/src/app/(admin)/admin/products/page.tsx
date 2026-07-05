@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -38,7 +38,9 @@ import ImagePreviewDialog from '@/components/features/ImagePreviewDialog';
 import { ProductImage } from '@/hooks/useProducts';
 
 export default function AdminProductsPage() {
+    const [searchInput, setSearchInput] = useState('');
     const [search, setSearch] = useState('');
+    const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
     const [productDialogOpen, setProductDialogOpen] = useState(false);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -52,8 +54,23 @@ export default function AdminProductsPage() {
     const [previewImages, setPreviewImages] = useState<ProductImage[]>([]);
     const [previewProductName, setPreviewProductName] = useState('');
 
-    const { data: products, isLoading } = useProducts({ search, channel: channelFilter });
-    const { data: categories } = useCategories(true);
+    // Debounce search to avoid firing API on every keystroke
+    useEffect(() => {
+        if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+        searchDebounceRef.current = setTimeout(() => setSearch(searchInput), 350);
+        return () => { if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current); };
+    }, [searchInput]);
+
+    const { data: products, isLoading, isError, refetch } = useProducts({ search, channel: channelFilter });
+    const { data: categoriesData } = useCategories(true);
+
+    // Category lookup Map — O(1) per product instead of O(n)
+    const categoryMap = useMemo(() => {
+        const map = new Map<number, string>();
+        (categoriesData || []).forEach(c => map.set(c.categoryId, c.name));
+        return map;
+    }, [categoriesData]);
+
     const deleteProduct = useDeleteProduct();
     const updateVariantStock = useUpdateVariantStock();
 
@@ -111,55 +128,50 @@ export default function AdminProductsPage() {
         }
     };
 
-    // Sorting Logic
-    const sortedProducts = [...(products || [])].filter(product => {
-        const totalStock = product.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0;
-        if (stockFilter === 'all') return true;
-        if (stockFilter === 'in_stock') return totalStock > 10;
-        if (stockFilter === 'low_stock') return totalStock > 0 && totalStock <= 10;
-        if (stockFilter === 'out_of_stock') return totalStock === 0;
-        return true;
-    }).sort((a, b) => {
-        if (!sortConfig) return 0;
-        const { key, direction } = sortConfig;
-
-        let aValue: any = a[key as keyof Product];
-        let bValue: any = b[key as keyof Product];
-
-        if (key === 'stock') {
-            aValue = a.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0;
-            bValue = b.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0;
-        } else if (key === 'price') {
-            const aPrices = a.variants?.map(v => v.price).filter(p => p != null) || [];
-            const bPrices = b.variants?.map(v => v.price).filter(p => p != null) || [];
-            aValue = aPrices.length > 0 ? Math.min(...aPrices) : 0;
-            bValue = bPrices.length > 0 ? Math.min(...bPrices) : 0;
-        } else if (key === 'dateCreated') {
-            aValue = new Date(a.dateCreated || 0).getTime();
-            bValue = new Date(b.dateCreated || 0).getTime();
-        } else if (typeof aValue === 'string' && typeof bValue === 'string') {
-            return direction === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
-        }
-
-        if (aValue < bValue) return direction === 'asc' ? -1 : 1;
-        if (aValue > bValue) return direction === 'asc' ? 1 : -1;
-        return 0;
-    });
-
     const handleSortChange = (value: string) => {
         const [key, direction] = value.split('-');
         setSortConfig({ key, direction: direction as 'asc' | 'desc' });
     };
 
-    // Stats
-    const totalProducts = products?.length || 0;
-    const lowStockCount = products?.filter(p => {
-        const stock = p.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0;
-        return stock > 0 && stock <= 10;
-    }).length || 0;
-    const outStockCount = products?.filter(p => {
-        return (p.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0) === 0;
-    }).length || 0;
+    // Memoized sort + filter + stats — avoid O(n) passes on every render
+    const { sortedProducts, totalProducts, lowStockCount, outStockCount } = useMemo(() => {
+        const all = products || [];
+        const filtered = all.filter(product => {
+            const totalStock = product.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0;
+            if (stockFilter === 'in_stock') return totalStock > 10;
+            if (stockFilter === 'low_stock') return totalStock > 0 && totalStock <= 10;
+            if (stockFilter === 'out_of_stock') return totalStock === 0;
+            return true;
+        });
+
+        const sorted = [...filtered].sort((a, b) => {
+            if (!sortConfig) return 0;
+            const { key, direction } = sortConfig;
+            let aValue: any = a[key as keyof Product];
+            let bValue: any = b[key as keyof Product];
+            if (key === 'stock') {
+                aValue = a.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0;
+                bValue = b.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0;
+            } else if (key === 'price') {
+                const ap = a.variants?.map(v => v.price).filter(p => p != null) || [];
+                const bp = b.variants?.map(v => v.price).filter(p => p != null) || [];
+                aValue = ap.length ? Math.min(...ap) : 0;
+                bValue = bp.length ? Math.min(...bp) : 0;
+            } else if (key === 'dateCreated') {
+                aValue = new Date(a.dateCreated || 0).getTime();
+                bValue = new Date(b.dateCreated || 0).getTime();
+            } else if (typeof aValue === 'string' && typeof bValue === 'string') {
+                return direction === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+            }
+            if (aValue < bValue) return direction === 'asc' ? -1 : 1;
+            if (aValue > bValue) return direction === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        const low = all.filter(p => { const s = p.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0; return s > 0 && s <= 10; }).length;
+        const out = all.filter(p => (p.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0) === 0).length;
+        return { sortedProducts: sorted, totalProducts: all.length, lowStockCount: low, outStockCount: out };
+    }, [products, stockFilter, sortConfig]);
 
     return (
         <div className="space-y-6 max-w-7xl mx-auto">
@@ -222,8 +234,8 @@ export default function AdminProductsPage() {
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
                         placeholder="ค้นหาชื่อสินค้า, SKU..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
+                        value={searchInput}
+                        onChange={(e) => setSearchInput(e.target.value)}
                         className="pl-10 h-11 bg-white border-gray-200 focus:bg-white transition-colors rounded-xl shadow-sm focus:ring-2 focus:ring-primary/20"
                     />
                 </div>
@@ -256,6 +268,13 @@ export default function AdminProductsPage() {
                         <Skeleton key={i} className="h-28 w-full rounded-xl" />
                     ))}
                 </div>
+            ) : isError ? (
+                <div className="flex flex-col items-center justify-center py-16 gap-4 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                    <p className="text-gray-500 font-medium">โหลดรายการสินค้าไม่สำเร็จ กรุณาลองใหม่อีกครั้ง</p>
+                    <Button onClick={() => refetch()} variant="outline" className="rounded-xl font-bold">
+                        ลองใหม่
+                    </Button>
+                </div>
             ) : sortedProducts.length > 0 ? (
                 <div className="space-y-3">
                     {sortedProducts.map((product) => {
@@ -263,7 +282,7 @@ export default function AdminProductsPage() {
                         const prices = product.variants?.map((v) => v.price).filter(p => p != null) || [];
                         const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
                         const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
-                        const categoryName = categories?.find(c => c.categoryId === product.categoryId)?.name || 'ไม่มีหมวดหมู่';
+                        const categoryName = categoryMap.get(product.categoryId) || 'ไม่มีหมวดหมู่';
 
                         // Check stock status for border color
                         let stockStatusDetails = { color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' };
@@ -276,7 +295,19 @@ export default function AdminProductsPage() {
                                 className="group bg-white rounded-xl border border-gray-200 hover:border-primary/30 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col sm:flex-row"
                             >
                                 {/* Image Section */}
-                                <div className="sm:w-32 md:w-40 aspect-square sm:aspect-auto relative bg-gray-50 flex-shrink-0 border-b sm:border-b-0 sm:border-r border-gray-100 cursor-pointer overflow-hidden" onClick={() => handleImageClick(product)}>
+                                <div
+                                    className="sm:w-32 md:w-40 aspect-square sm:aspect-auto relative bg-gray-50 flex-shrink-0 border-b sm:border-b-0 sm:border-r border-gray-100 cursor-pointer overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                                    role="button"
+                                    tabIndex={0}
+                                    aria-label={`ดูรูปภาพ ${product.productName}`}
+                                    onClick={() => handleImageClick(product)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' || e.key === ' ') {
+                                            e.preventDefault();
+                                            handleImageClick(product);
+                                        }
+                                    }}
+                                >
                                     {(product.images?.find(img => img.isPrimary)?.imagePath || product.images?.[0]?.imagePath || product.imageUrl) ? (
                                         <Image
                                             src={getImageUrl(product.images?.find(img => img.isPrimary)?.imagePath || product.images?.[0]?.imagePath || product.imageUrl!)}
@@ -284,7 +315,6 @@ export default function AdminProductsPage() {
                                             fill
                                             className="object-cover group-hover:scale-105 transition-transform duration-500"
                                             sizes="(max-width: 640px) 100vw, 160px"
-                                            unoptimized
                                         />
                                     ) : (
                                         <div className="flex items-center justify-center h-full w-full text-gray-300">
@@ -342,6 +372,7 @@ export default function AdminProductsPage() {
                                                     className="h-6 w-6 rounded-md bg-white shadow-sm hover:bg-gray-100"
                                                     disabled={totalStock <= 0 || updateVariantStock.isPending}
                                                     onClick={(e) => handleQuickStockUpdate(product, -1, e)}
+                                                    aria-label={`ลดสต๊อก ${product.productName}`}
                                                 >
                                                     <Minus className="h-3 w-3" />
                                                 </Button>
@@ -352,6 +383,7 @@ export default function AdminProductsPage() {
                                                     className="h-6 w-6 rounded-md bg-white shadow-sm hover:bg-gray-100"
                                                     disabled={updateVariantStock.isPending}
                                                     onClick={(e) => handleQuickStockUpdate(product, 1, e)}
+                                                    aria-label={`เพิ่มสต๊อก ${product.productName}`}
                                                 >
                                                     <Plus className="h-3 w-3" />
                                                 </Button>
@@ -374,6 +406,7 @@ export default function AdminProductsPage() {
                                                 size="icon"
                                                 className="h-8 w-8 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
                                                 onClick={() => handleDeleteClick(product._id)}
+                                                aria-label={`ลบ ${product.productName}`}
                                             >
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>
@@ -394,11 +427,18 @@ export default function AdminProductsPage() {
                         {search ? `ไม่พบผลลัพธ์สำหรับ "${search}"` : 'เริ่มต้นด้วยการเพิ่มสินค้าชิ้นแรกของคุณในคลัง'}
                     </p>
                     <Button
-                        onClick={handleCreateProduct}
+                        onClick={() => {
+                            if (search) {
+                                setSearchInput('');
+                                setSearch('');
+                            } else {
+                                handleCreateProduct();
+                            }
+                        }}
                         className="rounded-xl shadow-lg shadow-primary/20"
                     >
-                        <Plus className="h-4 w-4 mr-2" />
-                        {search ? 'ล้างการค้นหาและเพิ่มสินค้า' : 'เพิ่มสินค้าใหม่'}
+                        {search ? <Search className="h-4 w-4 mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+                        {search ? 'ล้างการค้นหา' : 'เพิ่มสินค้าใหม่'}
                     </Button>
                 </div>
             )}

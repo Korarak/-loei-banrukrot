@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Search, ShoppingCart } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -18,7 +18,9 @@ import { PaymentDialog } from './components/PaymentDialog';
 import { ReceiptDialog } from './components/ReceiptDialog';
 
 export default function POSPage() {
+    const [searchInput, setSearchInput] = useState('');
     const [search, setSearch] = useState('');
+    const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const [cart, setCart] = useState<any[]>([]);
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
@@ -29,76 +31,82 @@ export default function POSPage() {
     const [receiptData, setReceiptData] = useState<any | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
 
+    // Debounce POS search
+    useEffect(() => {
+        if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+        searchDebounceRef.current = setTimeout(() => setSearch(searchInput), 300);
+        return () => { if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current); };
+    }, [searchInput]);
+
     // Fetch Products
     const { data: products, isLoading: isProductsLoading } = useQuery({
         queryKey: ['pos-products', search, selectedCategory],
         queryFn: async () => {
-            const params: any = {};
+            const params: any = { scope: 'pos' };
             if (search) params.search = search;
             if (selectedCategory !== 'all') params.categoryId = selectedCategory;
             const response = await api.get('/products', { params });
             return response.data.data;
         },
+        staleTime: 30_000,
     });
 
     const { data: categories } = useCategories(true);
 
-    // Cart Logic
+    // Cart Logic — functional updates prevent stale-closure bugs on fast clicks
+    const updateQuantity = (variantId: string, delta: number) => {
+        setCart(prev =>
+            prev.map(item => {
+                if (item.variantId !== variantId) return item;
+                const newQty = Math.max(0, item.quantity + delta);
+                if (delta > 0 && newQty > item.stockAvailable) {
+                    toast.error('เกินขีดจำกัดสต๊อก', { description: `มีสินค้าเพียง ${item.stockAvailable} ชิ้นเท่านั้น`, id: 'pos-stock-limit' });
+                    return item;
+                }
+                return { ...item, quantity: newQty };
+            }).filter(item => item.quantity > 0)
+        );
+    };
+
     const addToCart = (product: any) => {
         const variant = product.variants?.[0];
         if (!variant || (variant.stockAvailable || 0) <= 0) {
-            toast.error('สินค้าหมด', { description: 'สินค้านี้ไม่พร้อมจำหน่ายในขณะนี้', id: 'pos-out-of-stock' }); // Prevent stack
+            toast.error('สินค้าหมด', { description: 'สินค้านี้ไม่พร้อมจำหน่ายในขณะนี้', id: 'pos-out-of-stock' });
             return;
         }
-
-        const existingItem = cart.find((item) => item.variantId === variant._id);
-        if (existingItem) {
-            if (existingItem.quantity + 1 > variant.stockAvailable) {
-                toast.error('เกินขีดจำกัดสต๊อก', { description: `มีสินค้าเพียง ${variant.stockAvailable} ชิ้นเท่านั้น`, id: 'pos-stock-limit' }); // Prevent stack
-                return;
-            }
-            // Optimistic feedback is enough, no toast needed for increment
-            updateQuantity(variant._id, 1);
-        } else {
-            setCart([
-                ...cart,
-                {
-                    variantId: variant._id,
-                    productId: product._id,
-                    name: product.productName,
-                    price: variant.price,
-                    quantity: 1,
-                    sku: variant.sku,
-                    image: product.images?.[0]?.imagePath,
-                    stockAvailable: variant.stockAvailable
-                },
-            ]);
-            toast.success('เพิ่มลงในรถเข็นแล้ว', { duration: 1000, position: 'bottom-center' });
-        }
-    };
-
-    const updateQuantity = (variantId: string, delta: number) => {
-        setCart(
-            cart.map((item) => {
-                if (item.variantId === variantId) {
-                    const newQuantity = Math.max(0, item.quantity + delta);
-
-                    if (delta > 0 && newQuantity > item.stockAvailable) {
-                        toast.error('เกินขีดจำกัดสต๊อก', { description: `มีสินค้าเพียง ${item.stockAvailable} ชิ้นเท่านั้น`, id: 'pos-stock-limit-update' }); // Prevent stack
-                        return item;
-                    }
-
-                    return { ...item, quantity: newQuantity };
+        setCart(prev => {
+            const existing = prev.find(item => item.variantId === variant._id);
+            if (existing) {
+                if (existing.quantity + 1 > variant.stockAvailable) {
+                    toast.error('เกินขีดจำกัดสต๊อก', { description: `มีสินค้าเพียง ${variant.stockAvailable} ชิ้นเท่านั้น`, id: 'pos-stock-limit' });
+                    return prev;
                 }
-                return item;
-            }).filter((item) => item.quantity > 0)
-        );
+                return prev.map(item =>
+                    item.variantId === variant._id
+                        ? { ...item, quantity: item.quantity + 1 }
+                        : item
+                );
+            }
+            toast.success('เพิ่มลงในรถเข็นแล้ว', { duration: 1000, position: 'bottom-center' });
+            return [...prev, {
+                variantId: variant._id,
+                productId: product._id,
+                name: product.productName,
+                price: variant.price,
+                quantity: 1,
+                sku: variant.sku,
+                image: product.images?.[0]?.imagePath,
+                stockAvailable: variant.stockAvailable,
+            }];
+        });
     };
 
     const clearCart = () => setCart([]);
 
-    const totalAmount = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+    const { totalAmount, totalItems } = useMemo(() => ({
+        totalAmount: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
+        totalItems: cart.reduce((sum, item) => sum + item.quantity, 0),
+    }), [cart]);
 
     // Payment Logic
     const handlePayment = async (cashReceived: number, change: number) => {
@@ -151,8 +159,8 @@ export default function POSPage() {
                         <Input
                             placeholder="ค้นหาสินค้า..."
                             className="pl-10 h-12 text-lg bg-gray-50 border-transparent focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all rounded-xl"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
+                            value={searchInput}
+                            onChange={(e) => setSearchInput(e.target.value)}
                         />
                     </div>
                     <CategoryFilter

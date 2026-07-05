@@ -157,6 +157,15 @@ exports.updateCartItem = async (req, res, next) => {
             });
         }
 
+        // Verify ownership — cart must belong to the requesting customer
+        const cart = await Cart.findById(cartItem.cartId);
+        if (!cart || cart.customerId.toString() !== req.customer._id.toString()) {
+            return res.status(403).json({
+                success: false,
+                message: 'Access denied'
+            });
+        }
+
         // ตรวจสอบสต็อก
         if (cartItem.variantId.stockAvailable < quantity) {
             return res.status(400).json({
@@ -168,7 +177,6 @@ exports.updateCartItem = async (req, res, next) => {
         cartItem.quantity = quantity;
         await cartItem.save();
 
-        // Update cart lastUpdated
         await Cart.findByIdAndUpdate(cartItem.cartId, { lastUpdated: Date.now() });
 
         res.json({
@@ -186,7 +194,7 @@ exports.updateCartItem = async (req, res, next) => {
 // @access  Private (customer)
 exports.removeFromCart = async (req, res, next) => {
     try {
-        const cartItem = await CartItem.findByIdAndDelete(req.params.id);
+        const cartItem = await CartItem.findById(req.params.id);
 
         if (!cartItem) {
             return res.status(404).json({
@@ -195,7 +203,16 @@ exports.removeFromCart = async (req, res, next) => {
             });
         }
 
-        // Update cart lastUpdated
+        // Verify ownership — cart must belong to the requesting customer
+        const cart = await Cart.findById(cartItem.cartId);
+        if (!cart || cart.customerId.toString() !== req.customer._id.toString()) {
+            return res.status(403).json({
+                success: false,
+                message: 'Access denied'
+            });
+        }
+
+        await cartItem.deleteOne();
         await Cart.findByIdAndUpdate(cartItem.cartId, { lastUpdated: Date.now() });
 
         res.json({

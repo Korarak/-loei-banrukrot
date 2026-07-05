@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,13 +28,16 @@ export default function ReportsPage() {
 
     const [activeTab, setActiveTab] = useState<'sales' | 'products' | 'customers'>('sales');
 
-    const handleSearch = () => {
-        setAppliedRange({ startDate, endDate });
-    };
+    const isInvalidRange = startDate > endDate;
 
-    const handleExport = async () => {
+    const handleSearch = useCallback(() => {
+        if (isInvalidRange) return;
+        setAppliedRange({ startDate, endDate });
+    }, [startDate, endDate, isInvalidRange]);
+
+    const handleExport = useCallback(async () => {
         await downloadReportCSV(activeTab, appliedRange);
-    };
+    }, [activeTab, appliedRange]);
 
     return (
         <div className="space-y-6 pb-10">
@@ -77,8 +80,10 @@ export default function ReportsPage() {
                                 />
                             </div>
                         </div>
-                        <Button 
-                            onClick={handleSearch} 
+                        <Button
+                            onClick={handleSearch}
+                            disabled={isInvalidRange}
+                            title={isInvalidRange ? 'วันที่เริ่มต้นต้องไม่เกินวันที่สิ้นสุด' : undefined}
                             className="w-full md:w-auto rounded-xl px-8 shadow-md"
                         >
                             <Search className="h-4 w-4 mr-2" />

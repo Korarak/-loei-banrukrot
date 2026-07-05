@@ -52,6 +52,15 @@ router.post(
     productController.addProductImage
 );
 
+// reorder must be before /:imageId to prevent Express from capturing "reorder" as imageId
+router.put(
+    '/:id/images/reorder',
+    authenticateToken('user'),
+    requireRole('owner', 'staff'),
+    validator.validateId,
+    productController.reorderProductImages
+);
+
 router.put(
     '/:id/images/:imageId',
     authenticateToken('user'),
@@ -66,14 +75,6 @@ router.delete(
     requireRole('owner', 'staff'),
     validator.validateId,
     productController.deleteProductImage
-);
-
-router.put(
-    '/:id/images/reorder',
-    authenticateToken('user'),
-    requireRole('owner', 'staff'),
-    validator.validateId,
-    productController.reorderProductImages
 );
 
 module.exports = router;

@@ -46,24 +46,24 @@ router.post(
 // Staff/Owner routes
 router.get(
     '/all/list',
-    authenticateToken(),
+    authenticateToken('user'),
     requireRole('owner', 'staff'),
     getAllOrders
 );
 
 router.patch(
     '/:id/status',
-    authenticateToken(),
+    authenticateToken('user'),
     requireRole('owner', 'staff'),
     validator.validateId,
     updateOrderStatus
 );
 
 router.route('/:id/slip')
-    .post(authenticateToken(), upload.single('slip'), uploadPaymentSlip);
+    .post(authenticateToken('customer'), upload.single('slip'), uploadPaymentSlip);
 
 router.route('/:id/verify-payment')
-    .post(authenticateToken(), requireRole('owner', 'admin', 'staff'), verifyPayment);
+    .post(authenticateToken('user'), requireRole('owner', 'admin', 'staff'), verifyPayment);
 
 router.get(
     '/:id/qrcode',

@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -17,6 +16,7 @@ import { motion, useInView } from 'framer-motion';
 import { useRef, useEffect, useState } from 'react';
 import { useCategories } from '@/hooks/useCategories';
 import { getImageUrl } from '@/lib/utils';
+import Image from 'next/image';
 import ProductCard from '@/components/features/ProductCard';
 import { siteConfig } from '@/config/site';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -93,6 +93,7 @@ export default function Home() {
             const { data } = await api.get('/products?limit=8&sort=newest');
             return data.data as any[];
         },
+        staleTime: 5 * 60_000,
     });
 
     const { data: popularProducts, isLoading: popularLoading } = useQuery({
@@ -101,6 +102,7 @@ export default function Home() {
             const { data } = await api.get('/products/popular?limit=8');
             return data.data as any[];
         },
+        staleTime: 5 * 60_000,
     });
 
     const { data: publicStats } = useQuery({
@@ -151,12 +153,8 @@ export default function Home() {
 
             {/* ── Hero ──────────────────────────────────────────────────────── */}
             <section className="relative bg-gradient-to-br from-primary via-emerald-900 to-black text-white rounded-[2rem] overflow-hidden shadow-2xl min-h-[700px] flex items-center pb-20">
-                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-accent/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 animate-breathe" />
-                <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 animate-breathe" style={{ animationDelay: '2s' }} />
-                <div className="absolute top-20 right-20 w-24 h-24 border-2 border-white/10 rounded-2xl animate-float rotate-12" />
-                <div className="absolute bottom-32 right-40 w-16 h-16 border-2 border-accent/20 rounded-full animate-float-reverse" />
-                <div className="absolute top-40 left-[60%] w-8 h-8 bg-accent/10 rounded-lg animate-float-slow rotate-45" />
-                <div className="absolute bottom-20 left-20 w-20 h-20 border border-white/5 rounded-3xl animate-spin-slow" />
+                <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-accent/15 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-primary/15 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 pointer-events-none" />
 
                 <div className="relative container mx-auto px-8 md:px-12 py-20 flex flex-col md:flex-row items-center gap-12">
                     <motion.div
@@ -215,35 +213,36 @@ export default function Home() {
                         </motion.div>
                     </motion.div>
 
-                    {/* Logo */}
+                    {/* Shop Name Display */}
                     <motion.div
                         className="flex-1 relative flex justify-center items-center"
-                        initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
-                        animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                        transition={{ duration: 1, ease: 'easeOut', delay: 0.2 }}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
                     >
-                        <div className="absolute inset-0 bg-primary/30 rounded-full blur-[100px] animate-breathe" />
-                        <div className="relative group perspective-1000">
+                        <div className="relative flex flex-col items-center justify-center text-center">
                             <motion.div
-                                className="relative bg-white/5 backdrop-blur-sm p-4 rounded-[3rem] border border-white/10 shadow-3xl card-hover-lift animate-float"
-                                whileHover={{ rotateY: 15, rotateX: -5, scale: 1.05 }}
-                                transition={{ type: 'spring', stiffness: 300 }}
+                                className="relative bg-white/5 backdrop-blur-sm px-10 py-12 md:px-16 md:py-16 rounded-[3rem] border border-white/10 shadow-2xl"
+                                whileHover={{ scale: 1.03 }}
+                                transition={{ type: 'spring', stiffness: 200 }}
                             >
-                                <div className="relative w-64 h-64 md:w-80 md:h-80 lg:w-[450px] lg:h-[450px] rounded-[2.5rem] overflow-hidden gold-glow">
-                                    <Image src="/logo.png" alt="Banrakrod Logo" fill className="object-contain p-4 transition-transform duration-700 group-hover:scale-110" priority />
-                                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                                <div className="text-5xl md:text-6xl lg:text-8xl font-black text-white leading-tight mb-3 tracking-tight">
+                                    บ้านรักรถ
+                                </div>
+                                <div className="text-base md:text-xl text-accent font-black italic tracking-[0.3em] mb-5">
+                                    BANRUKROT
+                                </div>
+                                <div className="w-20 h-1.5 bg-gradient-to-r from-accent to-pink-500 rounded-full mx-auto mb-5" />
+                                <div className="text-sm text-white/50 font-medium tracking-wider uppercase">
+                                    Vespa Specialist
                                 </div>
                             </motion.div>
-                            <motion.div
-                                className="absolute -top-10 -right-10 w-20 h-20 bg-accent/20 backdrop-blur-md rounded-2xl flex items-center justify-center animate-float-reverse border border-white/20 z-20"
-                                animate={{ rotate: 360 }}
-                                transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}
-                            >
-                                <Zap className="h-10 w-10 text-accent animate-pulse" />
-                            </motion.div>
-                            <motion.div className="absolute -bottom-12 -left-8 w-24 h-24 bg-primary/20 backdrop-blur-md rounded-full flex items-center justify-center animate-float border border-white/10 z-20">
-                                <ShieldCheck className="h-12 w-12 text-primary" />
-                            </motion.div>
+                            <div className="absolute -top-6 -right-6 w-14 h-14 bg-accent/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/20 z-20">
+                                <Zap className="h-7 w-7 text-accent" />
+                            </div>
+                            <div className="absolute -bottom-6 -left-6 w-16 h-16 bg-primary/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/10 z-20">
+                                <ShieldCheck className="h-8 w-8 text-primary" />
+                            </div>
                         </div>
                     </motion.div>
                 </div>
@@ -321,17 +320,17 @@ export default function Home() {
                             const catImage = category.imageUrl || category.sampleImage;
                             return (
                                 <motion.div key={category._id} variants={fadeInUp} className="w-[240px] md:w-auto flex-shrink-0 md:flex-shrink snap-start">
-                                    <Link href={`/products?categoryId=${category.categoryId}`} className="group block h-full">
+                                    <Link href={`/products?category=${category.slug}`} className="group block h-full">
                                         <Card className="h-full border border-gray-200/60 bg-gray-50 hover:bg-white shadow-none hover:shadow-xl hover:border-gray-200 transition-all duration-500 rounded-[2rem] overflow-hidden relative card-hover-lift">
                                             {catImage && (
                                                 <div className="absolute inset-0 z-0 opacity-10 group-hover:opacity-20 transition-opacity duration-500 scale-110 group-hover:scale-125">
-                                                    <img src={getImageUrl(catImage)} alt={category.name} className="w-full h-full object-cover grayscale" />
+                                                    <Image src={getImageUrl(catImage)} alt={category.name} fill className="object-cover grayscale" sizes="240px" />
                                                 </div>
                                             )}
                                             <div className="p-8 text-center pt-10 relative z-10 flex flex-col h-full">
                                                 <div className="h-20 w-20 bg-white rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-glow transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 border border-gray-50">
                                                     {catImage
-                                                        ? <img src={getImageUrl(catImage)} alt={category.name} className="w-14 h-14 object-cover rounded-xl" />
+                                                        ? <Image src={getImageUrl(catImage)} alt={category.name} width={56} height={56} className="object-cover rounded-xl" />
                                                         : <Package className="h-10 w-10 text-primary" />
                                                     }
                                                 </div>
@@ -469,7 +468,7 @@ export default function Home() {
                                     className="relative w-[240px] sm:w-[300px] lg:w-auto lg:min-w-0 snap-start flex-shrink-0 lg:flex-shrink h-full"
                                 >
                                     <div className="absolute top-3 left-3 z-30 pointer-events-none">
-                                        <div className="bg-rose-500 text-white text-[10px] font-black px-3 py-1 rounded-lg shadow-lg animate-pulse uppercase tracking-widest">
+                                        <div className="bg-rose-500 text-white text-[10px] font-black px-3 py-1 rounded-lg shadow-lg uppercase tracking-widest">
                                             New
                                         </div>
                                     </div>
@@ -482,8 +481,9 @@ export default function Home() {
             )}
 
             {/* ── Why Choose Us ─────────────────────────────────────────────── */}
-            <section className="bg-zinc-950 rounded-[3rem] p-10 md:p-20 text-center relative overflow-hidden mx-4 mt-24">
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/10 rounded-full blur-[100px] animate-breathe" />
+            <section className="bg-zinc-950 rounded-[3rem] p-10 md:p-20 text-center relative overflow-hidden mx-4 mt-24"
+                style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(16,185,129,0.08) 0%, transparent 70%), #09090b' }}
+            >
                 <motion.div
                     className="relative z-10 container mx-auto"
                     initial="hidden"

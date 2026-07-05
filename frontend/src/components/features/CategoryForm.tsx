@@ -253,7 +253,6 @@ export default function CategoryForm({ category, onSuccess, onCancel }: Category
                                             alt="Category"
                                             fill
                                             className="object-cover"
-                                            unoptimized
                                         />
                                         <button
                                             type="button"

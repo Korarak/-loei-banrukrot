@@ -19,6 +19,8 @@ const eslintConfig = defineConfig([
       "@typescript-eslint/no-unused-vars": "off",
       "react-hooks/exhaustive-deps": "off",
       "@typescript-eslint/no-require-imports": "off",
+      // Valid patterns: hydration guards, dialog resets, animation triggers, URL→state sync
+      "react-hooks/set-state-in-effect": "off",
     }
   }
 ]);

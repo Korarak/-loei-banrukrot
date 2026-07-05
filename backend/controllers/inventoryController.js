@@ -34,15 +34,17 @@ exports.getStockMovements = async (req, res, next) => {
         }
 
         const skip = (parseInt(page) - 1) * parseInt(limit);
-        const total = await StockMovement.countDocuments(query);
 
-        const movements = await StockMovement.find(query)
-            .populate({ path: 'variantId', select: 'sku option1Value option2Value stockAvailable' })
-            .populate({ path: 'productId', select: 'productName imageUrl' })
-            .populate({ path: 'performedBy', select: 'username' })
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(parseInt(limit));
+        const [total, movements] = await Promise.all([
+            StockMovement.countDocuments(query),
+            StockMovement.find(query)
+                .populate({ path: 'variantId', select: 'sku option1Value option2Value stockAvailable' })
+                .populate({ path: 'productId', select: 'productName imageUrl' })
+                .populate({ path: 'performedBy', select: 'username' })
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(parseInt(limit)),
+        ]);
 
         res.json({
             success: true,

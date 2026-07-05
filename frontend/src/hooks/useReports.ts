@@ -27,6 +27,7 @@ export const useSalesReport = (params?: ReportParams) => {
             const { data } = await api.get(`/reports/sales${buildParams(params)}`);
             return data.data;
         },
+        staleTime: 5 * 60_000,
     });
 };
 
@@ -37,6 +38,7 @@ export const useProductReport = (params?: ReportParams) => {
             const { data } = await api.get(`/reports/products${buildParams(params)}`);
             return data.data;
         },
+        staleTime: 5 * 60_000,
     });
 };
 
@@ -47,6 +49,7 @@ export const useCustomerReport = (params?: ReportParams) => {
             const { data } = await api.get(`/reports/customers${buildParams(params)}`);
             return data.data;
         },
+        staleTime: 5 * 60_000,
     });
 };
 
@@ -66,7 +69,9 @@ export const exportReportUrl = (type: 'sales' | 'products' | 'customers', params
 
 export const downloadReportCSV = async (type: 'sales' | 'products' | 'customers', params?: ReportParams) => {
     try {
-        const response = await api.get(`/reports/export/csv${buildParams(params)}&type=${type}`, {
+        const queryStr = buildParams(params);
+        const sep = queryStr ? '&' : '?';
+        const response = await api.get(`/reports/export/csv${queryStr}${sep}type=${type}`, {
             responseType: 'blob' // Important
         });
         

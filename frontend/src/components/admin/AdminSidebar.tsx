@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,7 +25,7 @@ import {
 import { cn, getImageUrl } from '@/lib/utils';
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { useOrders } from '@/hooks/useOrders';
+import { useOrders, Order } from '@/hooks/useOrders';
 import { useLowStockAlerts } from '@/hooks/useInventory';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -42,15 +43,45 @@ type MenuGroup = {
     }[];
 };
 
+const MENU_GROUPS: Record<string, MenuGroup> = {
+    'overview': {
+        title: 'ภาพรวม',
+        items: [
+            { href: '/admin/dashboard', label: 'ภาพรวมระบบ', icon: LayoutDashboard },
+            { href: '/admin/reports', label: 'รายงาน', icon: FileText },
+            { href: '/admin/users', label: 'ผู้ใช้งาน', icon: User },
+            { href: '/admin/customers', label: 'ลูกค้า', icon: Users },
+            { href: '/admin/backups', label: 'สำรองข้อมูล', icon: Database },
+            { href: '/admin/settings', label: 'ตั้งค่าระบบ', icon: Settings },
+        ]
+    },
+    'management': {
+        title: 'การจัดการ',
+        items: [
+            { href: '/admin/products', label: 'สินค้า', icon: Package },
+            { href: '/admin/categories', label: 'หมวดหมู่', icon: Folder },
+            { href: '/admin/inventory', label: 'คลังสินค้า', icon: Warehouse },
+            { href: '/admin/orders', label: 'คำสั่งซื้อ', icon: ShoppingCart },
+            { href: '/admin/shipping', label: 'การจัดส่ง', icon: Truck },
+        ]
+    },
+    'pos': {
+        title: 'จุดขายหน้าร้าน',
+        items: [
+            { href: '/admin/pos', label: 'ระบบขายหน้าร้าน', icon: Store },
+            { href: '/admin/pos/history', label: 'ประวัติการขาย', icon: History },
+        ]
+    }
+};
+
 export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
     const pathname = usePathname();
     const router = useRouter();
     const user = useAuthStore((state) => state.user);
     const logoutUser = useAuthStore((state) => state.logoutUser);
 
-    // Fetch orders for notification badge
-    const { data: orders } = useOrders({ refetchInterval: 30000 });
-    const pendingOrdersCount = orders?.filter(o => o.orderStatus === 'pending').length || 0;
+    const { data: allOrders } = useOrders({ refetchInterval: 30000 });
+    const pendingOrdersCount = (allOrders as Order[] | undefined)?.filter(o => o.orderStatus === 'pending').length ?? 0;
 
     // Low stock badge
     const { data: lowStockData } = useLowStockAlerts();
@@ -93,37 +124,6 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
             : "text-gray-500 group-hover:text-primary"
     );
 
-    const menuGroups: Record<string, MenuGroup> = {
-        'overview': {
-            title: 'ภาพรวม',
-            items: [
-                { href: '/admin/dashboard', label: 'ภาพรวมระบบ', icon: LayoutDashboard },
-                { href: '/admin/reports', label: 'รายงาน', icon: FileText },
-                { href: '/admin/users', label: 'ผู้ใช้งาน', icon: User },
-                { href: '/admin/customers', label: 'ลูกค้า', icon: Users },
-                { href: '/admin/backups', label: 'สำรองข้อมูล', icon: Database },
-                { href: '/admin/settings', label: 'ตั้งค่าระบบ', icon: Settings },
-            ]
-        },
-        'management': {
-            title: 'การจัดการ',
-            items: [
-                { href: '/admin/products', label: 'สินค้า', icon: Package },
-                { href: '/admin/categories', label: 'หมวดหมู่', icon: Folder },
-                { href: '/admin/inventory', label: 'คลังสินค้า', icon: Warehouse },
-                { href: '/admin/orders', label: 'คำสั่งซื้อ', icon: ShoppingCart },
-                { href: '/admin/shipping', label: 'การจัดส่ง', icon: Truck },
-            ]
-        },
-        'pos': {
-            title: 'จุดขายหน้าร้าน',
-            items: [
-                { href: '/admin/pos', label: 'ระบบขายหน้าร้าน', icon: Store },
-                { href: '/admin/pos/history', label: 'ประวัติการขาย', icon: History },
-            ]
-        }
-    };
-
     return (
         <>
             {/* Overlay for mobile */}
@@ -146,8 +146,8 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                 {/* Header */}
                 <div className="p-6 pb-4 flex items-center justify-between xl:justify-start">
                     <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 bg-gradient-to-br from-primary to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
-                            <Store className="h-6 w-6 text-white" />
+                        <div className="h-10 px-2.5 bg-gradient-to-br from-primary to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
+                            <span className="font-black text-[10px] italic tracking-tight leading-none text-white">VESPA</span>
                         </div>
                         <div>
                             <h1 className="text-xl font-black tracking-tight text-white italic">VESPA<span className="text-primary not-italic">ADMIN</span></h1>
@@ -168,12 +168,14 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                 <div className="px-4 mb-2">
                     {user && (
                         <div className="p-3 bg-white/5 rounded-2xl border border-white/5 flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-gray-800 to-gray-700 flex items-center justify-center text-lg font-bold text-white shadow-inner overflow-hidden shrink-0 border border-white/10">
+                                                <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-gray-800 to-gray-700 flex items-center justify-center text-lg font-bold text-white shadow-inner overflow-hidden shrink-0 border border-white/10 relative">
                                 {user.profilePicture ? (
-                                    <img
+                                    <Image
                                         src={getImageUrl(user.profilePicture)}
                                         alt={user.username}
-                                        className="h-full w-full object-cover"
+                                        fill
+                                        className="object-cover"
+                                        sizes="40px"
                                     />
                                 ) : (
                                     user.username.charAt(0).toUpperCase()
@@ -193,7 +195,7 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                 {/* Scrollable Content */}
                 <div className="flex-1 overflow-y-auto py-2 px-4 space-y-1 dark-scrollbar">
                     {/* Render Menu Groups */}
-                    {Object.entries(menuGroups).map(([key, group]) => (
+                    {Object.entries(MENU_GROUPS).map(([key, group]) => (
                         <div key={key} className="mb-4">
                             <button
                                 onClick={() => toggleGroup(key)}

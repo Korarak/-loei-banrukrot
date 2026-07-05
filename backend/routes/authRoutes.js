@@ -30,11 +30,18 @@ router.post('/login', validateRequest(schemas.loginSchema), authController.login
 router.post('/register-customer', validateRequest(schemas.createCustomerSchema), authController.registerCustomer);
 router.post('/login-customer', validateRequest(schemas.loginSchema), authController.loginCustomer);
 
-// Google Auth
-router.get('/google', require('passport').authenticate('google', { scope: ['profile', 'email'] }));
-router.get('/google/callback',
-    require('passport').authenticate('google', { failureRedirect: '/login?error=failed', session: false }),
-    authController.googleCallback
-);
+// Google Auth — only registered when credentials are configured
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    const passport = require('passport');
+    router.get('/google', authLimiter, passport.authenticate('google', { scope: ['profile', 'email'] }));
+    router.get('/google/callback',
+        authLimiter,
+        passport.authenticate('google', { failureRedirect: '/login?error=failed', session: false }),
+        authController.googleCallback
+    );
+} else {
+    router.get('/google', (req, res) => res.status(503).json({ success: false, message: 'Google OAuth is not configured' }));
+    router.get('/google/callback', (req, res) => res.status(503).json({ success: false, message: 'Google OAuth is not configured' }));
+}
 
 module.exports = router;

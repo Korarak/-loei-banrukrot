@@ -10,7 +10,7 @@ const {
 } = require('../controllers/dashboardController');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 
-router.use(authenticateToken());
+router.use(authenticateToken('user'));
 router.use(requireRole('owner', 'admin', 'staff'));
 
 router.get('/summary', getDashboardSummary);

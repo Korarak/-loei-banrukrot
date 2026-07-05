@@ -250,7 +250,6 @@ export default function ImageManager({ productId, images: initialImages }: Image
                                     fill
                                     className="object-cover"
                                     sizes="(max-width: 768px) 50vw, 25vw"
-                                    unoptimized
                                 />
                                 {image.isPrimary && (
                                     <div className="absolute top-2 left-2 bg-black text-white px-2 py-1 rounded-md text-[10px] font-bold flex items-center gap-1 shadow-sm">

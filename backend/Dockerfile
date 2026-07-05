@@ -23,12 +23,17 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Copy necessary files from deps
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+# Copy only what the backend needs — not frontend source files
+COPY --from=deps --chown=node:node /app/node_modules ./node_modules
+COPY --chown=node:node package.json package-lock.json ./
+COPY --chown=node:node backend/ ./backend/
 
 WORKDIR /app/backend
 
+# Run as non-root. The uploads bind mount on the host must be writable by
+# uid 1000 (chown -R 1000:1000 ./backend/public/uploads on the VPS).
+USER node
+
 EXPOSE 8080
 
-CMD ["npm", "start"]
+CMD ["node", "server.js"]

@@ -4,8 +4,7 @@
 import BottomNav from '@/components/layout/BottomNav';
 import Footer from '@/components/layout/Footer';
 import Link from 'next/link';
-import Image from 'next/image';
-import { ShoppingCart, User, LogOut, Wrench, Package, Heart, Menu, AlertCircle } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Package, Heart, Menu, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useCart } from '@/hooks/useCart';
 import { useCustomerOrders } from '@/hooks/useOrders';
@@ -20,7 +19,8 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
+import Image from 'next/image';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -43,15 +43,22 @@ export default function CustomerLayout({
     const logoutCustomer = useAuthStore((state) => state.logoutCustomer);
     const isHydrated = useAuthStore((state) => state.isHydrated);
     const [mounted, setMounted] = useState(false);
-    const [scrolled, setScrolled] = useState(false);
-    const [scrollProgress, setScrollProgress] = useState(0);
+    const [scroll, setScroll] = useState({ scrolled: false, progress: 0 });
+    const scrolled = scroll.scrolled;
+    const scrollProgress = scroll.progress;
 
     const { data: cart } = useCart();
     const { data: orders } = useCustomerOrders();
-    const totalItems = (cart?.items || []).reduce((sum, item) => sum + item.quantity, 0);
-    const pendingSlipCount = customer
-        ? (orders || []).filter(o => o.orderStatus === 'pending' && o.paymentMethod !== 'Cash' && !o.hasSlip).length
-        : 0;
+    const totalItems = useMemo(
+        () => (cart?.items || []).reduce((sum, item) => sum + item.quantity, 0),
+        [cart?.items]
+    );
+    const pendingSlipCount = useMemo(
+        () => customer
+            ? (orders || []).filter(o => o.orderStatus === 'pending' && o.paymentMethod !== 'Cash' && !o.hasSlip).length
+            : 0,
+        [customer, orders]
+    );
 
     const toastShownRef = useRef(false);
     useEffect(() => {
@@ -84,11 +91,9 @@ export default function CustomerLayout({
     useEffect(() => {
         setMounted(true);
         const handleScroll = () => {
-            setScrolled(window.scrollY > 20);
-            // Calculate scroll progress
             const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
             const progress = scrollHeight > 0 ? (window.scrollY / scrollHeight) * 100 : 0;
-            setScrollProgress(Math.min(progress, 100));
+            setScroll({ scrolled: window.scrollY > 20, progress: Math.min(progress, 100) });
         };
         window.addEventListener('scroll', handleScroll, { passive: true });
         return () => window.removeEventListener('scroll', handleScroll);
@@ -121,18 +126,8 @@ export default function CustomerLayout({
                     <div className="flex justify-between h-16 items-center">
                         {/* Logo */}
                         <Link href="/" className="flex items-center gap-3 group">
-                            <div className="relative">
-                                {/* <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl group-hover:bg-primary/40 transition-all duration-500" /> */}
-                                <div className="relative h-10 w-10 overflow-hidden rounded-xl shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 logo-shimmer-container gold-glow-hover">
-                                    <Image
-                                        src="/logo.png"
-                                        alt={siteConfig.brand.name}
-                                        fill
-                                        className="object-cover"
-                                        priority
-                                    />
-                                    <div className="logo-shimmer-effect" />
-                                </div>
+                            <div className="h-10 px-2.5 rounded-xl bg-gradient-to-br from-primary to-emerald-600 flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 shrink-0">
+                                <span className="text-white font-black text-[10px] italic tracking-tight leading-none">VESPA</span>
                             </div>
                             <div>
                                 <div className="text-xl font-black tracking-tighter italic text-gray-900 group-hover:text-primary transition-colors">
@@ -187,12 +182,14 @@ export default function CustomerLayout({
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
                                                 <Button variant="ghost" className="gap-3 pl-1 pr-4 rounded-full hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-all h-11">
-                                                    <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden ring-2 ring-white shadow-sm">
+                                                    <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden ring-2 ring-white shadow-sm relative">
                                                         {customer.profilePicture ? (
-                                                            <img
+                                                            <Image
                                                                 src={getImageUrl(customer.profilePicture)}
                                                                 alt={customer.firstName}
-                                                                className="h-full w-full object-cover"
+                                                                fill
+                                                                className="object-cover"
+                                                                sizes="32px"
                                                             />
                                                         ) : (
                                                             <User className="h-4 w-4 text-gray-400" />
@@ -261,15 +258,10 @@ export default function CustomerLayout({
             <nav className={`sticky top-0 z-50 transition-all duration-300 md:hidden ${scrolled ? 'glass-card border-b border-gray-100 shadow-sm' : 'bg-white'}`}>
                 <div className="px-4 h-16 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-2">
-                        <div className="h-8 w-8 relative overflow-hidden rounded-lg shadow-md">
-                            <Image
-                                src="/logo.png"
-                                alt={siteConfig.brand.name}
-                                fill
-                                className="object-cover"
-                            />
+                        <div className="h-8 px-2 rounded-lg bg-gradient-to-br from-primary to-emerald-600 flex items-center justify-center shadow-md shrink-0">
+                            <span className="text-white font-black text-[9px] italic tracking-tight leading-none">VESPA</span>
                         </div>
-                        <span className="font-black italic text-lg text-gray-900 tracking-tight">{siteConfig.brand.englishName}</span>
+                        <span className="font-black italic text-lg text-gray-900 tracking-tight">{siteConfig.brand.name}</span>
                     </Link>
 
                     <div className="flex items-center gap-2">
@@ -284,9 +276,9 @@ export default function CustomerLayout({
                         {mounted && isHydrated ? (
                             customer ? (
                                 <div className="flex items-center gap-1">
-                                    <Link href="/profile" className="h-8 w-8 rounded-full bg-gray-100 overflow-hidden border border-gray-200">
+                                    <Link href="/profile" className="h-8 w-8 rounded-full bg-gray-100 overflow-hidden border border-gray-200 relative block">
                                         {customer.profilePicture ? (
-                                            <img src={getImageUrl(customer.profilePicture)} alt="Profile" className="h-full w-full object-cover" />
+                                            <Image src={getImageUrl(customer.profilePicture)} alt="Profile" fill className="object-cover" sizes="32px" />
                                         ) : (
                                             <User className="h-full w-full p-1.5 text-gray-400" />
                                         )}
@@ -294,7 +286,7 @@ export default function CustomerLayout({
                                     <button
                                         onClick={handleLogout}
                                         className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors active:scale-95"
-                                        aria-label="Logout"
+                                        aria-label="ออกจากระบบ"
                                     >
                                         <LogOut className="h-5 w-5" />
                                     </button>

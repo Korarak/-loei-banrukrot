@@ -8,25 +8,28 @@ import { getImageUrl } from '@/lib/utils';
 import { Heart, ShoppingCart } from 'lucide-react';
 import { useWishlistStore } from '@/stores/useWishlistStore';
 import { motion, useMotionValue, useSpring, useTransform, useReducedMotion } from 'framer-motion';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useCallback, useMemo, useEffect } from 'react';
 
 interface ProductCardProps {
     product: any;
 }
+
+const CONFETTI_COLORS = ['#FFC107', '#FF5722', '#4CAF50', '#2196F3', '#E91E63'];
 
 export default function ProductCard({ product }: ProductCardProps) {
     const addToCart = useAddToCart();
     const customer = useAuthStore((state) => state.customer);
     const { addToWishlist, removeFromWishlist } = useWishlistStore();
     const inWishlist = useWishlistStore((state) => state.items.some((item) => item._id === product._id));
-    const [mounted, setMounted] = useState(false);
     const prefersReducedMotion = useReducedMotion();
+    // Wishlist store is persisted in localStorage — server HTML always renders
+    // "not in wishlist", so gate on mount to avoid a hydration mismatch.
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => setMounted(true), []);
+    const showInWishlist = mounted && inWishlist;
+    const [showConfetti, setShowConfetti] = useState(false);
+    const [confettiParticles, setConfettiParticles] = useState<{ x: number; y: number; rotate: number; color: string }[]>([]);
 
-    useEffect(() => {
-        setMounted(true);
-    }, []);
-
-    // 3D Motion Values — disabled for users who prefer reduced motion
     const ref = useRef<HTMLDivElement>(null);
     const x = useMotionValue(0);
     const y = useMotionValue(0);
@@ -35,80 +38,81 @@ export default function ProductCard({ product }: ProductCardProps) {
     const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ['6deg', '-6deg']);
     const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ['-6deg', '6deg']);
 
-    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         if (!ref.current || prefersReducedMotion) return;
         const rect = ref.current.getBoundingClientRect();
         x.set((e.clientX - rect.left) / rect.width - 0.5);
         y.set((e.clientY - rect.top) / rect.height - 0.5);
-    };
-    const handleMouseLeave = () => { x.set(0); y.set(0); };
+    }, [prefersReducedMotion, x, y]);
+
+    const handleMouseLeave = useCallback(() => { x.set(0); y.set(0); }, [x, y]);
 
     const primaryImage = product.images?.find((img: any) => img.isPrimary) || product.images?.[0];
-    const prices = product.variants?.map((v: any) => v.price) || [];
-    const minPrice = Math.min(...prices);
-    const maxPrice = Math.max(...prices);
-    const priceDisplay = prices.length > 0
-        ? minPrice === maxPrice
-            ? `฿${minPrice.toLocaleString()}`
-            : `฿${minPrice.toLocaleString()} – ฿${maxPrice.toLocaleString()}`
-        : 'N/A';
 
-    const isOutOfStock = product.variants?.every((v: any) => v.stockAvailable <= 0);
-    const firstAvailableVariant = product.variants?.find((v: any) => v.stockAvailable > 0);
-    const defaultVariant = product.variants?.[0];
+    const { priceDisplay, isOutOfStock, firstAvailableVariant, defaultVariant } = useMemo(() => {
+        const prices = product.variants?.map((v: any) => v.price) || [];
+        const minPrice = prices.length ? Math.min(...prices) : 0;
+        const maxPrice = prices.length ? Math.max(...prices) : 0;
+        return {
+            priceDisplay: prices.length === 0
+                ? 'ไม่ระบุราคา'
+                : minPrice === maxPrice
+                    ? `฿${minPrice.toLocaleString()}`
+                    : `฿${minPrice.toLocaleString()} – ฿${maxPrice.toLocaleString()}`,
+            isOutOfStock: product.variants?.every((v: any) => v.stockAvailable <= 0),
+            firstAvailableVariant: product.variants?.find((v: any) => v.stockAvailable > 0),
+            defaultVariant: product.variants?.[0],
+            minPrice,
+        };
+    }, [product.variants]);
 
-    const handleWishlistToggle = () => {
+    const handleWishlistToggle = useCallback(() => {
         if (inWishlist) {
             removeFromWishlist(product._id);
             toast.success('ลบออกจากรายการโปรดแล้ว');
         } else {
+            const prices = product.variants?.map((v: any) => v.price) || [];
             addToWishlist({
                 _id: product._id,
                 productName: product.productName,
                 imageUrl: primaryImage?.imagePath,
-                price: minPrice,
+                price: prices.length ? Math.min(...prices) : 0,
                 slug: product._id,
             });
             toast.success('เพิ่มในรายการโปรดแล้ว');
         }
-    };
+    }, [inWishlist, product, primaryImage, addToWishlist, removeFromWishlist]);
 
-    const [showConfetti, setShowConfetti] = useState(false);
-    const [confettiParticles, setConfettiParticles] = useState<any[]>([]);
-
-    const handleAddToCart = async (e: React.MouseEvent) => {
+    const handleAddToCart = useCallback(async (e: React.MouseEvent) => {
         e.preventDefault();
         const targetVariant = firstAvailableVariant || defaultVariant;
         if (!targetVariant) return;
-
-        const particles = [...Array(12)].map(() => ({
-            x: (Math.random() - 0.5) * 200,
-            y: (Math.random() - 0.5) * 200,
-            rotate: Math.random() * 360,
-            color: ['#FFC107', '#FF5722', '#4CAF50', '#2196F3', '#E91E63'][Math.floor(Math.random() * 5)],
-        }));
-        setConfettiParticles(particles);
-        setShowConfetti(true);
-        setTimeout(() => setShowConfetti(false), 1000);
-
+        if (!prefersReducedMotion) {
+            const particles = Array.from({ length: 8 }, () => ({
+                x: (Math.random() - 0.5) * 160,
+                y: (Math.random() - 0.5) * 160,
+                rotate: Math.random() * 360,
+                color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+            }));
+            setConfettiParticles(particles);
+            setShowConfetti(true);
+            setTimeout(() => setShowConfetti(false), 800);
+        }
         try {
             await addToCart.mutateAsync({ productId: product._id, variantId: targetVariant._id, quantity: 1 });
             toast.success('เพิ่มลงตะกร้าเรียบร้อย', { description: product.productName, id: 'add-to-cart-success' });
         } catch (error: any) {
             toast.error(error?.response?.data?.message || 'ไม่สามารถเพิ่มสินค้าได้', { id: 'add-to-cart-error' });
         }
-    };
+    }, [firstAvailableVariant, defaultVariant, prefersReducedMotion, addToCart, product]);
 
     return (
-        // Outer plain div owns relative + group so the wishlist button sits outside the 3D layer.
-        // This prevents preserve-3d from breaking z-index / pointer-events on desktop.
         <div
             ref={ref}
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
             className="group relative"
         >
-            {/* 3D tilt layer — only wraps the card, not the wishlist button */}
             <motion.div
                 whileHover={prefersReducedMotion ? {} : { y: -6 }}
                 transition={{ duration: 0.2 }}
@@ -126,19 +130,17 @@ export default function ProductCard({ product }: ProductCardProps) {
                                     alt={product.productName}
                                     fill
                                     className="object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
-                                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                                    unoptimized
+                                    sizes="(max-width: 640px) 240px, (max-width: 1024px) 300px, 25vw"
+                                    loading="lazy"
                                 />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-gray-300 bg-gradient-to-br from-gray-50 to-gray-100">
-                                    <span className="text-xs font-semibold uppercase tracking-widest">No Image</span>
+                                    <span className="text-xs font-semibold tracking-widest">ไม่มีรูปภาพ</span>
                                 </div>
                             )}
 
-                            {/* Gradient overlay */}
                             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-                            {/* Out of stock badge */}
                             {isOutOfStock && (
                                 <div className="absolute top-3 left-3 z-20">
                                     <span className="bg-red-500 text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full shadow">
@@ -147,8 +149,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                                 </div>
                             )}
 
-                            {/* Add to cart — slides up on hover */}
-                            <div className="absolute inset-x-3 bottom-3 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-out z-20">
+                            <div className="absolute inset-x-3 bottom-3 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:translate-y-0 group-focus-within:opacity-100 transition-all duration-300 ease-out z-20">
                                 <Button
                                     className="w-full bg-white/95 text-gray-900 hover:bg-white shadow-lg font-bold rounded-xl h-10 text-xs uppercase tracking-wider backdrop-blur-sm border-0"
                                     onClick={handleAddToCart}
@@ -156,7 +157,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                                     aria-label={isOutOfStock ? `${product.productName} — สินค้าหมด` : `เพิ่ม ${product.productName} ลงตะกร้า`}
                                 >
                                     <ShoppingCart className="h-3.5 w-3.5 mr-1.5" />
-                                    {addToCart.isPending ? '...' : isOutOfStock ? 'สินค้าหมด' : 'ใส่ตะกร้า'}
+                                    {addToCart.isPending ? 'กำลังเพิ่ม...' : isOutOfStock ? 'สินค้าหมด' : 'ใส่ตะกร้า'}
                                 </Button>
                             </div>
                         </div>
@@ -171,8 +172,8 @@ export default function ProductCard({ product }: ProductCardProps) {
                                 ) : <span />}
                                 {!isOutOfStock && (
                                     <span className="flex items-center gap-1 text-[10px] font-semibold text-emerald-500">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block" />
-                                        In Stock
+                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
+                                        มีสินค้า
                                     </span>
                                 )}
                             </div>
@@ -196,22 +197,21 @@ export default function ProductCard({ product }: ProductCardProps) {
                 </Link>
             </motion.div>
 
-            {/* Wishlist button — lives outside the 3D motion.div so preserve-3d
-                cannot interfere with z-index or pointer events on desktop */}
+            {/* Wishlist button */}
             <motion.button
                 whileTap={{ scale: 0.8 }}
                 onClick={handleWishlistToggle}
-                aria-label={(inWishlist && mounted) ? 'ลบออกจากรายการโปรด' : 'เพิ่มในรายการโปรด'}
+                aria-label={showInWishlist ? 'ลบออกจากรายการโปรด' : 'เพิ่มในรายการโปรด'}
                 className={`absolute top-3 right-3 z-30 p-2 rounded-full backdrop-blur-sm shadow transition-all duration-200 ${
-                    (inWishlist && mounted)
+                    showInWishlist
                         ? 'bg-red-500 text-white'
                         : 'bg-white/80 text-gray-400 hover:bg-white hover:text-red-500'
                 }`}
             >
-                <Heart className={`h-4 w-4 ${(inWishlist && mounted) ? 'fill-current' : ''}`} />
+                <Heart className={`h-4 w-4 ${showInWishlist ? 'fill-current' : ''}`} />
             </motion.button>
 
-            {/* Confetti */}
+            {/* Confetti — only 8 particles, only when motion is OK */}
             {showConfetti && (
                 <div className="absolute inset-0 z-50 pointer-events-none flex items-center justify-center">
                     {confettiParticles.map((p, i) => (
@@ -219,7 +219,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                             key={i}
                             initial={{ x: 0, y: 0, scale: 0.5, opacity: 1 }}
                             animate={{ x: p.x, y: p.y, rotate: p.rotate, scale: 0, opacity: 0 }}
-                            transition={{ duration: 0.8, ease: 'easeOut' }}
+                            transition={{ duration: 0.7, ease: 'easeOut' }}
                             className="absolute w-2 h-2 rounded-full"
                             style={{ backgroundColor: p.color }}
                         />

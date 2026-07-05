@@ -77,7 +77,6 @@ export default function ImagePreviewDialog({
                                 fill
                                 className="object-contain"
                                 priority
-                                unoptimized
                             />
                         </div>
 
@@ -122,8 +121,7 @@ export default function ImagePreviewDialog({
                                         fill
                                         className="object-cover"
                                         sizes="64px"
-                                        unoptimized
-                                    />
+                                            />
                                 </button>
                             ))}
                         </div>

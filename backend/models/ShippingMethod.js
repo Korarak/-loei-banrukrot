@@ -31,4 +31,6 @@ const shippingMethodSchema = new mongoose.Schema({
     timestamps: true
 });
 
+shippingMethodSchema.index({ isActive: 1 });
+
 module.exports = mongoose.model('ShippingMethod', shippingMethodSchema);

@@ -113,22 +113,24 @@ exports.getAllProducts = async (req, res, next) => {
                     }
                 }
             }] : []),
-            // Lookup Images
-            {
-                $lookup: {
-                    from: 'productimages',
-                    localField: '_id',
-                    foreignField: 'productId',
-                    as: 'images'
-                }
-            },
-            // Sort
+            // Sort (before pagination so we skip/limit from the right position)
             { $sort: sortStage },
-            // Facet for Pagination and Count
+            // Facet — images are fetched only for the current page
             {
                 $facet: {
                     metadata: [{ $count: "total" }],
-                    data: [{ $skip: skip }, { $limit: limitNum }]
+                    data: [
+                        { $skip: skip },
+                        { $limit: limitNum },
+                        {
+                            $lookup: {
+                                from: 'productimages',
+                                localField: '_id',
+                                foreignField: 'productId',
+                                as: 'images'
+                            }
+                        }
+                    ]
                 }
             }
         ];
@@ -207,10 +209,16 @@ exports.getProductById = async (req, res, next) => {
 exports.getPopularProducts = async (req, res, next) => {
     try {
         const limit = Math.min(parseInt(req.query.limit) || 8, 20);
-        const { OrderDetail } = require('../models');
+        const { OrderDetail, Order } = require('../models');
+
+        // Only count sales from the last 90 days to keep rankings fresh
+        const since = new Date();
+        since.setDate(since.getDate() - 90);
+        const recentOrderIds = await Order.distinct('_id', { orderDate: { $gte: since } });
 
         // Aggregate: variant sales → product sales
         const topProductIds = await OrderDetail.aggregate([
+            { $match: { orderId: { $in: recentOrderIds } } },
             { $group: { _id: '$variantId', totalSold: { $sum: '$quantity' } } },
             {
                 $lookup: {
@@ -362,17 +370,30 @@ exports.updateProduct = async (req, res, next) => {
 
         // Update variants if provided
         if (variants && variants.length > 0) {
-            // Delete existing variants
-            await ProductVariant.deleteMany({ productId: req.params.id });
+            const existingVariants = await ProductVariant.find({ productId: req.params.id });
+            const existingBySku = new Map(existingVariants.map(v => [v.sku, v]));
+            const newSkus = new Set(variants.map(v => v.sku));
 
-            // Create new variants
-            const variantDocs = variants.map(v => ({
-                productId: product._id,
-                sku: v.sku,
-                price: v.price,
-                stockAvailable: v.stock // map stock to stockAvailable
-            }));
-            await ProductVariant.insertMany(variantDocs);
+            // Delete variants no longer in the list
+            const toDelete = existingVariants.filter(v => !newSkus.has(v.sku));
+            if (toDelete.length > 0) {
+                await ProductVariant.deleteMany({ _id: { $in: toDelete.map(v => v._id) } });
+            }
+
+            // Upsert each variant by SKU to preserve IDs and stock levels
+            for (const v of variants) {
+                const existing = existingBySku.get(v.sku);
+                if (existing) {
+                    await ProductVariant.findByIdAndUpdate(existing._id, { price: v.price });
+                } else {
+                    await ProductVariant.create({
+                        productId: product._id,
+                        sku: v.sku,
+                        price: v.price,
+                        stockAvailable: v.stock ?? 0,
+                    });
+                }
+            }
         }
 
         // Fetch updated variants and images

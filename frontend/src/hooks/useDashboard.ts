@@ -18,6 +18,8 @@ const buildParams = (params?: DashboardParams) => {
     return query ? `?${query}` : '';
 };
 
+const DASHBOARD_STALE = 5 * 60_000;
+
 export const useDashboardSummary = (params?: DashboardParams) => {
     return useQuery({
         queryKey: ['dashboard-summary', params?.range, params?.startDate, params?.endDate],
@@ -25,6 +27,7 @@ export const useDashboardSummary = (params?: DashboardParams) => {
             const { data } = await api.get(`/dashboard/summary${buildParams(params)}`);
             return data.data;
         },
+        staleTime: DASHBOARD_STALE,
     });
 };
 
@@ -35,6 +38,7 @@ export const useDailyRevenue = (params?: DashboardParams) => {
             const { data } = await api.get(`/dashboard/daily-revenue${buildParams(params)}`);
             return data.data;
         },
+        staleTime: DASHBOARD_STALE,
     });
 };
 
@@ -45,6 +49,7 @@ export const useRevenueComparison = (params?: DashboardParams) => {
             const { data } = await api.get(`/dashboard/revenue-comparison${buildParams(params)}`);
             return data.data;
         },
+        staleTime: DASHBOARD_STALE,
     });
 };
 
@@ -55,6 +60,7 @@ export const useHourlySales = (params?: DashboardParams) => {
             const { data } = await api.get(`/dashboard/hourly-sales${buildParams(params)}`);
             return data.data;
         },
+        staleTime: DASHBOARD_STALE,
     });
 };
 
@@ -65,6 +71,7 @@ export const useCustomerInsights = (params?: DashboardParams) => {
             const { data } = await api.get(`/dashboard/customer-insights${buildParams(params)}`);
             return data.data;
         },
+        staleTime: DASHBOARD_STALE,
     });
 };
 
@@ -75,5 +82,6 @@ export const useTopCategories = (params?: DashboardParams) => {
             const { data } = await api.get(`/dashboard/top-categories${buildParams(params)}`);
             return data.data;
         },
+        staleTime: DASHBOARD_STALE,
     });
 };

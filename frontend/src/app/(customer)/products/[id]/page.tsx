@@ -2,8 +2,8 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { useState } from 'react';
-import { Minus, Plus, ShoppingCart, X, Package, Tag, Layers, ChevronLeft, Share2, Star } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Minus, Plus, ShoppingCart, X, Package, Tag, Layers, ChevronLeft, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useProduct } from '@/hooks/useProducts';
 import { useCategories } from '@/hooks/useCategories';
@@ -28,12 +28,25 @@ export default function ProductDetailPage() {
     const [fullScreenImage, setFullScreenImage] = useState<string | null>(null);
     const [isDescriptionOpen, setIsDescriptionOpen] = useState(false);
 
+    // Escape ปิด modal ที่เปิดอยู่ (custom modal ไม่ใช่ Radix จึงต้องจัดการเอง)
+    useEffect(() => {
+        if (!fullScreenImage && !isDescriptionOpen) return;
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                setFullScreenImage(null);
+                setIsDescriptionOpen(false);
+            }
+        };
+        window.addEventListener('keydown', onKeyDown);
+        return () => window.removeEventListener('keydown', onKeyDown);
+    }, [fullScreenImage, isDescriptionOpen]);
+
     if (isProductLoading) {
         return (
             <div className="flex justify-center items-center h-[70vh]">
                 <div className="flex flex-col items-center gap-4">
                     <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
-                    <p className="text-gray-400 animate-pulse font-medium">Loading Product...</p>
+                    <p className="text-gray-400 animate-pulse font-medium">กำลังโหลดสินค้า...</p>
                 </div>
             </div>
         );
@@ -66,7 +79,9 @@ export default function ProductDetailPage() {
         const parts = [v.option1Value, v.option2Value].filter(Boolean);
         return parts.length > 0 ? parts.join(' / ') : v.sku;
     };
-    const isVariantOOS = (v: any) => (v.stock ?? v.stockAvailable ?? 0) <= 0;
+    const getVariantStock = (v: any) => v?.stock ?? v?.stockAvailable ?? 0;
+    const isVariantOOS = (v: any) => getVariantStock(v) <= 0;
+    const selectedStock = getVariantStock(selectedVariant);
 
     const handleAddToCart = async () => {
         if (!selectedVariant) return;
@@ -83,13 +98,14 @@ export default function ProductDetailPage() {
                 variantId: selectedVariant._id,
                 quantity
             });
-            toast.success('Added to Cart!', {
+            toast.success('เพิ่มลงรถเข็นแล้ว!', {
                 description: `${product.productName} x${quantity}`,
                 id: 'add-to-cart-success',
                 className: 'bg-green-50 border-green-200'
             });
         } catch (error: any) {
-            const message = error?.response?.data?.message || 'Failed to add to cart';
+            const message = error?.response?.data?.message || 'ไม่สามารถเพิ่มสินค้าลงรถเข็นได้';
+            toast.error(message);
         }
     };
 
@@ -156,11 +172,10 @@ export default function ProductDetailPage() {
                                 className="object-contain p-4 transition-transform duration-500 group-hover:scale-105"
                                 sizes="(max-width: 768px) 100vw, 50vw"
                                 priority
-                                unoptimized
                             />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-300">
-                                <span className="text-sm font-bold uppercase tracking-widest text-gray-400">No Image Available</span>
+                                <span className="text-sm font-bold tracking-widest text-gray-400">ไม่มีรูปภาพ</span>
                             </div>
                         )}
                         {shippingSizeLabel && (
@@ -181,7 +196,6 @@ export default function ProductDetailPage() {
                                             fill
                                             className="object-contain p-1"
                                             sizes="96px"
-                                            unoptimized
                                         />
                                     </div>
                                 </div>
@@ -198,7 +212,6 @@ export default function ProductDetailPage() {
                                             fill
                                             className="object-contain p-1"
                                             sizes="96px"
-                                            unoptimized
                                         />
                                     </div>
                                 </button>
@@ -227,9 +240,9 @@ export default function ProductDetailPage() {
                             <div className="text-4xl md:text-5xl font-black text-gray-900 font-kanit">
                                 ฿{selectedVariant?.price.toLocaleString()}
                             </div>
-                            {(selectedVariant?.stock ?? 0) > 0 ? (
+                            {selectedStock > 0 ? (
                                 <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md uppercase tracking-wider">
-                                    มีสินค้า {selectedVariant?.stock} ชิ้น
+                                    มีสินค้า {selectedStock} ชิ้น
                                 </span>
                             ) : (
                                 <span className="text-xs font-bold text-red-500 bg-red-50 px-2.5 py-1 rounded-md uppercase tracking-wider">
@@ -266,8 +279,14 @@ export default function ProductDetailPage() {
                                     return (
                                         <button
                                             key={variant._id}
-                                            onClick={() => !oos && setSelectedVariantId(variant._id)}
+                                            onClick={() => {
+                                                if (oos) return;
+                                                setSelectedVariantId(variant._id);
+                                                // จำนวนที่เลือกไว้ต้องไม่เกินสต็อกของ variant ใหม่
+                                                setQuantity(q => Math.min(q, variant.stock ?? variant.stockAvailable ?? 1));
+                                            }}
                                             disabled={oos}
+                                            aria-pressed={selectedVariant?._id === variant._id}
                                             className={`px-5 py-2.5 rounded-full border-2 text-xs font-bold transition-all ${selectedVariant?._id === variant._id
                                                 ? 'border-gray-900 bg-gray-900 text-white shadow-md'
                                                 : oos
@@ -291,18 +310,20 @@ export default function ProductDetailPage() {
                                 <Button
                                     variant="ghost"
                                     size="icon"
+                                    aria-label="ลดจำนวน"
                                     className="h-10 w-10 rounded-full hover:bg-white hover:shadow-sm"
                                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                                 >
                                     <Minus className="h-4 w-4" />
                                 </Button>
-                                <span className="w-10 text-center font-bold text-gray-900">{quantity}</span>
+                                <span className="w-10 text-center font-bold text-gray-900" aria-live="polite">{quantity}</span>
                                 <Button
                                     variant="ghost"
                                     size="icon"
+                                    aria-label="เพิ่มจำนวน"
                                     className="h-10 w-10 rounded-full hover:bg-white hover:shadow-sm disabled:opacity-30"
-                                    onClick={() => setQuantity(Math.min(selectedVariant?.stock || 1, quantity + 1))}
-                                    disabled={quantity >= (selectedVariant?.stock || 1)}
+                                    onClick={() => setQuantity(Math.min(selectedStock || 1, quantity + 1))}
+                                    disabled={quantity >= (selectedStock || 1)}
                                 >
                                     <Plus className="h-4 w-4" />
                                 </Button>
@@ -311,7 +332,7 @@ export default function ProductDetailPage() {
                                 size="lg"
                                 className="flex-1 h-14 rounded-full text-lg font-black bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20 transition-colors active:scale-[0.98]"
                                 onClick={handleAddToCart}
-                                disabled={!selectedVariant || (selectedVariant?.stock ?? 0) <= 0 || addToCart.isPending}
+                                disabled={!selectedVariant || selectedStock <= 0 || addToCart.isPending}
                             >
                                 <ShoppingCart className="mr-2 h-5 w-5" />
                                 {addToCart.isPending ? 'กำลังเพิ่ม...' : 'เพิ่มลงรถเข็น'}
@@ -374,18 +395,20 @@ export default function ProductDetailPage() {
                             <Button
                                 variant="ghost"
                                 size="icon"
+                                aria-label="ลดจำนวน"
                                 className="h-10 w-10 rounded-xl"
                                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
                             >
                                 <Minus className="h-4 w-4" />
                             </Button>
-                            <span className="w-8 text-center font-bold text-gray-900">{quantity}</span>
+                            <span className="w-8 text-center font-bold text-gray-900" aria-live="polite">{quantity}</span>
                             <Button
                                 variant="ghost"
                                 size="icon"
+                                aria-label="เพิ่มจำนวน"
                                 className="h-10 w-10 rounded-xl disabled:opacity-30"
-                                onClick={() => setQuantity(Math.min(selectedVariant?.stock || 1, quantity + 1))}
-                                disabled={quantity >= (selectedVariant?.stock || 1)}
+                                onClick={() => setQuantity(Math.min(selectedStock || 1, quantity + 1))}
+                                disabled={quantity >= (selectedStock || 1)}
                             >
                                 <Plus className="h-4 w-4" />
                             </Button>
@@ -393,7 +416,7 @@ export default function ProductDetailPage() {
                         <Button
                             className="flex-1 h-12 rounded-2xl font-black text-sm shadow-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20 active:scale-95 transition-transform"
                             onClick={handleAddToCart}
-                            disabled={!selectedVariant || (selectedVariant?.stock ?? 0) <= 0 || addToCart.isPending}
+                            disabled={!selectedVariant || selectedStock <= 0 || addToCart.isPending}
                         >
                             {addToCart.isPending ? 'กำลังเพิ่ม...' : 'เพิ่มลงรถเข็น'}
                         </Button>
@@ -409,10 +432,14 @@ export default function ProductDetailPage() {
                             exit={{ opacity: 0 }}
                             className="fixed inset-0 z-[200] bg-white/95 flex items-center justify-center p-4 backdrop-blur-md"
                             onClick={() => setFullScreenImage(null)}
+                            role="dialog"
+                            aria-modal="true"
+                            aria-label="ดูรูปสินค้าแบบเต็มจอ"
                         >
                             <button
                                 className="absolute top-6 right-6 text-gray-900/50 hover:text-gray-900 transition-colors bg-gray-100 p-3 rounded-full z-10"
                                 onClick={() => setFullScreenImage(null)}
+                                aria-label="ปิดรูปเต็มจอ"
                             >
                                 <X className="h-6 w-6" />
                             </button>
@@ -424,7 +451,6 @@ export default function ProductDetailPage() {
                                     className="object-contain"
                                     sizes="100vw"
                                     priority
-                                    unoptimized
                                 />
                             </div>
                         </motion.div>
@@ -439,6 +465,9 @@ export default function ProductDetailPage() {
                             exit={{ opacity: 0 }}
                             className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-md flex items-center justify-center p-4"
                             onClick={() => setIsDescriptionOpen(false)}
+                            role="dialog"
+                            aria-modal="true"
+                            aria-label="รายละเอียดสินค้าทั้งหมด"
                         >
                             <motion.div
                                 initial={{ opacity: 0, y: 24 }}
@@ -449,7 +478,7 @@ export default function ProductDetailPage() {
                             >
                                 <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
                                     <h3 className="text-lg font-black uppercase tracking-widest text-gray-900">รายละเอียดสินค้า</h3>
-                                    <Button variant="ghost" size="icon" className="rounded-full" onClick={() => setIsDescriptionOpen(false)}>
+                                    <Button variant="ghost" size="icon" className="rounded-full" onClick={() => setIsDescriptionOpen(false)} aria-label="ปิดรายละเอียดสินค้า">
                                         <X className="h-5 w-5" />
                                     </Button>
                                 </div>

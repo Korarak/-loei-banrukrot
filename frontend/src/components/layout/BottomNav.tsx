@@ -55,7 +55,7 @@ export default function BottomNav() {
     if (isProductPage) return null;
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-[60] bg-white/90 backdrop-blur-lg border-t border-gray-200 md:hidden pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <nav aria-label="เมนูหลัก" className="fixed bottom-0 left-0 right-0 z-[60] bg-white/90 backdrop-blur-lg border-t border-gray-200 md:hidden pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
             <div className="flex justify-around items-center h-16">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
@@ -68,9 +68,10 @@ export default function BottomNav() {
                             className={cn(
                                 "flex flex-col items-center justify-center w-full h-full space-y-1",
                                 isActive
-                                    ? "text-green-600"
+                                    ? "text-primary"
                                     : "text-gray-500 hover:text-gray-900"
                             )}
+                            aria-current={isActive ? 'page' : undefined}
                         >
                             <div className="relative">
                                 <Icon className={cn("h-6 w-6", isActive && "fill-current")} />
@@ -85,6 +86,6 @@ export default function BottomNav() {
                     );
                 })}
             </div>
-        </div>
+        </nav>
     );
 }

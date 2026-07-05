@@ -34,6 +34,7 @@ export default function UsersPage() {
             const res = await api.get('/users');
             return res.data.data;
         },
+        staleTime: 60_000,
     });
 
     // Delete User Mutation
@@ -117,7 +118,7 @@ export default function UsersPage() {
                             ) : isError ? (
                                 <TableRow>
                                     <TableCell colSpan={5} className="h-24 text-center text-red-500">
-                                        ล้มเหลวในการโหลดข้อมูลผู้ใช้งาน. {(error as any)?.response?.data?.message || 'กรุณาลองใหม่อีกครั้ง'}
+                                        โหลดข้อมูลผู้ใช้งานไม่สำเร็จ — {(error as any)?.response?.data?.message || 'กรุณาลองใหม่อีกครั้ง'}
                                     </TableCell>
                                 </TableRow>
                             ) : filteredUsers?.length === 0 ? (
@@ -158,6 +159,7 @@ export default function UsersPage() {
                                                     size="icon"
                                                     className="h-8 w-8 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700"
                                                     onClick={() => handleEdit(user)}
+                                                    aria-label={`แก้ไขผู้ใช้ ${user.username}`}
                                                 >
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
@@ -166,6 +168,7 @@ export default function UsersPage() {
                                                     size="icon"
                                                     className="h-8 w-8 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700"
                                                     onClick={() => setDeleteId(user._id)}
+                                                    aria-label={`ลบผู้ใช้ ${user.username}`}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>

@@ -56,7 +56,8 @@ export default function LoginPage() {
             const response = await api.post('/auth/login', values);
 
             if (response.data.success) {
-                loginUser(response.data.data, response.data.data.token);
+                const { token, ...userInfo } = response.data.data;
+                loginUser(userInfo, token);
                 
                 // Clear any cached data to ensure queries re-run with new token
                 queryClient.clear();
@@ -73,28 +74,33 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="space-y-6">
-            <div className="space-y-2 text-center">
-                <h1 className="text-3xl font-bold">เข้าสู่ระบบ (ผู้ดูแลระบบ)</h1>
-                <p className="text-gray-500">กรอกข้อมูลของคุณเพื่อเข้าสู่ระบบส่วนจัดการส่วนหลัง</p>
+        <div className="space-y-8">
+            <div className="space-y-3">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary font-black text-[10px] uppercase tracking-[0.2em]">
+                    Staff Only
+                </div>
+                <h1 className="text-3xl font-black tracking-tight text-gray-900">
+                    เข้าสู่ระบบ<span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-500">หลังร้าน</span>
+                </h1>
+                <p className="text-gray-400 text-sm font-medium">กรอกอีเมลและรหัสผ่านพนักงานเพื่อเข้าส่วนจัดการร้าน</p>
             </div>
 
             {error && (
-                <div className="bg-red-50 text-red-500 p-3 rounded-md text-sm text-center">
+                <div className="bg-red-50 border border-red-100 text-red-600 p-3.5 rounded-2xl text-sm font-bold text-center">
                     {error}
                 </div>
             )}
 
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
                     <FormField
                         control={form.control}
                         name="email"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>อีเมล</FormLabel>
+                                <FormLabel className="text-xs font-black uppercase tracking-widest text-gray-500">อีเมล</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="admin@example.com" {...field} />
+                                    <Input type="email" autoComplete="email" placeholder="admin@example.com" className="h-12 rounded-xl bg-gray-50 border-2 border-transparent focus-visible:border-primary focus-visible:bg-white transition-all font-medium" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -105,23 +111,28 @@ export default function LoginPage() {
                         name="password"
                         render={({ field }) => (
                             <FormItem>
-                                <FormLabel>รหัสผ่าน</FormLabel>
+                                <FormLabel className="text-xs font-black uppercase tracking-widest text-gray-500">รหัสผ่าน</FormLabel>
                                 <FormControl>
-                                    <Input type="password" placeholder="******" {...field} />
+                                    <Input type="password" autoComplete="current-password" placeholder="••••••" className="h-12 rounded-xl bg-gray-50 border-2 border-transparent focus-visible:border-primary focus-visible:bg-white transition-all font-medium" {...field} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
-                    <Button type="submit" className="w-full" disabled={isLoading}>
+                    <Button
+                        type="submit"
+                        className="w-full h-12 rounded-2xl bg-gray-900 hover:bg-black text-white font-black text-base uppercase tracking-widest shadow-lg transition-all hover:-translate-y-0.5 active:scale-[0.98]"
+                        disabled={isLoading}
+                    >
                         {isLoading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
                     </Button>
                 </form>
             </Form>
 
-            <div className="text-center text-sm">
-                <Link href="/register" className="text-primary hover:underline">
-                    ยังไม่มีบัญชี? ลงทะเบียน
+            <div className="text-center text-sm text-gray-400 font-medium">
+                ยังไม่มีบัญชีพนักงาน?{' '}
+                <Link href="/register" className="text-primary hover:underline font-bold">
+                    ลงทะเบียน
                 </Link>
             </div>
         </div>

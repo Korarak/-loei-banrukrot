@@ -66,6 +66,7 @@ export function usePOSSales() {
             const response = await api.get('/pos/sales');
             return response.data.data as POSSale[];
         },
+        staleTime: 30_000,
     });
 }
 
@@ -78,5 +79,6 @@ export function useSaleReceipt(saleReference: string) {
             return response.data.data as POSSale;
         },
         enabled: !!saleReference,
+        staleTime: Infinity,
     });
 }

@@ -3,12 +3,12 @@ const jwt = require('jsonwebtoken');
 const { User, Customer } = require('../models');
 
 // Middleware สำหรับตรวจสอบ JWT Token
-const authenticateToken = () => {
+// expectedType: 'user' | 'customer' | undefined (undefined = allow both)
+const authenticateToken = (expectedType) => {
     return async (req, res, next) => {
         try {
-            // ดึง token จาก header
             const authHeader = req.headers['authorization'];
-            const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+            const token = authHeader && authHeader.split(' ')[1];
 
             if (!token) {
                 return res.status(401).json({
@@ -17,7 +17,6 @@ const authenticateToken = () => {
                 });
             }
 
-            // ตรวจสอบ token
             jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
                 if (err) {
                     return res.status(403).json({
@@ -26,8 +25,14 @@ const authenticateToken = () => {
                     });
                 }
 
-                // ตรวจสอบ type จาก token payload
-                // console.log('Decoded Token:', decoded);
+                // Reject tokens whose type doesn't match the route's requirement
+                if (expectedType && decoded.type !== expectedType) {
+                    return res.status(403).json({
+                        success: false,
+                        message: 'ไม่มีสิทธิ์เข้าถึง'
+                    });
+                }
+
                 if (decoded.type === 'user') {
                     const user = await User.findById(decoded.id);
                     if (!user || !user.isActive) {
@@ -39,10 +44,10 @@ const authenticateToken = () => {
                     req.user = user;
                 } else if (decoded.type === 'customer') {
                     const customer = await Customer.findById(decoded.id);
-                    if (!customer) {
+                    if (!customer || !customer.isActive) {
                         return res.status(403).json({
                             success: false,
-                            message: 'ไม่พบข้อมูลลูกค้า กรุณาลงทะเบียน'
+                            message: 'ไม่พบข้อมูลลูกค้า หรือบัญชีถูกระงับ'
                         });
                     }
                     req.customer = customer;

@@ -1,5 +1,5 @@
 // controllers/posController.js
-const { Order, OrderDetail, Payment, ProductVariant } = require('../models');
+const { Order, OrderDetail, Payment, ProductVariant, ProductImage } = require('../models');
 const { deductStock } = require('../utils/stockUtils');
 
 // @desc    Create POS sale (walk-in customer)
@@ -18,12 +18,16 @@ exports.createPOSSale = async (req, res, next) => {
             });
         }
 
-        // ตรวจสอบสต็อกและคำนวณยอดรวม
+        // Batch-fetch all variants in one query
+        const variantIds = items.map(i => i.variantId);
+        const variants = await ProductVariant.find({ _id: { $in: variantIds } }).populate('productId');
+        const variantMap = new Map(variants.map(v => [v._id.toString(), v]));
+
         let totalAmount = 0;
         const variantDetails = [];
 
         for (const item of items) {
-            const variant = await ProductVariant.findById(item.variantId).populate('productId');
+            const variant = variantMap.get(item.variantId.toString());
 
             if (!variant) {
                 return res.status(404).json({
@@ -64,19 +68,19 @@ exports.createPOSSale = async (req, res, next) => {
             orderStatus: 'completed' // POS ขายเสร็จทันที
         });
 
-        // สร้าง order details และลดสต็อก
-        const orderDetails = [];
-        for (const item of variantDetails) {
-            const detail = await OrderDetail.create({
+        // สร้าง order details (bulk insert)
+        const orderDetails = await OrderDetail.insertMany(
+            variantDetails.map(item => ({
                 orderId: order._id,
                 variantId: item.variant._id,
                 quantity: item.quantity,
                 pricePerUnit: item.variant.price,
                 subtotal: item.subtotal
-            });
-            orderDetails.push(detail);
+            }))
+        );
 
-            // ลดสต็อก + log movement
+        // ลดสต็อก (sequential — each must be atomic)
+        for (const item of variantDetails) {
             await deductStock(item.variant._id, item.quantity, 'sale_pos', order._id, 'Order', req.user._id);
         }
 
@@ -122,20 +126,54 @@ exports.getPOSSales = async (req, res, next) => {
 
         const skip = (page - 1) * limit;
 
-        const sales = await Order.find(query)
-            .populate('cashierUserId')
-            .populate('storeId')
-            .limit(parseInt(limit))
-            .skip(skip)
-            .sort({ orderDate: -1 });
-
-        const total = await Order.countDocuments(query);
-
-        // คำนวณยอดขายรวม
-        const totalSales = await Order.aggregate([
-            { $match: query },
-            { $group: { _id: null, total: { $sum: '$totalAmount' } } }
+        const [orders, total, totalSalesResult] = await Promise.all([
+            Order.find(query)
+                .populate('cashierUserId', 'username firstName lastName')
+                .populate('storeId')
+                .limit(parseInt(limit))
+                .skip(skip)
+                .sort({ orderDate: -1 }),
+            Order.countDocuments(query),
+            Order.aggregate([
+                { $match: query },
+                { $group: { _id: null, total: { $sum: '$totalAmount' } } }
+            ])
         ]);
+
+        // Batch-fetch order details and payments
+        const orderIds = orders.map(o => o._id);
+        const [allDetails, allPayments] = await Promise.all([
+            OrderDetail.find({ orderId: { $in: orderIds } })
+                .populate({ path: 'variantId', populate: { path: 'productId', select: 'productName' } }),
+            Payment.find({ orderId: { $in: orderIds } })
+        ]);
+
+        const detailsByOrder = new Map();
+        for (const d of allDetails) {
+            const key = d.orderId.toString();
+            if (!detailsByOrder.has(key)) detailsByOrder.set(key, []);
+            detailsByOrder.get(key).push(d);
+        }
+        const paymentByOrder = new Map(allPayments.map(p => [p.orderId.toString(), p]));
+
+        const sales = orders.map(order => {
+            const details = detailsByOrder.get(order._id.toString()) || [];
+            const payment = paymentByOrder.get(order._id.toString());
+            return {
+                ...order.toObject(),
+                createdAt: order.orderDate,
+                createdBy: order.cashierUserId,
+                items: details.map(d => ({
+                    product: { _id: d.variantId?.productId?._id, productName: d.variantId?.productId?.productName || 'Unknown' },
+                    variant: { _id: d.variantId?._id, sku: d.variantId?.sku, price: d.pricePerUnit },
+                    quantity: d.quantity,
+                    price: d.pricePerUnit
+                })),
+                paymentMethod: payment?.paymentMethod || null
+            };
+        });
+
+        const totalSales = totalSalesResult;
 
         res.json({
             success: true,
@@ -173,19 +211,27 @@ exports.getSaleReceipt = async (req, res, next) => {
             });
         }
 
-        const details = await OrderDetail.find({ orderId: order._id })
-            .populate({
-                path: 'variantId',
-                populate: { path: 'productId' }
-            });
+        const [details, payments] = await Promise.all([
+            OrderDetail.find({ orderId: order._id })
+                .populate({ path: 'variantId', populate: { path: 'productId' } }),
+            Payment.find({ orderId: order._id })
+        ]);
 
-        const payments = await Payment.find({ orderId: order._id });
+        const payment = payments[0];
 
         res.json({
             success: true,
             data: {
                 ...order.toObject(),
-                items: details,
+                createdAt: order.orderDate,
+                createdBy: order.cashierUserId,
+                paymentMethod: payment?.paymentMethod || null,
+                items: details.map(d => ({
+                    product: { _id: d.variantId?.productId?._id, productName: d.variantId?.productId?.productName || 'Unknown' },
+                    variant: { _id: d.variantId?._id, sku: d.variantId?.sku, price: d.pricePerUnit },
+                    quantity: d.quantity,
+                    price: d.pricePerUnit
+                })),
                 payments
             }
         });

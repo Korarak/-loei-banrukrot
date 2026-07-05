@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useCustomers, useDeleteCustomer, useUpdateCustomer, type Customer } from '@/hooks/useCustomers';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -51,24 +51,28 @@ export default function CustomersPage() {
     };
 
     // Filter
-    const filteredCustomers = customers?.filter(customer =>
-        customer.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        customer.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        customer.email.toLowerCase().includes(searchQuery.toLowerCase())
-    ) || [];
+    const filteredCustomers = useMemo(() =>
+        customers?.filter(customer =>
+            customer.firstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            customer.lastName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            customer.email.toLowerCase().includes(searchQuery.toLowerCase())
+        ) || [],
+        [customers, searchQuery]
+    );
 
     // Sort
-    const sortedCustomers = [...filteredCustomers].sort((a, b) => {
-        if (!sortConfig) return 0;
-        const { key, direction } = sortConfig;
-
-        const aValue = a[key] ?? '';
-        const bValue = b[key] ?? '';
-
-        if (aValue < bValue) return direction === 'asc' ? -1 : 1;
-        if (aValue > bValue) return direction === 'asc' ? 1 : -1;
-        return 0;
-    });
+    const sortedCustomers = useMemo(() =>
+        [...filteredCustomers].sort((a, b) => {
+            if (!sortConfig) return 0;
+            const { key, direction } = sortConfig;
+            const aValue = a[key] ?? '';
+            const bValue = b[key] ?? '';
+            if (aValue < bValue) return direction === 'asc' ? -1 : 1;
+            if (aValue > bValue) return direction === 'asc' ? 1 : -1;
+            return 0;
+        }),
+        [filteredCustomers, sortConfig]
+    );
 
     const handleSort = (key: keyof Customer) => {
         let direction: 'asc' | 'desc' = 'asc';
@@ -101,14 +105,15 @@ export default function CustomersPage() {
     };
 
     // Stats
-    const totalCustomers = customers?.length || 0;
-    const activeCustomers = customers?.filter(c => c.isActive).length || 0;
-    const newCustomers = customers?.filter(c => {
-        const date = new Date(c.dateRegistered);
+    const { totalCustomers, activeCustomers, newCustomers } = useMemo(() => {
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        return date >= thirtyDaysAgo;
-    }).length || 0;
+        return {
+            totalCustomers: customers?.length || 0,
+            activeCustomers: customers?.filter(c => c.isActive).length || 0,
+            newCustomers: customers?.filter(c => new Date(c.dateRegistered) >= thirtyDaysAgo).length || 0,
+        };
+    }, [customers]);
 
     return (
         <div className="space-y-8">

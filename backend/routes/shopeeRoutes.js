@@ -10,7 +10,7 @@ const {
 } = require('../controllers/shopeeController');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 
-const guard = [authenticateToken(), requireRole('owner', 'staff')];
+const guard = [authenticateToken('user'), requireRole('owner', 'staff')];
 
 // No auth — Shopee calls this endpoint directly (verified via HMAC signature)
 router.post('/webhook', webhookHandler);

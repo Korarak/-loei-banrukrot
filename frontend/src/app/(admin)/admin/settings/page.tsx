@@ -17,6 +17,7 @@ import {
 import { toast } from 'sonner';
 import { Save, Landmark, Store, Trash2, AlertTriangle, ShoppingBag, ListOrdered, Users, LayoutGrid, RotateCcw } from 'lucide-react';
 import api from '@/lib/api';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 const SETTING_GROUPS: { label: string; icon: React.ElementType; keys: { key: string; label: string; placeholder: string }[] }[] = [
     {
@@ -85,6 +86,8 @@ const RESET_ACTIONS = [
 export default function SettingsPage() {
     const { data: settings, isLoading } = useAdminSettings();
     const updateSetting = useUpdateSetting();
+    // Danger Zone แสดงเฉพาะ owner — backend ก็บังคับ requireRole('owner') อยู่แล้ว
+    const isOwner = useAuthStore((state) => state.user?.role === 'owner');
     const [values, setValues] = useState<Record<string, string>>({});
     const [dirty, setDirty] = useState<Record<string, boolean>>({});
 
@@ -183,7 +186,8 @@ export default function SettingsPage() {
                 </Card>
             ))}
 
-            {/* ─── Danger Zone ─── */}
+            {/* ─── Danger Zone (owner เท่านั้น) ─── */}
+            {isOwner && (
             <div className="space-y-3">
                 <div className="flex items-center gap-2">
                     <AlertTriangle className="h-4 w-4 text-red-500" />
@@ -220,6 +224,7 @@ export default function SettingsPage() {
                     ))}
                 </Card>
             </div>
+            )}
 
             {/* ─── Confirm Dialog ─── */}
             <Dialog open={!!resetTarget} onOpenChange={(o) => { if (!o) setResetTarget(null); }}>

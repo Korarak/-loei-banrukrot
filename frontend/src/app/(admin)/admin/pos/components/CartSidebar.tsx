@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ShoppingCart, Trash2, Plus, Minus, Package, Banknote, ChevronRight, AlertCircle } from 'lucide-react';
 import { cn, getImageUrl } from '@/lib/utils';
+import Image from 'next/image';
 import {
     Dialog,
     DialogContent,
@@ -67,7 +68,7 @@ export function CartSidebar({ cart, onUpdateQuantity, onClearCart, onCheckout }:
                         <div key={item.variantId} className="flex gap-2 p-2 rounded-xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-all group animate-in fade-in slide-in-from-bottom-2 duration-300">
                             <div className="h-12 w-12 bg-gray-100 rounded-lg overflow-hidden shrink-0 border border-gray-100 relative">
                                 {item.image ? (
-                                    <img src={getImageUrl(item.image)} alt={item.name} className="w-full h-full object-cover" />
+                                    <Image src={getImageUrl(item.image)} alt={item.name} width={48} height={48} className="w-full h-full object-cover" />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-gray-300">
                                         <Package className="h-5 w-5 opacity-50" />

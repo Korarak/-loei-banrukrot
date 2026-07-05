@@ -32,6 +32,7 @@ export function useShopeeStatus() {
             const res = await api.get('/shopee/status');
             return res.data.data as ShopeeStatus;
         },
+        staleTime: 5 * 60_000,
     });
 }
 

@@ -1,4 +1,5 @@
 // server.js
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const app = express();
@@ -26,11 +27,21 @@ connectDB();
 app.set('trust proxy', 1);
 
 // Middleware
+// Compression — must be first, before any response middleware
+const compression = require('compression');
+app.use(compression({ threshold: 1024 }));
+
 // Security Headers
 const helmet = require('helmet');
 app.use(helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
+
+// Permissions-Policy — helmet ไม่ตั้งให้ (API ไม่ใช้ browser features ใดๆ)
+app.use((req, res, next) => {
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
+    next();
+});
 
 // Cross-Origin Resource Sharing (CORS) - STRCITLY allow only the FRONTEND_URL
 const allowedOrigins = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : [];
@@ -55,9 +66,18 @@ const rateLimit = require('express-rate-limit');
 const limiter = rateLimit({
     windowMs: 10 * 60 * 1000, // 10 minutes
     max: 500, // Increased from 100 to 500 to accommodate legitimate browsing activity
-    message: 'Too many requests from this IP, please try again later.'
+    message: 'Too many requests from this IP, please try again later.',
+    standardHeaders: true,   // RateLimit-* (draft standard)
+    legacyHeaders: false     // ปิด X-RateLimit-* (ลด fingerprinting)
 });
 app.use(limiter);
+
+// API responses ห้าม cache — มีข้อมูล auth/order/cart (OWASP: Cache-Control no-store)
+// /uploads ไม่โดนเพราะ mount แยกด้วย maxAge 7d ด้านล่าง
+app.use('/api', (req, res, next) => {
+    res.setHeader('Cache-Control', 'no-store');
+    next();
+});
 
 // Body Parsers
 app.use(express.json({
@@ -76,8 +96,12 @@ app.use(hpp());
 
 app.use(require('./config/passport').initialize());
 
-// Serve static files
-app.use('/uploads', express.static('public/uploads'));
+// Serve static files — 7 days cache for images
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads'), {
+    maxAge: '7d',
+    etag: true,
+    lastModified: true,
+}));
 
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
@@ -100,15 +124,24 @@ app.get('/', (req, res) => {
     res.send('API is running...');
 });
 
-// Public store stats (no auth required)
+// Public store stats (no auth required) — cached 5 minutes to avoid DB hit on every page load
+let _publicStatsCache = null;
+let _publicStatsTTL = 0;
 app.get('/api/public-stats', async (req, res) => {
     try {
+        const now = Date.now();
+        if (_publicStatsCache && now < _publicStatsTTL) {
+            return res.json({ success: true, data: _publicStatsCache });
+        }
         const { Product, Customer } = require('./models');
         const [productCount, customerCount] = await Promise.all([
             Product.countDocuments({ isActive: true, isOnline: true }),
             Customer.countDocuments({})
         ]);
-        res.json({ success: true, data: { productCount, customerCount } });
+        _publicStatsCache = { productCount, customerCount };
+        _publicStatsTTL = now + 5 * 60 * 1000;
+        res.set('Cache-Control', 'public, max-age=300');
+        res.json({ success: true, data: _publicStatsCache });
     } catch (error) {
         res.status(500).json({ success: false });
     }
@@ -131,8 +164,6 @@ app.get('/api/status', async (req, res) => {
             res.status(200).json({
                 status: 'Server Running',
                 database: 'Connected',
-                dbName: mongoose.connection.name,
-                host: mongoose.connection.host
             });
         } else {
             res.status(500).json({
@@ -145,7 +176,6 @@ app.get('/api/status', async (req, res) => {
         res.status(500).json({
             status: 'Server Running',
             database: 'Disconnected',
-            error: error.message
         });
     }
 });
@@ -156,7 +186,7 @@ app.use(notFound);
 // Error handler (must be last)
 app.use(errorHandler);
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`🚀 Server is running on port ${PORT}`);
     console.log(`📡 API endpoints:`);
     console.log(`   - Auth:       http://localhost:${PORT}/api/auth`);
@@ -171,3 +201,7 @@ app.listen(PORT, () => {
     console.log(`   - Dashboard:  http://localhost:${PORT}/api/dashboard`);
     console.log(`   - Status:     http://localhost:${PORT}/api/status`);
 });
+
+// Prevent 502 errors behind reverse proxy — Node's default (5s) is shorter than Nginx's idle timeout
+server.keepAliveTimeout = 65_000;
+server.headersTimeout = 66_000;

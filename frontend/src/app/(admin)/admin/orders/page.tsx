@@ -25,7 +25,7 @@ import { Search, Eye, Plus, AlertCircle, Store, Globe, Calendar, CreditCard, Ban
 import { BarcodeScanner } from '@/components/features/BarcodeScanner';
 import { ShippingLabelDialog } from '@/components/admin/ShippingLabelDialog';
 import Link from 'next/link';
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Label } from '@/components/ui/label';
@@ -58,7 +58,7 @@ export default function AdminOrdersPage() {
     const [courier, setCourier] = useState('Flash Express');
     const [scannerOpen, setScannerOpen] = useState(false);
 
-    const { data: orders, isLoading } = useOrders({ refetchInterval: 10000 }); // Poll every 10s
+    const { data: orders, isLoading, isError, refetch } = useOrders({ refetchInterval: 10000 }); // Poll every 10s
     const updateStatus = useUpdateOrderStatus();
 
     // Notification Logic
@@ -151,32 +151,46 @@ export default function AdminOrdersPage() {
         }
     };
 
+    // Memoized filters — avoid recomputing on every poll-triggered re-render
+    const { filteredOrders, countAll, countOnline, countPos } = useMemo(() => {
+        const all = orders || [];
+        const lowerSearch = searchQuery.toLowerCase();
+        const filtered = all.filter((order) => {
+            const matchesSearch = !lowerSearch
+                || (order.orderReference?.toLowerCase() || '').includes(lowerSearch)
+                || (order.customer?.email?.toLowerCase() || '').includes(lowerSearch)
+                || `${order.customer?.firstName || ''} ${order.customer?.lastName || ''}`.toLowerCase().includes(lowerSearch);
+            const matchesStatus = statusFilter === 'all' || order.orderStatus === statusFilter;
+            const matchesSource = sourceFilter === 'all' || order.source === sourceFilter;
+            return matchesSearch && matchesStatus && matchesSource;
+        });
+        return {
+            filteredOrders: filtered,
+            countAll: all.length,
+            countOnline: all.filter(o => o.source === 'online').length,
+            countPos: all.filter(o => o.source === 'pos').length,
+        };
+    }, [orders, searchQuery, statusFilter, sourceFilter]);
+
     if (isLoading) {
         return (
-            <div className="flex justify-center items-center min-h-[400px]">
+            <div className="flex justify-center items-center min-h-[400px]" role="status">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                <span className="sr-only">กำลังโหลดคำสั่งซื้อ...</span>
             </div>
         );
     }
 
-    // Filter orders
-    const filteredOrders = orders?.filter((order) => {
-        const matchesSearch =
-            (order.orderReference?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
-            (order.customer?.email?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
-            `${order.customer?.firstName || ''} ${order.customer?.lastName || ''}`.toLowerCase().includes(searchQuery.toLowerCase());
-
-        const matchesStatus = statusFilter === 'all' || order.orderStatus === statusFilter;
-
-        const matchesSource = sourceFilter === 'all' || order.source === sourceFilter;
-
-        return matchesSearch && matchesStatus && matchesSource;
-    }) || [];
-
-    // Detailed counts for Tabs
-    const countAll = orders?.length || 0;
-    const countOnline = orders?.filter(o => o.source === 'online').length || 0;
-    const countPos = orders?.filter(o => o.source === 'pos').length || 0;
+    if (isError) {
+        return (
+            <div className="flex flex-col justify-center items-center min-h-[400px] gap-4 text-center">
+                <p className="text-gray-500 font-medium">โหลดคำสั่งซื้อไม่สำเร็จ กรุณาลองใหม่อีกครั้ง</p>
+                <Button onClick={() => refetch()} variant="outline" className="rounded-xl font-bold">
+                    ลองใหม่
+                </Button>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-6 max-w-6xl mx-auto">
@@ -403,7 +417,7 @@ export default function AdminOrdersPage() {
                             กรอกเลขพัสดุ
                         </DialogTitle>
                         <DialogDescription>
-                            เปลี่ยนสถานะเป็น "เริ่มการจัดส่ง" พร้อมบันทึกเลขพัสดุ
+                            เปลี่ยนสถานะเป็น &ldquo;เริ่มการจัดส่ง&rdquo; พร้อมบันทึกเลขพัสดุ
                         </DialogDescription>
                     </DialogHeader>
 

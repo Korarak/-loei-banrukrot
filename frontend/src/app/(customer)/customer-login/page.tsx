@@ -33,7 +33,8 @@ export default function CustomerLoginPage() {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            email: '',
+            // Prefill when redirected from register with an existing account
+            email: searchParams.get('email') || '',
             password: '',
         },
     });
@@ -63,11 +64,18 @@ export default function CustomerLoginPage() {
     }
 
     return (
-        <div className="container mx-auto flex items-center justify-center min-h-[calc(100vh-4rem)] p-4">
-            <Card className="w-full max-w-md shadow-lg">
-                <CardHeader className="space-y-1">
-                    <CardTitle className="text-2xl font-bold text-center">เข้าสู่ระบบ</CardTitle>
-                    <CardDescription className="text-center">
+        <div className="container mx-auto flex items-center justify-center min-h-[calc(100vh-4rem)] p-4 relative">
+            {/* Static ambience — matches storefront hero language */}
+            <div
+                className="absolute inset-0 pointer-events-none"
+                style={{ background: 'radial-gradient(ellipse 60% 40% at 80% 0%, rgba(16,185,129,0.08) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 10% 100%, rgba(236,72,153,0.06) 0%, transparent 60%)' }}
+            />
+            <Card className="w-full max-w-md border-0 shadow-2xl shadow-gray-200/60 rounded-[2rem] relative z-10">
+                <CardHeader className="space-y-2 pt-8">
+                    <CardTitle className="text-3xl font-black tracking-tight text-center text-gray-900">
+                        ยินดี<span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-emerald-500">ต้อนรับกลับ</span>
+                    </CardTitle>
+                    <CardDescription className="text-center text-gray-400 font-medium">
                         กรอกอีเมลและรหัสผ่านเพื่อเข้าสู่บัญชีของคุณ
                     </CardDescription>
                 </CardHeader>
@@ -79,9 +87,9 @@ export default function CustomerLoginPage() {
                                 name="email"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>อีเมล</FormLabel>
+                                        <FormLabel className="text-xs font-black uppercase tracking-widest text-gray-500">อีเมล</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="name@example.com" {...field} />
+                                            <Input type="email" autoComplete="email" placeholder="name@example.com" className="h-12 rounded-xl bg-gray-50 border-2 border-transparent focus-visible:border-primary focus-visible:bg-white transition-all font-medium" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -92,15 +100,15 @@ export default function CustomerLoginPage() {
                                 name="password"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>รหัสผ่าน</FormLabel>
+                                        <FormLabel className="text-xs font-black uppercase tracking-widest text-gray-500">รหัสผ่าน</FormLabel>
                                         <FormControl>
-                                            <Input type="password" placeholder="••••••" {...field} />
+                                            <Input type="password" autoComplete="current-password" placeholder="••••••" className="h-12 rounded-xl bg-gray-50 border-2 border-transparent focus-visible:border-primary focus-visible:bg-white transition-all font-medium" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
-                            <Button type="submit" className="w-full" disabled={isLoading}>
+                            <Button type="submit" className="w-full h-12 rounded-2xl bg-gray-900 hover:bg-black text-white font-black text-base uppercase tracking-widest shadow-lg transition-all hover:-translate-y-0.5 active:scale-[0.98]" disabled={isLoading}>
                                 {isLoading ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -130,7 +138,7 @@ export default function CustomerLoginPage() {
                     <Button
                         variant="outline"
                         type="button"
-                        className="w-full bg-white hover:bg-gray-50 text-gray-900 border-gray-200"
+                        className="w-full h-12 rounded-2xl bg-white hover:bg-gray-50 text-gray-900 border-2 border-gray-100 hover:border-gray-300 font-bold transition-all"
                         onClick={() => window.location.href = `${getServerUrl()}/api/auth/google?prompt=select_account`}
                     >
                         <svg className="mr-2 h-4 w-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512">

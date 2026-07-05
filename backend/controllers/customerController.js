@@ -67,7 +67,6 @@ exports.createCustomer = async (req, res, next) => {
 // @access  Private/Admin
 exports.updateCustomer = async (req, res, next) => {
     try {
-        console.log('updateCustomer req.body:', req.body);
         const { firstName, lastName, email, phone, isActive, password, profilePicture } = req.body;
         const customer = await Customer.findById(req.params.id);
 

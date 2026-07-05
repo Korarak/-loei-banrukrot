@@ -9,8 +9,8 @@ const PARTNER_ID = process.env.SHOPEE_PARTNER_ID;
 // Shopee signature: HMAC-SHA256(partner_key, partner_id + url + timestamp + rawBody)
 function verifyShopeeSignature(req) {
     if (!PARTNER_KEY || !PARTNER_ID) {
-        console.warn('[Shopee] SHOPEE_PARTNER_KEY/SHOPEE_PARTNER_ID not set — skipping signature verification');
-        return true;
+        console.warn('[Shopee] SHOPEE_PARTNER_KEY/SHOPEE_PARTNER_ID not set — rejecting webhook (fail-closed)');
+        return false;
     }
     const signature = req.headers['authorization'];
     if (!signature) return false;
@@ -21,7 +21,14 @@ function verifyShopeeSignature(req) {
         .createHmac('sha256', PARTNER_KEY)
         .update(`${PARTNER_ID}${url}${timestamp}${rawBody}`)
         .digest('hex');
-    return signature === expected;
+    try {
+        const sigBuf = Buffer.from(signature);
+        const expBuf = Buffer.from(expected);
+        if (sigBuf.length !== expBuf.length) return false;
+        return crypto.timingSafeEqual(sigBuf, expBuf);
+    } catch {
+        return false;
+    }
 }
 
 // @route   GET /api/shopee/status

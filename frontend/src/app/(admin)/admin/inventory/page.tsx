@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -121,7 +121,7 @@ function OverviewTab() {
                                 <div className="flex items-center gap-3">
                                     {item.productId?.imageUrl && (
                                         <div className="h-8 w-8 rounded-md overflow-hidden shrink-0 bg-gray-100 relative">
-                                            <Image src={getImageUrl(item.productId.imageUrl)} alt="" fill className="object-cover" unoptimized />
+                                            <Image src={getImageUrl(item.productId.imageUrl)} alt="" fill className="object-cover" sizes="40px" />
                                         </div>
                                     )}
                                     <div>
@@ -145,22 +145,29 @@ function OverviewTab() {
 
 function ReceiveStockTab() {
     const [search, setSearch] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [selectedVariantId, setSelectedVariantId] = useState('');
     const [quantity, setQuantity] = useState('');
     const [note, setNote] = useState('');
 
-    const { data: products } = useProducts({ search });
+    useEffect(() => {
+        const handler = setTimeout(() => setDebouncedSearch(search), 350);
+        return () => clearTimeout(handler);
+    }, [search]);
+
+    const { data: products } = useProducts({ search: debouncedSearch });
     const receiveStock = useReceiveStock();
 
     const selectedVariant = selectedProduct?.variants.find(v => v._id === selectedVariantId);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!selectedVariantId || !quantity || parseInt(quantity) <= 0) return;
-        await receiveStock.mutateAsync({ variantId: selectedVariantId, quantity: parseInt(quantity), note: note || undefined });
-        setQuantity('');
-        setNote('');
+        receiveStock.mutate(
+            { variantId: selectedVariantId, quantity: parseInt(quantity), note: note || undefined },
+            { onSuccess: () => { setQuantity(''); setNote(''); } }
+        );
     };
 
     return (
@@ -188,7 +195,7 @@ function ReceiveStockTab() {
                         >
                             <div className="h-10 w-10 rounded-lg overflow-hidden shrink-0 bg-gray-100 relative flex items-center justify-center">
                                 {product.images?.[0]?.imagePath || product.imageUrl ? (
-                                    <Image src={getImageUrl(product.images?.[0]?.imagePath || product.imageUrl!)} alt="" fill className="object-cover" unoptimized />
+                                    <Image src={getImageUrl(product.images?.[0]?.imagePath || product.imageUrl!)} alt="" fill className="object-cover" sizes="40px" />
                                 ) : <Package className="h-5 w-5 text-gray-400" />}
                             </div>
                             <div className="overflow-hidden min-w-0">
@@ -292,7 +299,7 @@ function LowStockTab() {
                             <div key={item._id} className="flex items-center gap-4 p-4 hover:bg-gray-50 transition-colors">
                                 <div className="h-10 w-10 rounded-lg overflow-hidden shrink-0 bg-gray-100 relative">
                                     {item.productId?.imageUrl ? (
-                                        <Image src={getImageUrl(item.productId.imageUrl)} alt="" fill className="object-cover" unoptimized />
+                                        <Image src={getImageUrl(item.productId.imageUrl)} alt="" fill className="object-cover" sizes="40px" />
                                     ) : <Package className="h-5 w-5 text-gray-400 m-auto mt-2.5" />}
                                 </div>
                                 <div className="flex-1 min-w-0">
@@ -307,10 +314,12 @@ function LowStockTab() {
                                     <div className="flex items-center gap-2 shrink-0">
                                         <Input type="number" value={quickAdjust.qty} onChange={e => setQuickAdjust({ id: item._id, qty: e.target.value })} className="w-20 h-8 text-center" placeholder="+/-" />
                                         <Button size="sm" className="h-8" disabled={adjustStock.isPending}
-                                            onClick={async () => {
+                                            onClick={() => {
                                                 if (!quickAdjust.qty || quickAdjust.qty === '0') return;
-                                                await adjustStock.mutateAsync({ variantId: item._id, quantity: parseInt(quickAdjust.qty), note: 'ปรับจากหน้าแจ้งเตือนสต็อก' });
-                                                setQuickAdjust(null);
+                                                adjustStock.mutate(
+                                                    { variantId: item._id, quantity: parseInt(quickAdjust.qty), note: 'ปรับจากหน้าแจ้งเตือนสต็อก' },
+                                                    { onSuccess: () => setQuickAdjust(null) }
+                                                );
                                             }}>
                                             ยืนยัน
                                         </Button>
@@ -463,13 +472,15 @@ function ShopeeTab() {
 
     const cancelEdit = () => setEditingId(null);
 
-    const saveEdit = async (variantId: string) => {
-        await updateMapping.mutateAsync({ variantId, shopeeItemId: editForm.shopeeItemId, shopeeModelId: editForm.shopeeModelId || undefined });
-        setEditingId(null);
+    const saveEdit = (variantId: string) => {
+        updateMapping.mutate(
+            { variantId, shopeeItemId: editForm.shopeeItemId, shopeeModelId: editForm.shopeeModelId || undefined },
+            { onSuccess: () => setEditingId(null) }
+        );
     };
 
-    const handleRemove = async (variantId: string) => {
-        await removeMapping.mutateAsync(variantId);
+    const handleRemove = (variantId: string) => {
+        removeMapping.mutate(variantId);
     };
 
     const FILTERS: { value: ShopeeMappingFilter; label: string }[] = [
@@ -630,6 +641,7 @@ SHOPEE_SHOP_ID=your_shop_id`}
                                                         {v.shopeeItemId && (
                                                             <Button size="sm" variant="ghost" className="h-7 text-red-500 hover:text-red-700 hover:bg-red-50"
                                                                 disabled={removeMapping.isPending}
+                                                                aria-label="ลบการผูกกับ Shopee"
                                                                 onClick={() => handleRemove(v._id)}>
                                                                 <Trash2 className="h-3.5 w-3.5" />
                                                             </Button>

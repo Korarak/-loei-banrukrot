@@ -26,13 +26,11 @@ exports.listBackups = async (req, res) => {
         const files = fs.readdirSync(backupDir)
             .filter(file => file.endsWith('.tar.gz'))
             .map(file => {
-                const filePath = path.join(backupDir, file);
-                const stats = fs.statSync(filePath);
+                const stats = fs.statSync(path.join(backupDir, file));
                 return {
                     filename: file,
                     size: stats.size,
                     createdAt: stats.mtime,
-                    path: filePath
                 };
             })
             .sort((a, b) => b.createdAt - a.createdAt);

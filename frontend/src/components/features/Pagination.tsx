@@ -42,12 +42,13 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
     };
 
     return (
-        <div className="flex items-center justify-center gap-2 mt-8">
+        <nav aria-label="เลือกหน้า" className="flex items-center justify-center gap-2 mt-8">
             <Button
                 variant="outline"
                 size="icon"
                 onClick={() => onPageChange(currentPage - 1)}
                 disabled={currentPage === 1}
+                aria-label="หน้าก่อนหน้า"
                 className="h-8 w-8"
             >
                 <ChevronLeft className="h-4 w-4" />
@@ -62,6 +63,8 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
                         variant={currentPage === page ? "default" : "outline"}
                         size="sm"
                         onClick={() => onPageChange(page)}
+                        aria-label={`หน้า ${page}`}
+                        aria-current={currentPage === page ? 'page' : undefined}
                         className="h-8 w-8"
                     >
                         {page}
@@ -74,10 +77,11 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
                 size="icon"
                 onClick={() => onPageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
+                aria-label="หน้าถัดไป"
                 className="h-8 w-8"
             >
                 <ChevronRight className="h-4 w-4" />
             </Button>
-        </div>
+        </nav>
     );
 }

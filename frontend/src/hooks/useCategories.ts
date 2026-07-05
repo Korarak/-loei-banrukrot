@@ -36,7 +36,8 @@ export function useCategories(isActive?: boolean) {
             const params = isActive !== undefined ? { isActive: isActive.toString() } : {};
             const { data } = await api.get('/categories', { params });
             return data.data as Category[];
-        }
+        },
+        staleTime: 10 * 60_000,
     });
 }
 
@@ -48,7 +49,8 @@ export function useCategory(id: string) {
             const { data } = await api.get(`/categories/${id}`);
             return data.data as Category;
         },
-        enabled: !!id
+        enabled: !!id,
+        staleTime: 10 * 60_000,
     });
 }
 

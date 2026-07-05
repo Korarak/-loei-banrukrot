@@ -85,6 +85,33 @@ export function BarcodeScanner({ open, onScan, onClose }: BarcodeScannerProps) {
             .catch(() => setError('ไม่สามารถเข้าถึงกล้องได้'));
     }, [open]);
 
+    const startDetectionLoop = () => {
+        const detect = async () => {
+            if (!videoRef.current || !detectorRef.current) return;
+            if (videoRef.current.readyState < 2) {
+                rafRef.current = requestAnimationFrame(detect);
+                return;
+            }
+            try {
+                const results = await detectorRef.current.detect(videoRef.current);
+                if (results.length > 0) {
+                    const value = results[0].rawValue;
+                    setDetected(value);
+                    stopCamera();
+                    setTimeout(() => {
+                        onScanRef.current(value.toUpperCase());
+                        onCloseRef.current();
+                    }, 400);
+                    return;
+                }
+            } catch {
+                // Detection errors on individual frames are expected — keep looping
+            }
+            rafRef.current = requestAnimationFrame(detect);
+        };
+        rafRef.current = requestAnimationFrame(detect);
+    };
+
     // Start camera stream when camera is selected
     useEffect(() => {
         if (!open || !selectedCamera || !apiSupported) return;
@@ -131,33 +158,6 @@ export function BarcodeScanner({ open, onScan, onClose }: BarcodeScannerProps) {
             setManualMode(false);
         }
     }, [open, stopCamera]);
-
-    const startDetectionLoop = () => {
-        const detect = async () => {
-            if (!videoRef.current || !detectorRef.current) return;
-            if (videoRef.current.readyState < 2) {
-                rafRef.current = requestAnimationFrame(detect);
-                return;
-            }
-            try {
-                const results = await detectorRef.current.detect(videoRef.current);
-                if (results.length > 0) {
-                    const value = results[0].rawValue;
-                    setDetected(value);
-                    stopCamera();
-                    setTimeout(() => {
-                        onScanRef.current(value.toUpperCase());
-                        onCloseRef.current();
-                    }, 400);
-                    return;
-                }
-            } catch {
-                // Detection errors on individual frames are expected — keep looping
-            }
-            rafRef.current = requestAnimationFrame(detect);
-        };
-        rafRef.current = requestAnimationFrame(detect);
-    };
 
     const switchCamera = () => {
         if (cameras.length < 2) return;

@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Package } from 'lucide-react';
@@ -59,7 +60,7 @@ export function ProductGrid({ products, onAddToCart, isLoading }: ProductGridPro
     );
 }
 
-function POSProductCard({ product, onAdd }: { product: Product; onAdd: () => void }) {
+const POSProductCard = memo(function POSProductCard({ product, onAdd }: { product: Product; onAdd: () => void }) {
     const variant = product.variants?.[0];
     const hasStock = variant && (variant.stockAvailable || 0) > 0;
     const imageUrl = product.images?.[0]?.imagePath ? getImageUrl(product.images[0].imagePath) : null;
@@ -90,7 +91,6 @@ function POSProductCard({ product, onAdd }: { product: Product; onAdd: () => voi
                         sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
                         className="object-cover group-hover:scale-110 transition-transform duration-500"
                         loading="lazy"
-                        unoptimized
                     />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-300">
@@ -142,5 +142,4 @@ function POSProductCard({ product, onAdd }: { product: Product; onAdd: () => voi
             </div>
         </Card>
     );
-}
-
+});

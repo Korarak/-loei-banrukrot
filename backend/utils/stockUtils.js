@@ -14,23 +14,31 @@ const { ProductVariant, StockMovement } = require('../models');
  * @returns {{ variant, movement }}
  */
 async function changeStock(variantId, delta, type, referenceId, referenceType, performedBy, note = null) {
-    const variant = await ProductVariant.findById(variantId);
-    if (!variant) throw new Error(`Variant ${variantId} not found`);
+    // Atomic update — returns the pre-update document so stockBefore is accurate
+    const query = delta < 0
+        ? { _id: variantId, stockAvailable: { $gte: -delta } }
+        : { _id: variantId };
 
-    const stockBefore = variant.stockAvailable;
-    const stockAfter = stockBefore + delta;
-
-    if (stockAfter < 0) throw new Error(`Insufficient stock for ${variant.sku}`);
-
-    const updated = await ProductVariant.findByIdAndUpdate(
-        variantId,
+    const before = await ProductVariant.findOneAndUpdate(
+        query,
         { $inc: { stockAvailable: delta } },
-        { new: true }
+        { new: false }
     );
+
+    if (!before) {
+        const exists = await ProductVariant.findById(variantId);
+        if (!exists) throw new Error(`Variant ${variantId} not found`);
+        throw new Error(`Insufficient stock for ${exists.sku}`);
+    }
+
+    const stockBefore = before.stockAvailable;
+    const updated = { ...before.toObject(), stockAvailable: stockBefore + delta };
+
+    const stockAfter = updated.stockAvailable;
 
     const movement = await StockMovement.create({
         variantId,
-        productId: variant.productId,
+        productId: before.productId,
         type,
         quantityChange: delta,
         stockBefore,

@@ -334,7 +334,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                         <div key={index} className="flex gap-4 border-b border-gray-50 pb-4 last:border-0 last:pb-0">
                             <div className="relative h-16 w-16 rounded-xl overflow-hidden bg-gray-50 border border-gray-100 shrink-0">
                                 {item.imageUrl ? (
-                                    <Image src={getImageUrl(item.imageUrl)} alt={item.productName} fill className="object-cover" unoptimized />
+                                    <Image src={getImageUrl(item.imageUrl)} alt={item.productName} fill className="object-cover" sizes="64px" />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-xs text-gray-300">ไม่มีรูป</div>
                                 )}

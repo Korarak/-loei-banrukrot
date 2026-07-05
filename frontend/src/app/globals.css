@@ -364,7 +364,6 @@
       hsl(var(--primary))
     );
     background-size: 200% 100%;
-    animation: scroll-progress-glow 2s ease-in-out infinite;
     transition: width 0.1s linear;
   }
 

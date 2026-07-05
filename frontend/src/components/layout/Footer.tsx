@@ -1,34 +1,24 @@
 'use client';
 
 import Link from 'next/link';
-import { Wrench, ChevronDown, ChevronRight, Facebook, Instagram, Phone, Mail, MapPin, Twitter } from 'lucide-react';
-import { useState } from 'react';
+import { ChevronRight, Facebook, Phone, MapPin } from 'lucide-react';
 import { siteConfig } from '@/config/site';
 
 export default function Footer() {
-    const [openSection, setOpenSection] = useState<string | null>(null);
-
-    const toggleSection = (section: string) => {
-        setOpenSection(openSection === section ? null : section);
-    };
-
     return (
         <footer className="bg-zinc-950 text-white mt-0 pt-12 md:pt-20 pb-12 rounded-t-[3rem] relative overflow-hidden">
             {/* Animated Background */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(16,185,129,0.1),rgba(255,255,255,0))]" />
             <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-gray-800 to-transparent"></div>
 
-            {/* Floating Glows */}
-            <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none animate-breathe"></div>
-            <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-accent/5 rounded-full blur-[80px] translate-y-1/3 -translate-x-1/3 pointer-events-none animate-breathe" style={{ animationDelay: '2s' }}></div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 lg:gap-20 mb-16">
                     {/* Brand Section */}
                     <div className="col-span-1 md:col-span-1">
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="h-10 w-10 bg-gradient-to-br from-primary to-emerald-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
-                                <Wrench className="h-5 w-5" />
+                            <div className="h-10 px-2.5 bg-gradient-to-br from-primary to-emerald-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
+                                <span className="font-black text-[10px] italic tracking-tight leading-none">VESPA</span>
                             </div>
                             <div>
                                 <h2 className="text-xl font-black italic tracking-tighter text-white">บ้านรักรถเมืองเลย</h2>
@@ -39,14 +29,14 @@ export default function Footer() {
                             {siteConfig.brand.description}
                         </p>
                         <div className="flex flex-wrap gap-4">
-                            <Link href={siteConfig.footerData.contact.social.facebook} className="h-10 w-10 bg-gray-900 rounded-full flex items-center justify-center text-gray-400 hover:bg-[#1877F2] hover:text-white transition-all transform hover:-translate-y-1">
+                            <Link href={siteConfig.footerData.contact.social.facebook} aria-label="Facebook" className="h-10 w-10 bg-gray-900 rounded-full flex items-center justify-center text-gray-400 hover:bg-[#1877F2] hover:text-white transition-all transform hover:-translate-y-1">
                                 <Facebook className="h-5 w-5" />
                             </Link>
-                            <Link href={siteConfig.footerData.contact.social.tiktok} className="h-10 w-10 bg-gray-900 rounded-full flex items-center justify-center text-gray-400 hover:bg-[#000000] hover:text-white transition-all transform hover:-translate-y-1">
-                                <span className="font-bold text-xs">TT</span>
+                            <Link href={siteConfig.footerData.contact.social.tiktok} aria-label="TikTok" className="h-10 w-10 bg-gray-900 rounded-full flex items-center justify-center text-gray-400 hover:bg-[#000000] hover:text-white transition-all transform hover:-translate-y-1">
+                                <span className="font-bold text-xs" aria-hidden="true">TT</span>
                             </Link>
-                            <Link href={siteConfig.footerData.contact.social.youtube} className="h-10 w-10 bg-gray-900 rounded-full flex items-center justify-center text-gray-400 hover:bg-[#FF0000] hover:text-white transition-all transform hover:-translate-y-1">
-                                <span className="font-bold text-xs">YT</span>
+                            <Link href={siteConfig.footerData.contact.social.youtube} aria-label="YouTube" className="h-10 w-10 bg-gray-900 rounded-full flex items-center justify-center text-gray-400 hover:bg-[#FF0000] hover:text-white transition-all transform hover:-translate-y-1">
+                                <span className="font-bold text-xs" aria-hidden="true">YT</span>
                             </Link>
                         </div>
                     </div>
@@ -71,7 +61,6 @@ export default function Footer() {
                         <div className="col-span-2 md:col-span-1">
                             <h3 className="font-bold text-white uppercase tracking-widest text-sm mb-6">Contact Us</h3>
                             <ul className="space-y-4 text-sm text-gray-400 font-medium">
-                                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                 {siteConfig.footerData.contact.items.map((item: any, index: number) => (
                                     <li key={index} className="flex items-start gap-3">
                                         <div className="mt-1 min-w-[16px]">
@@ -91,14 +80,17 @@ export default function Footer() {
                             </ul>
                         </div>
 
-                        {/* Newsletter (Optional/Placeholder) */}
+                        {/* Quick shop CTA */}
                         <div className="col-span-2 md:col-span-1 hidden md:block">
-                            <h3 className="font-bold text-white uppercase tracking-widest text-sm mb-6">Stay Updated</h3>
-                            <p className="text-xs text-gray-500 mb-4">Subscribe to get the latest products and news.</p>
-                            <div className="flex gap-2">
-                                <input type="email" placeholder="Email address" className="bg-gray-900 border-none rounded-lg px-4 py-2 text-sm w-full focus:ring-1 focus:ring-primary text-white" />
-                                <button className="bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-bold hover:bg-emerald-500 transition-colors">OK</button>
-                            </div>
+                            <h3 className="font-bold text-white uppercase tracking-widest text-sm mb-6">เริ่มช้อปเลย</h3>
+                            <p className="text-xs text-gray-500 mb-4">อะไหล่และอุปกรณ์ตกแต่ง Vespa คัดสรรโดยช่างผู้เชี่ยวชาญ</p>
+                            <Link
+                                href="/products"
+                                className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-full text-sm font-bold hover:bg-emerald-500 transition-colors"
+                            >
+                                ดูสินค้าทั้งหมด
+                                <ChevronRight className="h-4 w-4" />
+                            </Link>
                         </div>
                     </div>
                 </div>

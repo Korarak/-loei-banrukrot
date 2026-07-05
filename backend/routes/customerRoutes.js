@@ -18,9 +18,10 @@ router.use(authenticateToken());
 router.get('/me', (req, res) => {
     const profile = req.customer || req.user;
     if (!profile) {
-        return res.status(404).json({ message: 'User not found' });
+        return res.status(404).json({ success: false, message: 'User not found' });
     }
-    res.json(profile);
+    const { passwordHash: _omit, ...data } = profile.toObject ? profile.toObject() : profile;
+    res.json({ success: true, data });
 });
 
 // Admin/Staff only routes

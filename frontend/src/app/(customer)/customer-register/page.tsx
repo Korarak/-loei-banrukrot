@@ -233,10 +233,10 @@ export default function CustomerRegisterPage() {
                 </Button>
             </div>
 
-            <Card className="w-full max-w-md shadow-lg">
-                <CardHeader className="space-y-1">
-                    <CardTitle className="text-2xl font-bold text-center">{t.title}</CardTitle>
-                    <CardDescription className="text-center">
+            <Card className="w-full max-w-md border-0 shadow-2xl shadow-gray-200/60 rounded-[2rem]">
+                <CardHeader className="space-y-2 pt-8">
+                    <CardTitle className="text-3xl font-black tracking-tight text-center text-gray-900">{t.title}</CardTitle>
+                    <CardDescription className="text-center text-gray-400 font-medium">
                         {t.subtitle}
                     </CardDescription>
                 </CardHeader>
@@ -278,7 +278,7 @@ export default function CustomerRegisterPage() {
                                     <FormItem>
                                         <FormLabel>{t.email}</FormLabel>
                                         <FormControl>
-                                            <Input placeholder={t.placeholders.email} {...field} />
+                                            <Input type="email" autoComplete="email" placeholder={t.placeholders.email} {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -291,7 +291,7 @@ export default function CustomerRegisterPage() {
                                     <FormItem>
                                         <FormLabel>{t.phone}</FormLabel>
                                         <FormControl>
-                                            <Input placeholder={t.placeholders.phone} {...field} />
+                                            <Input type="tel" inputMode="numeric" autoComplete="tel" placeholder={t.placeholders.phone} {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -304,7 +304,7 @@ export default function CustomerRegisterPage() {
                                     <FormItem>
                                         <FormLabel>{t.password}</FormLabel>
                                         <FormControl>
-                                            <Input type="password" placeholder={t.placeholders.password} {...field} />
+                                            <Input type="password" autoComplete="new-password" placeholder={t.placeholders.password} {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -317,7 +317,7 @@ export default function CustomerRegisterPage() {
                                     <FormItem>
                                         <FormLabel>{t.confirmPassword}</FormLabel>
                                         <FormControl>
-                                            <Input type="password" placeholder={t.placeholders.password} {...field} />
+                                            <Input type="password" autoComplete="new-password" placeholder={t.placeholders.password} {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -336,6 +336,8 @@ export default function CustomerRegisterPage() {
                             <div className="space-y-2 p-4 bg-gray-50 rounded-lg border border-gray-100">
                                 <Label className="text-sm font-medium">{t.security.label}: {captcha.question}</Label>
                                 <Input
+                                    inputMode="numeric"
+                                    autoComplete="off"
                                     placeholder={t.security.placeholder}
                                     value={captchaInput}
                                     onChange={(e) => setCaptchaInput(e.target.value)}
@@ -345,7 +347,7 @@ export default function CustomerRegisterPage() {
 
                             <Button
                                 type="submit"
-                                className="w-full bg-primary text-primary-foreground font-bold hover:bg-primary/90 shadow-md h-12 text-lg"
+                                className="w-full h-12 rounded-2xl bg-gray-900 hover:bg-black text-white font-black text-base uppercase tracking-widest shadow-lg transition-all hover:-translate-y-0.5 active:scale-[0.98]"
                                 disabled={isLoading}
                             >
                                 {isLoading ? (

@@ -6,7 +6,6 @@ const Category = require('../models/Category');
 // @access  Public
 exports.getAllCategories = async (req, res, next) => {
     try {
-        console.log('GET /api/categories request received', req.query);
         const { isActive } = req.query;
 
         const match = {};

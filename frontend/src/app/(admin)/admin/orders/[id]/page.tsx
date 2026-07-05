@@ -26,7 +26,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { useShippingMethods } from '@/hooks/useShippingMethods';
-import { useState, use, useEffect } from 'react';
+import { useState, use } from 'react';
 import Image from 'next/image';
 import { COURIERS, getCourier, getTrackingUrl } from '@/lib/couriers';
 import { cn } from '@/lib/utils';
@@ -53,6 +53,8 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
     const [scannerOpen, setScannerOpen] = useState(false);
     const [receiptOpen, setReceiptOpen] = useState(false);
     const [labelOpen, setLabelOpen] = useState(false);
+    // confirm ก่อนยืนยัน/ยกเลิกการยืนยันการชำระเงิน — เป็น action ทางการเงิน
+    const [verifyAction, setVerifyAction] = useState<'verify' | 'unverify' | null>(null);
 
     const calculateShippingCost = () => {
         if (!order?.items) return 0;
@@ -60,15 +62,13 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
         return hasLargeItem ? 100 : 50;
     };
 
-    useEffect(() => {
-        if (order) {
-            setShippingProvider(order.shippingInfo?.provider || '');
-            setTrackingNumber(order.shippingInfo?.trackingNumber || '');
-            // Use existing cost or calculate based on items
-            const calculatedCost = calculateShippingCost();
-            setShippingCost(order.shippingInfo?.cost?.toString() || calculatedCost.toString());
-        }
-    }, [order]);
+    const openShippingDialog = () => {
+        setShippingProvider(order?.shippingInfo?.provider || '');
+        setTrackingNumber(order?.shippingInfo?.trackingNumber || '');
+        const calculatedCost = calculateShippingCost();
+        setShippingCost(order?.shippingInfo?.cost?.toString() || calculatedCost.toString());
+        setShippingDialogOpen(true);
+    };
 
     const handleUpdateShipping = async () => {
         if (!order) return;
@@ -117,8 +117,9 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
 
     if (isLoading) {
         return (
-            <div className="flex justify-center items-center min-h-[400px]">
+            <div className="flex justify-center items-center min-h-[400px]" role="status">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+                <span className="sr-only">กำลังโหลดคำสั่งซื้อ...</span>
             </div>
         );
     }
@@ -328,13 +329,24 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                             {order.payments?.[0]?.slipImage ? (
                                 <div className="space-y-3 border-t pt-3">
                                     <p className="font-medium text-sm text-gray-900">หลักฐานการชำระเงิน (Slip)</p>
-                                    <div className="relative h-40 w-full rounded-lg overflow-hidden border border-gray-200 group cursor-pointer" onClick={() => setPreviewImage(order.payments![0].slipImage!)}>
+                                    <div
+                                        className="relative h-40 w-full rounded-lg overflow-hidden border border-gray-200 group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+                                        role="button"
+                                        tabIndex={0}
+                                        aria-label="ดูหลักฐานการชำระเงินขนาดเต็ม"
+                                        onClick={() => setPreviewImage(order.payments![0].slipImage!)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' || e.key === ' ') {
+                                                e.preventDefault();
+                                                setPreviewImage(order.payments![0].slipImage!);
+                                            }
+                                        }}
+                                    >
                                         <Image
                                             src={getImageUrl(order.payments[0].slipImage)}
                                             alt="หลักฐานการชำระเงิน"
                                             fill
                                             className="object-cover"
-                                            unoptimized
                                         />
                                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                             <Eye className="text-white h-8 w-8" />
@@ -346,7 +358,7 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                                             <Button
                                                 variant="outline"
                                                 className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                onClick={() => verifyPayment.mutate({ id: order._id, isVerified: false })}
+                                                onClick={() => setVerifyAction('unverify')}
                                                 disabled={verifyPayment.isPending}
                                             >
                                                 <XCircle className="h-4 w-4 mr-2" />
@@ -355,7 +367,7 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                                         ) : (
                                             <Button
                                                 className="w-full bg-green-600 hover:bg-green-700 text-white"
-                                                onClick={() => verifyPayment.mutate({ id: order._id, isVerified: true })}
+                                                onClick={() => setVerifyAction('verify')}
                                                 disabled={verifyPayment.isPending}
                                             >
                                                 <CheckCircle className="h-4 w-4 mr-2" />
@@ -379,8 +391,9 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                             <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => setShippingDialogOpen(true)}
+                                onClick={openShippingDialog}
                                 className="h-8 w-8"
+                                aria-label="แก้ไขข้อมูลการจัดส่ง"
                             >
                                 <Pencil className="h-4 w-4" />
                             </Button>
@@ -407,6 +420,7 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                                             onClick={copyTrackingNumber}
                                             className="text-gray-400 hover:text-gray-700 transition-colors shrink-0"
                                             title="คัดลอกเลขพัสดุ"
+                                            aria-label="คัดลอกเลขพัสดุ"
                                         >
                                             <Copy className="h-3.5 w-3.5" />
                                         </button>
@@ -528,6 +542,7 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                                             onClick={copyDraftTrackingNumber}
                                             className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors"
                                             title="คัดลอก"
+                                            aria-label="คัดลอกเลขพัสดุ"
                                         >
                                             <Copy className="h-4 w-4" />
                                         </button>
@@ -538,6 +553,7 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                                     onClick={() => setScannerOpen(true)}
                                     className="h-11 w-11 shrink-0 flex items-center justify-center rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground transition-colors"
                                     title="สแกนบาร์โค้ดจากกล้อง"
+                                    aria-label="สแกนบาร์โค้ดจากกล้อง"
                                 >
                                     <ScanLine className="h-5 w-5" />
                                 </button>
@@ -609,7 +625,43 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                     </DialogHeader>
                     <DialogFooter>
                         <Button variant="outline" onClick={() => setCancelDialogOpen(false)}>กลับไปดูแลออเดอร์</Button>
-                        <Button variant="destructive" onClick={confirmCancel}>ใช่, ยกเลิกคำสั่งซื้อ</Button>
+                        <Button variant="destructive" onClick={confirmCancel} disabled={updateStatus.isPending}>
+                            {updateStatus.isPending ? 'กำลังยกเลิก...' : 'ใช่, ยกเลิกคำสั่งซื้อ'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Confirm payment verification */}
+            <Dialog open={!!verifyAction} onOpenChange={(o) => { if (!o) setVerifyAction(null); }}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle className={`flex items-center gap-2 ${verifyAction === 'verify' ? 'text-green-700' : 'text-red-600'}`}>
+                            {verifyAction === 'verify'
+                                ? <><CheckCircle className="h-5 w-5" /> ยืนยันการชำระเงิน</>
+                                : <><XCircle className="h-5 w-5" /> ยกเลิกการยืนยันการชำระเงิน</>}
+                        </DialogTitle>
+                        <DialogDescription>
+                            {verifyAction === 'verify'
+                                ? 'ตรวจสอบสลิปและยอดเงินเรียบร้อยแล้วใช่หรือไม่? เมื่อยืนยันแล้วออเดอร์จะเข้าสู่ขั้นตอนถัดไป'
+                                : 'ต้องการถอนการยืนยันการชำระเงินของออเดอร์นี้ใช่หรือไม่?'}
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setVerifyAction(null)}>ยกเลิก</Button>
+                        <Button
+                            className={verifyAction === 'verify' ? 'bg-green-600 hover:bg-green-700 text-white' : ''}
+                            variant={verifyAction === 'verify' ? 'default' : 'destructive'}
+                            disabled={verifyPayment.isPending}
+                            onClick={() => {
+                                verifyPayment.mutate(
+                                    { id: order._id, isVerified: verifyAction === 'verify' },
+                                    { onSettled: () => setVerifyAction(null) }
+                                );
+                            }}
+                        >
+                            {verifyPayment.isPending ? 'กำลังบันทึก...' : 'ยืนยัน'}
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -617,7 +669,7 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                 open={!!previewImage}
                 onOpenChange={(open: boolean) => !open && setPreviewImage(null)}
                 images={previewImage ? [{ _id: 'slip', imagePath: previewImage, isPrimary: true, sortOrder: 0 }] : []}
-                productName="Payment Slip"
+                productName="สลิปการชำระเงิน"
             />
 
             <BarcodeScanner

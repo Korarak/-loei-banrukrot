@@ -1,4 +1,4 @@
-const { Order, Product, User, Customer, Category, OrderDetail } = require('../models');
+const { Order, Product, ProductVariant, User, Customer, Category, OrderDetail } = require('../models');
 
 // Helper: Parse date range from query params
 const getDateRange = (range, startDate, endDate) => {
@@ -109,68 +109,63 @@ exports.getDashboardSummary = async (req, res, next) => {
             Customer.countDocuments({ isActive: true, dateRegistered: { $lte: prevEnd } })
         ]);
 
-        // New customers in period
-        const newCustomersInPeriod = await Customer.countDocuments({
-            dateRegistered: { $gte: start, $lte: end }
-        });
-        const prevNewCustomers = await Customer.countDocuments({
-            dateRegistered: { $gte: prevStart, $lte: prevEnd }
-        });
-
-        // 3. Recent Orders
-        const recentOrders = await Order.find(dateFilter)
-            .sort({ orderDate: -1 })
-            .limit(5)
-            .populate('customerId', 'firstName lastName email')
-            .select('orderDate totalAmount source orderStatus saleReference');
-
-        // 4. Monthly Revenue (for Chart)
-        const monthlyRevenue = await Order.aggregate([
-            { $match: { orderDate: { $gte: new Date(new Date().getFullYear(), 0, 1) } } },
-            {
-                $group: {
-                    _id: { $month: '$orderDate' },
-                    revenue: { $sum: '$totalAmount' },
-                    orders: { $sum: 1 }
-                }
-            },
-            { $sort: { _id: 1 } }
+        // 3–8. All independent queries in parallel
+        const [
+            newCustomersInPeriod,
+            prevNewCustomers,
+            recentOrders,
+            monthlyRevenue,
+            lowStockProducts,
+            topSellingProducts,
+            orderStatusDistribution,
+            recentCustomers,
+        ] = await Promise.all([
+            Customer.countDocuments({ dateRegistered: { $gte: start, $lte: end } }),
+            Customer.countDocuments({ dateRegistered: { $gte: prevStart, $lte: prevEnd } }),
+            Order.find(dateFilter)
+                .sort({ orderDate: -1 })
+                .limit(5)
+                .populate('customerId', 'firstName lastName email')
+                .select('orderDate totalAmount source orderStatus saleReference'),
+            Order.aggregate([
+                { $match: { orderDate: { $gte: new Date(new Date().getFullYear(), 0, 1) } } },
+                { $group: { _id: { $month: '$orderDate' }, revenue: { $sum: '$totalAmount' }, orders: { $sum: 1 } } },
+                { $sort: { _id: 1 } }
+            ]),
+            ProductVariant.aggregate([
+                { $match: { stockAvailable: { $lte: 10 } } },
+                { $lookup: { from: 'products', localField: 'productId', foreignField: '_id', as: 'productDoc' } },
+                { $unwind: '$productDoc' },
+                { $match: { 'productDoc.isActive': true } },
+                { $project: {
+                    productName: '$productDoc.productName',
+                    imageUrl: '$productDoc.imageUrl',
+                    variants: { sku: '$sku', stock: '$stockAvailable' }
+                }},
+                { $sort: { 'variants.stock': 1 } },
+                { $limit: 10 }
+            ]),
+            OrderDetail.aggregate([
+                { $lookup: { from: 'orders', localField: 'orderId', foreignField: '_id', as: 'order' } },
+                { $unwind: '$order' },
+                { $match: { 'order.orderDate': { $gte: start, $lte: end } } },
+                { $lookup: { from: 'productvariants', localField: 'variantId', foreignField: '_id', as: 'variant' } },
+                { $unwind: '$variant' },
+                { $lookup: { from: 'products', localField: 'variant.productId', foreignField: '_id', as: 'product' } },
+                { $unwind: '$product' },
+                { $group: { _id: '$product.productName', totalSold: { $sum: '$quantity' }, revenue: { $sum: '$subtotal' } } },
+                { $sort: { totalSold: -1 } },
+                { $limit: 5 }
+            ]),
+            Order.aggregate([
+                { $match: dateFilter },
+                { $group: { _id: "$orderStatus", count: { $sum: 1 } } }
+            ]),
+            Customer.find()
+                .sort({ dateRegistered: -1 })
+                .limit(5)
+                .select('firstName lastName email dateRegistered'),
         ]);
-
-        // 5. Low Stock Products (Stock <= 10)
-        const lowStockProducts = await Product.aggregate([
-            { $unwind: "$variants" },
-            { $match: { "variants.stock": { $lte: 10 } } },
-            { $project: { productName: 1, "variants.sku": 1, "variants.stock": 1, "variants.price": 1, imageUrl: 1 } },
-            { $limit: 10 }
-        ]);
-
-        // 6. Top Selling Products (within date range)
-        const topSellingProducts = await Order.aggregate([
-            { $match: dateFilter },
-            { $unwind: "$items" },
-            {
-                $group: {
-                    _id: "$items.productName",
-                    totalSold: { $sum: "$items.quantity" },
-                    revenue: { $sum: { $multiply: ["$items.price", "$items.quantity"] } }
-                }
-            },
-            { $sort: { totalSold: -1 } },
-            { $limit: 5 }
-        ]);
-
-        // 7. Order Status Distribution (within date range)
-        const orderStatusDistribution = await Order.aggregate([
-            { $match: dateFilter },
-            { $group: { _id: "$orderStatus", count: { $sum: 1 } } }
-        ]);
-
-        // 8. Recent Customers
-        const recentCustomers = await Customer.find()
-            .sort({ dateRegistered: -1 })
-            .limit(5)
-            .select('firstName lastName email dateRegistered');
 
         // 9. Average Order Value
         const avgOrderValue = currentTotalOrders > 0
@@ -396,18 +391,27 @@ exports.getCustomerInsights = async (req, res, next) => {
         const { range = '30d', startDate, endDate } = req.query;
         const { start, end } = getDateRange(range, startDate, endDate);
 
-        // 1. New customers in period
-        const newCustomers = await Customer.countDocuments({
-            dateRegistered: { $gte: start, $lte: end }
-        });
+        // 1, 2, 4, 5 — independent queries in parallel
+        const [newCustomers, orderingCustomers, topCustomers, registrationTrend] = await Promise.all([
+            Customer.countDocuments({ dateRegistered: { $gte: start, $lte: end } }),
+            Order.distinct('customerId', { orderDate: { $gte: start, $lte: end }, customerId: { $ne: null } }),
+            Order.aggregate([
+                { $match: { orderDate: { $gte: start, $lte: end }, customerId: { $ne: null } } },
+                { $group: { _id: '$customerId', totalSpent: { $sum: '$totalAmount' }, orderCount: { $sum: 1 } } },
+                { $sort: { totalSpent: -1 } },
+                { $limit: 5 },
+                { $lookup: { from: 'customers', localField: '_id', foreignField: '_id', as: 'customer' } },
+                { $unwind: '$customer' },
+                { $project: { _id: 1, totalSpent: 1, orderCount: 1, firstName: '$customer.firstName', lastName: '$customer.lastName', email: '$customer.email' } }
+            ]),
+            Customer.aggregate([
+                { $match: { dateRegistered: { $gte: start, $lte: end } } },
+                { $group: { _id: { year: { $year: '$dateRegistered' }, month: { $month: '$dateRegistered' }, day: { $dayOfMonth: '$dateRegistered' } }, count: { $sum: 1 } } },
+                { $sort: { '_id.year': 1, '_id.month': 1, '_id.day': 1 } }
+            ]),
+        ]);
 
-        // 2. Customers who ordered in this period
-        const orderingCustomers = await Order.distinct('customerId', {
-            orderDate: { $gte: start, $lte: end },
-            customerId: { $ne: null }
-        });
-
-        // 3. Of those, find returning customers (ordered before the period too)
+        // 3. Returning customers depends on orderingCustomers result
         let returningCount = 0;
         if (orderingCustomers.length > 0) {
             const returningCustomers = await Order.distinct('customerId', {
@@ -418,55 +422,6 @@ exports.getCustomerInsights = async (req, res, next) => {
         }
 
         const newBuyerCount = orderingCustomers.length - returningCount;
-
-        // 4. Top customers by spend
-        const topCustomers = await Order.aggregate([
-            { $match: { orderDate: { $gte: start, $lte: end }, customerId: { $ne: null } } },
-            {
-                $group: {
-                    _id: '$customerId',
-                    totalSpent: { $sum: '$totalAmount' },
-                    orderCount: { $sum: 1 }
-                }
-            },
-            { $sort: { totalSpent: -1 } },
-            { $limit: 5 },
-            {
-                $lookup: {
-                    from: 'customers',
-                    localField: '_id',
-                    foreignField: '_id',
-                    as: 'customer'
-                }
-            },
-            { $unwind: '$customer' },
-            {
-                $project: {
-                    _id: 1,
-                    totalSpent: 1,
-                    orderCount: 1,
-                    firstName: '$customer.firstName',
-                    lastName: '$customer.lastName',
-                    email: '$customer.email'
-                }
-            }
-        ]);
-
-        // 5. Customer registration trend (by day for the period)
-        const registrationTrend = await Customer.aggregate([
-            { $match: { dateRegistered: { $gte: start, $lte: end } } },
-            {
-                $group: {
-                    _id: {
-                        year: { $year: '$dateRegistered' },
-                        month: { $month: '$dateRegistered' },
-                        day: { $dayOfMonth: '$dateRegistered' }
-                    },
-                    count: { $sum: 1 }
-                }
-            },
-            { $sort: { '_id.year': 1, '_id.month': 1, '_id.day': 1 } }
-        ]);
 
         res.json({
             success: true,

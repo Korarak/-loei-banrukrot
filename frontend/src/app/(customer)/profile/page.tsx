@@ -3,6 +3,7 @@
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useCustomerAddresses, useAddAddress, useDeleteAddress, useUpdateAddress, useUpdateCustomer, CustomerAddress } from '@/hooks/useCustomers';
 import api from '@/lib/api';
+import Image from 'next/image';
 import { getImageUrl } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,6 +22,17 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 export default function ProfilePage() {
     const router = useRouter();
@@ -80,7 +92,7 @@ export default function ProfilePage() {
                 }, 500);
             }
         }
-    }, [customer, isEditingProfile, searchParams]);
+    }, [customer, searchParams]);
 
     const handleUpdateProfile = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -154,13 +166,11 @@ export default function ProfilePage() {
     };
 
     const handleDeleteAddress = async (addressId: string) => {
-        if (confirm('คุณแน่ใจว่าต้องการลบที่อยู่นี้?')) {
-            try {
-                await deleteAddress.mutateAsync({ addressId, customerId: customer._id });
-                toast.success('ลบที่อยู่เรียบร้อย');
-            } catch (error) {
-                toast.error('ไม่สามารถลบที่อยู่ได้');
-            }
+        try {
+            await deleteAddress.mutateAsync({ addressId, customerId: customer._id });
+            toast.success('ลบที่อยู่เรียบร้อย');
+        } catch (error) {
+            toast.error('ไม่สามารถลบที่อยู่ได้');
         }
     };
 
@@ -240,10 +250,12 @@ export default function ProfilePage() {
                     <div className="relative group">
                         <div className="h-32 w-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-gray-100 flex items-center justify-center relative">
                             {customer.profilePicture ? (
-                                <img
+                                <Image
                                     src={getImageUrl(customer.profilePicture)}
                                     alt="Profile"
-                                    className="h-full w-full object-cover"
+                                    fill
+                                    className="object-cover"
+                                    sizes="128px"
                                 />
                             ) : (
                                 <User className="h-16 w-16 text-gray-400" />
@@ -466,9 +478,11 @@ export default function ProfilePage() {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="phone">เบอร์โทรศัพท์ติดต่อ</Label>
+                                        <Label htmlFor="addr-phone">เบอร์โทรศัพท์ติดต่อ</Label>
                                         <Input
-                                            id="phone"
+                                            id="addr-phone"
+                                            type="tel"
+                                            inputMode="numeric"
                                             value={newAddress.phone}
                                             onChange={e => setNewAddress({ ...newAddress, phone: e.target.value })}
                                             required
@@ -546,7 +560,10 @@ export default function ProfilePage() {
 
                         <div className="space-y-4">
                             {isLoading ? (
-                                <div className="text-center py-4">กำลังโหลดข้อมูล...</div>
+                                <div className="flex items-center justify-center gap-3 py-8 text-gray-400" role="status">
+                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary" />
+                                    <span className="text-sm font-medium">กำลังโหลดข้อมูลที่อยู่...</span>
+                                </div>
                             ) : addresses && addresses.length > 0 ? (
                                 addresses.map((addr) => (
                                     <div key={addr._id} className={`flex items-start justify-between p-4 border rounded-2xl transition-all ${addr.isDefault ? 'border-primary/30 bg-primary/5' : 'border-gray-100 hover:bg-gray-50'}`}>
@@ -584,17 +601,37 @@ export default function ProfilePage() {
                                                 size="icon"
                                                 className="text-gray-400 hover:text-primary hover:bg-primary/5 rounded-xl mr-1"
                                                 onClick={() => handleEditAddressClick(addr)}
+                                                aria-label={`แก้ไขที่อยู่ของ ${addr.recipientName}`}
                                             >
                                                 <Pencil className="h-4 w-4" />
                                             </Button>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl"
-                                                onClick={() => handleDeleteAddress(addr._id)}
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl"
+                                                        disabled={deleteAddress.isPending}
+                                                        aria-label={`ลบที่อยู่ของ ${addr.recipientName}`}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>ลบที่อยู่นี้?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            ที่อยู่ของ {addr.recipientName} ({addr.province}) จะถูกลบออก ไม่สามารถย้อนกลับได้
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => handleDeleteAddress(addr._id)} className="bg-red-500 hover:bg-red-600">
+                                                            ลบที่อยู่
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
                                         </div>
                                     </div>
                                 ))
@@ -633,6 +670,8 @@ export default function ProfilePage() {
                                         <Label htmlFor="edit-phone">เบอร์โทรศัพท์ติดต่อ</Label>
                                         <Input
                                             id="edit-phone"
+                                            type="tel"
+                                            inputMode="numeric"
                                             value={editingAddress.phone || ''}
                                             onChange={e => setEditingAddress({ ...editingAddress, phone: e.target.value })}
                                             required

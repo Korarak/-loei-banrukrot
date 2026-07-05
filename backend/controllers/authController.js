@@ -12,10 +12,20 @@ const generateToken = (id, type = 'user') => {
 
 // @desc    Register new user (staff/owner)
 // @route   POST /api/auth/register
-// @access  Public (แต่ควรจำกัดในการใช้งานจริง)
+// @access  Public — bootstrap only (works only while no user exists yet)
 exports.registerUser = async (req, res, next) => {
     try {
-        const { username, email, password, role } = req.body;
+        const { username, email, password } = req.body;
+
+        // เปิดรับสมัครเฉพาะตอนที่ระบบยังไม่มี user เลย (คนแรก = owner)
+        // หลังจากนั้น owner ต้องเพิ่มพนักงานผ่าน POST /api/users เท่านั้น
+        const userCount = await User.estimatedDocumentCount();
+        if (userCount > 0) {
+            return res.status(403).json({
+                success: false,
+                message: 'การสมัครสมาชิกพนักงานถูกปิด กรุณาให้เจ้าของร้านเพิ่มบัญชีผ่านหน้าจัดการผู้ใช้'
+            });
+        }
 
         // เช็คว่า email ซ้ำหรือไม่
         const existingUser = await User.findOne({ email });
@@ -30,12 +40,12 @@ exports.registerUser = async (req, res, next) => {
         const salt = await bcrypt.genSalt(10);
         const passwordHash = await bcrypt.hash(password, salt);
 
-        // สร้าง user ใหม่
+        // สร้าง user ใหม่ — คนแรกของระบบเป็น owner เสมอ ไม่รับ role จาก client
         const user = await User.create({
             username,
             email,
             passwordHash,
-            role: role || 'staff'
+            role: 'owner'
         });
 
         // สร้าง token
@@ -173,6 +183,14 @@ exports.loginCustomer = async (req, res, next) => {
             });
         }
 
+        // ตรวจสอบว่า customer active หรือไม่
+        if (!customer.isActive) {
+            return res.status(403).json({
+                success: false,
+                message: 'Account is inactive'
+            });
+        }
+
         // ตรวจสอบ password
         const isMatch = await bcrypt.compare(password, customer.passwordHash);
         if (!isMatch) {
@@ -206,16 +224,15 @@ exports.loginCustomer = async (req, res, next) => {
 // @route   GET /api/auth/google/callback
 // @access  Public
 exports.googleCallback = async (req, res) => {
+    const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:3000').split(',')[0].trim();
     try {
+        if (!req.user?.isActive) {
+            return res.redirect(`${frontendUrl}/customer-login?error=account_inactive`);
+        }
         const token = generateToken(req.user._id, 'customer');
-        // Use first URL from comma-separated FRONTEND_URL (CORS uses all, redirect needs one)
-        const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:3000').split(',')[0].trim();
-
-        // Redirect to frontend with token
         res.redirect(`${frontendUrl}/auth/callback?token=${token}`);
     } catch (error) {
         console.error('Google Callback Error:', error);
-        const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:3000').split(',')[0].trim();
-        res.redirect(`${frontendUrl}/login?error=auth_failed`);
+        res.redirect(`${frontendUrl}/customer-login?error=auth_failed`);
     }
 };

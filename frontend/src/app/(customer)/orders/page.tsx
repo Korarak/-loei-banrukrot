@@ -35,8 +35,9 @@ export default function OrdersPage() {
 
     if (isLoading) {
         return (
-            <div className="flex justify-center items-center min-h-[400px]">
+            <div className="flex justify-center items-center min-h-[400px]" role="status">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+                <span className="sr-only">กำลังโหลดคำสั่งซื้อ...</span>
             </div>
         );
     }
@@ -157,7 +158,6 @@ export default function OrdersPage() {
                                                             alt={item.productName}
                                                             fill
                                                             className="object-cover"
-                                                            unoptimized
                                                         />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center text-xs text-gray-300 bg-gray-50">ไม่มีรูป</div>
@@ -345,7 +345,7 @@ export default function OrdersPage() {
                 <TabsContent value="pending" className="mt-0">{renderOrderList(filterOrders(['pending']))}</TabsContent>
                 <TabsContent value="processing" className="mt-0">{renderOrderList(filterOrders(['confirmed', 'processing']))}</TabsContent>
                 <TabsContent value="shipped" className="mt-0">{renderOrderList(filterOrders(['shipped']))}</TabsContent>
-                <TabsContent value="delivered" className="mt-0">{renderOrderList(filterOrders(['delivered']))}</TabsContent>
+                <TabsContent value="delivered" className="mt-0">{renderOrderList(filterOrders(['delivered', 'completed']))}</TabsContent>
                 <TabsContent value="cancelled" className="mt-0">{renderOrderList(filterOrders(['cancelled']))}</TabsContent>
             </Tabs>
         </div>

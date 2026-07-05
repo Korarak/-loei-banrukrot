@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { 
     Database, 
     Download, 
@@ -37,6 +37,14 @@ interface BackupFile {
     createdAt: string;
 }
 
+function formatSize(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
 export default function AdminBackupPage() {
     const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
@@ -48,6 +56,7 @@ export default function AdminBackupPage() {
             const response = await api.get('/settings/backups');
             return response.data.data as BackupFile[];
         },
+        staleTime: 60_000,
     });
 
     // Run backup mutation
@@ -69,16 +78,9 @@ export default function AdminBackupPage() {
         }
     });
 
-    const formatSize = (bytes: number) => {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    };
-
-    const filteredBackups = backups?.filter(b => 
-        b.filename.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredBackups = useMemo(() =>
+        backups?.filter(b => b.filename.toLowerCase().includes(searchTerm.toLowerCase())),
+        [backups, searchTerm]
     );
 
     return (
@@ -230,11 +232,9 @@ export default function AdminBackupPage() {
                                     sudo bash ~/loei-banrakrod/scripts/restore-db.sh [path-to-file]
                                 </div>
                             </div>
-                            <Button variant="outline" className="w-full rounded-xl border-gray-200 text-gray-600 font-bold text-xs py-5" asChild>
-                                <a href="file:///d:/@loei-banrakrod/DISASTER_RECOVERY.md">
-                                    อ่านคู่มือฉบับเต็ม (Full Guide)
-                                </a>
-                            </Button>
+                            <p className="text-xs text-gray-400 text-center pt-2">
+                                ดูไฟล์ <code className="bg-gray-100 px-1 rounded text-gray-600">DISASTER_RECOVERY.md</code> บน Server
+                            </p>
                         </CardContent>
                     </Card>
                 </div>

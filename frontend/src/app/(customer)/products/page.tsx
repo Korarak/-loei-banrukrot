@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
 import { useCategories } from '@/hooks/useCategories';
 import { Slider } from '@/components/ui/slider';
-import { Search, Filter, ChevronDown, X, Check, Zap, ShoppingBag } from 'lucide-react';
+import { Search, Filter, X, ShoppingBag } from 'lucide-react';
 import {
     Select,
     SelectContent,
@@ -55,7 +55,7 @@ export default function ProductsPage() {
         return () => clearTimeout(handler);
     }, [priceRange]);
 
-    // Sync local search state with URL
+    // Sync local search state with URL (e.g. browser back/forward)
     useEffect(() => {
         setSearch(searchParam || '');
     }, [searchParam]);
@@ -94,7 +94,7 @@ export default function ProductsPage() {
     });
 
     // Fetch Products
-    const { data, isLoading } = useQuery({
+    const { data, isLoading, isError, refetch } = useQuery({
         queryKey: ['products', categoryParam, searchParam, sortParam, pageParam, debouncedPriceRange, selectedBrands],
         queryFn: async () => {
             const params: any = {
@@ -124,10 +124,11 @@ export default function ProductsPage() {
             return response.data;
         },
         enabled: !categoryParam || !!categories,
+        staleTime: 60_000,
     });
 
     const products = data?.data || [];
-    const pagination = data?.pagination || { page: 1, totalPages: 1 };
+    const pagination = data?.pagination || { page: 1, pages: 1, total: 0 };
 
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
@@ -165,9 +166,8 @@ export default function ProductsPage() {
         <div className="min-h-screen bg-white pb-20">
             {/* Hero Section - POWERFUL DARK THEME */}
             <div className="relative overflow-hidden bg-zinc-950 mb-12 rounded-b-[3rem] shadow-2xl">
-                {/* Abstract Background */}
-                <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 animate-pulse"></div>
-                <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-accent/20 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/3"></div>
+                {/* Abstract Background — static gradient (no blur animation to save GPU) */}
+                <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 70% 60% at 80% -10%, rgba(16,185,129,0.15) 0%, transparent 60%), radial-gradient(ellipse 50% 50% at 10% 110%, rgba(236,72,153,0.12) 0%, transparent 60%)' }} />
 
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 relative z-10">
                     <motion.div
@@ -207,8 +207,8 @@ export default function ProductsPage() {
                                     onChange={(e) => setSearch(e.target.value)}
                                     className="pl-4 bg-gray-50 border-2 border-transparent focus:border-primary focus:bg-white rounded-xl h-12 transition-all font-medium"
                                 />
-                                <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary transition-colors">
-                                    <Zap className="h-4 w-4" />
+                                <button type="submit" aria-label="ค้นหาสินค้า" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary transition-colors">
+                                    <Search className="h-4 w-4" />
                                 </button>
                             </form>
                         </div>
@@ -225,7 +225,7 @@ export default function ProductsPage() {
                                         }`}
                                 >
                                     สินค้าทั้งหมด
-                                    {!categoryParam && <div className="h-2 w-2 rounded-full bg-white animate-pulse" />}
+                                    {!categoryParam && <div className="h-2 w-2 rounded-full bg-white" />}
                                 </button>
                                 {categories?.map((cat) => (
                                     <button
@@ -237,7 +237,7 @@ export default function ProductsPage() {
                                             }`}
                                     >
                                         {cat.name.toUpperCase()}
-                                        {categoryParam === cat.slug && <div className="h-2 w-2 rounded-full bg-white animate-pulse" />}
+                                        {categoryParam === cat.slug && <div className="h-2 w-2 rounded-full bg-white" />}
                                     </button>
                                 ))}
                             </div>
@@ -258,7 +258,7 @@ export default function ProductsPage() {
                             </div>
                             <div className="flex items-center justify-between text-sm font-bold text-gray-700 bg-gray-50 p-3 rounded-xl border border-gray-100">
                                 <span>฿{priceRange[0].toLocaleString()}</span>
-                                <span className="text-gray-300">to</span>
+                                <span className="text-gray-300">–</span>
                                 <span>฿{priceRange[1].toLocaleString()}</span>
                             </div>
                         </div>
@@ -304,7 +304,7 @@ export default function ProductsPage() {
                     </form>
                     <Sheet>
                         <SheetTrigger asChild>
-                            <Button className="bg-zinc-900 text-white rounded-xl hover:bg-black transition-colors shadow-md">
+                            <Button aria-label="เปิดตัวกรองสินค้า" className="bg-zinc-900 text-white rounded-xl hover:bg-black transition-colors shadow-md">
                                 <Filter className="h-4 w-4" />
                             </Button>
                         </SheetTrigger>
@@ -316,7 +316,7 @@ export default function ProductsPage() {
                                         <Filter className="h-4 w-4 text-primary" /> ตัวกรองสินค้า
                                     </SheetTitle>
                                 </SheetHeader>
-                                <SheetClose className="h-9 w-9 flex items-center justify-center rounded-full bg-gray-50 text-gray-400 hover:bg-gray-200 transition-colors border border-gray-100">
+                                <SheetClose aria-label="ปิดตัวกรอง" className="h-9 w-9 flex items-center justify-center rounded-full bg-gray-50 text-gray-400 hover:bg-gray-200 transition-colors border border-gray-100">
                                     <X className="h-4 w-4" />
                                 </SheetClose>
                             </div>
@@ -333,7 +333,7 @@ export default function ProductsPage() {
                                                 }`}
                                         >
                                             ทั้งหมด
-                                            {!categoryParam && <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />}
+                                            {!categoryParam && <div className="h-1.5 w-1.5 rounded-full bg-primary" />}
                                         </button>
                                         {categories?.map((cat) => (
                                             <button
@@ -345,7 +345,7 @@ export default function ProductsPage() {
                                                     }`}
                                             >
                                                 {cat.name}
-                                                {categoryParam === cat.slug && <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />}
+                                                {categoryParam === cat.slug && <div className="h-1.5 w-1.5 rounded-full bg-primary" />}
                                             </button>
                                         ))}
                                     </div>
@@ -425,9 +425,9 @@ export default function ProductsPage() {
                     {/* Sort Bar */}
                     <div className="flex justify-between items-center mb-8">
                         <p className="text-gray-500 font-medium">
-                            แสดง <span className="text-gray-900 font-bold">{products.length}</span> รายการ
+                            แสดง <span className="text-gray-900 font-bold">{products.length}</span> จาก <span className="text-gray-900 font-bold">{pagination.total ?? products.length}</span> รายการ
                         </p>
-                        <Select onValueChange={handleSortChange} defaultValue={sortParam || 'newest'}>
+                        <Select onValueChange={handleSortChange} value={sortParam || 'newest'}>
                             <SelectTrigger className="w-[180px] bg-transparent border-none text-right font-bold text-gray-900 focus:ring-0">
                                 <SelectValue placeholder="เรียงตาม" />
                             </SelectTrigger>
@@ -445,6 +445,17 @@ export default function ProductsPage() {
                             {[1, 2, 3, 4, 5, 6].map((i) => (
                                 <div key={i} className="aspect-[4/3] bg-gray-100 rounded-2xl animate-pulse" />
                             ))}
+                        </div>
+                    ) : isError ? (
+                        <div className="text-center py-24 space-y-6">
+                            <h3 className="text-2xl font-bold text-gray-300 uppercase tracking-widest">เกิดข้อผิดพลาด</h3>
+                            <p className="text-gray-400 font-medium">ไม่สามารถโหลดรายการสินค้าได้ กรุณาลองใหม่อีกครั้ง</p>
+                            <Button
+                                onClick={() => refetch()}
+                                className="rounded-full bg-gray-900 hover:bg-black text-white font-bold px-8"
+                            >
+                                ลองใหม่
+                            </Button>
                         </div>
                     ) : products.length > 0 ? (
                         <>

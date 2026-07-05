@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { User, Camera } from 'lucide-react';
 import api from '@/lib/api';
 import { getImageUrl } from '@/lib/utils';
+import Image from 'next/image';
 
 export default function AdminProfilePage() {
     const user = useAuthStore((state) => state.user);
@@ -104,12 +105,14 @@ export default function AdminProfilePage() {
                 {/* Profile Header */}
                 <div className="flex flex-col items-center mb-2">
                     <div className="relative group">
-                        <div className="h-24 w-24 rounded-full overflow-hidden border-4 border-white shadow-lg bg-gray-100 flex items-center justify-center">
+                        <div className="h-24 w-24 rounded-full overflow-hidden border-4 border-white shadow-lg bg-gray-100 flex items-center justify-center relative">
                             {(user.profilePicture || me?.profilePicture) ? (
-                                <img
+                                <Image
                                     src={getImageUrl(user.profilePicture || me?.profilePicture)}
                                     alt="Profile"
-                                    className="h-full w-full object-cover"
+                                    fill
+                                    className="object-cover"
+                                    sizes="96px"
                                 />
                             ) : (
                                 <User className="h-12 w-12 text-gray-400" />
