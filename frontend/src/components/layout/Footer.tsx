@@ -8,7 +8,7 @@ export default function Footer() {
     return (
         <footer className="bg-zinc-950 text-white mt-0 pt-12 md:pt-20 pb-12 rounded-t-[3rem] relative overflow-hidden">
             {/* Animated Background */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(16,185,129,0.1),rgba(255,255,255,0))]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(175,29,53,0.12),rgba(255,255,255,0))]" />
             <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-gray-800 to-transparent"></div>
 
 
@@ -22,7 +22,7 @@ export default function Footer() {
                             </div>
                             <div>
                                 <h2 className="text-xl font-black italic tracking-tighter text-white">บ้านรักรถเมืองเลย</h2>
-                                <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">OAT ENGINEERING</p>
+                                <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">OAT ENGINEERING</p>
                             </div>
                         </div>
                         <p className="text-gray-400 text-sm leading-relaxed mb-8">
@@ -83,10 +83,10 @@ export default function Footer() {
                         {/* Quick shop CTA */}
                         <div className="col-span-2 md:col-span-1 hidden md:block">
                             <h3 className="font-bold text-white uppercase tracking-widest text-sm mb-6">เริ่มช้อปเลย</h3>
-                            <p className="text-xs text-gray-500 mb-4">อะไหล่และอุปกรณ์ตกแต่ง Vespa คัดสรรโดยช่างผู้เชี่ยวชาญ</p>
+                            <p className="text-xs text-gray-400 mb-4">อะไหล่และอุปกรณ์ตกแต่ง Vespa คัดสรรโดยช่างผู้เชี่ยวชาญ</p>
                             <Link
                                 href="/products"
-                                className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-full text-sm font-bold hover:bg-emerald-500 transition-colors"
+                                className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-full text-sm font-bold hover:brightness-110 transition-all"
                             >
                                 ดูสินค้าทั้งหมด
                                 <ChevronRight className="h-4 w-4" />
@@ -96,14 +96,14 @@ export default function Footer() {
                 </div>
 
                 <div className="border-t border-gray-900 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p className="text-gray-600 text-xs font-medium">{siteConfig.footerData.copyright}</p>
+                    <p className="text-gray-400 text-xs font-medium">{siteConfig.footerData.copyright}</p>
                     <div className="flex gap-6">
                         {siteConfig.footerData.legal.map((item, index) => (
-                            <Link key={index} href={item.href} className="text-gray-600 hover:text-white text-xs font-medium transition-colors">
+                            <Link key={index} href={item.href} className="text-gray-400 hover:text-white text-xs font-medium transition-colors">
                                 {item.label}
                             </Link>
                         ))}
-                        <Link href="/login" className="text-gray-800 hover:text-primary text-[10px] font-bold transition-colors uppercase tracking-widest border border-gray-800 rounded px-1.5 py-0.5 ml-4">
+                        <Link href="/login" className="text-gray-500 hover:text-primary text-[10px] font-bold transition-colors uppercase tracking-widest border border-gray-700 rounded px-1.5 py-0.5 ml-4">
                             Admin
                         </Link>
                     </div>

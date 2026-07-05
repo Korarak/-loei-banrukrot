@@ -64,8 +64,8 @@ export default function OrdersPage() {
             return (
                 <div className="text-center py-16 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
                     <Package className="h-16 w-16 mx-auto text-gray-300 mb-4" />
-                    <p className="text-gray-500 font-bold text-lg">ไม่พบคำสั่งซื้อ</p>
-                    <p className="text-gray-400 text-sm mt-1">ยังไม่มีคำสั่งซื้อในสถานะนี้</p>
+                    <p className="text-gray-600 font-bold text-lg">ไม่พบคำสั่งซื้อ</p>
+                    <p className="text-gray-500 text-sm mt-1">ยังไม่มีคำสั่งซื้อในสถานะนี้</p>
                 </div>
             );
         }
@@ -109,7 +109,7 @@ export default function OrdersPage() {
                                 </div>
                             )}
                             {order.orderStatus === 'shipped' && !order.shippingInfo?.trackingNumber && (
-                                <div className="bg-gray-50 border-b border-gray-100 px-4 py-2 flex items-center gap-2 text-gray-500 text-xs font-bold">
+                                <div className="bg-gray-50 border-b border-gray-100 px-4 py-2 flex items-center gap-2 text-gray-600 text-xs font-bold">
                                     <Truck className="h-3.5 w-3.5 shrink-0" />
                                     อยู่ระหว่างจัดส่ง — ยังไม่มีเลขพัสดุ
                                 </div>
@@ -127,7 +127,7 @@ export default function OrdersPage() {
                                                 {getOrderStatusLabel(order.orderStatus)}
                                             </span>
                                         </div>
-                                        <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                                        <div className="flex items-center gap-1.5 text-xs text-gray-600">
                                             <Calendar className="h-3 w-3" />
                                             {new Date(order.createdAt).toLocaleDateString('th-TH', {
                                                 year: 'numeric', month: 'long', day: 'numeric',
@@ -160,12 +160,12 @@ export default function OrdersPage() {
                                                             className="object-cover"
                                                         />
                                                     ) : (
-                                                        <div className="w-full h-full flex items-center justify-center text-xs text-gray-300 bg-gray-50">ไม่มีรูป</div>
+                                                        <div className="w-full h-full flex items-center justify-center text-xs text-gray-500 bg-gray-50">ไม่มีรูป</div>
                                                     )}
                                                 </div>
                                                 <div>
                                                     <p className="font-medium text-gray-900 line-clamp-1">{item.productName}</p>
-                                                    <p className="text-xs text-gray-400">x{item.quantity}</p>
+                                                    <p className="text-xs text-gray-600">x{item.quantity}</p>
                                                 </div>
                                             </div>
                                             <span className="font-semibold text-gray-900 shrink-0">
@@ -174,7 +174,7 @@ export default function OrdersPage() {
                                         </div>
                                     ))}
                                     {order.items.length > 2 && (
-                                        <p className="text-xs text-gray-400 pl-16 pt-1">
+                                        <p className="text-xs text-gray-600 pl-16 pt-1">
                                             และสินค้าอีก {order.items.length - 2} รายการ
                                         </p>
                                     )}
@@ -225,7 +225,7 @@ export default function OrdersPage() {
                                 <div className="flex justify-between items-center pt-3 border-t border-gray-50">
                                     <div className="flex items-center gap-2">
                                         {order.paymentMethod === 'Cash' ? (
-                                            <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full font-medium">เก็บเงินปลายทาง</span>
+                                            <span className="text-xs text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full font-medium">เก็บเงินปลายทาง</span>
                                         ) : order.hasSlip ? (
                                             <span className="text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-bold flex items-center gap-1 border border-emerald-100">
                                                 <CheckCircle className="h-3 w-3" />
@@ -239,7 +239,7 @@ export default function OrdersPage() {
                                         )}
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-xs text-gray-500">ยอดรวม</span>
+                                        <span className="text-xs text-gray-600">ยอดรวม</span>
                                         <span className="text-lg font-black text-primary">
                                             ฿{order.totalAmount.toLocaleString()}
                                         </span>
@@ -310,7 +310,7 @@ export default function OrdersPage() {
             </div>
 
             <div className="relative mb-6">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 h-4 w-4" />
                 <Input
                     placeholder="ค้นหาเลขคำสั่งซื้อ หรือชื่อสินค้า..."
                     className="pl-10 h-11 rounded-xl border-gray-200"

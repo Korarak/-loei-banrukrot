@@ -68,14 +68,14 @@ export default function CustomerLoginPage() {
             {/* Static ambience — matches storefront hero language */}
             <div
                 className="absolute inset-0 pointer-events-none"
-                style={{ background: 'radial-gradient(ellipse 60% 40% at 80% 0%, rgba(16,185,129,0.08) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 10% 100%, rgba(236,72,153,0.06) 0%, transparent 60%)' }}
+                style={{ background: 'radial-gradient(ellipse 60% 40% at 80% 0%, rgba(175,29,53,0.08) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 10% 100%, rgba(201,162,39,0.07) 0%, transparent 60%)' }}
             />
             <Card className="w-full max-w-md border-0 shadow-2xl shadow-gray-200/60 rounded-[2rem] relative z-10">
                 <CardHeader className="space-y-2 pt-8">
                     <CardTitle className="text-3xl font-black tracking-tight text-center text-gray-900">
                         ยินดี<span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-red-900">ต้อนรับกลับ</span>
                     </CardTitle>
-                    <CardDescription className="text-center text-gray-400 font-medium">
+                    <CardDescription className="text-center text-gray-600 font-medium">
                         กรอกอีเมลและรหัสผ่านเพื่อเข้าสู่บัญชีของคุณ
                     </CardDescription>
                 </CardHeader>
@@ -148,7 +148,7 @@ export default function CustomerLoginPage() {
                     </Button>
                 </CardContent>
                 <CardFooter className="flex flex-col space-y-2">
-                    <div className="text-sm text-center text-gray-500">
+                    <div className="text-sm text-center text-gray-600">
                         ยังไม่มีบัญชี?{' '}
                         <Link
                             href={`/customer-register?redirect=${encodeURIComponent(redirect)}`}

@@ -27,7 +27,7 @@ export default function WishlistPage() {
                     <Heart className="h-10 w-10 text-gray-300" />
                 </div>
                 <h1 className="text-2xl font-bold text-gray-900 mb-2">คุณยังไม่มีสินค้าที่ถูกใจ</h1>
-                <p className="text-gray-500 max-w-sm mb-8">
+                <p className="text-gray-600 max-w-sm mb-8">
                     เลือกชมสินค้าและบันทึกรายการที่คุณสนใจได้เลย
                 </p>
                 <Button asChild size="lg" className="rounded-full bg-primary hover:bg-primary/90">
@@ -42,7 +42,7 @@ export default function WishlistPage() {
             <div className="flex items-center justify-between mb-8">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900">รายการโปรดของฉัน</h1>
-                    <p className="text-gray-500 mt-1">รายการที่บันทึกไว้ทั้งหมด {items.length} รายการ</p>
+                    <p className="text-gray-600 mt-1">รายการที่บันทึกไว้ทั้งหมด {items.length} รายการ</p>
                 </div>
                 <AlertDialog>
                     <AlertDialogTrigger asChild>

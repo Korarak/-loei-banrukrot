@@ -207,7 +207,7 @@ export default function ProductsPage() {
                                     onChange={(e) => setSearch(e.target.value)}
                                     className="pl-4 bg-gray-50 border-2 border-transparent focus:border-primary focus:bg-white rounded-xl h-12 transition-all font-medium"
                                 />
-                                <button type="submit" aria-label="ค้นหาสินค้า" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-primary transition-colors">
+                                <button type="submit" aria-label="ค้นหาสินค้า" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-primary transition-colors">
                                     <Search className="h-4 w-4" />
                                 </button>
                             </form>
@@ -221,7 +221,7 @@ export default function ProductsPage() {
                                     onClick={() => handleCategoryChange(null)}
                                     className={`w-full text-left px-4 py-3 rounded-xl text-sm transition-all duration-200 flex items-center justify-between font-bold group ${!categoryParam
                                         ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30'
-                                        : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                                        : 'bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                                         }`}
                                 >
                                     สินค้าทั้งหมด
@@ -233,7 +233,7 @@ export default function ProductsPage() {
                                         onClick={() => handleCategoryChange(cat.slug)}
                                         className={`w-full text-left px-4 py-3 rounded-xl text-sm transition-all duration-200 flex items-center justify-between font-bold group ${categoryParam === cat.slug
                                             ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30'
-                                            : 'bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                                            : 'bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                                             }`}
                                     >
                                         {cat.name.toUpperCase()}
@@ -273,7 +273,7 @@ export default function ProductsPage() {
                                         onClick={() => handleBrandToggle(brand)}
                                         className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide border-2 transition-all ${selectedBrands.includes(brand)
                                             ? 'bg-gray-900 text-white border-gray-900'
-                                            : 'bg-white text-gray-400 border-gray-200 hover:border-gray-900 hover:text-gray-900'
+                                            : 'bg-white text-gray-600 border-gray-200 hover:border-gray-900 hover:text-gray-900'
                                             }`}
                                     >
                                         {brand}
@@ -285,7 +285,7 @@ export default function ProductsPage() {
                         <Button
                             variant="outline"
                             onClick={clearFilters}
-                            className="w-full h-12 border-2 border-gray-200 text-gray-500 hover:text-red-500 hover:border-red-200 hover:bg-red-50 rounded-xl font-bold uppercase tracking-wider"
+                            className="w-full h-12 border-2 border-gray-200 text-gray-600 hover:text-red-500 hover:border-red-200 hover:bg-red-50 rounded-xl font-bold uppercase tracking-wider"
                         >
                             ล้างตัวกรอง
                         </Button>
@@ -316,20 +316,20 @@ export default function ProductsPage() {
                                         <Filter className="h-4 w-4 text-primary" /> ตัวกรองสินค้า
                                     </SheetTitle>
                                 </SheetHeader>
-                                <SheetClose aria-label="ปิดตัวกรอง" className="h-9 w-9 flex items-center justify-center rounded-full bg-gray-50 text-gray-400 hover:bg-gray-200 transition-colors border border-gray-100">
+                                <SheetClose aria-label="ปิดตัวกรอง" className="h-9 w-9 flex items-center justify-center rounded-full bg-gray-50 text-gray-500 hover:bg-gray-200 transition-colors border border-gray-100">
                                     <X className="h-4 w-4" />
                                 </SheetClose>
                             </div>
                             <div className="px-6 py-8 space-y-10 pb-32">
                                 {/* Categories */}
                                 <div className="space-y-5">
-                                    <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 border-b border-gray-50 pb-3">หมวดหมู่สินค้า</h3>
+                                    <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-500 border-b border-gray-50 pb-3">หมวดหมู่สินค้า</h3>
                                     <div className="grid grid-cols-2 gap-2.5">
                                         <button
                                             onClick={() => handleCategoryChange(null)}
                                             className={`text-center px-4 py-3 rounded-2xl text-[13px] transition-all duration-300 flex items-center justify-between font-bold group border-2 ${!categoryParam
                                                 ? 'bg-gray-900 border-gray-900 text-white shadow-lg'
-                                                : 'bg-white border-gray-50 text-gray-500 hover:bg-gray-50'
+                                                : 'bg-white border-gray-50 text-gray-600 hover:bg-gray-50'
                                                 }`}
                                         >
                                             ทั้งหมด
@@ -341,7 +341,7 @@ export default function ProductsPage() {
                                                 onClick={() => handleCategoryChange(cat.slug)}
                                                 className={`text-left px-4 py-3 rounded-2xl text-[13px] transition-all duration-300 flex items-center justify-between font-bold group border-2 ${categoryParam === cat.slug
                                                     ? 'bg-gray-900 border-gray-900 text-white shadow-lg'
-                                                    : 'bg-white border-gray-50 text-gray-500 hover:bg-gray-50'
+                                                    : 'bg-white border-gray-50 text-gray-600 hover:bg-gray-50'
                                                     }`}
                                             >
                                                 {cat.name}
@@ -354,7 +354,7 @@ export default function ProductsPage() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                     {/* Price Range */}
                                     <div className="space-y-6">
-                                        <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 border-b border-gray-50 pb-3">ช่วงราคา</h3>
+                                        <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-500 border-b border-gray-50 pb-3">ช่วงราคา</h3>
                                         <div className="px-3">
                                             <Slider
                                                 defaultValue={[0, 20000]}
@@ -367,12 +367,12 @@ export default function ProductsPage() {
                                         </div>
                                         <div className="flex items-center justify-between text-base font-black text-gray-900 bg-gray-50 p-5 rounded-2xl border-2 border-dashed border-gray-100">
                                             <div className="flex flex-col gap-0.5">
-                                                <span className="text-[10px] text-gray-400 uppercase tracking-widest">เริ่มต้น</span>
+                                                <span className="text-[10px] text-gray-500 uppercase tracking-widest">เริ่มต้น</span>
                                                 <span className="text-gray-900">฿{priceRange[0].toLocaleString()}</span>
                                             </div>
                                             <div className="h-8 w-px bg-gray-200" />
                                             <div className="flex flex-col gap-0.5 text-right">
-                                                <span className="text-[10px] text-gray-400 uppercase tracking-widest">สูงสุด</span>
+                                                <span className="text-[10px] text-gray-500 uppercase tracking-widest">สูงสุด</span>
                                                 <span className="text-gray-900">฿{priceRange[1].toLocaleString()}</span>
                                             </div>
                                         </div>
@@ -380,7 +380,7 @@ export default function ProductsPage() {
 
                                     {/* Brands */}
                                     <div className="space-y-5">
-                                        <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-400 border-b border-gray-50 pb-3">แบรนด์สินค้า</h3>
+                                        <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-500 border-b border-gray-50 pb-3">แบรนด์สินค้า</h3>
                                         <div className="flex flex-wrap gap-2.5">
                                             {availableBrands.map((brand) => (
                                                 <button
@@ -388,7 +388,7 @@ export default function ProductsPage() {
                                                     onClick={() => handleBrandToggle(brand)}
                                                     className={`px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider border-2 transition-all ${selectedBrands.includes(brand)
                                                         ? 'bg-gray-900 text-white border-gray-900 shadow-xl'
-                                                        : 'bg-white text-gray-400 border-gray-50 hover:border-gray-900 hover:text-gray-900'
+                                                        : 'bg-white text-gray-600 border-gray-50 hover:border-gray-900 hover:text-gray-900'
                                                         }`}
                                                 >
                                                     {brand}
@@ -405,7 +405,7 @@ export default function ProductsPage() {
                                     <Button 
                                         variant="outline" 
                                         onClick={clearFilters} 
-                                        className="flex-1 h-12 rounded-2xl font-black text-[13px] uppercase tracking-[0.1em] text-gray-500 border-2 border-gray-50 bg-white hover:bg-red-50 hover:text-red-500 hover:border-red-100 transition-all shadow-lg"
+                                        className="flex-1 h-12 rounded-2xl font-black text-[13px] uppercase tracking-[0.1em] text-gray-600 border-2 border-gray-50 bg-white hover:bg-red-50 hover:text-red-500 hover:border-red-100 transition-all shadow-lg"
                                     >
                                         ล้างข้อมูล
                                     </Button>
@@ -424,7 +424,7 @@ export default function ProductsPage() {
                 <div className="flex-1">
                     {/* Sort Bar */}
                     <div className="flex justify-between items-center mb-8">
-                        <p className="text-gray-500 font-medium">
+                        <p className="text-gray-600 font-medium">
                             แสดง <span className="text-gray-900 font-bold">{products.length}</span> จาก <span className="text-gray-900 font-bold">{pagination.total ?? products.length}</span> รายการ
                         </p>
                         <Select onValueChange={handleSortChange} value={sortParam || 'newest'}>
@@ -448,8 +448,8 @@ export default function ProductsPage() {
                         </div>
                     ) : isError ? (
                         <div className="text-center py-24 space-y-6">
-                            <h3 className="text-2xl font-bold text-gray-300 uppercase tracking-widest">เกิดข้อผิดพลาด</h3>
-                            <p className="text-gray-400 font-medium">ไม่สามารถโหลดรายการสินค้าได้ กรุณาลองใหม่อีกครั้ง</p>
+                            <h3 className="text-2xl font-bold text-gray-500 uppercase tracking-widest">เกิดข้อผิดพลาด</h3>
+                            <p className="text-gray-600 font-medium">ไม่สามารถโหลดรายการสินค้าได้ กรุณาลองใหม่อีกครั้ง</p>
                             <Button
                                 onClick={() => refetch()}
                                 className="rounded-full bg-gray-900 hover:bg-black text-white font-bold px-8"
@@ -495,8 +495,8 @@ export default function ProductsPage() {
                         </>
                     ) : (
                         <div className="text-center py-24 space-y-6">
-                            <h3 className="text-2xl font-bold text-gray-300 uppercase tracking-widest">ไม่พบสินค้า</h3>
-                            <p className="text-gray-400 font-medium">ลองเปลี่ยนตัวกรองหรือคีย์ค้นหาใหม่</p>
+                            <h3 className="text-2xl font-bold text-gray-500 uppercase tracking-widest">ไม่พบสินค้า</h3>
+                            <p className="text-gray-600 font-medium">ลองเปลี่ยนตัวกรองหรือคีย์ค้นหาใหม่</p>
                             <Button
                                 variant="outline"
                                 onClick={clearFilters}

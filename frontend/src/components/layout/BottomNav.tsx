@@ -69,7 +69,7 @@ export default function BottomNav() {
                                 "flex flex-col items-center justify-center w-full h-full space-y-1",
                                 isActive
                                     ? "text-primary"
-                                    : "text-gray-500 hover:text-gray-900"
+                                    : "text-gray-600 hover:text-gray-900"
                             )}
                             aria-current={isActive ? 'page' : undefined}
                         >

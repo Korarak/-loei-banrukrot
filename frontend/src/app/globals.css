@@ -24,7 +24,8 @@
 
     /* MUTED: WARM BEIGE */
     --muted: 30 20% 92%;
-    --muted-foreground: 25 15% 40%;
+    --muted-foreground: 25 15% 32%;
+    /* 32% lightness ≈ 6.8:1 on cream background — AA for small text */
 
     /* ACCENT: ANTIQUE GOLD */
     --accent: 46 65% 45%;

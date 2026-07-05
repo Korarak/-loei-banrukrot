@@ -159,7 +159,7 @@ export default function ProfilePage() {
     if (!customer) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
-                <div className="flex flex-col items-center gap-3 text-gray-400" role="status" aria-live="polite">
+                <div className="flex flex-col items-center gap-3 text-gray-600" role="status" aria-live="polite">
                     <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
                     <span className="text-sm font-medium">กำลังโหลดข้อมูล...</span>
                 </div>
@@ -316,7 +316,7 @@ export default function ProfilePage() {
                     </div>
                     <div className="mt-4 text-center">
                         <h2 className="text-2xl font-bold text-gray-900">{customer.firstName} {customer.lastName}</h2>
-                        <p className="text-sm text-gray-500">{customer.email}</p>
+                        <p className="text-sm text-gray-600">{customer.email}</p>
                     </div>
                 </div>
 
@@ -368,19 +368,19 @@ export default function ProfilePage() {
                     <CardContent className="pt-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                             <div>
-                                <Label className="text-gray-500 mb-1 block">ชื่อจริง</Label>
+                                <Label className="text-gray-600 mb-1 block">ชื่อจริง</Label>
                                 <div className="font-medium text-lg text-gray-900">{customer.firstName}</div>
                             </div>
                             <div>
-                                <Label className="text-gray-500 mb-1 block">นามสกุล</Label>
+                                <Label className="text-gray-600 mb-1 block">นามสกุล</Label>
                                 <div className="font-medium text-lg text-gray-900">{customer.lastName}</div>
                             </div>
                             <div>
-                                <Label className="text-gray-500 mb-1 block">อีเมล</Label>
+                                <Label className="text-gray-600 mb-1 block">อีเมล</Label>
                                 <div className="font-medium text-lg text-gray-900">{customer.email}</div>
                             </div>
                             <div>
-                                <Label className="text-gray-500 mb-1 block">เบอร์โทรศัพท์</Label>
+                                <Label className="text-gray-600 mb-1 block">เบอร์โทรศัพท์</Label>
                                 {customer.phone ? (
                                     <div className="font-medium text-lg text-gray-900">{customer.phone}</div>
                                 ) : (
@@ -415,7 +415,7 @@ export default function ProfilePage() {
                         </DialogHeader>
                         <form onSubmit={handleUpdateProfile} className="space-y-6">
                             <div className="space-y-4">
-                                <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">ข้อมูลทั่วไป</h3>
+                                <h3 className="text-sm font-medium text-gray-600 uppercase tracking-wider">ข้อมูลทั่วไป</h3>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="firstName">ชื่อจริง</Label>
@@ -447,7 +447,7 @@ export default function ProfilePage() {
                                         className="bg-gray-100 text-gray-500 cursor-not-allowed rounded-xl"
                                         autoComplete="username"
                                     />
-                                    <p className="text-xs text-gray-400">อีเมลใช้สำหรับเข้าสู่ระบบ ไม่สามารถเปลี่ยนได้</p>
+                                    <p className="text-xs text-gray-600">อีเมลใช้สำหรับเข้าสู่ระบบ ไม่สามารถเปลี่ยนได้</p>
                                 </div>
                                 <div className="space-y-2">
                                     <Label htmlFor="phone" className="flex items-center gap-1">
@@ -481,7 +481,7 @@ export default function ProfilePage() {
                             </div>
 
                             <div className="border-t pt-4 space-y-4">
-                                <h3 className="text-sm font-medium text-gray-500 uppercase tracking-wider">เปลี่ยนรหัสผ่าน</h3>
+                                <h3 className="text-sm font-medium text-gray-600 uppercase tracking-wider">เปลี่ยนรหัสผ่าน</h3>
                                 <div className="space-y-2">
                                     <Label htmlFor="password">รหัสผ่านใหม่</Label>
                                     <Input
@@ -630,7 +630,7 @@ export default function ProfilePage() {
 
                         <div className="space-y-4">
                             {isLoading ? (
-                                <div className="flex items-center justify-center gap-3 py-8 text-gray-400" role="status">
+                                <div className="flex items-center justify-center gap-3 py-8 text-gray-600" role="status">
                                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary" />
                                     <span className="text-sm font-medium">กำลังโหลดข้อมูลที่อยู่...</span>
                                 </div>
@@ -646,7 +646,7 @@ export default function ProfilePage() {
                                                     {addr.recipientName}
                                                     {addr.isDefault && <span className="text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-full font-normal">ค่าเริ่มต้น</span>}
                                                 </div>
-                                                <div className="text-sm text-gray-500 mt-1">
+                                                <div className="text-sm text-gray-600 mt-1">
                                                     {addr.phone}
                                                 </div>
                                                 <div className="text-sm text-gray-600 mt-2 leading-relaxed">
@@ -669,7 +669,7 @@ export default function ProfilePage() {
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                className="text-gray-400 hover:text-primary hover:bg-primary/5 rounded-xl mr-1"
+                                                className="text-gray-500 hover:text-primary hover:bg-primary/5 rounded-xl mr-1"
                                                 onClick={() => handleEditAddressClick(addr)}
                                                 aria-label={`แก้ไขที่อยู่ของ ${addr.recipientName}`}
                                             >
@@ -680,7 +680,7 @@ export default function ProfilePage() {
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
-                                                        className="text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl"
+                                                        className="text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-xl"
                                                         disabled={deleteAddress.isPending}
                                                         aria-label={`ลบที่อยู่ของ ${addr.recipientName}`}
                                                     >

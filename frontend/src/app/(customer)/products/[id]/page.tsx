@@ -46,7 +46,7 @@ export default function ProductDetailPage() {
             <div className="flex justify-center items-center h-[70vh]">
                 <div className="flex flex-col items-center gap-4">
                     <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
-                    <p className="text-gray-400 animate-pulse font-medium">กำลังโหลดสินค้า...</p>
+                    <p className="text-gray-600 animate-pulse font-medium">กำลังโหลดสินค้า...</p>
                 </div>
             </div>
         );
@@ -59,7 +59,7 @@ export default function ProductDetailPage() {
                     <Package className="h-10 w-10 text-gray-400" />
                 </div>
                 <h2 className="text-3xl font-black text-gray-900 mb-2">ไม่พบสินค้า</h2>
-                <p className="text-gray-500 mb-8 max-w-md">สินค้าที่คุณค้นหาอาจถูกลบออกไปแล้ว หรืออยู่ระหว่างพักขาย</p>
+                <p className="text-gray-600 mb-8 max-w-md">สินค้าที่คุณค้นหาอาจถูกลบออกไปแล้ว หรืออยู่ระหว่างพักขาย</p>
                 <Button asChild size="lg" className="rounded-full font-bold px-8">
                     <Link href="/products">กลับไปยังสินค้า</Link>
                 </Button>
@@ -139,7 +139,7 @@ export default function ProductDetailPage() {
         <div className="font-sans pb-24 md:pb-0 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {/* Breadcrumb / Back */}
             <div className="mb-6 flex items-center justify-between">
-                <Button variant="ghost" asChild className="group -ml-4 text-gray-500 hover:text-gray-900 hover:bg-transparent">
+                <Button variant="ghost" asChild className="group -ml-4 text-gray-600 hover:text-gray-900 hover:bg-transparent">
                     <Link href="/products" className="flex items-center gap-1">
                         <ChevronLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
                         <span className="font-bold">กลับไปยังสินค้า</span>
@@ -175,7 +175,7 @@ export default function ProductDetailPage() {
                             />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-300">
-                                <span className="text-sm font-bold tracking-widest text-gray-400">ไม่มีรูปภาพ</span>
+                                <span className="text-sm font-bold tracking-widest text-gray-500">ไม่มีรูปภาพ</span>
                             </div>
                         )}
                         {shippingSizeLabel && (
@@ -228,7 +228,7 @@ export default function ProductDetailPage() {
                                 {product.brand || 'Premium Brand'}
                             </span>
                             <span className="w-1 h-1 rounded-full bg-gray-300" />
-                            <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+                            <span className="text-xs font-bold text-gray-600 uppercase tracking-widest">
                                 {categoryName}
                             </span>
                         </div>
@@ -268,7 +268,7 @@ export default function ProductDetailPage() {
                     {variants.length > 1 && (
                         <div className="mb-8">
                             <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">รูปแบบสินค้า</h3>
+                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">รูปแบบสินค้า</h3>
                                 {selectedVariant && (
                                     <span className="text-xs font-bold text-gray-600">{getVariantLabel(selectedVariant)}</span>
                                 )}
@@ -304,7 +304,7 @@ export default function ProductDetailPage() {
 
                     {/* Quantity & Add to Cart */}
                     <div className="space-y-4 hidden lg:block">
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">จำนวน</h3>
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">จำนวน</h3>
                         <div className="flex items-center gap-4">
                             <div className="flex items-center bg-gray-50 rounded-full p-1 border border-gray-100">
                                 <Button
@@ -330,7 +330,7 @@ export default function ProductDetailPage() {
                             </div>
                             <Button
                                 size="lg"
-                                className="flex-1 h-14 rounded-full text-lg font-black bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20 transition-colors active:scale-[0.98]"
+                                className="flex-1 h-14 rounded-full text-lg font-black bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-colors active:scale-[0.98]"
                                 onClick={handleAddToCart}
                                 disabled={!selectedVariant || selectedStock <= 0 || addToCart.isPending}
                             >
@@ -344,17 +344,17 @@ export default function ProductDetailPage() {
                     <div className="mt-10 border border-gray-100 rounded-2xl overflow-hidden divide-y divide-gray-100">
                         <div className="flex items-center gap-3 px-4 py-3 bg-gray-50/50">
                             <Package className="h-4 w-4 text-primary flex-shrink-0" />
-                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex-1">จัดส่งด่วน</span>
+                            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider flex-1">จัดส่งด่วน</span>
                             <span className="text-xs font-black text-gray-900">1-3 วัน</span>
                         </div>
                         <div className="flex items-center gap-3 px-4 py-3 bg-gray-50/50">
                             <Tag className="h-4 w-4 text-primary flex-shrink-0" />
-                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex-1">รับประกัน</span>
+                            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider flex-1">รับประกัน</span>
                             <span className="text-xs font-black text-gray-900">ของแท้</span>
                         </div>
                         <div className="flex items-center gap-3 px-4 py-3 bg-gray-50/50">
                             <Layers className="h-4 w-4 text-primary flex-shrink-0" />
-                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider flex-1">ขนาดพัสดุ</span>
+                            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider flex-1">ขนาดพัสดุ</span>
                             <span className="text-xs font-black text-gray-900">{shippingSizeLabel}</span>
                         </div>
                     </div>
@@ -414,7 +414,7 @@ export default function ProductDetailPage() {
                             </Button>
                         </div>
                         <Button
-                            className="flex-1 h-12 rounded-2xl font-black text-sm shadow-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20 active:scale-95 transition-transform"
+                            className="flex-1 h-12 rounded-2xl font-black text-sm shadow-lg bg-primary hover:bg-primary/90 text-white shadow-primary/20 active:scale-95 transition-transform"
                             onClick={handleAddToCart}
                             disabled={!selectedVariant || selectedStock <= 0 || addToCart.isPending}
                         >

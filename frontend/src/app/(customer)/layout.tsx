@@ -144,7 +144,7 @@ export default function CustomerLayout({
                                 <div className="text-xl font-black tracking-tighter italic text-gray-900 group-hover:text-primary transition-colors">
                                     {siteConfig.brand.name}
                                 </div>
-                                <div className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] group-hover:text-primary/70 transition-colors">
+                                <div className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] group-hover:text-primary/70 transition-colors">
                                     {siteConfig.brand.englishName}
                                 </div>
                             </div>
@@ -203,18 +203,18 @@ export default function CustomerLayout({
                                                                 sizes="32px"
                                                             />
                                                         ) : (
-                                                            <User className="h-4 w-4 text-gray-400" />
+                                                            <User className="h-4 w-4 text-gray-500" />
                                                         )}
                                                     </div>
                                                     <div className="text-left hidden lg:block">
                                                         <div className="text-xs font-bold text-gray-900">{customer.firstName}</div>
-                                                        <div className="text-[10px] text-gray-500 font-medium">สมาชิก</div>
+                                                        <div className="text-[10px] text-gray-600 font-medium">สมาชิก</div>
                                                     </div>
-                                                    <Menu className="h-4 w-4 text-gray-400" />
+                                                    <Menu className="h-4 w-4 text-gray-500" />
                                                 </Button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 shadow-2xl border-gray-100 bg-white z-[60]">
-                                                <DropdownMenuLabel className="px-2 py-1.5 text-xs font-black text-gray-400 uppercase tracking-wider">บัญชีของฉัน</DropdownMenuLabel>
+                                                <DropdownMenuLabel className="px-2 py-1.5 text-xs font-black text-gray-500 uppercase tracking-wider">บัญชีของฉัน</DropdownMenuLabel>
                                                 <DropdownMenuSeparator className="bg-gray-100" />
                                                 <DropdownMenuItem asChild className="rounded-xl cursor-pointer focus:bg-primary/10 focus:text-primary">
                                                     <Link href="/profile" className="w-full flex items-center gap-2 font-bold text-gray-600">
@@ -294,7 +294,7 @@ export default function CustomerLayout({
                                         {customer.profilePicture ? (
                                             <Image src={getImageUrl(customer.profilePicture)} alt="Profile" fill className="object-cover" sizes="32px" />
                                         ) : (
-                                            <User className="h-full w-full p-1.5 text-gray-400" />
+                                            <User className="h-full w-full p-1.5 text-gray-500" />
                                         )}
                                     </Link>
                                     <button

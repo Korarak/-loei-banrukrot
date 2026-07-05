@@ -152,7 +152,7 @@ export default function Home() {
         <div className="space-y-0 pb-10">
 
             {/* ── Hero ──────────────────────────────────────────────────────── */}
-            <section className="relative bg-gradient-to-br from-primary via-emerald-900 to-black text-white rounded-[2rem] overflow-hidden shadow-2xl min-h-[700px] flex items-center pb-20">
+            <section className="relative bg-gradient-to-br from-primary via-red-950 to-black text-white rounded-[2rem] overflow-hidden shadow-2xl min-h-[700px] flex items-center pb-20">
                 <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-accent/15 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                 <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-primary/15 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 pointer-events-none" />
 
@@ -192,13 +192,13 @@ export default function Home() {
                                     className="pl-11 h-14 rounded-full bg-white/10 border-white/20 text-white placeholder:text-gray-400 text-base focus-visible:ring-accent focus-visible:border-accent backdrop-blur-sm"
                                 />
                             </div>
-                            <Button type="submit" size="lg" className="h-14 px-6 rounded-full bg-accent border-0 hover:bg-accent/90 shadow-[0_0_20px_rgba(236,72,153,0.5)] font-bold shrink-0">
+                            <Button type="submit" size="lg" className="h-14 px-6 rounded-full bg-accent border-0 hover:bg-accent/90 shadow-[0_0_20px_rgba(201,162,39,0.5)] font-bold shrink-0">
                                 ค้นหา
                             </Button>
                         </motion.form>
 
                         <motion.div variants={fadeInUp} className="flex flex-wrap gap-4 justify-center md:justify-start">
-                            <Button size="lg" asChild className="bg-white text-emerald-600 hover:bg-gray-100 border-0 rounded-full px-8 h-14 text-lg font-bold transition-all hover:scale-105 active:scale-95 shadow-lg hover:brightness-110 duration-200 has-[>svg]:px-4">
+                            <Button size="lg" asChild className="bg-white text-primary hover:bg-gray-100 border-0 rounded-full px-8 h-14 text-lg font-bold transition-all hover:scale-105 active:scale-95 shadow-lg hover:brightness-110 duration-200 has-[>svg]:px-4">
                                 <Link href="/products">
                                     <ShoppingCart className="mr-2 h-5 w-5" />
                                     ช้อปเลย
@@ -233,7 +233,7 @@ export default function Home() {
                                     BANRUKROT
                                 </div>
                                 <div className="w-20 h-1.5 bg-gradient-to-r from-accent to-amber-600 rounded-full mx-auto mb-5" />
-                                <div className="text-sm text-white/50 font-medium tracking-wider uppercase">
+                                <div className="text-sm text-white/70 font-medium tracking-wider uppercase">
                                     Vespa Specialist
                                 </div>
                             </motion.div>
@@ -261,10 +261,10 @@ export default function Home() {
                         <motion.div key={i} ref={counters[i].ref} variants={scaleIn}
                             className="bg-white rounded-2xl p-6 md:p-8 shadow-xl border border-gray-200 text-center card-hover-lift"
                         >
-                            <div className="text-3xl md:text-4xl font-black text-emerald-600 mb-1">
+                            <div className="text-3xl md:text-4xl font-black text-primary mb-1">
                                 {stat.isYear ? counters[i].count : counters[i].count.toLocaleString()}{stat.suffix}
                             </div>
-                            <div className="text-sm font-bold text-gray-500 uppercase tracking-wider">{stat.label}</div>
+                            <div className="text-sm font-bold text-gray-600 uppercase tracking-wider">{stat.label}</div>
                         </motion.div>
                     ))}
                 </motion.div>
@@ -292,7 +292,7 @@ export default function Home() {
                                 <ChevronRight className="h-5 w-5" />
                             </Button>
                         </div>
-                        <Link href="/products" className="flex items-center text-lg font-bold text-gray-500 hover:text-accent transition-colors group">
+                        <Link href="/products" className="flex items-center text-lg font-bold text-gray-600 hover:text-accent transition-colors group">
                             ดูทุกหมวดหมู่
                             <ChevronRight className="ml-1 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                         </Link>
@@ -335,7 +335,7 @@ export default function Home() {
                                                     }
                                                 </div>
                                                 <CardTitle className="text-xl font-black mb-3 text-gray-800 group-hover:text-primary transition-colors line-clamp-1 uppercase tracking-tight">{category.name}</CardTitle>
-                                                <CardDescription className="text-sm text-gray-400 group-hover:text-gray-600 font-medium italic">
+                                                <CardDescription className="text-sm text-gray-500 group-hover:text-gray-700 font-medium italic">
                                                     {category.description || 'Premium Specialist Parts'}
                                                 </CardDescription>
                                             </div>
@@ -372,7 +372,7 @@ export default function Home() {
                                 <ChevronRight className="h-5 w-5" />
                             </Button>
                         </div>
-                        <Link href="/products" className="flex items-center text-lg font-bold text-gray-500 hover:text-primary transition-colors group">
+                        <Link href="/products" className="flex items-center text-lg font-bold text-gray-600 hover:text-primary transition-colors group">
                             ดูสินค้าทั้งหมด
                             <ChevronRight className="ml-1 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                         </Link>
@@ -440,7 +440,7 @@ export default function Home() {
                                     <ChevronRight className="h-5 w-5" />
                                 </Button>
                             </div>
-                            <Link href="/products" className="flex items-center text-lg font-bold text-gray-500 hover:text-accent transition-colors group">
+                            <Link href="/products" className="flex items-center text-lg font-bold text-gray-600 hover:text-accent transition-colors group">
                                 ดูสินค้าทั้งหมด
                                 <ChevronRight className="ml-1 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                             </Link>
@@ -482,7 +482,7 @@ export default function Home() {
 
             {/* ── Why Choose Us ─────────────────────────────────────────────── */}
             <section className="bg-zinc-950 rounded-[3rem] p-10 md:p-20 text-center relative overflow-hidden mx-4 mt-24"
-                style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(16,185,129,0.08) 0%, transparent 70%), #09090b' }}
+                style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(175,29,53,0.12) 0%, transparent 70%), #09090b' }}
             >
                 <motion.div
                     className="relative z-10 container mx-auto"
@@ -499,8 +499,8 @@ export default function Home() {
                     </motion.h2>
                     <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-12" variants={staggerContainer}>
                         {[
-                            { icon: ShieldCheck, title: 'Authentic 100%', desc: 'มั่นใจได้ในคุณภาพ สินค้าแท้และเกรดพรีเมียมจากผู้ผลิตชั้นนำเท่านั้น', gradient: 'from-primary to-red-900', shadow: 'shadow-[0_10px_30px_-10px_rgba(16,185,129,0.5)]' },
-                            { icon: Zap, title: 'Fast & Secure', desc: 'จัดส่งรวดเร็วทั่วประเทศ แพ็คสินค้าอย่างดี ปลอดภัยหายห่วง', gradient: 'from-accent to-amber-600', shadow: 'shadow-[0_10px_30px_-10px_rgba(236,72,153,0.5)]' },
+                            { icon: ShieldCheck, title: 'Authentic 100%', desc: 'มั่นใจได้ในคุณภาพ สินค้าแท้และเกรดพรีเมียมจากผู้ผลิตชั้นนำเท่านั้น', gradient: 'from-primary to-red-900', shadow: 'shadow-[0_10px_30px_-10px_rgba(175,29,53,0.5)]' },
+                            { icon: Zap, title: 'Fast & Secure', desc: 'จัดส่งรวดเร็วทั่วประเทศ แพ็คสินค้าอย่างดี ปลอดภัยหายห่วง', gradient: 'from-accent to-amber-600', shadow: 'shadow-[0_10px_30px_-10px_rgba(201,162,39,0.5)]' },
                             { icon: Star, title: 'Expert Support', desc: 'ทีมงานมืออาชีพพร้อมให้คำปรึกษา ทุกปัญหาเรื่องเวสป้าเราช่วยได้', gradient: 'from-blue-500 to-indigo-600', shadow: 'shadow-[0_10px_30px_-10px_rgba(59,130,246,0.5)]' },
                         ].map((feature, i) => (
                             <motion.div key={i} variants={scaleIn} className="text-center group p-8 rounded-3xl transition-all hover:bg-white/5">
@@ -527,14 +527,14 @@ export default function Home() {
                         <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-3">
                             วิธี <span className="text-primary">สั่งซื้อ</span>
                         </h2>
-                        <p className="text-gray-500 text-lg max-w-xl mx-auto">ง่าย เร็ว ส่งถึงบ้าน ใน 4 ขั้นตอน</p>
+                        <p className="text-gray-600 text-lg max-w-xl mx-auto">ง่าย เร็ว ส่งถึงบ้าน ใน 4 ขั้นตอน</p>
                     </motion.div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {[
                             { step: '01', icon: Search, title: 'เลือกสินค้า', desc: 'ค้นหาและเลือกอะไหล่ที่ต้องการ กรองตามหมวดหมู่หรือรุ่นรถ', color: 'from-blue-500 to-indigo-600', shadow: 'shadow-blue-100' },
                             { step: '02', icon: ShoppingCart, title: 'ใส่ตะกร้า', desc: 'เพิ่มสินค้าลงตะกร้า เลือกตัวเลือกและจำนวนตามต้องการ', color: 'from-accent to-amber-600', shadow: 'shadow-pink-100' },
-                            { step: '03', icon: CheckCircle, title: 'ยืนยันคำสั่งซื้อ', desc: 'ระบุที่อยู่จัดส่ง เลือกวิธีส่ง และชำระเงินผ่าน QR Code', color: 'from-primary to-red-900', shadow: 'shadow-emerald-100' },
+                            { step: '03', icon: CheckCircle, title: 'ยืนยันคำสั่งซื้อ', desc: 'ระบุที่อยู่จัดส่ง เลือกวิธีส่ง และชำระเงินผ่าน QR Code', color: 'from-primary to-red-900', shadow: 'shadow-red-100' },
                             { step: '04', icon: Truck, title: 'รอรับสินค้า', desc: 'เราแพ็คและส่งสินค้าภายใน 1-2 วันทำการหลังยืนยันการชำระ', color: 'from-orange-500 to-amber-600', shadow: 'shadow-orange-100' },
                         ].map((item, i) => (
                             <motion.div key={i} variants={fadeInUp} className="relative bg-white rounded-3xl p-8 border border-gray-200 shadow-lg hover:shadow-2xl transition-all duration-500 group card-hover-lift overflow-hidden">
@@ -545,7 +545,7 @@ export default function Home() {
                                     <span className="text-5xl font-black text-gray-100 group-hover:text-gray-200 transition-colors leading-none">{item.step}</span>
                                 </div>
                                 <h3 className="text-xl font-black text-gray-900 mb-3">{item.title}</h3>
-                                <p className="text-gray-500 leading-relaxed text-sm">{item.desc}</p>
+                                <p className="text-gray-600 leading-relaxed text-sm">{item.desc}</p>
                                 {i < 3 && (
                                     <div className="hidden lg:flex absolute -right-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white border border-gray-200 shadow items-center justify-center">
                                         <ChevronRight className="h-4 w-4 text-gray-400" />
@@ -599,7 +599,7 @@ export default function Home() {
                                             <Phone className="h-5 w-5 text-primary group-hover:text-white" />
                                         </div>
                                         <div>
-                                            <div className="text-xs font-bold text-gray-400 uppercase tracking-wider">{item.label}</div>
+                                            <div className="text-xs font-bold text-gray-500 uppercase tracking-wider">{item.label}</div>
                                             <div className="text-lg font-black text-gray-800 group-hover:text-primary transition-colors">{item.value}</div>
                                         </div>
                                     </a>
@@ -611,7 +611,7 @@ export default function Home() {
                                             <MapPin className="h-5 w-5 text-accent" />
                                         </div>
                                         <div>
-                                            <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">ที่อยู่ร้าน</div>
+                                            <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">ที่อยู่ร้าน</div>
                                             <div className="text-sm text-gray-700 leading-relaxed">{item.value}</div>
                                             {contact.items.filter(i => i.type === 'maps').map((m, mi) => (
                                                 <a key={mi} href={m.href} target="_blank" rel="noopener noreferrer"
@@ -628,7 +628,7 @@ export default function Home() {
 
                             {/* Social */}
                             <div>
-                                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">ติดตามเราได้ที่</p>
+                                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">ติดตามเราได้ที่</p>
                                 <div className="flex gap-3 flex-wrap">
                                     {contact.social.facebook && (
                                         <a href={contact.social.facebook} target="_blank" rel="noopener noreferrer"
@@ -675,7 +675,7 @@ export default function Home() {
                                     href={mapsItem?.href}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="group rounded-3xl overflow-hidden shadow-2xl border border-gray-200 aspect-[4/3] md:aspect-auto md:h-[420px] flex flex-col items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300 hover:from-primary/10 hover:to-emerald-100 transition-all duration-500 relative"
+                                    className="group rounded-3xl overflow-hidden shadow-2xl border border-gray-200 aspect-[4/3] md:aspect-auto md:h-[420px] flex flex-col items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300 hover:from-primary/10 hover:to-amber-100 transition-all duration-500 relative"
                                 >
                                     {/* Road/grid pattern background */}
                                     <div className="absolute inset-0 opacity-10"

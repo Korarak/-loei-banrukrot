@@ -166,13 +166,13 @@ export default function ProductCard({ product }: ProductCardProps) {
                         <div className="px-4 py-3">
                             <div className="flex items-center justify-between mb-1.5">
                                 {product.brand ? (
-                                    <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                                    <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
                                         {product.brand}
                                     </span>
                                 ) : <span />}
                                 {!isOutOfStock && (
-                                    <span className="flex items-center gap-1 text-[10px] font-semibold text-emerald-500">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
+                                    <span className="flex items-center gap-1 text-[10px] font-semibold text-emerald-700">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
                                         มีสินค้า
                                     </span>
                                 )}
@@ -187,7 +187,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                                     {priceDisplay}
                                 </span>
                                 {product.variants?.length > 1 && (
-                                    <span className="text-[10px] text-gray-400 font-medium">
+                                    <span className="text-[10px] text-gray-500 font-medium">
                                         {product.variants.length} ตัวเลือก
                                     </span>
                                 )}
@@ -205,7 +205,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 className={`absolute top-3 right-3 z-30 p-2 rounded-full backdrop-blur-sm shadow transition-all duration-200 ${
                     showInWishlist
                         ? 'bg-red-500 text-white'
-                        : 'bg-white/80 text-gray-400 hover:bg-white hover:text-red-500'
+                        : 'bg-white/80 text-gray-500 hover:bg-white hover:text-red-500'
                 }`}
             >
                 <Heart className={`h-4 w-4 ${showInWishlist ? 'fill-current' : ''}`} />

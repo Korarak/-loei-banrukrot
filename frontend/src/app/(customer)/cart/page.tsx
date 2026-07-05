@@ -196,7 +196,7 @@ export default function CartPage() {
                                                 sizes="(max-width: 768px) 128px, 160px"
                                             />
                                         ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-xs text-gray-400 bg-gray-50">
+                                            <div className="w-full h-full flex items-center justify-center text-xs text-gray-500 bg-gray-50">
                                                 ไม่มีรูปภาพ
                                             </div>
                                         )}
@@ -217,13 +217,13 @@ export default function CartPage() {
                                                 onClick={() => handleRemoveItem(item._id)}
                                                 disabled={removeCartItem.isPending}
                                                 aria-label={`ลบ ${item.product.productName} ออกจากรถเข็น`}
-                                                className="text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-full shrink-0 h-10 w-10"
+                                                className="text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-full shrink-0 h-10 w-10"
                                             >
                                                 <Trash2 className="h-5 w-5" />
                                             </Button>
                                         </div>
                                         <div className="flex items-center gap-3">
-                                            <span className="text-xs font-bold uppercase tracking-widest text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                                            <span className="text-xs font-bold uppercase tracking-widest text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full">
                                                 SKU: {item.variant.sku}
                                             </span>
                                             {item.product.shippingSize === 'large' && (
@@ -236,7 +236,7 @@ export default function CartPage() {
 
                                     <div className="flex flex-wrap items-end justify-between mt-6 gap-4">
                                         <div className="flex flex-col">
-                                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">ราคาต่อชิ้น</span>
+                                            <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">ราคาต่อชิ้น</span>
                                             <p className="text-xl font-black text-primary">
                                                 ฿{item.variant.price.toLocaleString()}
                                             </p>
@@ -270,7 +270,7 @@ export default function CartPage() {
                                         </div>
 
                                         <div className="flex flex-col items-end">
-                                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">ราคารวม</span>
+                                            <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">ราคารวม</span>
                                             <p className="text-2xl font-black text-gray-900">
                                                 ฿{(item.variant.price * item.quantity).toLocaleString()}
                                             </p>
@@ -289,11 +289,11 @@ export default function CartPage() {
 
                         <div className="space-y-6 mb-8">
                             <div className="flex justify-between items-center text-lg">
-                                <span className="text-gray-500 font-medium">ยอดสินค้า</span>
+                                <span className="text-gray-600 font-medium">ยอดสินค้า</span>
                                 <span className="font-bold text-gray-900">฿{cartSubtotal.toLocaleString()}</span>
                             </div>
                             <div className="flex justify-between items-center text-lg">
-                                <span className="text-gray-500 font-medium">ค่าจัดส่ง</span>
+                                <span className="text-gray-600 font-medium">ค่าจัดส่ง</span>
                                 <span className="font-bold text-primary">
                                     {!selectedMethod ? '—' : shippingCost > 0 ? `฿${shippingCost.toLocaleString()}` : 'ฟรี'}
                                 </span>
@@ -301,7 +301,7 @@ export default function CartPage() {
 
                             {/* Address Selection */}
                             <div className="pt-6 border-t border-gray-100">
-                                <p className="font-black text-xs uppercase tracking-[0.2em] text-gray-400 mb-4 flex items-center gap-2">
+                                <p className="font-black text-xs uppercase tracking-[0.2em] text-gray-500 mb-4 flex items-center gap-2">
                                     <MapPin className="h-4 w-4 text-primary" />
                                     ที่อยู่จัดส่ง
                                 </p>
@@ -315,7 +315,7 @@ export default function CartPage() {
                                                         <span className="font-bold text-gray-900 text-base leading-none">{address.recipientName}</span>
                                                         {address.isDefault && <span className="text-[10px] font-black tracking-wider text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">ที่อยู่หลัก</span>}
                                                     </div>
-                                                    <span className="text-xs text-gray-500 font-medium leading-relaxed">
+                                                    <span className="text-xs text-gray-600 font-medium leading-relaxed">
                                                         {address.streetAddress}, {address.subDistrict}, {address.district}, {address.province} {address.zipCode}
                                                     </span>
                                                 </Label>
@@ -324,7 +324,7 @@ export default function CartPage() {
                                     </RadioGroup>
                                 ) : (
                                     <div className="text-center py-6 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
-                                        <p className="text-sm text-gray-400 font-bold mb-3 uppercase tracking-wider">ยังไม่มีที่อยู่จัดส่ง</p>
+                                        <p className="text-sm text-gray-600 font-bold mb-3 uppercase tracking-wider">ยังไม่มีที่อยู่จัดส่ง</p>
                                         <Button variant="outline" size="sm" asChild className="rounded-full border-2 font-bold hover:bg-primary hover:text-white hover:border-primary transition-all">
                                             <Link href="/profile">เพิ่มที่อยู่ใหม่</Link>
                                         </Button>
@@ -334,7 +334,7 @@ export default function CartPage() {
 
                             {/* Shipping Selection */}
                             <div className="pt-4">
-                                <p className="font-black text-xs uppercase tracking-[0.2em] text-gray-400 mb-4 flex items-center gap-2">
+                                <p className="font-black text-xs uppercase tracking-[0.2em] text-gray-500 mb-4 flex items-center gap-2">
                                     <Truck className="h-4 w-4 text-primary" />
                                     วิธีการจัดส่ง
                                 </p>
@@ -346,7 +346,7 @@ export default function CartPage() {
                                                     <RadioGroupItem value={method._id} id={method._id} />
                                                     <Label htmlFor={method._id} className="cursor-pointer">
                                                         <span className="font-bold text-gray-900 block">{method.name}</span>
-                                                        <span className="block text-[10px] text-gray-400 font-bold uppercase tracking-wider">{method.description || 'จัดส่งมาตรฐาน'}</span>
+                                                        <span className="block text-[10px] text-gray-500 font-bold uppercase tracking-wider">{method.description || 'จัดส่งมาตรฐาน'}</span>
                                                     </Label>
                                                 </div>
                                                 <span className="font-black text-gray-900">฿{method.price.toLocaleString()}</span>
@@ -363,7 +363,7 @@ export default function CartPage() {
 
                         {/* Payment Method Selection */}
                         <div className="pt-4 pb-8">
-                            <p className="font-black text-xs uppercase tracking-[0.2em] text-gray-400 mb-4 flex items-center gap-2">
+                            <p className="font-black text-xs uppercase tracking-[0.2em] text-gray-500 mb-4 flex items-center gap-2">
                                 <CreditCard className="h-4 w-4 text-primary" />
                                 ช่องทางชำระเงิน
                             </p>
@@ -372,14 +372,14 @@ export default function CartPage() {
                                     <RadioGroupItem value="Transfer" id="transfer" className="sr-only" />
                                     <Label htmlFor="transfer" className="cursor-pointer text-center">
                                         <span className="font-bold text-gray-900 block text-sm">โอนเงิน</span>
-                                        <span className="block text-[9px] text-gray-400 font-bold uppercase tracking-wider mt-1">แนบสลิป</span>
+                                        <span className="block text-[9px] text-gray-500 font-bold uppercase tracking-wider mt-1">แนบสลิป</span>
                                     </Label>
                                 </div>
                             </RadioGroup>
                         </div>
 
                         <div className="border-t-2 border-gray-50 pt-6 mb-8 flex justify-between items-center">
-                            <span className="text-xl font-black text-gray-400 uppercase tracking-tighter">ยอดรวม</span>
+                            <span className="text-xl font-black text-gray-600 uppercase tracking-tighter">ยอดรวม</span>
                             <span className="text-4xl font-black text-primary tracking-tighter drop-shadow-sm">
                                 ฿{totalAmount.toLocaleString()}
                             </span>
@@ -396,7 +396,7 @@ export default function CartPage() {
 
                         <Button
                             variant="ghost"
-                            className="w-full mt-4 text-gray-400 hover:text-primary font-bold transition-colors"
+                            className="w-full mt-4 text-gray-600 hover:text-primary font-bold transition-colors"
                             asChild
                         >
                             <Link href="/products">← เลือกสินค้าต่อ</Link>

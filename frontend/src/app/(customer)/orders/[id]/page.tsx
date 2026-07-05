@@ -115,7 +115,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                     <h1 className="text-2xl md:text-3xl font-black text-gray-900">
                         คำสั่งซื้อ <span className="text-primary">#{order.orderReference}</span>
                     </h1>
-                    <p className="text-sm text-gray-400 mt-1">
+                    <p className="text-sm text-gray-600 mt-1">
                         สั่งเมื่อ {new Date(order.createdAt).toLocaleDateString('th-TH', {
                             year: 'numeric', month: 'long', day: 'numeric',
                             hour: '2-digit', minute: '2-digit',
@@ -201,7 +201,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                                                 รอแอดมินตรวจสอบ (ประมาณ 24 ชั่วโมง)
                                             </div>
                                         )}
-                                        <p className="text-sm text-gray-500 leading-relaxed">
+                                        <p className="text-sm text-gray-600 leading-relaxed">
                                             หากมีปัญหาเกี่ยวกับการชำระเงิน กรุณาติดต่อทีมงาน
                                         </p>
                                     </div>
@@ -212,7 +212,7 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                             <div className="space-y-6">
                                 <div>
                                     <h2 className="text-xl font-black text-gray-900 mb-1">แนบสลิปโอนเงิน</h2>
-                                    <p className="text-sm text-gray-400">กรุณาโอนเงินและอัปโหลดหลักฐานการชำระเงิน</p>
+                                    <p className="text-sm text-gray-600">กรุณาโอนเงินและอัปโหลดหลักฐานการชำระเงิน</p>
                                 </div>
 
                                 {/* Bank Info + QR in a grid */}
@@ -222,20 +222,20 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                                         <p className="text-xs font-black uppercase tracking-widest text-emerald-600 mb-3">ข้อมูลบัญชีธนาคาร</p>
                                         <div className="space-y-1.5 text-sm">
                                             <div className="flex justify-between">
-                                                <span className="text-gray-500">ธนาคาร</span>
+                                                <span className="text-gray-600">ธนาคาร</span>
                                                 <span className="font-bold text-gray-900">{bankSettings?.payment_bank_name || '—'}</span>
                                             </div>
                                             <div className="flex justify-between">
-                                                <span className="text-gray-500">เลขบัญชี</span>
+                                                <span className="text-gray-600">เลขบัญชี</span>
                                                 <span className="font-bold text-gray-900 font-mono tracking-wider select-all">{bankSettings?.payment_bank_account_number || '—'}</span>
                                             </div>
                                             <div className="flex justify-between">
-                                                <span className="text-gray-500">ชื่อบัญชี</span>
+                                                <span className="text-gray-600">ชื่อบัญชี</span>
                                                 <span className="font-bold text-gray-900 text-right">{bankSettings?.payment_bank_account_name || '—'}</span>
                                             </div>
                                         </div>
                                         <div className="border-t border-green-100 pt-2.5 flex justify-between items-center">
-                                            <span className="text-gray-500 text-sm">ยอดที่ต้องโอน</span>
+                                            <span className="text-gray-600 text-sm">ยอดที่ต้องโอน</span>
                                             <span className="text-xl font-black text-primary">฿{order.totalAmount.toLocaleString()}</span>
                                         </div>
                                     </div>
@@ -260,16 +260,16 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                                             >
                                                 <X className="h-4 w-4" />
                                             </button>
-                                            <p className="text-xs text-gray-400 text-center mt-2">{file?.name}</p>
+                                            <p className="text-xs text-gray-600 text-center mt-2">{file?.name}</p>
                                         </div>
                                     ) : (
                                         <label
                                             htmlFor="slip-upload"
                                             className="flex flex-col items-center justify-center w-full h-40 rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 hover:bg-gray-100 hover:border-primary/50 transition-all cursor-pointer group"
                                         >
-                                            <ImageIcon className="h-8 w-8 text-gray-300 group-hover:text-primary/50 mb-2 transition-colors" />
-                                            <p className="text-sm font-bold text-gray-400 group-hover:text-gray-600">คลิกเพื่อเลือกรูปสลิป</p>
-                                            <p className="text-xs text-gray-300 mt-1">รองรับ JPG, PNG, HEIC</p>
+                                            <ImageIcon className="h-8 w-8 text-gray-400 group-hover:text-primary/50 mb-2 transition-colors" />
+                                            <p className="text-sm font-bold text-gray-600 group-hover:text-gray-800">คลิกเพื่อเลือกรูปสลิป</p>
+                                            <p className="text-xs text-gray-500 mt-1">รองรับ JPG, PNG, HEIC</p>
                                         </label>
                                     )}
 
@@ -315,11 +315,11 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                     </h2>
                     <div className="bg-gray-50 rounded-2xl p-4 space-y-3 text-sm">
                         <div className="flex justify-between items-center">
-                            <span className="text-gray-500 font-medium">บริษัทขนส่ง</span>
+                            <span className="text-gray-600 font-medium">บริษัทขนส่ง</span>
                             <span className="font-bold text-gray-900">{order.shippingInfo.provider}</span>
                         </div>
                         <div className="flex justify-between items-center">
-                            <span className="text-gray-500 font-medium">เลขพัสดุ</span>
+                            <span className="text-gray-600 font-medium">เลขพัสดุ</span>
                             <span className="font-mono font-black text-lg text-primary tracking-widest">{order.shippingInfo.trackingNumber}</span>
                         </div>
                     </div>
@@ -336,29 +336,29 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
                                 {item.imageUrl ? (
                                     <Image src={getImageUrl(item.imageUrl)} alt={item.productName} fill className="object-cover" sizes="64px" />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-xs text-gray-300">ไม่มีรูป</div>
+                                    <div className="w-full h-full flex items-center justify-center text-xs text-gray-500">ไม่มีรูป</div>
                                 )}
                             </div>
                             <div className="flex-1 min-w-0">
                                 <h3 className="font-bold text-gray-900 truncate">{item.productName}</h3>
-                                <p className="text-xs text-gray-400 mt-0.5">SKU: {item.sku} · {item.quantity} ชิ้น</p>
+                                <p className="text-xs text-gray-600 mt-0.5">SKU: {item.sku} · {item.quantity} ชิ้น</p>
                             </div>
                             <div className="text-right shrink-0">
                                 <p className="font-black text-gray-900">฿{item.price.toLocaleString()}</p>
-                                <p className="text-xs text-gray-400">รวม ฿{(item.price * item.quantity).toLocaleString()}</p>
+                                <p className="text-xs text-gray-600">รวม ฿{(item.price * item.quantity).toLocaleString()}</p>
                             </div>
                         </div>
                     ))}
                 </div>
 
                 <div className="mt-5 pt-4 border-t border-gray-100 space-y-2 text-sm">
-                    <div className="flex justify-between text-gray-500">
+                    <div className="flex justify-between text-gray-600">
                         <span>ยอดสินค้า</span>
                         <span className="font-medium text-gray-900">
                             ฿{(order.totalAmount - (order.shippingInfo?.cost || 0)).toLocaleString()}
                         </span>
                     </div>
-                    <div className="flex justify-between text-gray-500">
+                    <div className="flex justify-between text-gray-600">
                         <span>ค่าจัดส่ง</span>
                         <span className="font-medium text-gray-900">
                             {order.shippingInfo?.cost ? `฿${order.shippingInfo.cost.toLocaleString()}` : 'ฟรี'}
@@ -374,28 +374,28 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
             {/* ── Shipping address + Customer info ── */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Card className="p-5 border-0 shadow-lg rounded-3xl">
-                    <h2 className="text-sm font-black uppercase tracking-widest text-gray-400 mb-3">ที่อยู่จัดส่ง</h2>
+                    <h2 className="text-sm font-black uppercase tracking-widest text-gray-500 mb-3">ที่อยู่จัดส่ง</h2>
                     {order.shippingAddressId ? (
                         <div className="space-y-1 text-sm">
                             <p className="font-bold text-gray-900">{order.shippingAddressId.recipientName}</p>
-                            <p className="text-gray-500">{order.shippingAddressId.streetAddress}</p>
-                            <p className="text-gray-500">
+                            <p className="text-gray-600">{order.shippingAddressId.streetAddress}</p>
+                            <p className="text-gray-600">
                                 {order.shippingAddressId.subDistrict && `${order.shippingAddressId.subDistrict}, `}
                                 {order.shippingAddressId.district}
                             </p>
-                            <p className="text-gray-500">{order.shippingAddressId.province} {order.shippingAddressId.zipCode}</p>
+                            <p className="text-gray-600">{order.shippingAddressId.province} {order.shippingAddressId.zipCode}</p>
                         </div>
                     ) : (
-                        <p className="text-gray-400 text-sm">ไม่มีที่อยู่จัดส่ง</p>
+                        <p className="text-gray-500 text-sm">ไม่มีที่อยู่จัดส่ง</p>
                     )}
                 </Card>
 
                 <Card className="p-5 border-0 shadow-lg rounded-3xl">
-                    <h2 className="text-sm font-black uppercase tracking-widest text-gray-400 mb-3">ข้อมูลผู้สั่งซื้อ</h2>
+                    <h2 className="text-sm font-black uppercase tracking-widest text-gray-500 mb-3">ข้อมูลผู้สั่งซื้อ</h2>
                     <div className="space-y-1 text-sm">
                         <p className="font-bold text-gray-900">{order.customer.firstName} {order.customer.lastName}</p>
-                        <p className="text-gray-500">{order.customer.email}</p>
-                        {order.customer.phone && <p className="text-gray-500">{order.customer.phone}</p>}
+                        <p className="text-gray-600">{order.customer.email}</p>
+                        {order.customer.phone && <p className="text-gray-600">{order.customer.phone}</p>}
                     </div>
                 </Card>
             </div>
@@ -417,11 +417,11 @@ function PromptPayQRCode({ orderId }: { orderId: string }) {
 
     return (
         <div className="flex flex-col items-center justify-center p-4 rounded-2xl border border-gray-100 bg-white shadow-sm">
-            <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-3">สแกน QR ชำระเงิน (พร้อมเพย์)</p>
+            <p className="text-xs font-black uppercase tracking-widest text-gray-500 mb-3">สแกน QR ชำระเงิน (พร้อมเพย์)</p>
             <div className="relative w-36 h-36">
                 <Image src={qrCode} alt="PromptPay QR Code" fill className="object-contain" unoptimized />
             </div>
-            <p className="text-xs text-gray-400 mt-2">ยอดที่สร้างอัตโนมัติ</p>
+            <p className="text-xs text-gray-500 mt-2">ยอดที่สร้างอัตโนมัติ</p>
         </div>
     );
 }

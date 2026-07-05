@@ -236,7 +236,7 @@ export default function CustomerRegisterPage() {
             <Card className="w-full max-w-md border-0 shadow-2xl shadow-gray-200/60 rounded-[2rem]">
                 <CardHeader className="space-y-2 pt-8">
                     <CardTitle className="text-3xl font-black tracking-tight text-center text-gray-900">{t.title}</CardTitle>
-                    <CardDescription className="text-center text-gray-400 font-medium">
+                    <CardDescription className="text-center text-gray-600 font-medium">
                         {t.subtitle}
                     </CardDescription>
                 </CardHeader>
@@ -366,7 +366,7 @@ export default function CustomerRegisterPage() {
                     </Form>
                 </CardContent>
                 <CardFooter className="flex flex-col space-y-2">
-                    <div className="text-sm text-center text-gray-500">
+                    <div className="text-sm text-center text-gray-600">
                         {t.loginPrompt}{' '}
                         <Link
                             href={`/customer-login?redirect=${encodeURIComponent(redirect)}`}
