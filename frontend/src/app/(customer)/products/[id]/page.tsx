@@ -3,7 +3,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
-import { Minus, Plus, ShoppingCart, X, Package, Tag, Layers, ChevronLeft, Share2 } from 'lucide-react';
+import { Minus, Plus, ShoppingCart, X, Package, Layers, ChevronLeft, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useProduct } from '@/hooks/useProducts';
 import { useCategories } from '@/hooks/useCategories';
@@ -342,16 +342,6 @@ export default function ProductDetailPage() {
 
                     {/* Key Attributes */}
                     <div className="mt-10 border border-gray-100 rounded-2xl overflow-hidden divide-y divide-gray-100">
-                        <div className="flex items-center gap-3 px-4 py-3 bg-gray-50/50">
-                            <Package className="h-4 w-4 text-primary flex-shrink-0" />
-                            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider flex-1">จัดส่งด่วน</span>
-                            <span className="text-xs font-black text-gray-900">1-3 วัน</span>
-                        </div>
-                        <div className="flex items-center gap-3 px-4 py-3 bg-gray-50/50">
-                            <Tag className="h-4 w-4 text-primary flex-shrink-0" />
-                            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider flex-1">รับประกัน</span>
-                            <span className="text-xs font-black text-gray-900">ของแท้</span>
-                        </div>
                         <div className="flex items-center gap-3 px-4 py-3 bg-gray-50/50">
                             <Layers className="h-4 w-4 text-primary flex-shrink-0" />
                             <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider flex-1">ขนาดพัสดุ</span>

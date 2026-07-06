@@ -192,7 +192,7 @@ export default function Home() {
                                     className="pl-11 h-14 rounded-full bg-white/10 border-white/20 text-white placeholder:text-gray-400 text-base focus-visible:ring-accent focus-visible:border-accent backdrop-blur-sm"
                                 />
                             </div>
-                            <Button type="submit" size="lg" className="h-14 px-6 rounded-full bg-accent border-0 hover:bg-accent/90 shadow-[0_0_20px_rgba(201,162,39,0.5)] font-bold shrink-0">
+                            <Button type="submit" size="lg" className="h-14 px-6 rounded-full bg-accent text-accent-foreground border-0 hover:bg-accent/90 shadow-[0_0_20px_rgba(201,162,39,0.5)] font-bold shrink-0">
                                 ค้นหา
                             </Button>
                         </motion.form>
@@ -288,7 +288,7 @@ export default function Home() {
                             <Button size="icon" variant="outline" onClick={() => scroll(catScrollRef, 'left')} className="h-10 w-10 rounded-lg border-2 border-gray-100 bg-white/80 backdrop-blur-sm -skew-x-12 hover:skew-x-0 transition-transform active:scale-95 shadow-sm" aria-label="เลื่อนซ้าย">
                                 <ChevronLeft className="h-5 w-5" />
                             </Button>
-                            <Button size="icon" onClick={() => scroll(catScrollRef, 'right')} className="h-10 w-10 rounded-lg bg-gradient-to-r from-accent to-amber-600 text-white border-none -skew-x-12 hover:skew-x-0 transition-transform active:scale-95 shadow-lg shadow-accent/20" aria-label="เลื่อนขวา">
+                            <Button size="icon" onClick={() => scroll(catScrollRef, 'right')} className="h-10 w-10 rounded-lg bg-gradient-to-r from-accent to-amber-600 text-accent-foreground border-none -skew-x-12 hover:skew-x-0 transition-transform active:scale-95 shadow-lg shadow-accent/20" aria-label="เลื่อนขวา">
                                 <ChevronRight className="h-5 w-5" />
                             </Button>
                         </div>
@@ -321,21 +321,19 @@ export default function Home() {
                             return (
                                 <motion.div key={category._id} variants={fadeInUp} className="w-[240px] md:w-auto flex-shrink-0 md:flex-shrink snap-start">
                                     <Link href={`/products?category=${category.slug}`} className="group block h-full">
-                                        <Card className="h-full border border-gray-200/60 bg-gray-50 hover:bg-white shadow-none hover:shadow-xl hover:border-gray-200 transition-all duration-500 rounded-[2rem] overflow-hidden relative card-hover-lift">
-                                            {catImage && (
-                                                <div className="absolute inset-0 z-0 opacity-10 group-hover:opacity-20 transition-opacity duration-500 scale-110 group-hover:scale-125">
-                                                    <Image src={getImageUrl(catImage)} alt={category.name} fill className="object-cover grayscale" sizes="240px" />
-                                                </div>
-                                            )}
-                                            <div className="p-8 text-center pt-10 relative z-10 flex flex-col h-full">
-                                                <div className="h-20 w-20 bg-white rounded-[1.5rem] flex items-center justify-center mx-auto mb-6 shadow-glow transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 border border-gray-50">
-                                                    {catImage
-                                                        ? <Image src={getImageUrl(catImage)} alt={category.name} width={56} height={56} className="object-cover rounded-xl" />
-                                                        : <Package className="h-10 w-10 text-primary" />
-                                                    }
-                                                </div>
-                                                <CardTitle className="text-xl font-black mb-3 text-gray-800 group-hover:text-primary transition-colors line-clamp-1 uppercase tracking-tight">{category.name}</CardTitle>
-                                                <CardDescription className="text-sm text-gray-500 group-hover:text-gray-700 font-medium italic">
+                                        <Card className="h-[280px] p-0 gap-0 border border-gray-200/60 shadow-none hover:shadow-xl hover:border-gray-200 transition-all duration-500 rounded-[2rem] overflow-hidden relative card-hover-lift">
+                                            {catImage
+                                                ? <Image src={getImageUrl(catImage)} alt={category.name} fill className="object-cover transition-transform duration-500 group-hover:scale-110" sizes="240px" />
+                                                : (
+                                                    <div className="absolute inset-0 bg-gradient-to-br from-primary to-gray-900 flex items-center justify-center">
+                                                        <Package className="h-16 w-16 text-white/40" />
+                                                    </div>
+                                                )
+                                            }
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
+                                            <div className="absolute bottom-0 left-0 right-0 p-6 text-left">
+                                                <CardTitle className="text-xl font-black mb-1 text-white group-hover:text-accent transition-colors line-clamp-1 uppercase tracking-tight">{category.name}</CardTitle>
+                                                <CardDescription className="text-sm text-gray-200 font-medium italic line-clamp-1">
                                                     {category.description || 'Premium Specialist Parts'}
                                                 </CardDescription>
                                             </div>
@@ -436,7 +434,7 @@ export default function Home() {
                                 <Button size="icon" variant="outline" onClick={() => scroll(newScrollRef, 'left')} className="h-10 w-10 rounded-lg border-2 border-gray-100 bg-white/80 backdrop-blur-sm -skew-x-12 hover:skew-x-0 transition-transform active:scale-95 shadow-sm" aria-label="เลื่อนซ้าย">
                                     <ChevronLeft className="h-5 w-5" />
                                 </Button>
-                                <Button size="icon" onClick={() => scroll(newScrollRef, 'right')} className="h-10 w-10 rounded-lg bg-gradient-to-r from-accent to-amber-600 text-white border-none -skew-x-12 hover:skew-x-0 transition-transform active:scale-95 shadow-lg shadow-accent/20" aria-label="เลื่อนขวา">
+                                <Button size="icon" onClick={() => scroll(newScrollRef, 'right')} className="h-10 w-10 rounded-lg bg-gradient-to-r from-accent to-amber-600 text-accent-foreground border-none -skew-x-12 hover:skew-x-0 transition-transform active:scale-95 shadow-lg shadow-accent/20" aria-label="เลื่อนขวา">
                                     <ChevronRight className="h-5 w-5" />
                                 </Button>
                             </div>

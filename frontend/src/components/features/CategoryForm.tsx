@@ -58,6 +58,7 @@ export default function CategoryForm({ category, onSuccess, onCancel }: Category
                 description: category.description || '',
                 isActive: category.isActive,
                 sortOrder: category.sortOrder,
+                imageUrl: category.imageUrl || '',
             }
             : {
                 name: '',
