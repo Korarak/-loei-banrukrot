@@ -112,4 +112,4 @@ See `backend/API_DOCUMENTATION.md` for full endpoint reference.
 Multer handles file uploads to `backend/public/uploads/`. In Docker production, this directory is bind-mounted to persist images across container restarts.
 
 ### Next.js Configuration
-`next.config.ts` enables: standalone output (for Docker), React Compiler, Turbopack, webpack polling (for Docker dev with `WATCHPACK_POLLING=true`). Remote image domains configured for `localhost` and `loeitech.org`.
+`next.config.ts` enables: standalone output (for Docker), React Compiler, Turbopack, webpack polling (for Docker dev with `WATCHPACK_POLLING=true`). Remote image domains configured for `localhost`, `loeitech.org`, and `banrukrot.com`.

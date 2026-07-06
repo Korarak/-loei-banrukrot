@@ -51,6 +51,16 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
+        hostname: 'banrukrot.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.banrukrot.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
         hostname: 'lh3.googleusercontent.com',
         pathname: '/**',
       },

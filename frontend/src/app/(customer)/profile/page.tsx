@@ -273,10 +273,10 @@ export default function ProfilePage() {
     };
 
     return (
-        <div className="max-w-4xl mx-auto p-6 font-sans">
-            <h1 className="text-3xl font-bold mb-8 text-gray-900">ข้อมูลส่วนตัว</h1>
+        <div className="max-w-4xl mx-auto p-4 sm:p-6 font-sans">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 text-gray-900">ข้อมูลส่วนตัว</h1>
 
-            <div className="grid gap-8">
+            <div className="grid gap-6 sm:gap-8">
                 {/* Profile Header */}
                 <div className="flex flex-col items-center mb-6">
                     <div className="relative group">
@@ -342,8 +342,8 @@ export default function ProfilePage() {
                             </CardContent>
                         </Card>
                     </Link>
-                    <Link href="/cart">
-                        <Card className="hover:shadow-lg transition-all cursor-pointer border-0 shadow-sm bg-white group">
+                    <Link href="/cart" className="col-span-2 md:col-span-1">
+                        <Card className="hover:shadow-lg transition-all cursor-pointer border-0 shadow-sm bg-white group h-full">
                             <CardContent className="p-6 flex flex-col items-center justify-center text-center space-y-3">
                                 <div className="p-4 bg-orange-50 rounded-full text-orange-600 group-hover:scale-110 transition-transform">
                                     <ShoppingBag className="h-6 w-6" />
@@ -533,7 +533,7 @@ export default function ProfilePage() {
                     </CardHeader>
                     <CardContent className="pt-6">
                         {isAdding && (
-                            <form onSubmit={handleAddAddress} className="mb-8 p-6 border rounded-2xl bg-gray-50 space-y-4">
+                            <form onSubmit={handleAddAddress} className="mb-8 p-4 sm:p-6 border rounded-2xl bg-gray-50 space-y-4">
                                 <h3 className="font-semibold mb-4 text-primary">เพิ่มที่อยู่ใหม่</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
@@ -559,7 +559,7 @@ export default function ProfilePage() {
                                             className="bg-white rounded-xl"
                                         />
                                     </div>
-                                    <div className="col-span-2 space-y-2">
+                                    <div className="md:col-span-2 space-y-2">
                                         <Label htmlFor="streetAddress">ที่อยู่ (บ้านเลขที่, หมู่, ซอย, ถนน)</Label>
                                         <Input
                                             id="streetAddress"
@@ -636,13 +636,13 @@ export default function ProfilePage() {
                                 </div>
                             ) : addresses && addresses.length > 0 ? (
                                 addresses.map((addr) => (
-                                    <div key={addr._id} className={`flex items-start justify-between p-4 border rounded-2xl transition-all ${addr.isDefault ? 'border-primary/30 bg-primary/5' : 'border-gray-100 hover:bg-gray-50'}`}>
-                                        <div className="flex gap-4">
-                                            <div className={`h-10 w-10 rounded-full flex items-center justify-center flex-shrink-0 ${addr.isDefault ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-500'}`}>
+                                    <div key={addr._id} className={`flex items-start justify-between gap-2 p-4 border rounded-2xl transition-all ${addr.isDefault ? 'border-primary/30 bg-primary/5' : 'border-gray-100 hover:bg-gray-50'}`}>
+                                        <div className="flex gap-3 sm:gap-4 min-w-0">
+                                            <div className={`hidden sm:flex h-10 w-10 rounded-full items-center justify-center flex-shrink-0 ${addr.isDefault ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-500'}`}>
                                                 {addr.isDefault ? <Star className="h-5 w-5 fill-current" /> : <Home className="h-5 w-5" />}
                                             </div>
-                                            <div>
-                                                <div className="font-medium flex items-center gap-2 text-gray-900">
+                                            <div className="min-w-0">
+                                                <div className="font-medium flex flex-wrap items-center gap-2 text-gray-900">
                                                     {addr.recipientName}
                                                     {addr.isDefault && <span className="text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-full font-normal">ค่าเริ่มต้น</span>}
                                                 </div>
@@ -665,11 +665,11 @@ export default function ProfilePage() {
                                                 )}
                                             </div>
                                         </div>
-                                        <div>
+                                        <div className="flex flex-col sm:flex-row flex-shrink-0">
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                className="text-gray-500 hover:text-primary hover:bg-primary/5 rounded-xl mr-1"
+                                                className="text-gray-500 hover:text-primary hover:bg-primary/5 rounded-xl sm:mr-1"
                                                 onClick={() => handleEditAddressClick(addr)}
                                                 aria-label={`แก้ไขที่อยู่ของ ${addr.recipientName}`}
                                             >
