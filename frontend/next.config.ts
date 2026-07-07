@@ -14,12 +14,13 @@ const contentSecurityPolicy = [
   "default-src 'self'",
   // Next.js ต้องใช้ inline script ตอน hydration (ไม่ได้ใช้ nonce)
   // dev เท่านั้น: webpack dev server (--webpack) ใช้ eval() สำหรับ source map เร็ว — ขาด unsafe-eval แล้ว JS ทั้งหน้าจะถูกบล็อกเงียบๆ (หน้าขาว ไม่มี error ฝั่ง server)
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
+  // static.cloudflareinsights.com — Cloudflare Web Analytics beacon, ฉีดโดย edge เอง ไม่ได้มาจากโค้ดเรา
+  `script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com${isDev ? " 'unsafe-eval'" : ''}`,
   // Tailwind inline styles + Framer Motion ต้องใช้ inline style
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob: ${apiOrigin} https://*.loeitech.org https://lh3.googleusercontent.com`.replace(/\s+/g, ' '),
   "font-src 'self' data:",
-  `connect-src 'self' ${apiOrigin}`.replace(/\s+/g, ' '),
+  `connect-src 'self' ${apiOrigin} https://cloudflareinsights.com`.replace(/\s+/g, ' '),
   // @zxing barcode scanner ใช้ camera stream + blob
   "media-src 'self' blob:",
   "worker-src 'self' blob:",
