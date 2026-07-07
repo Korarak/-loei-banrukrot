@@ -34,6 +34,10 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   images: {
     formats: ['image/avif', 'image/webp'],
+    // Next 16's SSRF guard blocks any upstream image whose hostname resolves to a
+    // loopback/private IP — localhost always does, so dev (backend on localhost:8080)
+    // needs this opt-out. Production points at banrukrot.com (public), so stays protected.
+    dangerouslyAllowLocalIP: isDev,
     remotePatterns: [
       {
         protocol: 'http',
@@ -71,6 +75,21 @@ const nextConfig: NextConfig = {
   output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
   reactCompiler: true,
   turbopack: {},
+  async rewrites() {
+    // Dev only: frontend and backend are separate origins/containers (production's
+    // /uploads/ is already routed to the backend at the Nginx layer, before Next.js).
+    // Proxying here lets getImageUrl() emit a relative path in dev, so next/image's
+    // server-side optimizer fetch stays in-process instead of hitting "localhost"
+    // from inside the frontend container (wrong container) or Next's SSRF guard.
+    if (!isDev) return [];
+    const internalApiUrl = process.env.INTERNAL_API_URL || 'http://localhost:8080';
+    return [
+      {
+        source: '/uploads/:path*',
+        destination: `${internalApiUrl}/uploads/:path*`,
+      },
+    ];
+  },
   async headers() {
     const baseHeaders = [
       {
