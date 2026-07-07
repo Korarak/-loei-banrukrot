@@ -1,0 +1,8 @@
+{
+  "pollingInterval": 2000,
+  "ignore": [
+    "public/uploads/*",
+    "node_modules/*",
+    "*.log"
+  ]
+}

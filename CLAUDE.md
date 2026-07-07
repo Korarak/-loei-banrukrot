@@ -38,7 +38,7 @@ npm run lint      # ESLint
 cd backend
 npm run dev       # nodemon hot-reload
 npm start         # Production
-npm test          # Run tests
+npm test          # Jest — see Testing section below for coverage scope
 ```
 
 ### Production Docker
@@ -58,7 +58,7 @@ npm run docker:down  # docker-compose down
 ### Backend (`backend/`)
 Express app organized as: `controllers/` → `routes/` → `models/` → `middleware/`
 
-**Entry point:** `server.js` — enforces env vars (`MONGODB_URI`, `JWT_SECRET`, `FRONTEND_URL`) on startup, applies security middleware stack (helmet, cors, rate-limit, mongo-sanitize, hpp), then mounts routes under `/api`.
+**Entry point:** `server.js` — enforces env vars (`MONGODB_URI`, `JWT_SECRET`, `FRONTEND_URL`) on startup, connects to MongoDB, then starts `app.js`. `app.js` holds the actual Express app (middleware stack + routes) and exports it without listening — this split exists so `supertest` can exercise the app in tests without opening a real port or requiring a real MongoDB connection.
 
 **Security stack:** Helmet headers → CORS (strict, FRONTEND_URL only) → 500 req/10min rate limit → 10KB body limit → mongo-sanitize → hpp.
 
@@ -110,6 +110,29 @@ See `backend/API_DOCUMENTATION.md` for full endpoint reference.
 
 ### Image Uploads
 Multer handles file uploads to `backend/public/uploads/`. In Docker production, this directory is bind-mounted to persist images across container restarts.
+
+### Testing
+Backend only — no frontend test suite exists yet.
+
+- **Framework:** Jest + Supertest + `mongodb-memory-server` (real Mongoose models against an in-memory MongoDB, no mocking of the DB layer).
+- **Run:** `cd backend && npm test`
+- **Coverage is intentionally partial, not exhaustive:** `backend/tests/stockUtils.test.js` covers the critical `stockUtils.js` path (deduct/add/insufficient-stock/not-found), and `backend/tests/auth.test.js` covers the bootstrap-owner register/login flow as a Supertest integration pattern to copy for new tests. Most controllers (products, orders, cart, POS, inventory, etc.) have no tests yet — add them incrementally using the same `tests/setup/memoryDb.js` helper rather than introducing a second test setup pattern.
+- CI (`.github/workflows/deploy.yml`) does **not** run tests or lint before building/deploying — `npm test` and `npm run lint` (frontend) are currently manual gates only.
+
+### Production / Deployment
+Live at https://banrukrot.com. Architecture (see `plan.md` for full history/lessons and `deploy-secrets.local.md`, not committed, for credentials):
+
+```
+Internet → Nginx Proxy Manager (:80/:443, Let's Encrypt)
+             ├─ banrukrot.com, www → frontend (Next.js :8081)
+             │    └─ /api/, /uploads/ → backend (Express :8080)
+             └─ registry.banrukrot.com → registry:5000 (self-hosted Docker registry)
+           mongodb (internal only)
+```
+
+- 5 containers on one VPS (`103.107.53.112`, SSH key already configured for user `deploy`): frontend, backend, mongodb, npm (Nginx Proxy Manager), registry.
+- **CI/CD:** push to `main` → GitHub Actions (`.github/workflows/deploy.yml`) builds + pushes Docker images to the self-hosted registry → SSHes into the VPS → `docker compose pull && up -d`. No `gh` CLI available locally — check run status via the GitHub API (see the `deploy-check` skill below).
+- After any push to `main`, use the **`deploy-check` project skill** (`.claude/skills/deploy-check/SKILL.md`) to verify the deploy: it checks the GitHub Actions run, container health on the VPS, and does a production smoke test — this is the routine documented in `plan.md` that used to be repeated manually every time.
 
 ### Next.js Configuration
 `next.config.ts` enables: standalone output (for Docker), React Compiler, Turbopack, webpack polling (for Docker dev with `WATCHPACK_POLLING=true`). Remote image domains configured for `localhost`, `loeitech.org`, and `banrukrot.com`.

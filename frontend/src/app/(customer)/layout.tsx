@@ -254,7 +254,7 @@ export default function CustomerLayout({
                                             <Button variant="ghost" asChild className="text-gray-600 font-bold hover:text-accent hover:bg-accent/5 rounded-full px-5 transition-colors">
                                                 <Link href="/customer-login">เข้าสู่ระบบ</Link>
                                             </Button>
-                                            <Button asChild className="bg-gradient-to-r from-accent to-amber-600 text-white hover:brightness-110 rounded-full shadow-lg shadow-accent/20 px-6 font-bold transition-all hover:-translate-y-0.5 border-none">
+                                            <Button asChild className="bg-gradient-to-r from-accent to-amber-600 text-accent-foreground hover:brightness-110 rounded-full shadow-lg shadow-accent/20 px-6 font-bold transition-all hover:-translate-y-0.5 border-none">
                                                 <Link href="/customer-register">สมัครสมาชิก</Link>
                                             </Button>
                                         </div>
@@ -306,7 +306,7 @@ export default function CustomerLayout({
                                     </button>
                                 </div>
                             ) : (
-                                <Button size="sm" asChild className="rounded-full h-8 px-4 text-xs font-bold bg-gradient-to-r from-accent to-amber-600 text-white border-none shadow-md shadow-accent/20">
+                                <Button size="sm" asChild className="rounded-full h-8 px-4 text-xs font-bold bg-gradient-to-r from-accent to-amber-600 text-accent-foreground border-none shadow-md shadow-accent/20">
                                     <Link href="/customer-login">เข้าสู่ระบบ</Link>
                                 </Button>
                             )

@@ -122,7 +122,7 @@ export function useUpdateCartItem() {
             queryClient.invalidateQueries({ queryKey: ['cart'] });
         },
         onError: (error: any) => {
-            toast.error(error.response?.data?.message || 'Failed to update cart');
+            toast.error(error.response?.data?.message || 'ไม่สามารถอัปเดตรถเข็นได้');
         },
     });
 }
@@ -138,10 +138,10 @@ export function useRemoveCartItem() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['cart'] });
-            toast.success('Removed from cart');
+            toast.success('ลบสินค้าออกจากรถเข็นแล้ว');
         },
         onError: (error: any) => {
-            toast.error(error.response?.data?.message || 'Failed to remove item');
+            toast.error(error.response?.data?.message || 'ไม่สามารถลบสินค้าออกจากรถเข็นได้');
         },
     });
 }
@@ -157,10 +157,10 @@ export function useClearCart() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['cart'] });
-            toast.success('Cart cleared');
+            toast.success('ล้างรถเข็นเรียบร้อยแล้ว');
         },
         onError: (error: any) => {
-            toast.error(error.response?.data?.message || 'Failed to clear cart');
+            toast.error(error.response?.data?.message || 'ไม่สามารถล้างรถเข็นได้');
         },
     });
 }

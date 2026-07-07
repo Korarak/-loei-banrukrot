@@ -119,13 +119,13 @@ export function useCreateOrder() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['orders'] });
             queryClient.invalidateQueries({ queryKey: ['cart'] });
-            toast.success('Order placed successfully!', {
-                description: 'Thank you for your purchase.',
+            toast.success('สั่งซื้อสำเร็จแล้ว!', {
+                description: 'ขอบคุณสำหรับการสั่งซื้อ',
             });
         },
         onError: (error: any) => {
-            toast.error('Failed to create order', {
-                description: error.response?.data?.message || 'Please try again',
+            toast.error('ไม่สามารถสั่งซื้อได้', {
+                description: error.response?.data?.message || 'กรุณาลองใหม่อีกครั้ง',
             });
         },
     });
@@ -191,11 +191,11 @@ export function useUploadSlip() {
         },
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ['order', variables.id] });
-            toast.success('Payment slip uploaded successfully');
+            toast.success('อัปโหลดสลิปการโอนเงินเรียบร้อยแล้ว');
         },
         onError: (error: any) => {
-            toast.error('Failed to upload slip', {
-                description: error.response?.data?.message || 'Please try again',
+            toast.error('ไม่สามารถอัปโหลดสลิปได้', {
+                description: error.response?.data?.message || 'กรุณาลองใหม่อีกครั้ง',
             });
         },
     });
