@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -55,6 +55,44 @@ interface ProductFormProps {
     onSubmit: (data: ProductFormData) => void;
     onCancel?: () => void;
     isLoading?: boolean;
+}
+
+// Controlled <input type="number"> snaps back to "0" mid-edit on every keystroke
+// (RHF field.value coerces empty input to 0 immediately), which on mobile makes the
+// leading 0 look undeletable. Buffer the raw text locally so the field can sit empty
+// while the user types, and only feed RHF a coerced number.
+function VariantNumberInput({
+    value,
+    onChange,
+    parse,
+    step,
+    placeholder,
+    className,
+}: {
+    value: number;
+    onChange: (value: number) => void;
+    parse: (raw: string) => number;
+    step?: string;
+    placeholder?: string;
+    className?: string;
+}) {
+    const [text, setText] = useState(value === 0 ? '' : String(value));
+
+    return (
+        <Input
+            type="number"
+            step={step}
+            placeholder={placeholder}
+            value={text}
+            onChange={(e) => {
+                const raw = e.target.value;
+                setText(raw);
+                const parsed = parse(raw);
+                onChange(isNaN(parsed) ? 0 : parsed);
+            }}
+            className={className}
+        />
+    );
 }
 
 export default function ProductForm({ product, onSubmit, onCancel, isLoading }: ProductFormProps) {
@@ -347,15 +385,12 @@ export default function ProductForm({ product, onSubmit, onCancel, isLoading }: 
                                             <FormItem>
                                                 <FormLabel className="text-xs text-gray-500 uppercase font-bold">ราคา</FormLabel>
                                                 <FormControl>
-                                                    <Input
-                                                        type="number"
+                                                    <VariantNumberInput
+                                                        value={field.value}
+                                                        onChange={field.onChange}
+                                                        parse={(raw) => parseFloat(raw)}
                                                         step="0.01"
                                                         placeholder="0.00"
-                                                        value={isNaN(field.value ?? 0) ? '' : field.value}
-                                                        onChange={(e) => {
-                                                            const val = e.target.value === '' ? 0 : parseFloat(e.target.value);
-                                                            field.onChange(isNaN(val) ? 0 : val);
-                                                        }}
                                                         className="h-10 bg-white"
                                                     />
                                                 </FormControl>
@@ -372,14 +407,11 @@ export default function ProductForm({ product, onSubmit, onCancel, isLoading }: 
                                             <FormItem>
                                                 <FormLabel className="text-xs text-gray-500 uppercase font-bold">สต๊อก</FormLabel>
                                                 <FormControl>
-                                                    <Input
-                                                        type="number"
+                                                    <VariantNumberInput
+                                                        value={field.value}
+                                                        onChange={field.onChange}
+                                                        parse={(raw) => parseInt(raw, 10)}
                                                         placeholder="0"
-                                                        value={isNaN(field.value ?? 0) ? '' : field.value}
-                                                        onChange={(e) => {
-                                                            const val = e.target.value === '' ? 0 : parseInt(e.target.value);
-                                                            field.onChange(isNaN(val) ? 0 : val);
-                                                        }}
                                                         className="h-10 bg-white"
                                                     />
                                                 </FormControl>
