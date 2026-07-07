@@ -52,8 +52,8 @@ export default {
                 },
             },
             fontFamily: {
-                sans: ["var(--font-inter)", "var(--font-sarabun)", "ui-sans-serif", "system-ui", "sans-serif"],
-                kanit: ["var(--font-kanit)", "sans-serif"],
+                sans: ["var(--font-sarabun)", "ui-sans-serif", "system-ui", "sans-serif"],
+                mitr: ["var(--font-mitr)", "sans-serif"],
             },
             borderRadius: {
                 lg: "var(--radius)",

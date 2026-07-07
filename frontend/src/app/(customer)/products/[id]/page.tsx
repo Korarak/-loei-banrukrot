@@ -232,12 +232,12 @@ export default function ProductDetailPage() {
                                 {categoryName}
                             </span>
                         </div>
-                        <h1 className="text-3xl md:text-4xl font-black text-gray-900 mb-6 leading-[1.15] font-kanit">
+                        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 leading-[1.15] font-mitr">
                             {product.productName}
                         </h1>
 
                         <div className="flex items-baseline gap-4 mb-8">
-                            <div className="text-4xl md:text-5xl font-black text-gray-900 font-kanit">
+                            <div className="text-4xl md:text-5xl font-bold text-gray-900 font-mitr">
                                 ฿{selectedVariant?.price.toLocaleString()}
                             </div>
                             {selectedStock > 0 ? (
@@ -356,12 +356,12 @@ export default function ProductDetailPage() {
                 <div className="max-w-3xl mx-auto">
                     <div className="text-center mb-12">
                         <h2 className="text-xs font-black uppercase tracking-[0.3em] text-primary mb-3">Product Details</h2>
-                        <h3 className="text-3xl font-black text-gray-900 font-kanit">รายละเอียดสินค้า</h3>
+                        <h3 className="text-3xl font-bold text-gray-900 font-mitr">รายละเอียดสินค้า</h3>
                     </div>
                     
                     <div className="prose prose-lg prose-gray max-w-none">
                         <div className="bg-white rounded-[2.5rem] p-8 md:p-12 border border-gray-100 shadow-sm relative overflow-hidden group">
-                            <div className="text-gray-600 leading-[1.8] font-medium font-kanit text-base line-clamp-4 overflow-hidden">
+                            <div className="text-gray-600 leading-[1.8] font-medium text-base line-clamp-4 overflow-hidden">
                                 {product.description || 'ไม่มีข้อมูลรายละเอียดสำหรับสินค้านี้'}
                             </div>
                             <div className="mt-12 flex justify-center">

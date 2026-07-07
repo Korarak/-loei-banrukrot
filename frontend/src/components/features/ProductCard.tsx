@@ -183,7 +183,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                             </h3>
 
                             <div className="flex items-baseline justify-between">
-                                <span className="text-base font-black text-primary tracking-tight font-kanit">
+                                <span className="text-base font-bold text-primary tracking-tight font-mitr">
                                     {priceDisplay}
                                 </span>
                                 {product.variants?.length > 1 && (
