@@ -374,12 +374,12 @@ export default function AdminProductsPage() {
 
             {/* Advanced Filters + View Toggle */}
             <div className="flex flex-wrap items-center gap-3">
-                <div className="w-full sm:w-40">
+                <div className="w-full sm:w-40 min-w-0">
                     <Select
                         value={categoryFilter === 'all' ? 'all' : String(categoryFilter)}
                         onValueChange={(v) => setCategoryFilter(v === 'all' ? 'all' : parseInt(v))}
                     >
-                        <SelectTrigger className="h-10 bg-white border-gray-200 rounded-xl shadow-sm text-sm">
+                        <SelectTrigger className="h-10 w-full bg-white border-gray-200 rounded-xl shadow-sm text-sm">
                             <SelectValue placeholder="หมวดหมู่" />
                         </SelectTrigger>
                         <SelectContent>
@@ -390,9 +390,9 @@ export default function AdminProductsPage() {
                         </SelectContent>
                     </Select>
                 </div>
-                <div className="w-full sm:w-40">
+                <div className="w-full sm:w-40 min-w-0">
                     <Select value={brandFilter} onValueChange={setBrandFilter}>
-                        <SelectTrigger className="h-10 bg-white border-gray-200 rounded-xl shadow-sm text-sm">
+                        <SelectTrigger className="h-10 w-full bg-white border-gray-200 rounded-xl shadow-sm text-sm">
                             <SelectValue placeholder="แบรนด์" />
                         </SelectTrigger>
                         <SelectContent>
@@ -403,9 +403,9 @@ export default function AdminProductsPage() {
                         </SelectContent>
                     </Select>
                 </div>
-                <div className="w-full sm:w-36">
+                <div className="w-full sm:w-36 min-w-0">
                     <Select value={activeFilter} onValueChange={(v) => setActiveFilter(v as any)}>
-                        <SelectTrigger className="h-10 bg-white border-gray-200 rounded-xl shadow-sm text-sm">
+                        <SelectTrigger className="h-10 w-full bg-white border-gray-200 rounded-xl shadow-sm text-sm">
                             <SelectValue placeholder="สถานะ" />
                         </SelectTrigger>
                         <SelectContent>
