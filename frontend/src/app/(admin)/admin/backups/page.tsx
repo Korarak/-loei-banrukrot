@@ -84,7 +84,7 @@ export default function AdminBackupPage() {
     );
 
     return (
-        <div className="p-6 space-y-8 max-w-7xl mx-auto">
+        <div className="p-6 space-y-8">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>

@@ -193,7 +193,7 @@ export default function AdminOrdersPage() {
     }
 
     return (
-        <div className="space-y-6 max-w-6xl mx-auto min-w-0">
+        <div className="space-y-6 min-w-0">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 tracking-tight">คำสั่งซื้อ</h1>

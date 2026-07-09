@@ -225,7 +225,7 @@ export default function AdminCategoriesPage() {
     ) || [];
 
     return (
-        <div className="space-y-6 max-w-7xl mx-auto">
+        <div className="space-y-6">
             {/* Header Section */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>

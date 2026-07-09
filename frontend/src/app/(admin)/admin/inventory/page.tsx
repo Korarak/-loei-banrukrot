@@ -682,7 +682,7 @@ export default function InventoryPage() {
     const lowCount = lowStockData?.data?.length ?? 0;
 
     return (
-        <div className="space-y-6 max-w-7xl mx-auto">
+        <div className="space-y-6">
             <div>
                 <h1 className="text-3xl font-bold text-gray-900 tracking-tight flex items-center gap-3">
                     <Warehouse className="h-8 w-8 text-primary" />
