@@ -269,14 +269,14 @@ export default function AdminProductsPage() {
     };
 
     return (
-        <div className="space-y-6 max-w-7xl mx-auto">
+        <div className="space-y-6 max-w-7xl mx-auto min-w-0">
             {/* Header Section */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-900 tracking-tight">สินค้า</h1>
                     <p className="text-gray-500 text-sm mt-1">จัดการสต๊อกสินค้า ราคา และรายละเอียดสินค้า</p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                     <Button
                         variant="outline"
                         className="rounded-xl"
@@ -302,11 +302,11 @@ export default function AdminProductsPage() {
             </div>
 
             {/* Filters Section */}
-            <div className="flex flex-col gap-4">
-                <div className="flex flex-col md:flex-row gap-4 justify-between">
+            <div className="flex flex-col gap-4 min-w-0">
+                <div className="flex flex-col md:flex-row gap-4 justify-between min-w-0">
                     {/* Stock Filter */}
-                    <Tabs defaultValue="all" value={stockFilter} onValueChange={setStockFilter} className="w-full md:w-auto">
-                        <TabsList className="grid w-full md:w-[400px] grid-cols-4 bg-gray-100 p-1 rounded-xl">
+                    <Tabs defaultValue="all" value={stockFilter} onValueChange={setStockFilter} className="w-full min-w-0 md:w-auto">
+                        <TabsList className="grid w-full md:w-[400px] grid-cols-4 bg-gray-100 p-1 rounded-xl overflow-x-auto">
                             <TabsTrigger value="all" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
                                 ทั้งหมด ({totalProducts})
                             </TabsTrigger>
@@ -323,8 +323,8 @@ export default function AdminProductsPage() {
                     </Tabs>
 
                     {/* Channel Filter */}
-                    <Tabs defaultValue="all" value={channelFilter} onValueChange={(val) => setChannelFilter(val as any)} className="w-full md:w-auto">
-                        <TabsList className="grid w-full md:w-[350px] grid-cols-3 bg-gray-100 p-1 rounded-xl">
+                    <Tabs defaultValue="all" value={channelFilter} onValueChange={(val) => setChannelFilter(val as any)} className="w-full min-w-0 md:w-auto">
+                        <TabsList className="grid w-full md:w-[350px] grid-cols-3 bg-gray-100 p-1 rounded-xl overflow-x-auto">
                             <TabsTrigger value="all" className="rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
                                 ทั้งหมด ({products?.stats?.total || 0})
                             </TabsTrigger>
