@@ -1,7 +1,13 @@
 // controllers/productController.js
 const mongoose = require('mongoose');
+const { parse: parseCsv } = require('csv-parse/sync');
 const { changeStock } = require('../utils/stockUtils');
-const { Product, ProductVariant, ProductImage } = require('../models');
+const { Product, ProductVariant, ProductImage, Category, OrderDetail } = require('../models');
+const { csvProductRowSchema } = require('../models/validationSchemas');
+
+const escapeCSV = (val) => `"${String(val ?? '').replace(/"/g, '""')}"`;
+const CSV_PRODUCT_EXPORT_LIMIT = 2000;
+const CSV_PRODUCT_IMPORT_LIMIT = 2000;
 
 // @desc    Get all products with variants and images
 // @route   GET /api/products
@@ -440,6 +446,327 @@ exports.deleteProduct = async (req, res, next) => {
         res.json({
             success: true,
             message: 'Product deleted successfully'
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// ==================== BULK ACTIONS ====================
+
+// @desc    Bulk toggle sales channel (isPos/isOnline) for multiple products
+// @route   PATCH /api/products/bulk-channel
+// @access  Private (staff/owner)
+exports.bulkUpdateChannel = async (req, res, next) => {
+    try {
+        const { productIds, isPos, isOnline } = req.body;
+
+        const updateFields = {};
+        if (isPos !== undefined) updateFields.isPos = isPos;
+        if (isOnline !== undefined) updateFields.isOnline = isOnline;
+
+        const result = await Product.updateMany(
+            { _id: { $in: productIds } },
+            { $set: updateFields }
+        );
+
+        res.json({
+            success: true,
+            message: 'Products updated successfully',
+            data: { matchedCount: result.matchedCount, modifiedCount: result.modifiedCount }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// @desc    Bulk change category for multiple products
+// @route   PATCH /api/products/bulk-category
+// @access  Private (staff/owner)
+exports.bulkUpdateCategory = async (req, res, next) => {
+    try {
+        const { productIds, categoryId } = req.body;
+
+        const category = await Category.findOne({ categoryId });
+        if (!category) {
+            return res.status(404).json({ success: false, message: 'Category not found' });
+        }
+
+        const result = await Product.updateMany(
+            { _id: { $in: productIds } },
+            { $set: { categoryId } }
+        );
+
+        res.json({
+            success: true,
+            message: 'Products updated successfully',
+            data: { matchedCount: result.matchedCount, modifiedCount: result.modifiedCount }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// @desc    Bulk delete multiple products (skips products with order history)
+// @route   DELETE /api/products/bulk-delete
+// @access  Private (owner only)
+exports.bulkDeleteProducts = async (req, res, next) => {
+    try {
+        const { productIds } = req.body;
+
+        const products = await Product.find({ _id: { $in: productIds } }, { productName: 1 });
+        const foundIds = products.map(p => p._id.toString());
+
+        const variants = await ProductVariant.find({ productId: { $in: foundIds } }, { _id: 1, productId: 1 });
+        const variantIds = variants.map(v => v._id);
+
+        const referencedVariantIds = await OrderDetail.distinct('variantId', { variantId: { $in: variantIds } });
+        const referencedVariantIdSet = new Set(referencedVariantIds.map(id => id.toString()));
+
+        const excludedProductIds = new Set(
+            variants
+                .filter(v => referencedVariantIdSet.has(v._id.toString()))
+                .map(v => v.productId.toString())
+        );
+
+        const deletableIds = foundIds.filter(id => !excludedProductIds.has(id));
+        const skipped = products
+            .filter(p => excludedProductIds.has(p._id.toString()))
+            .map(p => ({ productId: p._id, productName: p.productName, reason: 'มีประวัติการสั่งซื้อ' }));
+
+        await Product.deleteMany({ _id: { $in: deletableIds } });
+        await ProductVariant.deleteMany({ productId: { $in: deletableIds } });
+        await ProductImage.deleteMany({ productId: { $in: deletableIds } });
+
+        res.json({
+            success: true,
+            message: 'Products deleted successfully',
+            data: { deletedCount: deletableIds.length, deletedIds: deletableIds, skipped }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// ==================== CSV IMPORT/EXPORT ====================
+
+// @desc    Export products to CSV (one row per variant)
+// @route   GET /api/products/export/csv?ids=id1,id2
+// @access  Private (staff/owner)
+exports.exportProductsCSV = async (req, res, next) => {
+    try {
+        const { ids } = req.query;
+
+        const productMatch = ids
+            ? { _id: { $in: ids.split(',').map(s => s.trim()).filter(Boolean) } }
+            : {};
+
+        const products = await Product.find(productMatch)
+            .sort({ dateCreated: -1 })
+            .limit(CSV_PRODUCT_EXPORT_LIMIT);
+
+        const productIds = products.map(p => p._id);
+        const [variants, categories] = await Promise.all([
+            ProductVariant.find({ productId: { $in: productIds } }),
+            Category.find({})
+        ]);
+
+        const categoryMap = new Map(categories.map(c => [c.categoryId, c.name]));
+        const productMap = new Map(products.map(p => [p._id.toString(), p]));
+
+        let csvData = '﻿';
+        csvData += 'SKU,ProductName,Category,Brand,Option1,Option2,Price,Stock,ShippingSize,IsActive,IsPos,IsOnline\n';
+
+        variants.forEach(v => {
+            const product = productMap.get(v.productId.toString());
+            if (!product) return;
+            const categoryName = categoryMap.get(product.categoryId) || '';
+            csvData += [
+                escapeCSV(v.sku),
+                escapeCSV(product.productName),
+                escapeCSV(categoryName),
+                escapeCSV(product.brand),
+                escapeCSV(v.option1Value),
+                escapeCSV(v.option2Value),
+                v.price,
+                v.stockAvailable,
+                escapeCSV(product.shippingSize),
+                product.isActive,
+                product.isPos,
+                product.isOnline
+            ].join(',') + '\n';
+        });
+
+        res.setHeader('Content-disposition', `attachment; filename=products_export_${Date.now()}.csv`);
+        res.set('Content-Type', 'text/csv; charset=utf-8');
+        res.status(200).send(csvData);
+    } catch (error) {
+        next(error);
+    }
+};
+
+// @desc    Import products from CSV — updates existing products/variants matched by SKU.
+//          Never creates new products. Blank cells mean "don't change this field."
+// @route   POST /api/products/import/csv
+// @access  Private (staff/owner)
+exports.importProductsCSV = async (req, res, next) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'CSV file is required' });
+        }
+
+        let records;
+        try {
+            records = parseCsv(req.file.buffer.toString('utf-8'), {
+                columns: true,
+                skip_empty_lines: true,
+                trim: true,
+                bom: true
+            });
+        } catch (parseErr) {
+            return res.status(400).json({ success: false, message: `Invalid CSV file: ${parseErr.message}` });
+        }
+
+        if (records.length === 0) {
+            return res.status(400).json({ success: false, message: 'CSV file has no rows' });
+        }
+        if (records.length > CSV_PRODUCT_IMPORT_LIMIT) {
+            return res.status(400).json({ success: false, message: `CSV file exceeds ${CSV_PRODUCT_IMPORT_LIMIT} row limit` });
+        }
+
+        const categories = await Category.find({});
+        const categoryByName = new Map(categories.map(c => [c.name.trim().toLowerCase(), c.categoryId]));
+
+        const skus = records.map(r => (r.SKU || '').trim()).filter(Boolean);
+        const variants = await ProductVariant.find({ sku: { $in: skus } });
+        const variantBySku = new Map(variants.map(v => [v.sku, v]));
+
+        const parseBoolCell = (value) => {
+            const v = value.trim().toLowerCase();
+            if (v === 'true' || v === '1') return true;
+            if (v === 'false' || v === '0') return false;
+            return null; // invalid
+        };
+
+        const updated = [];
+        const errors = [];
+
+        // Sequential — no DB transactions exist anywhere in this codebase, and this keeps
+        // StockMovement ordering sane. Each row is an independent, individually-committed
+        // write, same as every other mutation in this app.
+        for (let i = 0; i < records.length; i++) {
+            const row = records[i];
+            const rowNum = i + 2; // header is row 1
+
+            const parseResult = csvProductRowSchema.safeParse(row);
+            if (!parseResult.success) {
+                errors.push({ row: rowNum, sku: row.SKU || '', reason: parseResult.error.issues[0]?.message || 'Invalid row' });
+                continue;
+            }
+
+            const sku = parseResult.data.SKU.trim();
+            const variant = variantBySku.get(sku);
+            if (!variant) {
+                errors.push({ row: rowNum, sku, reason: 'SKU not found' });
+                continue;
+            }
+
+            try {
+                // Resolve/validate every non-blank cell BEFORE writing anything —
+                // whole-row atomicity: one bad cell skips the entire row rather than
+                // partially applying some fields.
+                let categoryId;
+                if (row.Category && row.Category.trim() !== '') {
+                    categoryId = categoryByName.get(row.Category.trim().toLowerCase());
+                    if (categoryId === undefined) {
+                        errors.push({ row: rowNum, sku, reason: `Category "${row.Category}" not found` });
+                        continue;
+                    }
+                }
+
+                let isActive, isPos, isOnline;
+                if (row.IsActive && row.IsActive.trim() !== '') {
+                    isActive = parseBoolCell(row.IsActive);
+                    if (isActive === null) { errors.push({ row: rowNum, sku, reason: 'Invalid IsActive value' }); continue; }
+                }
+                if (row.IsPos && row.IsPos.trim() !== '') {
+                    isPos = parseBoolCell(row.IsPos);
+                    if (isPos === null) { errors.push({ row: rowNum, sku, reason: 'Invalid IsPos value' }); continue; }
+                }
+                if (row.IsOnline && row.IsOnline.trim() !== '') {
+                    isOnline = parseBoolCell(row.IsOnline);
+                    if (isOnline === null) { errors.push({ row: rowNum, sku, reason: 'Invalid IsOnline value' }); continue; }
+                }
+
+                let shippingSize;
+                if (row.ShippingSize && row.ShippingSize.trim() !== '') {
+                    const s = row.ShippingSize.trim().toLowerCase();
+                    if (s !== 'small' && s !== 'large') {
+                        errors.push({ row: rowNum, sku, reason: 'ShippingSize must be small or large' });
+                        continue;
+                    }
+                    shippingSize = s;
+                }
+
+                let price;
+                if (row.Price && row.Price.trim() !== '') {
+                    price = parseFloat(row.Price);
+                    if (isNaN(price) || price < 0) {
+                        errors.push({ row: rowNum, sku, reason: 'Invalid Price value' });
+                        continue;
+                    }
+                }
+
+                let stock;
+                if (row.Stock && row.Stock.trim() !== '') {
+                    stock = parseInt(row.Stock, 10);
+                    if (isNaN(stock) || stock < 0) {
+                        errors.push({ row: rowNum, sku, reason: 'Invalid Stock value' });
+                        continue;
+                    }
+                }
+
+                const productFields = {};
+                if (categoryId !== undefined) productFields.categoryId = categoryId;
+                if (row.Brand && row.Brand.trim() !== '') productFields.brand = row.Brand.trim();
+                if (shippingSize !== undefined) productFields.shippingSize = shippingSize;
+                if (isActive !== undefined) productFields.isActive = isActive;
+                if (isPos !== undefined) productFields.isPos = isPos;
+                if (isOnline !== undefined) productFields.isOnline = isOnline;
+
+                if (Object.keys(productFields).length > 0) {
+                    await Product.findByIdAndUpdate(variant.productId, { $set: productFields });
+                }
+
+                if (price !== undefined) {
+                    await ProductVariant.findByIdAndUpdate(variant._id, { price });
+                }
+
+                if (stock !== undefined) {
+                    const delta = stock - variant.stockAvailable;
+                    if (delta !== 0) {
+                        // Stock changes must always go through stockUtils so every change
+                        // is logged in StockMovement — never a raw update here.
+                        await changeStock(variant._id, delta, 'adjustment', null, null, req.user._id, 'CSV import');
+                        variant.stockAvailable = stock; // keep map correct for duplicate-SKU rows in this file
+                    }
+                }
+
+                updated.push(sku);
+            } catch (rowError) {
+                errors.push({ row: rowNum, sku, reason: rowError.message || 'Unexpected error' });
+            }
+        }
+
+        res.json({
+            success: true,
+            data: {
+                totalRows: records.length,
+                updatedCount: updated.length,
+                skippedCount: errors.length,
+                updated,
+                skipped: errors
+            }
         });
     } catch (error) {
         next(error);

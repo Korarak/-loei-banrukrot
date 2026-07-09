@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
     Select,
@@ -17,19 +18,32 @@ import {
     Trash2,
     Search,
     Package,
-    AlertCircle,
     Store,
     Globe,
-    Ban,
     SortDesc,
     Minus,
-    Layers,
-    Box
+    LayoutGrid,
+    Table2,
+    Download,
+    Upload
 } from 'lucide-react';
-import { useProducts, useDeleteProduct, useUpdateVariantStock, type Product } from '@/hooks/useProducts';
+import {
+    useProducts,
+    useDeleteProduct,
+    useUpdateVariantStock,
+    useBulkDeleteProducts,
+    useBulkUpdateChannel,
+    useBulkUpdateCategory,
+    exportProductsCSV,
+    type Product
+} from '@/hooks/useProducts';
 import { useCategories } from '@/hooks/useCategories';
 import ProductDialog from '@/components/features/ProductDialog';
 import DeleteConfirmDialog from '@/components/features/DeleteConfirmDialog';
+import BulkActionToolbar from '@/components/features/BulkActionToolbar';
+import BulkCategoryDialog from '@/components/features/BulkCategoryDialog';
+import CsvImportDialog from '@/components/features/CsvImportDialog';
+import ProductsTableView from '@/components/features/ProductsTableView';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
@@ -48,6 +62,16 @@ export default function AdminProductsPage() {
     const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>({ key: 'dateCreated', direction: 'desc' });
     const [stockFilter, setStockFilter] = useState('all'); // 'all' | 'in_stock' | 'low_stock' | 'out_of_stock'
     const [channelFilter, setChannelFilter] = useState<'all' | 'pos' | 'online'>('all');
+    const [categoryFilter, setCategoryFilter] = useState<number | 'all'>('all');
+    const [brandFilter, setBrandFilter] = useState<string>('all');
+    const [activeFilter, setActiveFilter] = useState<'all' | 'active' | 'inactive'>('all');
+    const [viewMode, setViewMode] = useState<'card' | 'table'>('card');
+
+    // Bulk selection + bulk action dialogs
+    const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
+    const [bulkCategoryDialogOpen, setBulkCategoryDialogOpen] = useState(false);
+    const [csvImportDialogOpen, setCsvImportDialogOpen] = useState(false);
 
     // Image Preview State
     const [previewOpen, setPreviewOpen] = useState(false);
@@ -71,8 +95,19 @@ export default function AdminProductsPage() {
         return map;
     }, [categoriesData]);
 
+    // Distinct brands from the full loaded set (not the filtered one, so narrowing by
+    // category doesn't yank options out from under an in-progress brand selection)
+    const brandOptions = useMemo(() => {
+        return Array.from(new Set((products || []).map(p => p.brand).filter((b): b is string => !!b))).sort();
+    }, [products]);
+
     const deleteProduct = useDeleteProduct();
     const updateVariantStock = useUpdateVariantStock();
+    const bulkDeleteProducts = useBulkDeleteProducts();
+    const bulkUpdateChannel = useBulkUpdateChannel();
+    const bulkUpdateCategory = useBulkUpdateCategory();
+
+    const isBulkActionBusy = bulkDeleteProducts.isPending || bulkUpdateChannel.isPending || bulkUpdateCategory.isPending;
 
     const handleCreateProduct = () => {
         setSelectedProductId(null);
@@ -133,10 +168,56 @@ export default function AdminProductsPage() {
         setSortConfig({ key, direction: direction as 'asc' | 'desc' });
     };
 
+    // ─── Selection handlers ─────────────────────────────────────────────────
+    const handleToggleSelect = (id: string) => {
+        setSelectedIds(prev => {
+            const next = new Set(prev);
+            if (next.has(id)) next.delete(id); else next.add(id);
+            return next;
+        });
+    };
+
+    const handleClearSelection = () => setSelectedIds(new Set());
+
+    // ─── Bulk action handlers ───────────────────────────────────────────────
+    const handleBulkDeleteConfirm = async () => {
+        const result = await bulkDeleteProducts.mutateAsync(Array.from(selectedIds));
+        // Prune only the ids that were actually deleted — keep skipped ones selected
+        // so the admin can see exactly what's still selected and why.
+        setSelectedIds(prev => {
+            const next = new Set(prev);
+            result.deletedIds.forEach(id => next.delete(id));
+            return next;
+        });
+        setBulkDeleteDialogOpen(false);
+    };
+
+    const handleBulkChannelToggle = async (field: 'isPos' | 'isOnline', value: boolean) => {
+        await bulkUpdateChannel.mutateAsync({ productIds: Array.from(selectedIds), [field]: value });
+        setSelectedIds(new Set());
+    };
+
+    const handleBulkCategoryConfirm = async (categoryId: number) => {
+        await bulkUpdateCategory.mutateAsync({ productIds: Array.from(selectedIds), categoryId });
+        setSelectedIds(new Set());
+        setBulkCategoryDialogOpen(false);
+    };
+
     // Memoized sort + filter + stats — avoid O(n) passes on every render
     const { sortedProducts, totalProducts, lowStockCount, outStockCount } = useMemo(() => {
         const all = products || [];
-        const filtered = all.filter(product => {
+
+        // Stage 1: category/brand/active — affect both the list AND the stat badges
+        const preStockFiltered = all.filter(product => {
+            if (categoryFilter !== 'all' && product.categoryId !== categoryFilter) return false;
+            if (brandFilter !== 'all' && (product.brand || '') !== brandFilter) return false;
+            if (activeFilter === 'active' && !product.isActive) return false;
+            if (activeFilter === 'inactive' && product.isActive) return false;
+            return true;
+        });
+
+        // Stage 2: stock tab — affects the rendered list only, not the tab badge counts
+        const filtered = preStockFiltered.filter(product => {
             const totalStock = product.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0;
             if (stockFilter === 'in_stock') return totalStock > 10;
             if (stockFilter === 'low_stock') return totalStock > 0 && totalStock <= 10;
@@ -168,10 +249,24 @@ export default function AdminProductsPage() {
             return 0;
         });
 
-        const low = all.filter(p => { const s = p.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0; return s > 0 && s <= 10; }).length;
-        const out = all.filter(p => (p.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0) === 0).length;
-        return { sortedProducts: sorted, totalProducts: all.length, lowStockCount: low, outStockCount: out };
-    }, [products, stockFilter, sortConfig]);
+        const low = preStockFiltered.filter(p => { const s = p.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0; return s > 0 && s <= 10; }).length;
+        const out = preStockFiltered.filter(p => (p.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0) === 0).length;
+        return { sortedProducts: sorted, totalProducts: preStockFiltered.length, lowStockCount: low, outStockCount: out };
+    }, [products, stockFilter, sortConfig, categoryFilter, brandFilter, activeFilter]);
+
+    const allVisibleSelected = sortedProducts.length > 0 && sortedProducts.every(p => selectedIds.has(p._id));
+
+    const handleToggleSelectAll = () => {
+        setSelectedIds(prev => {
+            const next = new Set(prev);
+            if (allVisibleSelected) {
+                sortedProducts.forEach(p => next.delete(p._id));
+            } else {
+                sortedProducts.forEach(p => next.add(p._id));
+            }
+            return next;
+        });
+    };
 
     return (
         <div className="space-y-6 max-w-7xl mx-auto">
@@ -181,13 +276,29 @@ export default function AdminProductsPage() {
                     <h1 className="text-3xl font-bold text-gray-900 tracking-tight">สินค้า</h1>
                     <p className="text-gray-500 text-sm mt-1">จัดการสต๊อกสินค้า ราคา และรายละเอียดสินค้า</p>
                 </div>
-                <Button
-                    onClick={handleCreateProduct}
-                    className="rounded-xl px-6 shadow-lg shadow-primary/20 transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5"
-                >
-                    <Plus className="h-5 w-5 mr-2" />
-                    <span className="font-medium">เพิ่มสินค้า</span>
-                </Button>
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        className="rounded-xl"
+                        onClick={() => setCsvImportDialogOpen(true)}
+                    >
+                        <Upload className="h-4 w-4 mr-2" /> นำเข้า CSV
+                    </Button>
+                    <Button
+                        variant="outline"
+                        className="rounded-xl"
+                        onClick={() => exportProductsCSV(sortedProducts.map(p => p._id))}
+                    >
+                        <Download className="h-4 w-4 mr-2" /> ส่งออก CSV
+                    </Button>
+                    <Button
+                        onClick={handleCreateProduct}
+                        className="rounded-xl px-6 shadow-lg shadow-primary/20 transition-all duration-200 hover:shadow-xl hover:-translate-y-0.5"
+                    >
+                        <Plus className="h-5 w-5 mr-2" />
+                        <span className="font-medium">เพิ่มสินค้า</span>
+                    </Button>
+                </div>
             </div>
 
             {/* Filters Section */}
@@ -261,7 +372,87 @@ export default function AdminProductsPage() {
                 </div>
             </div>
 
-            {/* Product List as Cards */}
+            {/* Advanced Filters + View Toggle */}
+            <div className="flex flex-wrap items-center gap-3">
+                <div className="w-full sm:w-40">
+                    <Select
+                        value={categoryFilter === 'all' ? 'all' : String(categoryFilter)}
+                        onValueChange={(v) => setCategoryFilter(v === 'all' ? 'all' : parseInt(v))}
+                    >
+                        <SelectTrigger className="h-10 bg-white border-gray-200 rounded-xl shadow-sm text-sm">
+                            <SelectValue placeholder="หมวดหมู่" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">ทุกหมวดหมู่</SelectItem>
+                            {categoriesData?.map((c) => (
+                                <SelectItem key={c.categoryId} value={c.categoryId.toString()}>{c.name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="w-full sm:w-40">
+                    <Select value={brandFilter} onValueChange={setBrandFilter}>
+                        <SelectTrigger className="h-10 bg-white border-gray-200 rounded-xl shadow-sm text-sm">
+                            <SelectValue placeholder="แบรนด์" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">ทุกแบรนด์</SelectItem>
+                            {brandOptions.map((b) => (
+                                <SelectItem key={b} value={b}>{b}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="w-full sm:w-36">
+                    <Select value={activeFilter} onValueChange={(v) => setActiveFilter(v as any)}>
+                        <SelectTrigger className="h-10 bg-white border-gray-200 rounded-xl shadow-sm text-sm">
+                            <SelectValue placeholder="สถานะ" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">ทุกสถานะ</SelectItem>
+                            <SelectItem value="active">เปิดใช้งาน</SelectItem>
+                            <SelectItem value="inactive">ปิดใช้งาน</SelectItem>
+                        </SelectContent>
+                    </Select>
+                </div>
+
+                <div className="ml-auto flex items-center gap-1 bg-gray-100 p-1 rounded-xl">
+                    <Button
+                        variant={viewMode === 'card' ? 'default' : 'ghost'}
+                        size="icon"
+                        className="h-8 w-8 rounded-lg"
+                        onClick={() => setViewMode('card')}
+                        aria-label="มุมมองการ์ด"
+                    >
+                        <LayoutGrid className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant={viewMode === 'table' ? 'default' : 'ghost'}
+                        size="icon"
+                        className="h-8 w-8 rounded-lg"
+                        onClick={() => setViewMode('table')}
+                        aria-label="มุมมองตาราง"
+                    >
+                        <Table2 className="h-4 w-4" />
+                    </Button>
+                </div>
+            </div>
+
+            {/* Bulk Action Toolbar */}
+            {selectedIds.size > 0 && (
+                <BulkActionToolbar
+                    selectedCount={selectedIds.size}
+                    isBusy={isBulkActionBusy}
+                    onBulkDelete={() => setBulkDeleteDialogOpen(true)}
+                    onTogglePos={(value) => handleBulkChannelToggle('isPos', value)}
+                    onToggleOnline={(value) => handleBulkChannelToggle('isOnline', value)}
+                    onBulkCategoryChange={() => setBulkCategoryDialogOpen(true)}
+                    onExportSelected={() => exportProductsCSV(Array.from(selectedIds))}
+                    onClearSelection={handleClearSelection}
+                />
+            )}
+
+            {/* Product List */}
             {isLoading ? (
                 <div className="space-y-4">
                     {Array.from({ length: 5 }).map((_, i) => (
@@ -276,6 +467,18 @@ export default function AdminProductsPage() {
                     </Button>
                 </div>
             ) : sortedProducts.length > 0 ? (
+                viewMode === 'table' ? (
+                    <ProductsTableView
+                        products={sortedProducts}
+                        categoryMap={categoryMap}
+                        selectedIds={selectedIds}
+                        onToggleSelect={handleToggleSelect}
+                        allVisibleSelected={allVisibleSelected}
+                        onToggleSelectAll={handleToggleSelectAll}
+                        onEditProduct={handleEditProduct}
+                        onDeleteProduct={handleDeleteClick}
+                    />
+                ) : (
                 <div className="space-y-3">
                     {sortedProducts.map((product) => {
                         const totalStock = product.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0;
@@ -325,6 +528,15 @@ export default function AdminProductsPage() {
                                     <div className="absolute top-2 left-2 flex flex-col gap-1">
                                         {product.isPos && <Badge className="bg-orange-500 hover:bg-orange-600 text-white shadow-sm text-[10px] h-5 px-1.5"><Store className="h-3 w-3 mr-1" /> หน้าร้าน</Badge>}
                                         {product.isOnline && <Badge className="bg-blue-500 hover:bg-blue-600 text-white shadow-sm text-[10px] h-5 px-1.5"><Globe className="h-3 w-3 mr-1" /> ออนไลน์</Badge>}
+                                    </div>
+                                    {/* Selection Checkbox */}
+                                    <div className="absolute top-2 right-2" onClick={(e) => e.stopPropagation()}>
+                                        <Checkbox
+                                            checked={selectedIds.has(product._id)}
+                                            onCheckedChange={() => handleToggleSelect(product._id)}
+                                            className="bg-white shadow-sm"
+                                            aria-label={`เลือก ${product.productName}`}
+                                        />
                                     </div>
                                 </div>
 
@@ -417,6 +629,7 @@ export default function AdminProductsPage() {
                         );
                     })}
                 </div>
+                )
             ) : (
                 <div className="text-center py-24 bg-white rounded-3xl border border-gray-200 border-dashed">
                     <div className="bg-gray-50 h-16 w-16 rounded-full flex items-center justify-center mx-auto mb-4 animate-in fade-in zoom-in duration-300">
@@ -456,6 +669,28 @@ export default function AdminProductsPage() {
                 isLoading={deleteProduct.isPending}
                 title="ลบสินค้า"
                 description="คุณแน่ใจหรือไม่ว่าต้องการลบสินค้านี้? การดำเนินการนี้ไม่สามารถยกเลิกได้ และจะลบตัวเลือกสินค้าทั้งหมดด้วย"
+            />
+
+            <DeleteConfirmDialog
+                open={bulkDeleteDialogOpen}
+                onOpenChange={setBulkDeleteDialogOpen}
+                onConfirm={handleBulkDeleteConfirm}
+                isLoading={bulkDeleteProducts.isPending}
+                title={`ลบสินค้า ${selectedIds.size} รายการ`}
+                description="การดำเนินการนี้ไม่สามารถยกเลิกได้ สินค้าที่มีประวัติการสั่งซื้อจะถูกข้ามและไม่ถูกลบ"
+            />
+
+            <BulkCategoryDialog
+                open={bulkCategoryDialogOpen}
+                onOpenChange={setBulkCategoryDialogOpen}
+                onConfirm={handleBulkCategoryConfirm}
+                isLoading={bulkUpdateCategory.isPending}
+                selectedCount={selectedIds.size}
+            />
+
+            <CsvImportDialog
+                open={csvImportDialogOpen}
+                onOpenChange={setCsvImportDialogOpen}
             />
 
             <ImagePreviewDialog

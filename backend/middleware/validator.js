@@ -38,6 +38,29 @@ const validationRules = {
         validate
     ],
 
+    // Bulk product validations
+    bulkUpdateChannel: [
+        body('productIds').isArray({ min: 1, max: 500 }).withMessage('productIds must be a non-empty array (max 500)'),
+        body('productIds.*').isMongoId().withMessage('Invalid product ID'),
+        body('isPos').optional().isBoolean().withMessage('isPos must be a boolean'),
+        body('isOnline').optional().isBoolean().withMessage('isOnline must be a boolean'),
+        body().custom(b => b.isPos !== undefined || b.isOnline !== undefined).withMessage('At least one of isPos/isOnline is required'),
+        validate
+    ],
+
+    bulkUpdateCategory: [
+        body('productIds').isArray({ min: 1, max: 500 }).withMessage('productIds must be a non-empty array (max 500)'),
+        body('productIds.*').isMongoId().withMessage('Invalid product ID'),
+        body('categoryId').isInt({ min: 1 }).withMessage('categoryId is required'),
+        validate
+    ],
+
+    bulkDeleteProducts: [
+        body('productIds').isArray({ min: 1, max: 500 }).withMessage('productIds must be a non-empty array (max 500)'),
+        body('productIds.*').isMongoId().withMessage('Invalid product ID'),
+        validate
+    ],
+
     // Customer validations
     createCustomer: [
         body('firstName').trim().notEmpty().withMessage('First name is required'),

@@ -150,6 +150,131 @@ export function useDeleteProduct() {
     });
 }
 
+// ─── Bulk actions ───────────────────────────────────────────────────────────
+
+export interface BulkDeleteResult {
+    deletedCount: number;
+    deletedIds: string[];
+    skipped: { productId: string; productName: string; reason: string }[];
+}
+
+export function useBulkDeleteProducts() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (productIds: string[]) => {
+            const response = await api.delete('/products/bulk-delete', { data: { productIds } });
+            return response.data.data as BulkDeleteResult;
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ['products'] });
+            const skippedNote = data.skipped.length
+                ? `, ข้าม ${data.skipped.length} รายการ (มีประวัติการสั่งซื้อ)`
+                : '';
+            toast.success(`ลบสินค้า ${data.deletedCount} รายการ${skippedNote}`);
+        },
+        onError: (error: any) => {
+            toast.error('ลบสินค้าไม่สำเร็จ', {
+                description: error.response?.data?.message || 'กรุณาลองใหม่อีกครั้ง',
+            });
+        },
+    });
+}
+
+export function useBulkUpdateChannel() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ productIds, isPos, isOnline }: { productIds: string[]; isPos?: boolean; isOnline?: boolean }) => {
+            const response = await api.patch('/products/bulk-channel', { productIds, isPos, isOnline });
+            return response.data.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['products'] });
+            toast.success('อัปเดตช่องทางขายสำเร็จ');
+        },
+        onError: (error: any) => {
+            toast.error('อัปเดตช่องทางขายไม่สำเร็จ', {
+                description: error.response?.data?.message || 'กรุณาลองใหม่อีกครั้ง',
+            });
+        },
+    });
+}
+
+export function useBulkUpdateCategory() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ productIds, categoryId }: { productIds: string[]; categoryId: number }) => {
+            const response = await api.patch('/products/bulk-category', { productIds, categoryId });
+            return response.data.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['products'] });
+            toast.success('เปลี่ยนหมวดหมู่สำเร็จ');
+        },
+        onError: (error: any) => {
+            toast.error('เปลี่ยนหมวดหมู่ไม่สำเร็จ', {
+                description: error.response?.data?.message || 'กรุณาลองใหม่อีกครั้ง',
+            });
+        },
+    });
+}
+
+// ─── CSV import/export ──────────────────────────────────────────────────────
+
+export interface CsvImportResult {
+    totalRows: number;
+    updatedCount: number;
+    skippedCount: number;
+    updated: string[];
+    skipped: { row: number; sku: string; reason: string }[];
+}
+
+export function useImportProductsCSV() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (file: File) => {
+            const formData = new FormData();
+            formData.append('file', file);
+            // The shared `api` instance defaults to Content-Type: application/json,
+            // which overrides axios's automatic multipart boundary detection for
+            // FormData bodies. Unset it here so the browser sets the correct
+            // multipart/form-data boundary — otherwise multer silently drops the file.
+            const response = await api.post('/products/import/csv', formData, {
+                headers: { 'Content-Type': undefined },
+            });
+            return response.data.data as CsvImportResult;
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ['products'] });
+            toast.success(`นำเข้าสำเร็จ ${data.updatedCount} รายการ${data.skippedCount ? `, ข้าม ${data.skippedCount} รายการ` : ''}`);
+        },
+        onError: (error: any) => {
+            toast.error('นำเข้า CSV ไม่สำเร็จ', {
+                description: error.response?.data?.message || 'กรุณาลองใหม่อีกครั้ง',
+            });
+        },
+    });
+}
+
+// Plain async function (not a hook) — mirrors useReports.ts's downloadReportCSV blob pattern
+export async function exportProductsCSV(ids?: string[]) {
+    const params = ids && ids.length ? { ids: ids.join(',') } : undefined;
+    const response = await api.get('/products/export/csv', { params, responseType: 'blob' });
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    link.setAttribute('download', `products_export_${timestamp}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode?.removeChild(link);
+    window.URL.revokeObjectURL(url);
+}
+
 // Update variant stock
 export function useUpdateVariantStock() {
     const queryClient = useQueryClient();

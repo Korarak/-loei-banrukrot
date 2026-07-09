@@ -4,10 +4,20 @@ const router = express.Router();
 const productController = require('../controllers/productController');
 const { authenticateToken, requireRole } = require('../middleware/auth');
 const validator = require('../middleware/validator');
+const uploadCsv = require('../middleware/uploadCsv');
 
 // Public routes
 router.get('/', productController.getAllProducts);
 router.get('/popular', productController.getPopularProducts);
+
+// Bulk/export routes — must precede '/:id' (static segment vs param route)
+router.get(
+    '/export/csv',
+    authenticateToken('user'),
+    requireRole('owner', 'staff'),
+    productController.exportProductsCSV
+);
+
 router.get('/:id', validator.validateId, productController.getProductById);
 
 // Protected routes (staff/owner)
@@ -17,6 +27,39 @@ router.post(
     requireRole('owner', 'staff'),
     validator.createProduct,
     productController.createProduct
+);
+
+router.post(
+    '/import/csv',
+    authenticateToken('user'),
+    requireRole('owner', 'staff'),
+    uploadCsv.single('file'),
+    productController.importProductsCSV
+);
+
+router.patch(
+    '/bulk-channel',
+    authenticateToken('user'),
+    requireRole('owner', 'staff'),
+    validator.bulkUpdateChannel,
+    productController.bulkUpdateChannel
+);
+
+router.patch(
+    '/bulk-category',
+    authenticateToken('user'),
+    requireRole('owner', 'staff'),
+    validator.bulkUpdateCategory,
+    productController.bulkUpdateCategory
+);
+
+// bulk-delete must precede '/:id' (static segment vs param route)
+router.delete(
+    '/bulk-delete',
+    authenticateToken('user'),
+    requireRole('owner'),
+    validator.bulkDeleteProducts,
+    productController.bulkDeleteProducts
 );
 
 router.put(

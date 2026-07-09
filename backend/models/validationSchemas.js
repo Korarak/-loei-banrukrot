@@ -21,8 +21,28 @@ const createCustomerSchema = z.object({
     phone: z.string().min(10, 'Phone number must be at least 10 characters').optional()
 });
 
+// CSV import row — structural only (csv-parse yields every cell as a string).
+// Business-rule coercion (blank-means-no-change, boolean/number parsing) happens
+// in the controller, not here — keeps "is this row shaped right" separate from
+// "what does this row mean."
+const csvProductRowSchema = z.object({
+    SKU: z.string().trim().min(1, 'SKU is required'),
+    ProductName: z.string().optional(),
+    Category: z.string().optional(),
+    Brand: z.string().optional(),
+    Option1: z.string().optional(),
+    Option2: z.string().optional(),
+    Price: z.string().optional(),
+    Stock: z.string().optional(),
+    ShippingSize: z.string().optional(),
+    IsActive: z.string().optional(),
+    IsPos: z.string().optional(),
+    IsOnline: z.string().optional()
+});
+
 module.exports = {
     registerSchema,
     loginSchema,
-    createCustomerSchema
+    createCustomerSchema,
+    csvProductRowSchema
 };
