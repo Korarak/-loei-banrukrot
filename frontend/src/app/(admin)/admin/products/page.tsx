@@ -47,7 +47,7 @@ import ProductsTableView from '@/components/features/ProductsTableView';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
-import { getImageUrl, cn } from '@/lib/utils';
+import { getImageUrl, getPrimaryImage, cn } from '@/lib/utils';
 import ImagePreviewDialog from '@/components/features/ImagePreviewDialog';
 import { ProductImage } from '@/hooks/useProducts';
 
@@ -480,12 +480,13 @@ export default function AdminProductsPage() {
                     />
                 ) : (
                 <div className="space-y-3">
-                    {sortedProducts.map((product) => {
+                    {sortedProducts.map((product, index) => {
                         const totalStock = product.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0;
                         const prices = product.variants?.map((v) => v.price).filter(p => p != null) || [];
                         const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
                         const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
                         const categoryName = categoryMap.get(product.categoryId) || 'ไม่มีหมวดหมู่';
+                        const primaryImage = getPrimaryImage(product.images, product.imageUrl);
 
                         // Check stock status for border color
                         let stockStatusDetails = { color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' };
@@ -511,13 +512,16 @@ export default function AdminProductsPage() {
                                         }
                                     }}
                                 >
-                                    {(product.images?.find(img => img.isPrimary)?.imagePath || product.images?.[0]?.imagePath || product.imageUrl) ? (
+                                    {primaryImage ? (
                                         <Image
-                                            src={getImageUrl(product.images?.find(img => img.isPrimary)?.imagePath || product.images?.[0]?.imagePath || product.imageUrl!)}
+                                            src={getImageUrl(primaryImage.imagePath)}
                                             alt={product.productName}
                                             fill
                                             className="object-cover group-hover:scale-105 transition-transform duration-500"
                                             sizes="(max-width: 640px) 100vw, 160px"
+                                            priority={index < 6}
+                                            placeholder={primaryImage.blurDataURL ? 'blur' : 'empty'}
+                                            blurDataURL={primaryImage.blurDataURL}
                                         />
                                     ) : (
                                         <div className="flex items-center justify-center h-full w-full text-gray-300">

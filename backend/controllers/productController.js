@@ -326,6 +326,7 @@ exports.createProduct = async (req, res, next) => {
             const imageDocs = images.map((img, index) => ({
                 productId: product._id,
                 imagePath: img.imagePath,
+                blurDataURL: img.blurDataURL,
                 isPrimary: img.isPrimary || index === 0,
                 sortOrder: img.sortOrder || index
             }));
@@ -823,7 +824,7 @@ exports.updateVariantStock = async (req, res, next) => {
 // @access  Private (staff/owner)
 exports.addProductImage = async (req, res, next) => {
     try {
-        const { imagePath, isPrimary } = req.body;
+        const { imagePath, isPrimary, blurDataURL } = req.body;
         const productId = req.params.id;
 
         // Check if product exists
@@ -851,6 +852,7 @@ exports.addProductImage = async (req, res, next) => {
         const newImage = await ProductImage.create({
             productId,
             imagePath,
+            blurDataURL,
             isPrimary: isPrimary || false,
             sortOrder: maxSortOrder ? maxSortOrder.sortOrder + 1 : 0
         });

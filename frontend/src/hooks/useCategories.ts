@@ -9,6 +9,7 @@ export interface Category {
     slug: string;
     description?: string;
     imageUrl?: string;
+    blurDataURL?: string;
     sampleImage?: string;
     isActive: boolean;
     sortOrder: number;
@@ -19,6 +20,8 @@ interface CreateCategoryData {
     name: string;
     description?: string;
     sortOrder?: number;
+    imageUrl?: string;
+    blurDataURL?: string;
 }
 
 interface UpdateCategoryData {
@@ -26,6 +29,8 @@ interface UpdateCategoryData {
     description?: string;
     isActive?: boolean;
     sortOrder?: number;
+    imageUrl?: string;
+    blurDataURL?: string;
 }
 
 // Get all categories

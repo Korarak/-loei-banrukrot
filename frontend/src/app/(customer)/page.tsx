@@ -323,7 +323,16 @@ export default function Home() {
                                     <Link href={`/products?category=${category.slug}`} className="group block h-full">
                                         <Card className="h-[280px] p-0 gap-0 border border-gray-200/60 shadow-none hover:shadow-xl hover:border-gray-200 transition-all duration-500 rounded-[2rem] overflow-hidden relative card-hover-lift">
                                             {catImage
-                                                ? <Image src={getImageUrl(catImage)} alt={category.name} fill className="object-cover transition-transform duration-500 group-hover:scale-110" sizes="240px" />
+                                                ? <Image
+                                                    src={getImageUrl(catImage)}
+                                                    alt={category.name}
+                                                    fill
+                                                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                                    sizes="240px"
+                                                    priority
+                                                    placeholder={category.blurDataURL ? 'blur' : 'empty'}
+                                                    blurDataURL={category.blurDataURL}
+                                                />
                                                 : (
                                                     <div className="absolute inset-0 bg-gradient-to-br from-primary to-gray-900 flex items-center justify-center">
                                                         <Package className="h-16 w-16 text-white/40" />
@@ -406,7 +415,7 @@ export default function Home() {
                                         </div>
                                     </div>
                                 )}
-                                <ProductCard product={product} />
+                                <ProductCard product={product} priority={idx < 4} />
                             </motion.div>
                         ))
                     }
@@ -459,7 +468,7 @@ export default function Home() {
                                     <Skeleton className="w-full h-full rounded-[2rem]" />
                                 </div>
                             ))
-                            : (newProducts || []).filter(p => p.isActive && p.isOnline).slice(0, 8).map((product) => (
+                            : (newProducts || []).filter(p => p.isActive && p.isOnline).slice(0, 8).map((product, idx) => (
                                 <motion.div
                                     key={product._id}
                                     variants={fadeInUp}
@@ -470,7 +479,7 @@ export default function Home() {
                                             New
                                         </div>
                                     </div>
-                                    <ProductCard product={product} />
+                                    <ProductCard product={product} priority={idx < 4} />
                                 </motion.div>
                             ))
                         }

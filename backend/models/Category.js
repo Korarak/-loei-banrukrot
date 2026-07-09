@@ -31,6 +31,10 @@ const categorySchema = new mongoose.Schema({
         type: String,
         maxlength: 500
     },
+    blurDataURL: {
+        type: String,
+        maxlength: 5000
+    },
     sortOrder: {
         type: Number,
         default: 0

@@ -473,7 +473,7 @@ export default function ProductsPage() {
                                 animate="show"
                                 className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
                             >
-                                {products.map((product: any) => (
+                                {products.map((product: any, idx: number) => (
                                     <motion.div
                                         key={product._id}
                                         variants={{
@@ -481,7 +481,7 @@ export default function ProductsPage() {
                                             show: { opacity: 1, scale: 1 }
                                         }}
                                     >
-                                        <ProductCard product={product} />
+                                        <ProductCard product={product} priority={idx < 4} />
                                     </motion.div>
                                 ))}
                             </motion.div>

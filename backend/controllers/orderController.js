@@ -6,6 +6,10 @@ const { Order, OrderDetail, Payment, ProductVariant, Cart, CartItem, CustomerAdd
 // @access  Private (customer)
 const { generateQRCodeDataURL } = require('../utils/promptpay');
 const { deductStock, addStock } = require('../utils/stockUtils');
+const { processImage } = require('../utils/imageProcessing');
+const { UPLOADS_BASE, getUploadSubdir } = require('../middleware/upload');
+const path = require('path');
+const fs = require('fs');
 
 // @desc    Create order from cart (E-commerce)
 // @route   POST /api/orders
@@ -445,6 +449,20 @@ exports.uploadPaymentSlip = async (req, res, next) => {
             });
         }
 
+        // Resize/compress the slip — receipts need to stay legible, so a
+        // higher cap/quality than product thumbnails, but still never store
+        // an unprocessed multi-MB phone photo. Done before touching the DB
+        // so a corrupt/unsupported image fails fast without side effects.
+        let processedBuffer;
+        try {
+            processedBuffer = await processImage(req.file.buffer, { maxDimension: 2000, quality: 85 });
+        } catch (imgError) {
+            return res.status(400).json({
+                success: false,
+                message: 'Could not process image: ' + imgError.message
+            });
+        }
+
         const order = await Order.findById(req.params.id);
         if (!order) {
             return res.status(404).json({
@@ -474,8 +492,14 @@ exports.uploadPaymentSlip = async (req, res, next) => {
             });
         }
 
+        const subDir = getUploadSubdir('slip');
+        const uploadDir = path.join(UPLOADS_BASE, subDir);
+        fs.mkdirSync(uploadDir, { recursive: true });
+        const filename = `slip-${Date.now()}-${Math.round(Math.random() * 1E9)}.webp`;
+        fs.writeFileSync(path.join(uploadDir, filename), processedBuffer);
+
         // Update payment with slip
-        const slipPath = `/uploads/slips/${req.file.filename}`;
+        const slipPath = `/uploads/${subDir}/${filename}`;
         payment.slipImage = slipPath;
         payment.isVerified = false; // Reset verification on new upload
         await payment.save();

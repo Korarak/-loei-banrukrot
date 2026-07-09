@@ -34,6 +34,10 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   images: {
     formats: ['image/avif', 'image/webp'],
+    // Default also includes 2048/3840 — unrealistic for this site's widest
+    // real usage (product-detail gallery at 50vw); trimming the matrix means
+    // fewer variants for the optimizer to generate/cache.
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     // Next 16's SSRF guard blocks any upstream image whose hostname resolves to a
     // loopback/private IP — localhost always does, so dev (backend on localhost:8080)
     // needs this opt-out. Production points at banrukrot.com (public), so stays protected.
@@ -70,7 +74,10 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
-    minimumCacheTTL: 3600,
+    // 1 year — safe because every upload gets a unique file-<timestamp>-<random>.webp
+    // name (see backend/routes/uploadRoutes.js), so there's no same-URL-different-content
+    // staleness risk; an edited image is a new file with a new name.
+    minimumCacheTTL: 31536000,
   },
   output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
   reactCompiler: true,

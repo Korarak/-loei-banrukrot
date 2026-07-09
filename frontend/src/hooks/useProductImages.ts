@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 interface AddImageData {
     productId: string;
     imagePath: string;
+    blurDataURL?: string;
     isPrimary?: boolean;
 }
 
@@ -30,9 +31,10 @@ export function useAddProductImage() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async ({ productId, imagePath, isPrimary }: AddImageData) => {
+        mutationFn: async ({ productId, imagePath, blurDataURL, isPrimary }: AddImageData) => {
             const { data } = await api.post(`/products/${productId}/images`, {
                 imagePath,
+                blurDataURL,
                 isPrimary
             });
             return data;

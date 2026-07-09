@@ -96,7 +96,7 @@ exports.getCategoryById = async (req, res, next) => {
 // @access  Private (staff/owner)
 exports.createCategory = async (req, res, next) => {
     try {
-        const { name, description, sortOrder, imageUrl } = req.body;
+        const { name, description, sortOrder, imageUrl, blurDataURL } = req.body;
 
         // Generate base slug from name
         let baseSlug = name.toLowerCase()
@@ -125,7 +125,8 @@ exports.createCategory = async (req, res, next) => {
             slug,
             description,
             sortOrder: sortOrder || 0,
-            imageUrl
+            imageUrl,
+            blurDataURL
         });
 
         res.status(201).json({
@@ -143,7 +144,7 @@ exports.createCategory = async (req, res, next) => {
 // @access  Private (staff/owner)
 exports.updateCategory = async (req, res, next) => {
     try {
-        const { name, description, isActive, sortOrder, imageUrl } = req.body;
+        const { name, description, isActive, sortOrder, imageUrl, blurDataURL } = req.body;
 
         const updateData = {};
         if (name) {
@@ -169,6 +170,7 @@ exports.updateCategory = async (req, res, next) => {
         if (isActive !== undefined) updateData.isActive = isActive;
         if (sortOrder !== undefined) updateData.sortOrder = sortOrder;
         if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
+        if (blurDataURL !== undefined) updateData.blurDataURL = blurDataURL;
 
         const category = await Category.findByIdAndUpdate(
             req.params.id,

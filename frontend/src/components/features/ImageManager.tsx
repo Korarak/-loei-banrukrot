@@ -29,6 +29,7 @@ import { getImageUrl } from '@/lib/utils';
 interface ProductImage {
     _id: string;
     imagePath: string;
+    blurDataURL?: string;
     isPrimary: boolean;
     sortOrder: number;
 }
@@ -116,11 +117,12 @@ export default function ImageManager({ productId, images: initialImages }: Image
             });
 
             if (response.data.success) {
-                const imagePath = response.data.data.imagePath;
+                const { imagePath, blurDataURL } = response.data.data;
                 // Add to product
                 await addImage.mutateAsync({
                     productId,
                     imagePath, // Store relative path
+                    blurDataURL,
                     isPrimary: images.length === 0
                 });
                 toast.success('อัปโหลดรูปภาพสำเร็จ');

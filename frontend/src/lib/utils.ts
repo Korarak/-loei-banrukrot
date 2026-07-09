@@ -39,3 +39,21 @@ export function getImageUrl(path: string | undefined | null) {
 
   return `${serverUrl}${normalizedPath}`;
 }
+
+interface PrimaryImageLike {
+  imagePath: string;
+  isPrimary?: boolean;
+  blurDataURL?: string;
+}
+
+// Picks the primary image from a product/category image array, falling back
+// to the first image, then to a legacy single-image-url field if provided.
+export function getPrimaryImage(
+  images?: PrimaryImageLike[] | null,
+  fallbackUrl?: string | null
+): PrimaryImageLike | null {
+  const found = images?.find((img) => img.isPrimary) || images?.[0];
+  if (found) return found;
+  if (fallbackUrl) return { imagePath: fallbackUrl, isPrimary: true };
+  return null;
+}

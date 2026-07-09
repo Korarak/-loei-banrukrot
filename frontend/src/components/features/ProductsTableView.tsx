@@ -13,7 +13,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Pencil, Trash2, Store, Globe, Package } from 'lucide-react';
-import { getImageUrl, cn } from '@/lib/utils';
+import { getImageUrl, getPrimaryImage, cn } from '@/lib/utils';
 import type { Product } from '@/hooks/useProducts';
 
 interface ProductsTableViewProps {
@@ -59,13 +59,13 @@ export default function ProductsTableView({
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {products.map((product) => {
+                    {products.map((product, index) => {
                         const totalStock = product.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0;
                         const prices = product.variants?.map((v) => v.price).filter((p) => p != null) || [];
                         const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
                         const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
                         const categoryName = categoryMap.get(product.categoryId) || 'ไม่มีหมวดหมู่';
-                        const thumbnail = product.images?.find((img) => img.isPrimary)?.imagePath || product.images?.[0]?.imagePath || product.imageUrl;
+                        const primaryImage = getPrimaryImage(product.images, product.imageUrl);
                         const stockColor = totalStock === 0 ? 'text-red-600' : totalStock <= 10 ? 'text-orange-600' : 'text-green-600';
 
                         return (
@@ -84,8 +84,17 @@ export default function ProductsTableView({
                                 <TableCell className="py-3">
                                     <div className="flex items-center gap-3">
                                         <div className="h-10 w-10 rounded-lg bg-gray-50 border border-gray-100 relative overflow-hidden flex-shrink-0">
-                                            {thumbnail ? (
-                                                <Image src={getImageUrl(thumbnail)} alt={product.productName} fill className="object-cover" sizes="40px" />
+                                            {primaryImage ? (
+                                                <Image
+                                                    src={getImageUrl(primaryImage.imagePath)}
+                                                    alt={product.productName}
+                                                    fill
+                                                    className="object-cover"
+                                                    sizes="40px"
+                                                    priority={index < 6}
+                                                    placeholder={primaryImage.blurDataURL ? 'blur' : 'empty'}
+                                                    blurDataURL={primaryImage.blurDataURL}
+                                                />
                                             ) : (
                                                 <div className="flex items-center justify-center h-full w-full text-gray-300">
                                                     <Package className="h-4 w-4" />

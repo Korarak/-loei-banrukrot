@@ -34,6 +34,7 @@ const categorySchema = z.object({
     isActive: z.boolean(),
     sortOrder: z.number().int().min(0),
     imageUrl: z.string().optional(),
+    blurDataURL: z.string().optional(),
 });
 
 type CategoryFormData = z.infer<typeof categorySchema>;
@@ -59,6 +60,7 @@ export default function CategoryForm({ category, onSuccess, onCancel }: Category
                 isActive: category.isActive,
                 sortOrder: category.sortOrder,
                 imageUrl: category.imageUrl || '',
+                blurDataURL: category.blurDataURL || '',
             }
             : {
                 name: '',
@@ -66,6 +68,7 @@ export default function CategoryForm({ category, onSuccess, onCancel }: Category
                 isActive: true,
                 sortOrder: 0,
                 imageUrl: '',
+                blurDataURL: '',
             },
     });
 
@@ -123,6 +126,7 @@ export default function CategoryForm({ category, onSuccess, onCancel }: Category
 
             if (response.data.success) {
                 form.setValue('imageUrl', response.data.data.imagePath);
+                form.setValue('blurDataURL', response.data.data.blurDataURL);
                 toast.success('อัปโหลดรูปภาพหมวดหมู่สำเร็จ');
             }
         } catch (error) {
@@ -254,6 +258,9 @@ export default function CategoryForm({ category, onSuccess, onCancel }: Category
                                             alt="Category"
                                             fill
                                             className="object-cover"
+                                            sizes="128px"
+                                            placeholder={form.watch('blurDataURL') ? 'blur' : 'empty'}
+                                            blurDataURL={form.watch('blurDataURL')}
                                         />
                                         <button
                                             type="button"

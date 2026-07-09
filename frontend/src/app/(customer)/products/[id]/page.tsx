@@ -9,7 +9,7 @@ import { useProduct } from '@/hooks/useProducts';
 import { useCategories } from '@/hooks/useCategories';
 import { useAddToCart } from '@/hooks/useCart';
 import { toast } from 'sonner';
-import { getImageUrl } from '@/lib/utils';
+import { getImageUrl, getPrimaryImage } from '@/lib/utils';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -67,8 +67,9 @@ export default function ProductDetailPage() {
         );
     }
 
-    const primaryImage = product.images?.find((img: any) => img.isPrimary) || product.images?.[0];
+    const primaryImage = getPrimaryImage(product.images, product.imageUrl);
     const displayImage = activeImage || primaryImage?.imagePath || product.imageUrl;
+    const displayImageObj = product.images?.find((img: any) => img.imagePath === displayImage) || primaryImage;
     const variants = product.variants || [];
     const selectedVariant = selectedVariantId
         ? variants.find((v: any) => v._id === selectedVariantId)
@@ -172,6 +173,8 @@ export default function ProductDetailPage() {
                                 className="object-contain p-4 transition-transform duration-500 group-hover:scale-105"
                                 sizes="(max-width: 768px) 100vw, 50vw"
                                 priority
+                                placeholder={displayImageObj?.blurDataURL ? 'blur' : 'empty'}
+                                blurDataURL={displayImageObj?.blurDataURL}
                             />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-300">
@@ -196,6 +199,8 @@ export default function ProductDetailPage() {
                                             fill
                                             className="object-contain p-1"
                                             sizes="96px"
+                                            placeholder={img.blurDataURL ? 'blur' : 'empty'}
+                                            blurDataURL={img.blurDataURL}
                                         />
                                     </div>
                                 </div>
@@ -212,6 +217,8 @@ export default function ProductDetailPage() {
                                             fill
                                             className="object-contain p-1"
                                             sizes="96px"
+                                            placeholder={img.blurDataURL ? 'blur' : 'empty'}
+                                            blurDataURL={img.blurDataURL}
                                         />
                                     </div>
                                 </button>
@@ -440,7 +447,6 @@ export default function ProductDetailPage() {
                                     fill
                                     className="object-contain"
                                     sizes="100vw"
-                                    priority
                                 />
                             </div>
                         </motion.div>

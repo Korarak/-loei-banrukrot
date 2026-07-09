@@ -12,6 +12,10 @@ const productImageSchema = new mongoose.Schema({
         required: true,
         maxlength: 500
     },
+    blurDataURL: {
+        type: String,
+        maxlength: 5000
+    },
     isPrimary: {
         type: Boolean,
         default: false

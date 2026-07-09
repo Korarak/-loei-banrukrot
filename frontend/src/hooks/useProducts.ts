@@ -14,6 +14,7 @@ export interface ProductVariant {
 export interface ProductImage {
     _id: string;
     imagePath: string;
+    blurDataURL?: string;
     isPrimary: boolean;
     sortOrder: number;
 }

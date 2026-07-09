@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useAddToCart } from '@/hooks/useCart';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { toast } from 'sonner';
-import { getImageUrl } from '@/lib/utils';
+import { getImageUrl, getPrimaryImage } from '@/lib/utils';
 import { Heart, ShoppingCart } from 'lucide-react';
 import { useWishlistStore } from '@/stores/useWishlistStore';
 import { motion, useMotionValue, useSpring, useTransform, useReducedMotion } from 'framer-motion';
@@ -12,11 +12,12 @@ import { useRef, useState, useCallback, useMemo, useEffect } from 'react';
 
 interface ProductCardProps {
     product: any;
+    priority?: boolean;
 }
 
 const CONFETTI_COLORS = ['#FFC107', '#FF5722', '#4CAF50', '#2196F3', '#E91E63'];
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, priority = false }: ProductCardProps) {
     const addToCart = useAddToCart();
     const customer = useAuthStore((state) => state.customer);
     const { addToWishlist, removeFromWishlist } = useWishlistStore();
@@ -47,7 +48,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
     const handleMouseLeave = useCallback(() => { x.set(0); y.set(0); }, [x, y]);
 
-    const primaryImage = product.images?.find((img: any) => img.isPrimary) || product.images?.[0];
+    const primaryImage = getPrimaryImage(product.images);
 
     const { priceDisplay, isOutOfStock, firstAvailableVariant, defaultVariant } = useMemo(() => {
         const prices = product.variants?.map((v: any) => v.price) || [];
@@ -131,7 +132,9 @@ export default function ProductCard({ product }: ProductCardProps) {
                                     fill
                                     className="object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
                                     sizes="(max-width: 640px) 240px, (max-width: 1024px) 300px, 25vw"
-                                    loading="lazy"
+                                    placeholder={primaryImage.blurDataURL ? 'blur' : 'empty'}
+                                    blurDataURL={primaryImage.blurDataURL}
+                                    {...(priority ? { priority: true } : { loading: 'lazy' as const })}
                                 />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-gray-300 bg-gradient-to-br from-gray-50 to-gray-100">
