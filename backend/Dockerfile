@@ -11,11 +11,19 @@ COPY package.json package-lock.json ./
 COPY backend/package.json ./backend/
 
 # Use npm ci for deterministic installs and cache mounts
+# npm's workspace hoisting can nest a package under backend/node_modules
+# instead of the shared root node_modules — this build only copies
+# backend/package.json (not frontend's), which is enough to trip that for
+# any dependency both workspaces share (e.g. sharp). The runner stage below
+# only copies the root node_modules, so mkdir here guarantees a (possibly
+# empty) backend/node_modules always exists for that second COPY to succeed,
+# whichever way npm decided to place things.
 RUN --mount=type=cache,target=/root/.npm \
     npm config set fetch-retries 5 && \
     npm config set fetch-retry-mintimeout 20000 && \
     npm config set fetch-retry-maxtimeout 120000 && \
-    npm ci --workspace=backend --legacy-peer-deps
+    npm ci --workspace=backend --legacy-peer-deps && \
+    mkdir -p backend/node_modules
 
 # Create final production image
 FROM base AS runner
@@ -25,6 +33,7 @@ ENV NODE_ENV=production
 
 # Copy only what the backend needs — not frontend source files
 COPY --from=deps --chown=node:node /app/node_modules ./node_modules
+COPY --from=deps --chown=node:node /app/backend/node_modules ./backend/node_modules
 COPY --chown=node:node package.json package-lock.json ./
 COPY --chown=node:node backend/ ./backend/
 
