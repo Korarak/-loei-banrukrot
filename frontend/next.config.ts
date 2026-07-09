@@ -83,13 +83,19 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   turbopack: {},
   async rewrites() {
-    // Dev only: frontend and backend are separate origins/containers (production's
-    // /uploads/ is already routed to the backend at the Nginx layer, before Next.js).
-    // Proxying here lets getImageUrl() emit a relative path in dev, so next/image's
-    // server-side optimizer fetch stays in-process instead of hitting "localhost"
-    // from inside the frontend container (wrong container) or Next's SSRF guard.
-    if (!isDev) return [];
-    const internalApiUrl = process.env.INTERNAL_API_URL || 'http://localhost:8080';
+    // next/image's server-side optimizer treats a same-origin absolute URL as a
+    // relative path and dispatches it through Next's OWN internal request
+    // handling (next.config.ts rewrites included) rather than a real network
+    // fetch — Next has no route for /uploads/* itself (nginx routes that
+    // straight to the backend before requests ever reach Next in production),
+    // so without this rewrite the optimizer's internal dispatch resolves to
+    // nothing and every image 400s ("received null") on any cache miss.
+    // This bites both environments, just via different addresses: dev needs
+    // to reach the sibling backend container (not "localhost", which inside
+    // the frontend container means itself), production needs the backend's
+    // Docker Compose service hostname (nginx is skipped entirely here since
+    // this fetch never leaves the Docker network).
+    const internalApiUrl = process.env.INTERNAL_API_URL || (isDev ? 'http://localhost:8080' : 'http://backend:8080');
     return [
       {
         source: '/uploads/:path*',
