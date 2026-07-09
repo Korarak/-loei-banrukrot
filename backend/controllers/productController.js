@@ -8,9 +8,16 @@ const { Product, ProductVariant, ProductImage } = require('../models');
 // @access  Public
 exports.getAllProducts = async (req, res, next) => {
     try {
-        const { page = 1, limit = 20, search, categoryId, isActive, sort, brand, minPrice, maxPrice } = req.query;
+        const { page = 1, limit, search, categoryId, isActive, sort, brand, minPrice, maxPrice, scope, channel } = req.query;
         const pageNum = parseInt(page);
-        const limitNum = parseInt(limit);
+        // Admin/POS screens list the whole catalog client-side (search/sort/filter all happen
+        // in-browser), so they get a much higher default+cap than the public storefront, which
+        // paginates for real and should never pull the entire catalog in one request.
+        const isInternalScope = scope === 'admin' || scope === 'pos';
+        const requestedLimit = parseInt(limit);
+        const defaultLimit = isInternalScope ? 1000 : 20;
+        const maxLimit = isInternalScope ? 2000 : 100;
+        const limitNum = Math.min(requestedLimit || defaultLimit, maxLimit);
         const skip = (pageNum - 1) * limitNum;
 
         // 1. Base Match Stage (Common filters)
@@ -48,8 +55,6 @@ exports.getAllProducts = async (req, res, next) => {
         const matchStage = { ...baseMatch };
 
         // Filter Sales Channels logic
-        const { scope, channel } = req.query;
-
         if (channel === 'pos') {
             matchStage.isPos = true;
         } else if (channel === 'online') {
