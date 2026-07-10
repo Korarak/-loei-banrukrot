@@ -21,7 +21,7 @@ export default function Footer() {
                                 <span className="font-black text-[10px] italic tracking-tight leading-none">VESPA</span>
                             </div>
                             <div>
-                                <h2 className="text-xl font-black italic tracking-tighter text-white">บ้านรักรถเมืองเลย</h2>
+                                <h2 className="text-xl font-black italic tracking-tighter text-white">{siteConfig.brand.name}</h2>
                                 <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">OAT ENGINEERING</p>
                             </div>
                         </div>

@@ -11,6 +11,7 @@ import { Order } from '@/hooks/useOrders';
 import { usePublicSettings } from '@/hooks/useSettings';
 import { getCourier } from '@/lib/couriers';
 import { cn } from '@/lib/utils';
+import { siteConfig } from '@/config/site';
 import { useMemo, useState } from 'react';
 
 interface ShippingLabelDialogProps {
@@ -146,7 +147,7 @@ export function ShippingLabelDialog({ open, onOpenChange, order }: ShippingLabel
     const [sizeId, setSizeId] = useState<PrintSizeId>('thermal');
 
     const addr = order.shippingAddressId;
-    const storeName = settings?.store_name || 'บ้านรักรถ';
+    const storeName = settings?.store_name || siteConfig.brand.name;
     const storePhone = settings?.store_phone || '';
     const storeAddress = settings?.store_address || '';
     const courier = getCourier(order.shippingInfo?.provider || '');

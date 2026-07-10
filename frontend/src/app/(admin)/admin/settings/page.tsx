@@ -33,7 +33,7 @@ const SETTING_GROUPS: { label: string; icon: React.ElementType; keys: { key: str
         label: 'ข้อมูลร้านค้า',
         icon: Store,
         keys: [
-            { key: 'store_name', label: 'ชื่อร้าน', placeholder: 'เช่น บ้านรักรถ' },
+            { key: 'store_name', label: 'ชื่อร้าน', placeholder: 'เช่น บ้านรักรถเมืองเลย' },
             { key: 'store_phone', label: 'เบอร์โทรร้าน', placeholder: 'เช่น 042-000-000' },
             { key: 'store_address', label: 'ที่อยู่ร้าน', placeholder: 'เช่น 519/2 ม.5 ต.เมือง อ.เมือง จ.เลย 42000' },
         ],

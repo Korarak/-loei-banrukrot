@@ -168,7 +168,7 @@ export default function Home() {
                             Vespa Specialist & Oat Engineering
                         </motion.div>
 
-                        <motion.h1 variants={fadeInUp} className="text-5xl md:text-7xl lg:text-8xl font-black mb-6 tracking-tighter leading-[1.1] drop-shadow-lg">
+                        <motion.h1 variants={fadeInUp} className="text-4xl md:text-6xl lg:text-7xl font-black mb-6 tracking-tighter leading-[1.1] drop-shadow-lg">
                             {siteConfig.brand.name} <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-amber-600 italic pr-4">
                                 {siteConfig.brand.englishName}
@@ -226,8 +226,8 @@ export default function Home() {
                                 whileHover={{ scale: 1.03 }}
                                 transition={{ type: 'spring', stiffness: 200 }}
                             >
-                                <div className="text-5xl md:text-6xl lg:text-8xl font-black text-white leading-tight mb-3 tracking-tight">
-                                    บ้านรักรถ
+                                <div className="text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight mb-3 tracking-tight">
+                                    บ้านรักรถ<br />เมืองเลย
                                 </div>
                                 <div className="text-base md:text-xl text-accent font-black italic tracking-[0.3em] mb-5">
                                     BANRUKROT
@@ -693,7 +693,7 @@ export default function Home() {
                                             <MapPin className="h-10 w-10 text-primary" />
                                         </div>
                                         <div>
-                                            <p className="font-black text-xl text-gray-800 mb-1">ร้านบ้านรักรถ</p>
+                                            <p className="font-black text-xl text-gray-800 mb-1">ร้านบ้านรักรถเมืองเลย</p>
                                             <p className="text-sm text-gray-600 max-w-[240px] leading-relaxed">
                                                 {contact.items.find(i => i.type === 'address')?.value}
                                             </p>
