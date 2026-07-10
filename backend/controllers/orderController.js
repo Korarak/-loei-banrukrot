@@ -16,7 +16,7 @@ const fs = require('fs');
 // @access  Private (customer)
 exports.createOrderFromCart = async (req, res, next) => {
     try {
-        let { shippingAddressId, paymentMethod, shippingMethodId } = req.body;
+        let { shippingAddressId, paymentMethod, shippingMethodId, itemIds } = req.body;
 
         // Default payment method if not provided
         if (!paymentMethod) {
@@ -40,11 +40,18 @@ exports.createOrderFromCart = async (req, res, next) => {
             await CartItem.deleteMany({ _id: { $in: ghostItems.map(i => i._id) } });
         }
 
-        const cartItems = allCartItems.filter(item => item.variantId);
+        let cartItems = allCartItems.filter(item => item.variantId);
+
+        // สั่งเฉพาะรายการที่เลือก (itemIds) — ไม่ส่งมา = สั่งทั้งตะกร้า (client เก่า)
+        if (Array.isArray(itemIds) && itemIds.length > 0) {
+            const selectedIds = new Set(itemIds.map(String));
+            cartItems = cartItems.filter(item => selectedIds.has(item._id.toString()));
+        }
+
         if (cartItems.length === 0) {
             return res.status(400).json({
                 success: false,
-                message: 'Cart is empty'
+                message: 'ไม่มีสินค้าที่เลือกสั่งซื้อ'
             });
         }
 
@@ -52,9 +59,12 @@ exports.createOrderFromCart = async (req, res, next) => {
         let totalAmount = 0;
         for (const item of cartItems) {
             if (item.variantId.stockAvailable < item.quantity) {
+                const remaining = item.variantId.stockAvailable;
                 return res.status(400).json({
                     success: false,
-                    message: `สินค้า ${item.variantId.sku} มีสต็อกไม่เพียงพอ`
+                    message: remaining <= 0
+                        ? `สินค้า ${item.variantId.sku} หมดสต็อก กรุณานำออกจากรายการที่เลือก`
+                        : `สินค้า ${item.variantId.sku} มีไม่เพียงพอ (คงเหลือ ${remaining} ชิ้น) กรุณาปรับจำนวน`
                 });
             }
             totalAmount += item.quantity * item.variantId.price;
@@ -135,8 +145,8 @@ exports.createOrderFromCart = async (req, res, next) => {
             paidByCustomerId: req.customer._id
         });
 
-        // ล้าง cart
-        await CartItem.deleteMany({ cartId: cart._id });
+        // ลบเฉพาะรายการที่สั่งซื้อ — รายการที่ไม่ได้เลือก (เช่น ของหมด) คงอยู่ในรถเข็น
+        await CartItem.deleteMany({ _id: { $in: cartItems.map(item => item._id) } });
 
         res.status(201).json({
             success: true,

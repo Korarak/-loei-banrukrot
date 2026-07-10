@@ -15,6 +15,7 @@ export interface CartItem {
         _id: string;
         sku: string;
         price: number;
+        stockAvailable?: number;
     };
     quantity: number;
 }

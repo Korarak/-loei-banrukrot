@@ -57,7 +57,8 @@ exports.getCart = async (req, res, next) => {
                 variant: {
                     _id: variant._id,
                     sku: variant.sku,
-                    price: variant.price
+                    price: variant.price,
+                    stockAvailable: variant.stockAvailable
                 },
                 product: {
                     _id: product._id,
@@ -94,14 +95,7 @@ exports.addToCart = async (req, res, next) => {
         if (!variant) {
             return res.status(404).json({
                 success: false,
-                message: 'Product variant not found'
-            });
-        }
-
-        if (variant.stockAvailable < quantity) {
-            return res.status(400).json({
-                success: false,
-                message: 'Insufficient stock'
+                message: 'ไม่พบสินค้านี้ในระบบ'
             });
         }
 
@@ -113,6 +107,17 @@ exports.addToCart = async (req, res, next) => {
 
         // เช็คว่ามี item นี้ใน cart แล้วหรือยัง
         let cartItem = await CartItem.findOne({ cartId: cart._id, variantId });
+
+        // ตรวจสต็อกจากยอดรวม (ที่อยู่ในรถเข็นแล้ว + ที่เพิ่มใหม่) ไม่ใช่แค่จำนวนที่เพิ่ม
+        const existingQty = cartItem ? cartItem.quantity : 0;
+        if (variant.stockAvailable < existingQty + quantity) {
+            return res.status(400).json({
+                success: false,
+                message: variant.stockAvailable <= 0
+                    ? 'สินค้าหมด'
+                    : `สินค้ามีไม่เพียงพอ (คงเหลือ ${variant.stockAvailable} ชิ้น${existingQty > 0 ? `, อยู่ในรถเข็นแล้ว ${existingQty} ชิ้น` : ''})`
+            });
+        }
 
         if (cartItem) {
             // ถ้ามีแล้ว เพิ่มจำนวน
@@ -170,7 +175,9 @@ exports.updateCartItem = async (req, res, next) => {
         if (cartItem.variantId.stockAvailable < quantity) {
             return res.status(400).json({
                 success: false,
-                message: 'Insufficient stock'
+                message: cartItem.variantId.stockAvailable <= 0
+                    ? 'สินค้าหมด'
+                    : `สินค้ามีไม่เพียงพอ (คงเหลือ ${cartItem.variantId.stockAvailable} ชิ้น)`
             });
         }
 

@@ -74,6 +74,8 @@ const validationRules = {
     createOrder: [
         body('shippingAddressId').isMongoId().withMessage('Invalid shipping address ID'),
         body('shippingMethodId').isMongoId().withMessage('Invalid shipping method ID'),
+        body('itemIds').optional().isArray().withMessage('itemIds must be an array'),
+        body('itemIds.*').isMongoId().withMessage('Invalid cart item ID'),
         validate
     ],
 

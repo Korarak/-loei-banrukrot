@@ -64,6 +64,8 @@ export interface CreateOrderData {
     paymentMethod?: string;
     shippingMethodId?: string;
     shippingAddressId?: string;
+    /** สั่งซื้อเฉพาะรายการที่เลือกในรถเข็น — ไม่ส่ง = สั่งทั้งตะกร้า */
+    itemIds?: string[];
 }
 
 // Fetch all orders (admin) — request enough to support client-side filtering
@@ -127,6 +129,8 @@ export function useCreateOrder() {
             toast.error('ไม่สามารถสั่งซื้อได้', {
                 description: error.response?.data?.message || 'กรุณาลองใหม่อีกครั้ง',
             });
+            // สั่งไม่สำเร็จมักแปลว่าสต็อกเปลี่ยนระหว่างดูหน้า cart — ดึงข้อมูลใหม่ให้หน้าจอตรงความจริง
+            queryClient.invalidateQueries({ queryKey: ['cart'] });
         },
     });
 }

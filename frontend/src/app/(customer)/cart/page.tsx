@@ -24,6 +24,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useShippingMethods } from '@/hooks/useShippingMethods';
 import { useCustomerAddresses } from '@/hooks/useCustomers';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Truck, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
@@ -43,15 +44,38 @@ export default function CartPage() {
     const [manualShippingId, setManualShippingId] = useState<string | null>(null);
     const [manualAddressId, setManualAddressId] = useState<string | null>(null);
     const [paymentMethod, setPaymentMethod] = useState<string>('Transfer');
+    // รายการที่ผู้ใช้ "เอาออก" จากการคิดเงิน — ค่าเริ่มต้นคือเลือกทุกชิ้นที่ซื้อได้
+    const [deselectedIds, setDeselectedIds] = useState<Set<string>>(new Set());
 
     const items = cart?.items || [];
-    const cartSubtotal = cart?.totalAmount || 0;
 
-    // Determine cart size
-    const cartSize = useMemo(() => {
-        const hasLargeItem = items.some(item => item.product.shippingSize === 'large');
-        return hasLargeItem ? 'large' : 'small';
-    }, [items]);
+    // สต็อกคงเหลือ — backend เก่าที่ยังไม่ส่ง field นี้จะถือว่าไม่จำกัด (พฤติกรรมเดิม)
+    const getStock = (item: { variant: { stockAvailable?: number } }) =>
+        item.variant.stockAvailable ?? Number.POSITIVE_INFINITY;
+    const isOutOfStock = (item: (typeof items)[number]) => getStock(item) <= 0;
+    const exceedsStock = (item: (typeof items)[number]) => !isOutOfStock(item) && item.quantity > getStock(item);
+    const isSelectable = (item: (typeof items)[number]) => !isOutOfStock(item) && !exceedsStock(item);
+
+    const selectableItems = items.filter(isSelectable);
+    const selectedItems = selectableItems.filter(item => !deselectedIds.has(item._id));
+    const cartSubtotal = selectedItems.reduce((sum, item) => sum + item.variant.price * item.quantity, 0);
+
+    const toggleItem = (itemId: string) => {
+        setDeselectedIds(prev => {
+            const next = new Set(prev);
+            if (next.has(itemId)) next.delete(itemId);
+            else next.add(itemId);
+            return next;
+        });
+    };
+
+    const allSelected = selectableItems.length > 0 && selectedItems.length === selectableItems.length;
+    const toggleSelectAll = () => {
+        setDeselectedIds(allSelected ? new Set(selectableItems.map(item => item._id)) : new Set());
+    };
+
+    // Determine cart size — คิดเฉพาะรายการที่เลือกสั่งซื้อ
+    const cartSize = selectedItems.some(item => item.product.shippingSize === 'large') ? 'large' : 'small';
 
     // Filter available shipping methods
     const availableShippingMethods = useMemo(() => {
@@ -96,11 +120,14 @@ export default function CartPage() {
     const shippingCost = selectedMethod?.price || 0;
     const totalAmount = cartSubtotal + shippingCost;
 
-    const handleUpdateQuantity = (itemId: string, currentQuantity: number, change: number) => {
+    const handleUpdateQuantity = (itemId: string, currentQuantity: number, change: number, maxStock: number) => {
         const newQuantity = currentQuantity + change;
-        if (newQuantity > 0) {
-            updateCartItem.mutate({ itemId, quantity: newQuantity });
+        if (newQuantity <= 0) return;
+        if (change > 0 && newQuantity > maxStock) {
+            toast.error(`สินค้ามีไม่เพียงพอ (คงเหลือ ${maxStock} ชิ้น)`);
+            return;
         }
+        updateCartItem.mutate({ itemId, quantity: newQuantity });
     };
 
     const handleRemoveItem = (itemId: string) => {
@@ -108,6 +135,10 @@ export default function CartPage() {
     };
 
     const handleCheckout = async () => {
+        if (selectedItems.length === 0) {
+            toast.error('กรุณาเลือกสินค้าที่ต้องการสั่งซื้อ');
+            return;
+        }
         if (!selectedAddressId) {
             toast.error('กรุณาเลือกที่อยู่จัดส่ง');
             return;
@@ -120,7 +151,8 @@ export default function CartPage() {
             const order = await createOrder.mutateAsync({
                 shippingMethodId: selectedShippingId,
                 shippingAddressId: selectedAddressId,
-                paymentMethod
+                paymentMethod,
+                itemIds: selectedItems.map(item => item._id)
             });
             router.push(`/orders/${order._id}`);
         } catch (error) {
@@ -181,12 +213,45 @@ export default function CartPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 md:gap-12">
                 {/* Cart Items */}
                 <div className="lg:col-span-2 space-y-6">
-                    {items.map((item) => (
-                        <Card key={item._id} className="p-4 md:p-6 border-0 shadow-lg shadow-gray-100/50 rounded-[2rem] overflow-hidden group hover:shadow-xl transition-all duration-300 border border-gray-50/50">
-                            <div className="flex flex-col sm:flex-row gap-6">
+                    {/* Select All */}
+                    {selectableItems.length > 0 && (
+                        <div className="flex items-center gap-3 px-2">
+                            <Checkbox
+                                id="select-all"
+                                checked={allSelected}
+                                onCheckedChange={toggleSelectAll}
+                                aria-label="เลือกสินค้าทั้งหมด"
+                            />
+                            <Label htmlFor="select-all" className="cursor-pointer text-sm font-bold text-gray-700">
+                                เลือกทั้งหมด <span className="text-gray-400 font-medium">(เลือกแล้ว {selectedItems.length}/{selectableItems.length} รายการ)</span>
+                            </Label>
+                        </div>
+                    )}
+
+                    {items.map((item) => {
+                        const stock = getStock(item);
+                        const oos = isOutOfStock(item);
+                        const overStock = exceedsStock(item);
+                        const checked = isSelectable(item) && !deselectedIds.has(item._id);
+                        return (
+                        <Card key={item._id} className={`p-4 md:p-6 border-0 shadow-lg shadow-gray-100/50 rounded-[2rem] overflow-hidden group transition-all duration-300 border border-gray-50/50 ${oos ? 'opacity-60 bg-gray-50/80' : 'hover:shadow-xl'}`}>
+                            <div className="flex gap-4">
+                                {/* Selection Checkbox */}
+                                <div className="flex items-center shrink-0">
+                                    <Checkbox
+                                        checked={checked}
+                                        disabled={!isSelectable(item)}
+                                        onCheckedChange={() => toggleItem(item._id)}
+                                        aria-label={oos
+                                            ? `${item.product.productName} — สินค้าหมด ไม่สามารถเลือกได้`
+                                            : `เลือก ${item.product.productName} เพื่อสั่งซื้อ`}
+                                    />
+                                </div>
+
+                                <div className="flex-1 flex flex-col sm:flex-row gap-6">
                                 {/* Product Image */}
                                 <Link href={`/products/${item.product._id}`} className="shrink-0 mx-auto sm:mx-0">
-                                    <div className="relative h-32 w-32 md:h-40 md:w-40 rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 group-hover:scale-105 transition-transform duration-500">
+                                    <div className={`relative h-32 w-32 md:h-40 md:w-40 rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 transition-transform duration-500 ${oos ? 'grayscale' : 'group-hover:scale-105'}`}>
                                         {item.product.imageUrl ? (
                                             <Image
                                                 src={getImageUrl(item.product.imageUrl)}
@@ -200,6 +265,13 @@ export default function CartPage() {
                                                 ไม่มีรูปภาพ
                                             </div>
                                         )}
+                                        {oos && (
+                                            <div className="absolute inset-0 flex items-center justify-center bg-white/50">
+                                                <span className="bg-gray-900/80 text-white text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-full">
+                                                    สินค้าหมด
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
                                 </Link>
 
@@ -207,7 +279,7 @@ export default function CartPage() {
                                     <div className="space-y-2">
                                         <div className="flex justify-between items-start gap-4">
                                             <Link href={`/products/${item.product._id}`} className="group/title">
-                                                <h3 className="font-bold text-xl md:text-2xl text-gray-900 group-hover/title:text-primary transition-colors line-clamp-2 leading-tight">
+                                                <h3 className={`font-bold text-xl md:text-2xl transition-colors line-clamp-2 leading-tight ${oos ? 'text-gray-500' : 'text-gray-900 group-hover/title:text-primary'}`}>
                                                     {item.product.productName}
                                                 </h3>
                                             </Link>
@@ -222,7 +294,7 @@ export default function CartPage() {
                                                 <Trash2 className="h-5 w-5" />
                                             </Button>
                                         </div>
-                                        <div className="flex items-center gap-3">
+                                        <div className="flex items-center gap-3 flex-wrap">
                                             <span className="text-xs font-bold uppercase tracking-widest text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full">
                                                 SKU: {item.variant.sku}
                                             </span>
@@ -231,55 +303,79 @@ export default function CartPage() {
                                                     สินค้าขนาดใหญ่
                                                 </span>
                                             )}
+                                            {oos && (
+                                                <span className="text-[10px] font-bold uppercase tracking-widest text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-100">
+                                                    สินค้าหมด — ไม่ถูกรวมในยอดชำระ
+                                                </span>
+                                            )}
                                         </div>
+                                        {overStock && (
+                                            <div className="flex items-center gap-2 flex-wrap text-xs font-bold text-red-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2">
+                                                <span>สินค้าคงเหลือเพียง {stock} ชิ้น กรุณาลดจำนวนก่อนสั่งซื้อ</span>
+                                                <button
+                                                    onClick={() => updateCartItem.mutate({ itemId: item._id, quantity: stock })}
+                                                    disabled={updateCartItem.isPending}
+                                                    className="underline underline-offset-2 hover:text-red-700 disabled:opacity-50"
+                                                >
+                                                    ปรับเป็น {stock} ชิ้น
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div className="flex flex-wrap items-end justify-between mt-6 gap-4">
                                         <div className="flex flex-col">
                                             <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">ราคาต่อชิ้น</span>
-                                            <p className="text-xl font-black text-primary">
+                                            <p className={`text-xl font-black ${oos ? 'text-gray-400' : 'text-primary'}`}>
                                                 ฿{item.variant.price.toLocaleString()}
                                             </p>
                                         </div>
 
-                                        <div className="flex items-center gap-6 bg-gray-50 p-1.5 rounded-2xl border border-gray-100">
-                                            {/* Quantity Controls */}
-                                            <div className="flex items-center gap-1">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => handleUpdateQuantity(item._id, item.quantity, -1)}
-                                                    disabled={updateCartItem.isPending}
-                                                    aria-label="ลดจำนวน"
-                                                    className="h-10 w-10 rounded-xl hover:bg-white hover:shadow-sm"
-                                                >
-                                                    <Minus className="h-4 w-4" />
-                                                </Button>
-                                                <span className="w-10 text-center font-black text-gray-900" aria-live="polite">{item.quantity}</span>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    onClick={() => handleUpdateQuantity(item._id, item.quantity, 1)}
-                                                    disabled={updateCartItem.isPending}
-                                                    aria-label="เพิ่มจำนวน"
-                                                    className="h-10 w-10 rounded-xl hover:bg-white hover:shadow-sm"
-                                                >
-                                                    <Plus className="h-4 w-4" />
-                                                </Button>
+                                        <div className="flex flex-col items-center gap-1">
+                                            <div className="flex items-center gap-6 bg-gray-50 p-1.5 rounded-2xl border border-gray-100">
+                                                {/* Quantity Controls */}
+                                                <div className="flex items-center gap-1">
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => handleUpdateQuantity(item._id, item.quantity, -1, stock)}
+                                                        disabled={updateCartItem.isPending || oos}
+                                                        aria-label="ลดจำนวน"
+                                                        className="h-10 w-10 rounded-xl hover:bg-white hover:shadow-sm"
+                                                    >
+                                                        <Minus className="h-4 w-4" />
+                                                    </Button>
+                                                    <span className="w-10 text-center font-black text-gray-900" aria-live="polite">{item.quantity}</span>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        onClick={() => handleUpdateQuantity(item._id, item.quantity, 1, stock)}
+                                                        disabled={updateCartItem.isPending || oos || item.quantity >= stock}
+                                                        aria-label="เพิ่มจำนวน"
+                                                        className="h-10 w-10 rounded-xl hover:bg-white hover:shadow-sm disabled:opacity-30"
+                                                    >
+                                                        <Plus className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
                                             </div>
+                                            {!oos && Number.isFinite(stock) && item.quantity >= stock && (
+                                                <span className="text-[10px] font-bold text-orange-600">สูงสุด {stock} ชิ้น</span>
+                                            )}
                                         </div>
 
                                         <div className="flex flex-col items-end">
                                             <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">ราคารวม</span>
-                                            <p className="text-2xl font-black text-gray-900">
+                                            <p className={`text-2xl font-black ${oos ? 'text-gray-400 line-through' : 'text-gray-900'}`}>
                                                 ฿{(item.variant.price * item.quantity).toLocaleString()}
                                             </p>
                                         </div>
                                     </div>
                                 </div>
+                                </div>
                             </div>
                         </Card>
-                    ))}
+                        );
+                    })}
                 </div>
 
                 {/* Order Summary */}
@@ -289,7 +385,7 @@ export default function CartPage() {
 
                         <div className="space-y-6 mb-8">
                             <div className="flex justify-between items-center text-lg">
-                                <span className="text-gray-600 font-medium">ยอดสินค้า</span>
+                                <span className="text-gray-600 font-medium">ยอดสินค้า ({selectedItems.length} รายการ)</span>
                                 <span className="font-bold text-gray-900">฿{cartSubtotal.toLocaleString()}</span>
                             </div>
                             <div className="flex justify-between items-center text-lg">
@@ -389,10 +485,16 @@ export default function CartPage() {
                             className="w-full bg-gray-900 text-white hover:bg-black rounded-3xl h-16 text-xl font-black uppercase tracking-widest shadow-xl shadow-gray-200 transition-all hover:-translate-y-1 active:scale-95 disabled:opacity-50"
                             size="lg"
                             onClick={handleCheckout}
-                            disabled={createOrder.isPending || !selectedAddressId || !selectedShippingId}
+                            disabled={createOrder.isPending || !selectedAddressId || !selectedShippingId || selectedItems.length === 0}
                         >
                             {createOrder.isPending ? 'กำลังดำเนินการ...' : 'สั่งซื้อเลย'}
                         </Button>
+
+                        {selectedItems.length === 0 && (
+                            <p className="mt-3 text-center text-xs font-bold text-red-500">
+                                กรุณาเลือกสินค้าอย่างน้อย 1 รายการ
+                            </p>
+                        )}
 
                         <Button
                             variant="ghost"
