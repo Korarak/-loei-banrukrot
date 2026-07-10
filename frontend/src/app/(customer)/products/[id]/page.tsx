@@ -13,6 +13,7 @@ import { getImageUrl, getPrimaryImage } from '@/lib/utils';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/stores/useAuthStore';
+import RelatedProducts from '@/components/features/RelatedProducts';
 
 export default function ProductDetailPage() {
     const params = useParams();
@@ -74,7 +75,8 @@ export default function ProductDetailPage() {
     const selectedVariant = selectedVariantId
         ? variants.find((v: any) => v._id === selectedVariantId)
         : variants[0];
-    const categoryName = categories?.find(c => c.categoryId === product.categoryId)?.name || '-';
+    const category = categories?.find(c => c.categoryId === product.categoryId);
+    const categoryName = category?.name || '-';
     const shippingSizeLabel = product.shippingSize === 'large' ? 'Large Item' : 'Standard Item';
     const getVariantLabel = (v: any) => {
         const parts = [v.option1Value, v.option2Value].filter(Boolean);
@@ -231,10 +233,14 @@ export default function ProductDetailPage() {
                 <div className="flex flex-col pt-2">
                     <div className="mb-6">
                         <div className="flex items-center gap-2 mb-4">
-                            <span className="text-xs font-black uppercase tracking-widest text-primary">
-                                {product.brand || 'Premium Brand'}
-                            </span>
-                            <span className="w-1 h-1 rounded-full bg-gray-300" />
+                            {product.brand && (
+                                <>
+                                    <span className="text-xs font-black uppercase tracking-widest text-primary">
+                                        {product.brand}
+                                    </span>
+                                    <span className="w-1 h-1 rounded-full bg-gray-300" />
+                                </>
+                            )}
                             <span className="text-xs font-bold text-gray-600 uppercase tracking-widest">
                                 {categoryName}
                             </span>
@@ -258,17 +264,6 @@ export default function ProductDetailPage() {
                             )}
                         </div>
 
-                        {/* Quick Highlights - 425degree style */}
-                        <div className="grid grid-cols-1 gap-4 py-6 border-y border-gray-100 mb-8">
-                            <div className="flex items-start gap-3">
-                                <div className="mt-1 w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
-                                <p className="text-sm font-medium text-gray-600">สินค้านำเข้าของแท้ 100% จากแบรนด์โดยตรง</p>
-                            </div>
-                            <div className="flex items-start gap-3">
-                                <div className="mt-1 w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
-                                <p className="text-sm font-medium text-gray-600">ดีไซน์ทันสมัย วัสดุพรีเมียม แข็งแรงทนทาน</p>
-                            </div>
-                        </div>
                     </div>
 
                     {/* Variants */}
@@ -384,6 +379,14 @@ export default function ProductDetailPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Related products — same category */}
+            <RelatedProducts
+                categoryId={product.categoryId}
+                currentProductId={product._id}
+                categorySlug={category?.slug}
+                categoryName={category?.name}
+            />
 
                 {/* Mobile Sticky Action Bar - REFINED */}
                 <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-xl border-t border-gray-100 lg:hidden z-40 safe-area-bottom shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
