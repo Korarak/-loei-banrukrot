@@ -328,6 +328,16 @@ exports.updateOrderStatus = async (req, res, next) => {
             });
         }
 
+        // Cancelled is terminal — once cancelled, stock has been restored and the
+        // order must not be reopened (would let staff replay cancel→other→cancel to
+        // inflate stock indefinitely).
+        if (order.orderStatus === 'cancelled' && orderStatus && orderStatus !== 'cancelled') {
+            return res.status(400).json({
+                success: false,
+                message: 'ไม่สามารถเปลี่ยนสถานะออเดอร์ที่ยกเลิกแล้วได้'
+            });
+        }
+
         // Check if cancelling and not already cancelled
         if (orderStatus === 'cancelled' && order.orderStatus !== 'cancelled') {
             const orderDetails = await OrderDetail.find({ orderId: order._id });

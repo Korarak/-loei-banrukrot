@@ -67,7 +67,7 @@ exports.createCustomer = async (req, res, next) => {
 // @access  Private/Admin
 exports.updateCustomer = async (req, res, next) => {
     try {
-        const { firstName, lastName, email, phone, isActive, password, profilePicture } = req.body;
+        const { firstName, lastName, email, phone, isActive, password, currentPassword, profilePicture } = req.body;
         const customer = await Customer.findById(req.params.id);
 
         if (!customer) {
@@ -85,6 +85,20 @@ exports.updateCustomer = async (req, res, next) => {
         if (profilePicture) customer.profilePicture = profilePicture;
 
         if (password) {
+            // Staff/owner resetting a customer's password doesn't need the old one;
+            // the customer changing their own password does (req.customer is only set for self-service calls).
+            // Social-login accounts with no password yet (passwordHash unset) are setting one
+            // for the first time, so there's nothing to verify against.
+            // 400, not 401: the frontend axios interceptor treats 401/403 as an
+            // expired session and force-logs the user out before the error shows.
+            if (req.customer && customer.passwordHash) {
+                if (!currentPassword || !(await bcrypt.compare(currentPassword, customer.passwordHash))) {
+                    return res.status(400).json({
+                        success: false,
+                        message: 'รหัสผ่านปัจจุบันไม่ถูกต้อง'
+                    });
+                }
+            }
             const salt = await bcrypt.genSalt(10);
             customer.passwordHash = await bcrypt.hash(password, salt);
         }
@@ -194,7 +208,7 @@ exports.updateCustomerAddress = async (req, res, next) => {
         const { addressLabel, recipientName, phone, streetAddress, subDistrict, district, province, zipCode, isDefault } = req.body;
         const address = await CustomerAddress.findById(req.params.addressId);
 
-        if (!address) {
+        if (!address || address.customerId.toString() !== req.params.id) {
             return res.status(404).json({
                 success: false,
                 message: 'Address not found'
@@ -237,7 +251,7 @@ exports.deleteCustomerAddress = async (req, res, next) => {
     try {
         const address = await CustomerAddress.findById(req.params.addressId);
 
-        if (!address) {
+        if (!address || address.customerId.toString() !== req.params.id) {
             return res.status(404).json({
                 success: false,
                 message: 'Address not found'

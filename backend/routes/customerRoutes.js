@@ -45,10 +45,4 @@ router.route('/:id/addresses/:addressId')
     .put(checkCustomerAccess, updateCustomerAddress)
     .delete(checkCustomerAccess, deleteCustomerAddress);
 
-// Fix for delete/update address by customer:
-// The route is /addresses/:addressId. We don't have :id (customerId) in params.
-// We need a middleware that checks if the address belongs to the logged-in customer.
-// For now, let's just fix the CREATE issue which is blocking the user.
-// The user is hitting POST /api/customers/:id/addresses.
-
 module.exports = router;

@@ -24,7 +24,7 @@ export function useMe() {
 export function useUpdateMe() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async (data: Partial<User> & { password?: string }) => {
+        mutationFn: async (data: Partial<User> & { password?: string; currentPassword?: string }) => {
             const res = await api.put('/users/me', data);
             return res.data.data;
         },

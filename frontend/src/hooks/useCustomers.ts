@@ -54,7 +54,7 @@ export function useCreateCustomer() {
 export function useUpdateCustomer() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async ({ id, data }: { id: string; data: Partial<Customer> & { password?: string } }) => {
+        mutationFn: async ({ id, data }: { id: string; data: Partial<Customer> & { password?: string; currentPassword?: string } }) => {
             const res = await api.put(`/customer/${id}`, data);
             return res.data.data;
         },

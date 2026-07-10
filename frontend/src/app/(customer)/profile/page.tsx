@@ -56,6 +56,7 @@ export default function ProfilePage() {
         firstName: '',
         lastName: '',
         phone: '',
+        currentPassword: '',
         password: '',
         confirmPassword: ''
     });
@@ -93,6 +94,7 @@ export default function ProfilePage() {
                 firstName: customer.firstName || '',
                 lastName: customer.lastName || '',
                 phone: customer.phone || '',
+                currentPassword: '',
                 password: '',
                 confirmPassword: ''
             });
@@ -126,6 +128,11 @@ export default function ProfilePage() {
             return;
         }
 
+        if (editForm.password && !editForm.currentPassword) {
+            toast.error('กรุณากรอกรหัสผ่านปัจจุบัน');
+            return;
+        }
+
         try {
             const updateData: any = {
                 firstName: editForm.firstName,
@@ -135,6 +142,7 @@ export default function ProfilePage() {
 
             if (editForm.password) {
                 updateData.password = editForm.password;
+                updateData.currentPassword = editForm.currentPassword;
             }
 
             const updatedCustomer = await updateCustomer.mutateAsync({
@@ -145,6 +153,7 @@ export default function ProfilePage() {
             updateAuthCustomer(updatedCustomer);
             toast.success('อัปเดตข้อมูลส่วนตัวเรียบร้อย');
             setIsEditingProfile(false);
+            setEditForm(prev => ({ ...prev, currentPassword: '', password: '', confirmPassword: '' }));
         } catch (error: any) {
             toast.error(error.response?.data?.message || 'ไม่สามารถอัปเดตข้อมูลได้');
         }
@@ -494,17 +503,31 @@ export default function ProfilePage() {
                                     />
                                 </div>
                                 {editForm.password && (
-                                    <div className="space-y-2">
-                                        <Label htmlFor="confirmPassword">ยืนยันรหัสผ่านใหม่</Label>
-                                        <Input
-                                            id="confirmPassword"
-                                            type="password"
-                                            value={editForm.confirmPassword}
-                                            onChange={(e) => setEditForm({ ...editForm, confirmPassword: e.target.value })}
-                                            required
-                                            className="rounded-xl"
-                                        />
-                                    </div>
+                                    <>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="confirmPassword">ยืนยันรหัสผ่านใหม่</Label>
+                                            <Input
+                                                id="confirmPassword"
+                                                type="password"
+                                                value={editForm.confirmPassword}
+                                                onChange={(e) => setEditForm({ ...editForm, confirmPassword: e.target.value })}
+                                                required
+                                                className="rounded-xl"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="currentPassword">รหัสผ่านปัจจุบัน</Label>
+                                            <Input
+                                                id="currentPassword"
+                                                type="password"
+                                                placeholder="ยืนยันตัวตนก่อนเปลี่ยนรหัสผ่าน"
+                                                value={editForm.currentPassword}
+                                                onChange={(e) => setEditForm({ ...editForm, currentPassword: e.target.value })}
+                                                required
+                                                className="rounded-xl"
+                                            />
+                                        </div>
+                                    </>
                                 )}
                             </div>
 

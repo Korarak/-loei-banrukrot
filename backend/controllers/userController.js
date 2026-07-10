@@ -21,7 +21,7 @@ exports.getMe = async (req, res, next) => {
 // @access  Private
 exports.updateMe = async (req, res, next) => {
     try {
-        const { username, email, password, profilePicture } = req.body;
+        const { username, email, password, currentPassword, profilePicture } = req.body;
         const user = await User.findById(req.user.id);
 
         if (!user) {
@@ -36,6 +36,14 @@ exports.updateMe = async (req, res, next) => {
         if (profilePicture) user.profilePicture = profilePicture;
 
         if (password) {
+            // 400, not 401: the frontend axios interceptor treats 401/403 as an
+            // expired session and force-logs the user out before the error shows.
+            if (!currentPassword || !(await bcrypt.compare(currentPassword, user.passwordHash))) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'รหัสผ่านปัจจุบันไม่ถูกต้อง'
+                });
+            }
             const salt = await bcrypt.genSalt(10);
             user.passwordHash = await bcrypt.hash(password, salt);
         }

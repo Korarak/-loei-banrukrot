@@ -23,6 +23,7 @@ export default function AdminProfilePage() {
     const [form, setForm] = useState({
         username: '',
         email: '',
+        currentPassword: '',
         password: '',
         confirmPassword: ''
     });
@@ -32,6 +33,7 @@ export default function AdminProfilePage() {
             setForm({
                 username: me.username,
                 email: me.email,
+                currentPassword: '',
                 password: '',
                 confirmPassword: ''
             });
@@ -50,6 +52,11 @@ export default function AdminProfilePage() {
             return;
         }
 
+        if (form.password && !form.currentPassword) {
+            toast.error('กรุณากรอกรหัสผ่านปัจจุบัน');
+            return;
+        }
+
         try {
             const updateData: any = {
                 username: form.username,
@@ -58,12 +65,13 @@ export default function AdminProfilePage() {
 
             if (form.password) {
                 updateData.password = form.password;
+                updateData.currentPassword = form.currentPassword;
             }
 
             const updatedUser = await updateMe.mutateAsync(updateData);
             updateAuthUser(updatedUser);
             toast.success('อัปเดตโปรไฟล์สำเร็จ');
-            setForm(prev => ({ ...prev, password: '', confirmPassword: '' }));
+            setForm(prev => ({ ...prev, currentPassword: '', password: '', confirmPassword: '' }));
         } catch (error: any) {
             toast.error(error.response?.data?.message || 'ไม่สามารถอัปเดตโปรไฟล์ได้');
         }
@@ -183,16 +191,29 @@ export default function AdminProfilePage() {
                                     />
                                 </div>
                                 {form.password && (
-                                    <div className="space-y-2">
-                                        <Label htmlFor="confirmPassword">ยืนยันรหัสผ่านใหม่</Label>
-                                        <Input
-                                            id="confirmPassword"
-                                            type="password"
-                                            value={form.confirmPassword}
-                                            onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
-                                            required
-                                        />
-                                    </div>
+                                    <>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="confirmPassword">ยืนยันรหัสผ่านใหม่</Label>
+                                            <Input
+                                                id="confirmPassword"
+                                                type="password"
+                                                value={form.confirmPassword}
+                                                onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+                                                required
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="currentPassword">รหัสผ่านปัจจุบัน</Label>
+                                            <Input
+                                                id="currentPassword"
+                                                type="password"
+                                                placeholder="ยืนยันตัวตนก่อนเปลี่ยนรหัสผ่าน"
+                                                value={form.currentPassword}
+                                                onChange={(e) => setForm({ ...form, currentPassword: e.target.value })}
+                                                required
+                                            />
+                                        </div>
+                                    </>
                                 )}
                             </div>
 
