@@ -151,99 +151,66 @@ export default function Home() {
     return (
         <div className="space-y-0 pb-10">
 
-            {/* ── Hero ──────────────────────────────────────────────────────── */}
-            <section className="relative bg-gradient-to-br from-primary via-red-950 to-black text-white rounded-[2rem] overflow-hidden shadow-2xl min-h-[700px] flex items-center pb-20">
+            {/* ── Hero — compact, centered, no duplicated shop-name card ────── */}
+            <section className="relative bg-gradient-to-br from-primary via-red-950 to-black text-white rounded-[2rem] overflow-hidden shadow-2xl">
                 <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-accent/15 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                 <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-primary/15 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 pointer-events-none" />
 
-                <div className="relative container mx-auto px-8 md:px-12 py-20 flex flex-col md:flex-row items-center gap-12">
+                <div className="relative container mx-auto px-6 md:px-12 pt-12 md:pt-16 pb-24 md:pb-28">
                     <motion.div
-                        className="flex-1 relative z-10 text-center md:text-left"
+                        className="relative z-10 max-w-3xl mx-auto text-center"
                         initial="hidden"
                         animate="visible"
                         variants={staggerContainer}
                     >
-                        <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-accent font-bold text-sm uppercase tracking-widest mb-8 shadow-glow">
+                        <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-accent font-bold text-xs md:text-sm uppercase tracking-widest mb-5 shadow-glow">
                             <Zap className="h-4 w-4 fill-accent" />
                             Vespa Specialist & Oat Engineering
                         </motion.div>
 
-                        <motion.h1 variants={fadeInUp} className="text-4xl md:text-6xl lg:text-7xl font-black mb-6 tracking-tighter leading-[1.1] drop-shadow-lg">
-                            {siteConfig.brand.name} <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-amber-600 italic pr-4">
+                        <motion.h1 variants={fadeInUp} className="text-3xl md:text-5xl font-black mb-4 tracking-tighter leading-[1.1] drop-shadow-lg">
+                            {siteConfig.brand.name}{' '}
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-amber-600 italic pr-2">
                                 {siteConfig.brand.englishName}
                             </span>
                         </motion.h1>
 
-                        <motion.p variants={fadeInUp} className="text-xl md:text-2xl mb-8 text-gray-200 font-medium max-w-2xl leading-relaxed">
+                        <motion.p variants={fadeInUp} className="text-base md:text-lg mb-7 text-gray-200 font-medium leading-relaxed">
                             ศูนย์รวมอะไหล่และบริการ Vespa ครบวงจร โดย{' '}
                             <span className="text-accent font-bold">ช่างโอ๊ต (Oat Engineering)</span>{' '}
                             สำหรับคนรักเวสป้าเมืองเลย
                         </motion.p>
 
                         {/* Search bar */}
-                        <motion.form variants={fadeInUp} onSubmit={handleHeroSearch} className="flex gap-2 mb-8 max-w-lg mx-auto md:mx-0">
+                        <motion.form variants={fadeInUp} onSubmit={handleHeroSearch} className="flex gap-2 mb-6 max-w-lg mx-auto">
                             <div className="relative flex-1">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
                                 <Input
                                     value={heroSearch}
                                     onChange={e => setHeroSearch(e.target.value)}
                                     placeholder="ค้นหาอะไหล่ Vespa..."
-                                    className="pl-11 h-14 rounded-full bg-white/10 border-white/20 text-white placeholder:text-gray-400 text-base focus-visible:ring-accent focus-visible:border-accent backdrop-blur-sm"
+                                    className="pl-11 h-12 rounded-full bg-white/10 border-white/20 text-white placeholder:text-gray-400 text-base focus-visible:ring-accent focus-visible:border-accent backdrop-blur-sm"
                                 />
                             </div>
-                            <Button type="submit" size="lg" className="h-14 px-6 rounded-full bg-accent text-accent-foreground border-0 hover:bg-accent/90 shadow-[0_0_20px_rgba(201,162,39,0.5)] font-bold shrink-0">
+                            <Button type="submit" className="h-12 px-6 rounded-full bg-accent text-accent-foreground border-0 hover:bg-accent/90 shadow-[0_0_20px_rgba(201,162,39,0.5)] font-bold shrink-0">
                                 ค้นหา
                             </Button>
                         </motion.form>
 
-                        <motion.div variants={fadeInUp} className="flex flex-wrap gap-4 justify-center md:justify-start">
-                            <Button size="lg" asChild className="bg-white text-primary hover:bg-gray-100 border-0 rounded-full px-8 has-[>svg]:px-8 h-14 text-lg font-bold transition-all hover:scale-105 active:scale-95 shadow-lg hover:brightness-110 duration-200">
+                        <motion.div variants={fadeInUp} className="flex flex-wrap gap-3 justify-center">
+                            <Button asChild className="bg-white text-primary hover:bg-gray-100 border-0 rounded-full px-7 has-[>svg]:px-7 h-12 text-base font-bold transition-all hover:scale-105 active:scale-95 shadow-lg hover:brightness-110 duration-200">
                                 <Link href="/products">
                                     <ShoppingCart className="mr-2 h-5 w-5" />
                                     ช้อปเลย
                                 </Link>
                             </Button>
-                            <Button size="lg" variant="outline" asChild className="bg-black/20 backdrop-blur-sm border-2 border-white/30 text-white hover:bg-white hover:text-black rounded-full px-8 h-14 text-lg font-bold transition-all hover:scale-105">
+                            <Button variant="outline" asChild className="bg-black/20 backdrop-blur-sm border-2 border-white/30 text-white hover:bg-white hover:text-black rounded-full px-7 h-12 text-base font-bold transition-all hover:scale-105">
                                 <Link href="/products">
                                     ดูสินค้าทั้งหมด
                                     <ChevronRight className="ml-1 h-5 w-5" />
                                 </Link>
                             </Button>
                         </motion.div>
-                    </motion.div>
-
-                    {/* Shop Name Display */}
-                    <motion.div
-                        className="flex-1 relative flex justify-center items-center"
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.8, ease: 'easeOut', delay: 0.2 }}
-                    >
-                        <div className="relative flex flex-col items-center justify-center text-center">
-                            <motion.div
-                                className="relative bg-white/5 backdrop-blur-sm px-10 py-12 md:px-16 md:py-16 rounded-[3rem] border border-white/10 shadow-2xl"
-                                whileHover={{ scale: 1.03 }}
-                                transition={{ type: 'spring', stiffness: 200 }}
-                            >
-                                <div className="text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight mb-3 tracking-tight">
-                                    บ้านรักรถ<br />เมืองเลย
-                                </div>
-                                <div className="text-base md:text-xl text-accent font-black italic tracking-[0.3em] mb-5">
-                                    BANRUKROT
-                                </div>
-                                <div className="w-20 h-1.5 bg-gradient-to-r from-accent to-amber-600 rounded-full mx-auto mb-5" />
-                                <div className="text-sm text-white/70 font-medium tracking-wider uppercase">
-                                    Vespa Specialist
-                                </div>
-                            </motion.div>
-                            <div className="absolute -top-6 -right-6 w-14 h-14 bg-accent/20 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/20 z-20">
-                                <Zap className="h-7 w-7 text-accent" />
-                            </div>
-                            <div className="absolute -bottom-6 -left-6 w-16 h-16 bg-primary/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/10 z-20">
-                                <ShieldCheck className="h-8 w-8 text-primary" />
-                            </div>
-                        </div>
                     </motion.div>
                 </div>
             </section>
