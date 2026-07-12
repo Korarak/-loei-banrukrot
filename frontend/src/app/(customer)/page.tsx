@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import {
-    Package, Zap, Star, ShieldCheck,
+    Package, Zap, ShieldCheck,
     ChevronRight, ChevronLeft,
     Search, Phone, MapPin, Facebook,
     ShoppingCart, CheckCircle, Truck, Headphones,
@@ -401,7 +401,7 @@ export default function Home() {
             )}
 
             {/* ── Why Choose Us ─────────────────────────────────────────────── */}
-            <section className="bg-zinc-950 p-10 md:p-20 text-center relative overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8 mt-20">
+            <section className="bg-zinc-950 p-10 md:p-20 relative overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8 mt-20">
                 <motion.div
                     className="relative z-10 container mx-auto"
                     initial="hidden"
@@ -409,24 +409,58 @@ export default function Home() {
                     viewport={{ once: true, margin: '-80px' }}
                     variants={staggerContainer}
                 >
-                    <motion.div variants={fadeInUp} className="inline-block text-gray-400 text-[11px] md:text-xs font-bold uppercase tracking-[0.25em] mb-5">
+                    <motion.div variants={fadeInUp} className="text-center text-gray-400 text-[11px] md:text-xs font-bold uppercase tracking-[0.25em] mb-5">
                         Why Choose Banrakrod Loei
                     </motion.div>
-                    <motion.h2 variants={fadeInUp} className="font-display uppercase leading-[0.95] text-4xl md:text-6xl mb-16 text-white">
-                        World Class <span className="text-brand">Standard</span>
+                    <motion.h2 variants={fadeInUp} className="font-display uppercase leading-[0.95] text-4xl md:text-6xl mb-16 text-white text-center">
+                        Vespa <span className="text-brand">Specialist</span>
                     </motion.h2>
                     <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-8" variants={staggerContainer}>
                         {[
-                            { icon: ShieldCheck, title: 'Authentic 100%', desc: 'มั่นใจได้ในคุณภาพ สินค้าแท้และเกรดพรีเมียมจากผู้ผลิตชั้นนำเท่านั้น' },
-                            { icon: Zap, title: 'Fast & Secure', desc: 'จัดส่งรวดเร็วทั่วประเทศ แพ็คสินค้าอย่างดี ปลอดภัยหายห่วง' },
-                            { icon: Star, title: 'Expert Support', desc: 'ทีมงานมืออาชีพพร้อมให้คำปรึกษา ทุกปัญหาเรื่องเวสป้าเราช่วยได้' },
-                        ].map((feature, i) => (
-                            <motion.div key={i} variants={scaleIn} className="text-center border border-white/10 p-8 transition-colors hover:border-white/30">
-                                <div className="border border-white/15 w-20 h-20 flex items-center justify-center mx-auto mb-8">
-                                    <feature.icon className="h-9 w-9 text-white" />
+                            {
+                                num: '01',
+                                icon: Phone,
+                                title: 'คุยกับช่างโอ๊ตตัวจริง',
+                                desc: 'ไม่ใช่แชทบอท ไม่ใช่คอลเซ็นเตอร์ โทรคุยกับช่างที่ซ่อมรถให้คุณเองโดยตรง',
+                                fact: '061-370-2484',
+                                href: 'tel:0613702484',
+                            },
+                            {
+                                num: '02',
+                                icon: Wrench,
+                                title: 'งานโรงกลึงเฉพาะทาง',
+                                desc: 'กลึง ซ่อม ดัดแปลงอะไหล่ที่หาไม่ได้ในท้องตลาด งานเฉพาะทางที่ร้านอะไหล่ทั่วไปทำไม่ได้',
+                                fact: 'Oat Engineering',
+                            },
+                            {
+                                num: '03',
+                                icon: MapPin,
+                                title: 'ร้านจริง ที่จังหวัดเลย',
+                                desc: '519/2 หมู่ 5 บ้านหนองผักก้าม ต.เมือง อ.เมือง จ.เลย — ดูของจริง ลองรถได้ก่อนตัดสินใจ',
+                                fact: 'ดูแผนที่',
+                                href: 'https://goo.gl/maps/Cbas3yCjPz6feeSPA',
+                            },
+                        ].map((item, i) => (
+                            <motion.div key={i} variants={fadeInUp} className="border border-white/10 p-8 transition-colors hover:border-white/30">
+                                <div className="flex items-start justify-between mb-6">
+                                    <span className="font-display text-6xl leading-none text-white/10">{item.num}</span>
+                                    <item.icon className="h-6 w-6 text-brand" />
                                 </div>
-                                <h3 className="text-xl font-bold mb-4 text-white uppercase tracking-wide">{feature.title}</h3>
-                                <p className="text-gray-400 leading-relaxed text-base">{feature.desc}</p>
+                                <h3 className="text-xl font-bold mb-3 text-white">{item.title}</h3>
+                                <p className="text-gray-400 leading-relaxed text-sm mb-6">{item.desc}</p>
+                                {item.href ? (
+                                    <a
+                                        href={item.href}
+                                        target={item.href.startsWith('http') ? '_blank' : undefined}
+                                        rel={item.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                                        className="inline-flex items-center gap-2 text-white font-bold uppercase tracking-wide text-sm hover:text-brand transition-colors"
+                                    >
+                                        {item.fact}
+                                        <ChevronRight className="h-4 w-4" />
+                                    </a>
+                                ) : (
+                                    <span className="text-white font-bold uppercase tracking-wide text-sm">{item.fact}</span>
+                                )}
                             </motion.div>
                         ))}
                     </motion.div>
