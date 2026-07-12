@@ -16,6 +16,7 @@ export interface PublicSettings {
     store_name?: string;
     store_phone?: string;
     store_address?: string;
+    store_tax_id?: string;
 }
 
 export function usePublicSettings() {

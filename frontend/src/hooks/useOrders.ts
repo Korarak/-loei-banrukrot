@@ -44,6 +44,7 @@ export interface Order {
         _id: string;
         paymentMethod: string;
         amountPaid: number;
+        amountReceived?: number;
         transactionDate: string;
         slipImage?: string;
         isVerified: boolean;

@@ -13,6 +13,13 @@ export interface POSSale {
         username: string;
     };
     createdAt: string;
+    payments?: {
+        _id: string;
+        paymentMethod: string;
+        amountPaid: number;
+        amountReceived?: number;
+        isVerified: boolean;
+    }[];
 }
 
 export interface POSSaleItem {

@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { toast } from "sonner";
 import api from '@/lib/api';
 import { useCategories } from '@/hooks/useCategories';
+import { usePublicSettings } from '@/hooks/useSettings';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
@@ -15,7 +17,8 @@ import { CategoryFilter } from './components/CategoryFilter';
 import { ProductGrid } from './components/ProductGrid';
 import { CartSidebar } from './components/CartSidebar';
 import { PaymentDialog } from './components/PaymentDialog';
-import { ReceiptDialog } from './components/ReceiptDialog';
+import { ReceiptDialog } from '@/components/receipt/ReceiptDialog';
+import { posCartToReceiptData, type ReceiptData } from '@/lib/receipt';
 
 export default function POSPage() {
     const [searchInput, setSearchInput] = useState('');
@@ -28,8 +31,11 @@ export default function POSPage() {
     const [mobileCartOpen, setMobileCartOpen] = useState(false);
     const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
     const [receiptDialogOpen, setReceiptDialogOpen] = useState(false);
-    const [receiptData, setReceiptData] = useState<any | null>(null);
+    const [receiptData, setReceiptData] = useState<ReceiptData | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
+
+    const { data: settings } = usePublicSettings();
+    const cashierName = useAuthStore((s) => s.user?.username);
 
     // Debounce POS search
     useEffect(() => {
@@ -124,14 +130,7 @@ export default function POSPage() {
             });
 
             if (response.data.success) {
-                setReceiptData({
-                    ...response.data.data,
-                    items: cart,
-                    total: totalAmount,
-                    cash: cashReceived,
-                    change: change,
-                    date: new Date().toISOString()
-                });
+                setReceiptData(posCartToReceiptData(cart, response.data.data, cashReceived, change, cashierName, settings));
                 setPaymentDialogOpen(false);
                 setReceiptDialogOpen(true);
                 clearCart();
@@ -240,38 +239,15 @@ export default function POSPage() {
                 isProcessing={isProcessing}
             />
 
-            <ReceiptDialog
-                open={receiptDialogOpen}
-                onOpenChange={setReceiptDialogOpen}
-                receiptData={receiptData}
-                onPrint={() => window.print()}
-                onNewSale={() => setReceiptDialogOpen(false)}
-            />
-
-            {/* Print Styles */}
-            <style dangerouslySetInnerHTML={{
-                __html: `
-                @media print {
-                    body * {
-                        visibility: hidden;
-                    }
-                    #receipt-content, #receipt-content * {
-                        visibility: visible;
-                    }
-                    #receipt-content {
-                        position: absolute;
-                        left: 0;
-                        top: 0;
-                        width: 100%;
-                        padding: 0;
-                        margin: 0;
-                    }
-                    [role="dialog"] {
-                        box-shadow: none !important;
-                        border: none !important;
-                    }
-                }
-            `}} />
+            {receiptData && (
+                <ReceiptDialog
+                    open={receiptDialogOpen}
+                    onOpenChange={setReceiptDialogOpen}
+                    data={receiptData}
+                    defaultMode="compact"
+                    defaultPaperSize="thermal80"
+                />
+            )}
         </div>
     );
 }

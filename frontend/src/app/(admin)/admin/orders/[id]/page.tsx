@@ -1,10 +1,12 @@
 'use client';
 
 import { useOrder, useUpdateOrderStatus, useVerifyPayment } from '@/hooks/useOrders';
+import { usePublicSettings } from '@/hooks/useSettings';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ArrowLeft, Package, Truck, Pencil, AlertCircle, Copy, ExternalLink, CheckCircle2, ScanLine, ReceiptText, Printer } from 'lucide-react';
-import { OrderReceiptDialog } from '@/components/admin/OrderReceiptDialog';
+import { ReceiptDialog } from '@/components/receipt/ReceiptDialog';
+import { orderToReceiptData } from '@/lib/receipt';
 import { ShippingLabelDialog } from '@/components/admin/ShippingLabelDialog';
 import { BarcodeScanner } from '@/components/features/BarcodeScanner';
 import Link from 'next/link';
@@ -34,11 +36,12 @@ import { toast } from 'sonner';
 import ImagePreviewDialog from '@/components/features/ImagePreviewDialog';
 import { CheckCircle, XCircle, Eye } from 'lucide-react';
 import { getImageUrl } from '@/lib/utils';
-import { getOrderStatusColor } from '@/lib/order-status';
+import { getOrderStatusColor, ORDER_STATUS_LABELS, ORDER_STATUS_ORDER } from '@/lib/order-status';
 
 export default function AdminOrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const { data: order, isLoading } = useOrder(id);
+    const { data: settings } = usePublicSettings();
     const { data: shippingMethods } = useShippingMethods();
     const updateStatus = useUpdateOrderStatus();
     const verifyPayment = useVerifyPayment();
@@ -169,15 +172,7 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
         ? getTrackingUrl(order.shippingInfo.provider ?? '', order.shippingInfo.trackingNumber)
         : null;
 
-    const statusOptions = [
-        { value: 'pending', label: 'รอดำเนินการ' },
-        { value: 'confirmed', label: 'ยืนยันแล้ว' },
-        { value: 'processing', label: 'กำลังเตรียมสินค้า' },
-        { value: 'shipped', label: 'เริ่มการจัดส่ง' },
-        { value: 'delivered', label: 'จัดส่งสำเร็จ' },
-        { value: 'completed', label: 'เสร็จรับเงิน' },
-        { value: 'cancelled', label: 'ยกเลิกแล้ว' },
-    ];
+    const statusOptions = ORDER_STATUS_ORDER.map(value => ({ value, label: ORDER_STATUS_LABELS[value] }));
 
     return (
         <div className="max-w-5xl mx-auto space-y-6">
@@ -679,10 +674,12 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
             />
 
             {receiptOpen && (
-                <OrderReceiptDialog
+                <ReceiptDialog
                     open={receiptOpen}
                     onOpenChange={setReceiptOpen}
-                    order={order}
+                    data={orderToReceiptData(order, settings)}
+                    defaultMode="compact"
+                    defaultPaperSize="thermal80"
                 />
             )}
 
@@ -693,21 +690,6 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                     order={order}
                 />
             )}
-
-            <style dangerouslySetInnerHTML={{
-                __html: `
-                @media print {
-                    body * { visibility: hidden; }
-                    #receipt-content, #receipt-content * { visibility: visible; }
-                    #receipt-content {
-                        position: absolute;
-                        left: 0; top: 0;
-                        width: 100%;
-                        padding: 0; margin: 0;
-                    }
-                    [role="dialog"] { box-shadow: none !important; border: none !important; }
-                }
-            `}} />
-        </div >
+        </div>
     );
 }

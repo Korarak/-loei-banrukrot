@@ -17,6 +17,10 @@ const paymentSchema = new mongoose.Schema({
         required: true,
         min: 0
     },
+    amountReceived: {
+        type: Number,
+        min: 0
+    },
     transactionDate: {
         type: Date,
         default: Date.now,

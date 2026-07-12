@@ -7,7 +7,7 @@ const { deductStock } = require('../utils/stockUtils');
 // @access  Private (staff/owner)
 exports.createPOSSale = async (req, res, next) => {
     try {
-        const { items, paymentMethod, customerId, storeId } = req.body;
+        const { items, paymentMethod, customerId, storeId, amountReceived } = req.body;
 
         // items = [{ variantId, quantity }, ...]
 
@@ -89,6 +89,7 @@ exports.createPOSSale = async (req, res, next) => {
             orderId: order._id,
             paymentMethod: paymentMethod || 'Cash',
             amountPaid: totalAmount,
+            amountReceived: amountReceived != null ? Number(amountReceived) : totalAmount,
             paidByCustomerId: customerId || null
         });
 

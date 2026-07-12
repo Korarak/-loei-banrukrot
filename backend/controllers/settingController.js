@@ -8,6 +8,7 @@ const PUBLIC_KEYS = [
     'store_name',
     'store_phone',
     'store_address',
+    'store_tax_id',
 ];
 
 // Sensitive keys: only owner can view (via admin API) or edit — never public
@@ -22,6 +23,7 @@ const DEFAULT_SETTINGS = [
     { key: 'store_name', value: 'บ้านรักรถ', description: 'ชื่อร้าน' },
     { key: 'store_phone', value: '', description: 'เบอร์โทรร้าน' },
     { key: 'store_address', value: '', description: 'ที่อยู่ร้าน' },
+    { key: 'store_tax_id', value: '', description: 'เลขประจำตัวผู้เสียภาษี (Tax ID)' },
     { key: 'payment_promptpay_id', value: '', description: 'เบอร์พร้อมเพย์ (PromptPay) สำหรับสร้าง QR Code' },
 ];
 
