@@ -8,12 +8,13 @@ import {
     ChevronRight, ChevronLeft,
     Search, Phone, MapPin, Facebook,
     ShoppingCart, CheckCircle, Truck, Headphones,
+    Wrench, QrCode,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardDescription, CardTitle } from '@/components/ui/card';
-import { motion, useInView } from 'framer-motion';
-import { useRef, useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { useRef, useState } from 'react';
 import { useCategories } from '@/hooks/useCategories';
 import { getImageUrl } from '@/lib/utils';
 import Image from 'next/image';
@@ -21,33 +22,6 @@ import ProductCard from '@/components/features/ProductCard';
 import { siteConfig } from '@/config/site';
 import { Skeleton } from '@/components/ui/skeleton';
 import api from '@/lib/api';
-
-// ─── Animated Counter ───────────────────────────────────────────────────────
-function useCounter(end: number, duration: number = 2000) {
-    const [count, setCount] = useState(0);
-    const ref = useRef<HTMLDivElement>(null);
-    const isInView = useInView(ref, { once: true, margin: '-100px' });
-    const hasStarted = useRef(false);
-
-    useEffect(() => {
-        if (end === 0) return; // wait for real data
-        if (!isInView) return;
-        if (hasStarted.current) return;
-        hasStarted.current = true;
-
-        const startTime = performance.now();
-        const animate = (currentTime: number) => {
-            const elapsed = currentTime - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3);
-            setCount(Math.floor(eased * end));
-            if (progress < 1) requestAnimationFrame(animate);
-        };
-        requestAnimationFrame(animate);
-    }, [isInView, end, duration]);
-
-    return { count, ref };
-}
 
 // ─── Animation Variants ──────────────────────────────────────────────────────
 const fadeInUp = {
@@ -104,29 +78,6 @@ export default function Home() {
         },
         staleTime: 5 * 60_000,
     });
-
-    const { data: publicStats } = useQuery({
-        queryKey: ['public-stats'],
-        queryFn: async () => {
-            const { data } = await api.get('/public-stats');
-            return data.data as { productCount: number; customerCount: number };
-        },
-        staleTime: 5 * 60 * 1000, // 5 min cache
-    });
-
-    // ── Counters (called at top level — not in a loop) ───────────────────────
-    const counter0 = useCounter(publicStats?.productCount ?? 0, 2000);
-    const counter1 = useCounter(publicStats?.customerCount ?? 0, 2000);
-    const counter2 = useCounter(2020, 1500);
-    const counter3 = useCounter(99, 2000);
-
-    const counters = [counter0, counter1, counter2, counter3];
-    const statDefs = [
-        { label: 'สินค้าพร้อมส่ง', suffix: '+', isYear: false },
-        { label: 'ลูกค้าไว้ใจ', suffix: '+', isYear: false },
-        { label: 'ปีที่เริ่มดำเนินการ', suffix: '', isYear: true },
-        { label: 'ความพึงพอใจ', suffix: '%', isYear: false },
-    ];
 
     // ── Scroll refs ──────────────────────────────────────────────────────────
     const catScrollRef = useRef<HTMLDivElement>(null);
@@ -215,23 +166,31 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* ── Stats ─────────────────────────────────────────────────────── */}
+            {/* ── Trust bar ─────────────────────────────────────────────────── */}
             <section className="container mx-auto px-4 -mt-14 relative z-10">
                 <motion.div
-                    className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6"
+                    className="bg-white rounded-[2rem] shadow-xl border border-gray-200 p-6 md:p-8 grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8"
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true, margin: '-50px' }}
                     variants={staggerContainer}
                 >
-                    {statDefs.map((stat, i) => (
-                        <motion.div key={i} ref={counters[i].ref} variants={scaleIn}
-                            className="bg-white rounded-2xl p-6 md:p-8 shadow-xl border border-gray-200 text-center card-hover-lift"
+                    {[
+                        { icon: ShieldCheck, title: 'สินค้าแท้ 100%', desc: 'คัดคุณภาพทุกชิ้นก่อนส่ง', gradient: 'from-primary to-red-900' },
+                        { icon: Truck, title: 'ส่งไวทั่วไทย', desc: 'แพ็คแน่น ส่งใน 1-2 วันทำการ', gradient: 'from-accent to-amber-600' },
+                        { icon: Wrench, title: 'ปรึกษาช่างโอ๊ต', desc: 'ผู้เชี่ยวชาญ Vespa ตัวจริง', gradient: 'from-blue-500 to-indigo-600' },
+                        { icon: QrCode, title: 'จ่ายสะดวก ปลอดภัย', desc: 'ชำระผ่าน QR PromptPay', gradient: 'from-emerald-500 to-green-600' },
+                    ].map((item, i) => (
+                        <motion.div key={i} variants={scaleIn}
+                            className="flex flex-col md:flex-row items-center md:items-start gap-3 md:gap-4 text-center md:text-left"
                         >
-                            <div className="text-3xl md:text-4xl font-black text-primary mb-1">
-                                {stat.isYear ? counters[i].count : counters[i].count.toLocaleString()}{stat.suffix}
+                            <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shrink-0 shadow-lg`}>
+                                <item.icon className="h-6 w-6 text-white" />
                             </div>
-                            <div className="text-sm font-bold text-gray-600 uppercase tracking-wider">{stat.label}</div>
+                            <div>
+                                <div className="font-black text-gray-900 text-sm md:text-base">{item.title}</div>
+                                <div className="text-xs md:text-sm text-gray-500 mt-0.5 leading-snug">{item.desc}</div>
+                            </div>
                         </motion.div>
                     ))}
                 </motion.div>
