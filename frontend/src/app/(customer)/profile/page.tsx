@@ -38,6 +38,7 @@ export default function ProfilePage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const customer = useAuthStore((state) => state.customer);
+    const isHydrated = useAuthStore((state) => state.isHydrated);
     const { data: addresses, isLoading } = useCustomerAddresses(customer?._id);
     const addAddress = useAddAddress();
     const updateAddress = useUpdateAddress();
@@ -159,13 +160,15 @@ export default function ProfilePage() {
         }
     };
 
+    // Wait for zustand hydration before redirecting — a hard reload would
+    // otherwise bounce logged-in users to the login page
     useEffect(() => {
-        if (!customer) {
+        if (isHydrated && !customer) {
             router.push('/customer-login');
         }
-    }, [customer, router]);
+    }, [isHydrated, customer, router]);
 
-    if (!customer) {
+    if (!isHydrated || !customer) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
                 <div className="flex flex-col items-center gap-3 text-gray-600" role="status" aria-live="polite">

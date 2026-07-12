@@ -21,17 +21,20 @@ export default function OrdersPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const customer = useAuthStore((state) => state.customer);
+    const isHydrated = useAuthStore((state) => state.isHydrated);
     const { data: orders, isLoading } = useCustomerOrders();
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'pending');
 
+    // Wait for zustand hydration before redirecting — a hard reload would
+    // otherwise bounce logged-in users to the login page
     useEffect(() => {
-        if (!customer) {
+        if (isHydrated && !customer) {
             router.push('/customer-login?redirect=/orders');
         }
-    }, [customer, router]);
+    }, [isHydrated, customer, router]);
 
-    if (!customer) return null;
+    if (!isHydrated || !customer) return null;
 
     if (isLoading) {
         return (

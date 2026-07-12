@@ -28,6 +28,7 @@ import { getOrderStatusLabel, getOrderStatusColor } from '@/lib/order-status';
 export default function OrderDetailPage({ params }: { params: Promise<{ id: string }> }) {
     const router = useRouter();
     const customer = useAuthStore((state) => state.customer);
+    const isHydrated = useAuthStore((state) => state.isHydrated);
     const { id } = use(params);
     const { data: order, isLoading } = useOrder(id);
     const { data: bankSettings } = usePublicSettings();
@@ -65,13 +66,15 @@ export default function OrderDetailPage({ params }: { params: Promise<{ id: stri
         }
     };
 
+    // Wait for zustand hydration before redirecting — a hard reload would
+    // otherwise bounce logged-in users to the login page
     useEffect(() => {
-        if (!customer) {
+        if (isHydrated && !customer) {
             router.push('/customer-login?redirect=/orders/' + id);
         }
-    }, [customer, router, id]);
+    }, [isHydrated, customer, router, id]);
 
-    if (!customer) return null;
+    if (!isHydrated || !customer) return null;
 
     if (isLoading) {
         return (

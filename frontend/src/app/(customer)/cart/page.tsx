@@ -33,6 +33,7 @@ import { getImageUrl } from '@/lib/utils';
 export default function CartPage() {
     const router = useRouter();
     const customer = useAuthStore((state) => state.customer);
+    const isHydrated = useAuthStore((state) => state.isHydrated);
     const { data: cart, isLoading } = useCart();
     const { data: shippingMethods, isLoading: isLoadingShipping } = useShippingMethods();
     const { data: addresses, isLoading: isLoadingAddresses } = useCustomerAddresses(customer?._id);
@@ -96,15 +97,16 @@ export default function CartPage() {
     const setSelectedShippingId = setManualShippingId;
     const setSelectedAddressId = setManualAddressId;
 
-    // Redirect to login if not authenticated
+    // Redirect to login if not authenticated — wait for zustand hydration first,
+    // otherwise a hard reload bounces logged-in users to the login page
     useEffect(() => {
-        if (!customer) {
+        if (isHydrated && !customer) {
             router.push('/customer-login?redirect=/cart');
         }
-    }, [customer, router]);
+    }, [isHydrated, customer, router]);
 
-    if (!customer) {
-        return null; // Will redirect
+    if (!isHydrated || !customer) {
+        return null; // Hydrating, or will redirect
     }
 
     if (isLoading) {
