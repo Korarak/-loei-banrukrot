@@ -31,17 +31,12 @@ import { toast } from 'sonner';
 import { Label } from '@/components/ui/label';
 import { COURIERS, getCourier, getTrackingUrl } from '@/lib/couriers';
 
+import { getOrderStatusLabel, getOrderStatusColor, ORDER_STATUS_LABELS, ORDER_STATUS_ORDER } from '@/lib/order-status';
+
 const statusOptions = [
     { value: 'all', label: 'ทั้งหมด' },
-    { value: 'pending', label: 'กำลังดำเนินการ' },
-    { value: 'processing', label: 'กำลังเตรียมสินค้า' },
-    { value: 'shipped', label: 'เริ่มการจัดส่ง' },
-    { value: 'delivered', label: 'จัดส่งสำเร็จ' },
-    { value: 'completed', label: 'เสร็จรับเงิน' },
-    { value: 'cancelled', label: 'ยกเลิก' },
+    ...ORDER_STATUS_ORDER.map(value => ({ value, label: ORDER_STATUS_LABELS[value] })),
 ];
-
-import { getOrderStatusLabel, getOrderStatusColor } from '@/lib/order-status';
 
 export default function AdminOrdersPage() {
     const [searchQuery, setSearchQuery] = useState('');

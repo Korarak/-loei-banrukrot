@@ -25,7 +25,7 @@ import {
 import Image from 'next/image';
 import { getImageUrl } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
-import { getOrderStatusLabel } from '@/lib/order-status';
+import { getOrderStatusLabel, ORDER_STATUS_HEX } from '@/lib/order-status';
 import {
     Table,
     TableBody,
@@ -37,17 +37,6 @@ import {
 import { motion, Variants } from 'framer-motion';
 import { useMemo, useState } from 'react';
 import { useAuthStore } from '@/stores/useAuthStore';
-
-const STATUS_COLORS: Record<string, string> = {
-    pending: '#F59E0B',
-    confirmed: '#3B82F6',
-    processing: '#8B5CF6',
-    shipped: '#10B981',
-    delivered: '#059669',
-    cancelled: '#EF4444',
-    completed: '#059669',
-};
-
 
 const CATEGORY_COLORS = ['#10B981', '#3B82F6', '#EC4899', '#F59E0B', '#8B5CF6', '#EF4444', '#06B6D4', '#84CC16'];
 
@@ -179,7 +168,7 @@ export default function AdminDashboard() {
     const pieData = useMemo(() => data?.orderStatusDistribution?.map((s: any) => ({
         name: getOrderStatusLabel(s._id),
         value: s.count,
-        color: STATUS_COLORS[s._id] || '#8884d8'
+        color: ORDER_STATUS_HEX[s._id] || '#8884d8'
     })) || [], [data?.orderStatusDistribution]);
 
     const dailyChartData = useMemo(() => (dailyData || []).map((d: any) => ({
@@ -599,7 +588,7 @@ export default function AdminDashboard() {
                                                 <TableCell>
                                                     <Badge
                                                         className="rounded-lg font-bold shadow-none border-0 text-xs"
-                                                        style={{ backgroundColor: `${STATUS_COLORS[order.orderStatus]}20`, color: STATUS_COLORS[order.orderStatus] }}
+                                                        style={{ backgroundColor: `${ORDER_STATUS_HEX[order.orderStatus]}20`, color: ORDER_STATUS_HEX[order.orderStatus] }}
                                                     >
                                                         {getOrderStatusLabel(order.orderStatus)}
                                                     </Badge>
