@@ -110,7 +110,7 @@ export default function CartPage() {
     if (isLoading) {
         return (
             <div className="flex justify-center items-center min-h-[400px]" role="status">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-foreground"></div>
                 <span className="sr-only">กำลังโหลดรถเข็น...</span>
             </div>
         );
@@ -164,11 +164,11 @@ export default function CartPage() {
         return (
             <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
                 <h1 className="text-3xl font-bold mb-8">รถเข็นของคุณ</h1>
-                <Card className="p-12 text-center border-0 shadow-lg rounded-[2.5rem]">
+                <Card className="p-12 text-center">
                     <ShoppingBag className="h-16 w-16 mx-auto text-gray-400 mb-4" />
                     <h2 className="text-xl font-semibold mb-2">รถเข็นของคุณว่างเปล่า</h2>
                     <p className="text-gray-600 mb-6">เลือกชมสินค้าเพื่อเพิ่มใส่รถเข็นเลย!</p>
-                    <Button asChild className="bg-gray-900 hover:bg-black rounded-full px-8">
+                    <Button asChild className="px-8 mx-auto">
                         <Link href="/products">เลือกชมสินค้า</Link>
                     </Button>
                 </Card>
@@ -179,15 +179,15 @@ export default function CartPage() {
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-                <h1 className="text-3xl md:text-4xl font-black tracking-tight text-gray-900">
-                    รถเข็น<span className="gradient-text-primary">สินค้า</span>
-                </h1>
+                <div>
+                    <h1 className="font-display uppercase text-3xl md:text-4xl text-gray-900 leading-none mb-1">Cart</h1>
+                    <p className="text-sm font-bold text-muted-foreground">รถเข็นสินค้า</p>
+                </div>
                 <AlertDialog>
                     <AlertDialogTrigger asChild>
                         <Button
                             variant="outline"
                             disabled={clearCart.isPending}
-                            className="rounded-full border-2 hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all font-bold"
                         >
                             <Trash2 className="h-4 w-4 mr-2" />
                             ล้างรถเข็น
@@ -234,7 +234,7 @@ export default function CartPage() {
                         const overStock = exceedsStock(item);
                         const checked = isSelectable(item) && !deselectedIds.has(item._id);
                         return (
-                        <Card key={item._id} className={`p-4 md:p-6 border-0 shadow-lg shadow-gray-100/50 rounded-[2rem] overflow-hidden group transition-all duration-300 border border-gray-50/50 ${oos ? 'opacity-60 bg-gray-50/80' : 'hover:shadow-xl'}`}>
+                        <Card key={item._id} className={`p-4 md:p-6 overflow-hidden group transition-colors duration-300 ${oos ? 'opacity-60 bg-gray-50/80' : 'hover:border-foreground'}`}>
                             <div className="flex gap-4">
                                 {/* Selection Checkbox */}
                                 <div className="flex items-center shrink-0">
@@ -251,7 +251,7 @@ export default function CartPage() {
                                 <div className="flex-1 flex flex-col sm:flex-row gap-6">
                                 {/* Product Image */}
                                 <Link href={`/products/${item.product._id}`} className="shrink-0 mx-auto sm:mx-0">
-                                    <div className={`relative h-32 w-32 md:h-40 md:w-40 rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 transition-transform duration-500 ${oos ? 'grayscale' : 'group-hover:scale-105'}`}>
+                                    <div className={`relative h-32 w-32 md:h-40 md:w-40 overflow-hidden bg-gray-50 border border-border transition-transform duration-500 ${oos ? 'grayscale' : 'group-hover:scale-105'}`}>
                                         {item.product.imageUrl ? (
                                             <Image
                                                 src={getImageUrl(item.product.imageUrl)}
@@ -267,7 +267,7 @@ export default function CartPage() {
                                         )}
                                         {oos && (
                                             <div className="absolute inset-0 flex items-center justify-center bg-white/50">
-                                                <span className="bg-gray-900/80 text-white text-xs font-black uppercase tracking-widest px-3 py-1.5 rounded-full">
+                                                <span className="bg-brand text-brand-foreground text-xs font-black uppercase tracking-widest px-3 py-1.5">
                                                     สินค้าหมด
                                                 </span>
                                             </div>
@@ -279,7 +279,7 @@ export default function CartPage() {
                                     <div className="space-y-2">
                                         <div className="flex justify-between items-start gap-4">
                                             <Link href={`/products/${item.product._id}`} className="group/title">
-                                                <h3 className={`font-bold text-xl md:text-2xl transition-colors line-clamp-2 leading-tight ${oos ? 'text-gray-500' : 'text-gray-900 group-hover/title:text-primary'}`}>
+                                                <h3 className={`font-bold text-xl md:text-2xl transition-colors line-clamp-2 leading-tight ${oos ? 'text-gray-500' : 'text-gray-900 group-hover/title:underline underline-offset-4'}`}>
                                                     {item.product.productName}
                                                 </h3>
                                             </Link>
@@ -289,33 +289,33 @@ export default function CartPage() {
                                                 onClick={() => handleRemoveItem(item._id)}
                                                 disabled={removeCartItem.isPending}
                                                 aria-label={`ลบ ${item.product.productName} ออกจากรถเข็น`}
-                                                className="text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-full shrink-0 h-10 w-10"
+                                                className="text-gray-500 hover:text-brand hover:bg-accent shrink-0 h-10 w-10"
                                             >
                                                 <Trash2 className="h-5 w-5" />
                                             </Button>
                                         </div>
                                         <div className="flex items-center gap-3 flex-wrap">
-                                            <span className="text-xs font-bold uppercase tracking-widest text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full">
+                                            <span className="text-xs font-bold uppercase tracking-widest text-gray-600 bg-gray-100 px-2 py-0.5">
                                                 SKU: {item.variant.sku}
                                             </span>
                                             {item.product.shippingSize === 'large' && (
-                                                <span className="text-[10px] font-bold uppercase tracking-widest text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">
+                                                <span className="text-[10px] font-bold uppercase tracking-widest text-gray-700 px-2 py-0.5 border border-border">
                                                     สินค้าขนาดใหญ่
                                                 </span>
                                             )}
                                             {oos && (
-                                                <span className="text-[10px] font-bold uppercase tracking-widest text-red-600 bg-red-50 px-2 py-0.5 rounded-full border border-red-100">
+                                                <span className="text-[10px] font-bold uppercase tracking-widest text-brand px-2 py-0.5 border border-brand">
                                                     สินค้าหมด — ไม่ถูกรวมในยอดชำระ
                                                 </span>
                                             )}
                                         </div>
                                         {overStock && (
-                                            <div className="flex items-center gap-2 flex-wrap text-xs font-bold text-red-600 bg-red-50 border border-red-100 rounded-xl px-3 py-2">
+                                            <div className="flex items-center gap-2 flex-wrap text-xs font-bold text-brand border border-brand px-3 py-2">
                                                 <span>สินค้าคงเหลือเพียง {stock} ชิ้น กรุณาลดจำนวนก่อนสั่งซื้อ</span>
                                                 <button
                                                     onClick={() => updateCartItem.mutate({ itemId: item._id, quantity: stock })}
                                                     disabled={updateCartItem.isPending}
-                                                    className="underline underline-offset-2 hover:text-red-700 disabled:opacity-50"
+                                                    className="underline underline-offset-2 hover:text-black disabled:opacity-50"
                                                 >
                                                     ปรับเป็น {stock} ชิ้น
                                                 </button>
@@ -326,13 +326,13 @@ export default function CartPage() {
                                     <div className="flex flex-wrap items-end justify-between mt-6 gap-4">
                                         <div className="flex flex-col">
                                             <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">ราคาต่อชิ้น</span>
-                                            <p className={`text-xl font-black ${oos ? 'text-gray-400' : 'text-primary'}`}>
+                                            <p className={`text-xl font-black font-mitr ${oos ? 'text-gray-400' : 'text-brand'}`}>
                                                 ฿{item.variant.price.toLocaleString()}
                                             </p>
                                         </div>
 
                                         <div className="flex flex-col items-center gap-1">
-                                            <div className="flex items-center gap-6 bg-gray-50 p-1.5 rounded-2xl border border-gray-100">
+                                            <div className="flex items-center gap-6 border border-border p-1">
                                                 {/* Quantity Controls */}
                                                 <div className="flex items-center gap-1">
                                                     <Button
@@ -341,7 +341,7 @@ export default function CartPage() {
                                                         onClick={() => handleUpdateQuantity(item._id, item.quantity, -1, stock)}
                                                         disabled={updateCartItem.isPending || oos}
                                                         aria-label="ลดจำนวน"
-                                                        className="h-10 w-10 rounded-xl hover:bg-white hover:shadow-sm"
+                                                        className="h-10 w-10"
                                                     >
                                                         <Minus className="h-4 w-4" />
                                                     </Button>
@@ -352,14 +352,14 @@ export default function CartPage() {
                                                         onClick={() => handleUpdateQuantity(item._id, item.quantity, 1, stock)}
                                                         disabled={updateCartItem.isPending || oos || item.quantity >= stock}
                                                         aria-label="เพิ่มจำนวน"
-                                                        className="h-10 w-10 rounded-xl hover:bg-white hover:shadow-sm disabled:opacity-30"
+                                                        className="h-10 w-10 disabled:opacity-30"
                                                     >
                                                         <Plus className="h-4 w-4" />
                                                     </Button>
                                                 </div>
                                             </div>
                                             {!oos && Number.isFinite(stock) && item.quantity >= stock && (
-                                                <span className="text-[10px] font-bold text-orange-600">สูงสุด {stock} ชิ้น</span>
+                                                <span className="text-[10px] font-bold text-brand">สูงสุด {stock} ชิ้น</span>
                                             )}
                                         </div>
 
@@ -380,8 +380,9 @@ export default function CartPage() {
 
                 {/* Order Summary */}
                 <div className="lg:col-span-1">
-                    <Card className="p-8 sticky top-24 border-0 shadow-2xl shadow-gray-200/50 rounded-[2.5rem] bg-white border border-gray-100">
-                        <h2 className="text-2xl font-black mb-8 text-gray-900 tracking-tight uppercase">สรุป<span className="text-primary">คำสั่งซื้อ</span></h2>
+                    <Card className="p-8 sticky top-24 bg-white">
+                        <h2 className="font-display uppercase text-2xl mb-1 text-gray-900 leading-none">Summary</h2>
+                        <p className="text-sm font-bold text-muted-foreground mb-8">สรุปคำสั่งซื้อ</p>
 
                         <div className="space-y-6 mb-8">
                             <div className="flex justify-between items-center text-lg">
@@ -390,26 +391,26 @@ export default function CartPage() {
                             </div>
                             <div className="flex justify-between items-center text-lg">
                                 <span className="text-gray-600 font-medium">ค่าจัดส่ง</span>
-                                <span className="font-bold text-primary">
+                                <span className="font-bold text-gray-900">
                                     {!selectedMethod ? '—' : shippingCost > 0 ? `฿${shippingCost.toLocaleString()}` : 'ฟรี'}
                                 </span>
                             </div>
 
                             {/* Address Selection */}
-                            <div className="pt-6 border-t border-gray-100">
+                            <div className="pt-6 border-t border-border">
                                 <p className="font-black text-xs uppercase tracking-[0.2em] text-gray-500 mb-4 flex items-center gap-2">
-                                    <MapPin className="h-4 w-4 text-primary" />
+                                    <MapPin className="h-4 w-4 text-foreground" />
                                     ที่อยู่จัดส่ง
                                 </p>
                                 {addresses && addresses.length > 0 ? (
                                     <RadioGroup value={selectedAddressId} onValueChange={setSelectedAddressId} className="space-y-3">
                                         {addresses.map((address) => (
-                                            <div key={address._id} className={`flex items-start space-x-3 border-2 rounded-2xl p-4 cursor-pointer transition-all ${selectedAddressId === address._id ? 'border-primary bg-primary/5 shadow-md shadow-primary/10' : 'border-gray-50 hover:border-gray-200 bg-gray-50/50'}`}>
+                                            <div key={address._id} className={`flex items-start space-x-3 border p-4 cursor-pointer transition-colors ${selectedAddressId === address._id ? 'border-foreground bg-white' : 'border-border hover:border-foreground bg-gray-50/50'}`}>
                                                 <RadioGroupItem value={address._id} id={address._id} className="mt-1" />
                                                 <Label htmlFor={address._id} className="cursor-pointer flex-1 flex flex-col gap-1.5">
                                                     <div className="flex items-center justify-between">
                                                         <span className="font-bold text-gray-900 text-base leading-none">{address.recipientName}</span>
-                                                        {address.isDefault && <span className="text-[10px] font-black tracking-wider text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">ที่อยู่หลัก</span>}
+                                                        {address.isDefault && <span className="text-[10px] font-black tracking-wider text-gray-900 px-2 py-0.5 border border-border">ที่อยู่หลัก</span>}
                                                     </div>
                                                     <span className="text-xs text-gray-600 font-medium leading-relaxed">
                                                         {address.streetAddress}, {address.subDistrict}, {address.district}, {address.province} {address.zipCode}
@@ -419,9 +420,9 @@ export default function CartPage() {
                                         ))}
                                     </RadioGroup>
                                 ) : (
-                                    <div className="text-center py-6 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
+                                    <div className="text-center py-6 bg-gray-50 border-2 border-dashed border-border">
                                         <p className="text-sm text-gray-600 font-bold mb-3 uppercase tracking-wider">ยังไม่มีที่อยู่จัดส่ง</p>
-                                        <Button variant="outline" size="sm" asChild className="rounded-full border-2 font-bold hover:bg-primary hover:text-white hover:border-primary transition-all">
+                                        <Button variant="outline" size="sm" asChild>
                                             <Link href="/profile">เพิ่มที่อยู่ใหม่</Link>
                                         </Button>
                                     </div>
@@ -431,13 +432,13 @@ export default function CartPage() {
                             {/* Shipping Selection */}
                             <div className="pt-4">
                                 <p className="font-black text-xs uppercase tracking-[0.2em] text-gray-500 mb-4 flex items-center gap-2">
-                                    <Truck className="h-4 w-4 text-primary" />
+                                    <Truck className="h-4 w-4 text-foreground" />
                                     วิธีการจัดส่ง
                                 </p>
                                 {availableShippingMethods.length > 0 ? (
                                     <RadioGroup value={selectedShippingId} onValueChange={setSelectedShippingId} className="space-y-3">
                                         {availableShippingMethods.map((method) => (
-                                            <div key={method._id} className={`flex items-center justify-between space-x-3 border-2 rounded-2xl p-4 cursor-pointer transition-all ${selectedShippingId === method._id ? 'border-primary bg-primary/5 shadow-md shadow-primary/10' : 'border-gray-50 hover:border-gray-200 bg-gray-50/50'}`}>
+                                            <div key={method._id} className={`flex items-center justify-between space-x-3 border p-4 cursor-pointer transition-colors ${selectedShippingId === method._id ? 'border-foreground bg-white' : 'border-border hover:border-foreground bg-gray-50/50'}`}>
                                                 <div className="flex items-center space-x-3">
                                                     <RadioGroupItem value={method._id} id={method._id} />
                                                     <Label htmlFor={method._id} className="cursor-pointer">
@@ -450,8 +451,8 @@ export default function CartPage() {
                                         ))}
                                     </RadioGroup>
                                 ) : (
-                                    <div className="p-4 bg-red-50 rounded-2xl border border-red-100">
-                                        <p className="text-xs text-red-600 font-bold">ไม่มีวิธีการจัดส่งสำหรับขนาดพัสดุนี้</p>
+                                    <div className="p-4 border border-brand">
+                                        <p className="text-xs text-brand font-bold">ไม่มีวิธีการจัดส่งสำหรับขนาดพัสดุนี้</p>
                                     </div>
                                 )}
                             </div>
@@ -460,11 +461,11 @@ export default function CartPage() {
                         {/* Payment Method Selection */}
                         <div className="pt-4 pb-8">
                             <p className="font-black text-xs uppercase tracking-[0.2em] text-gray-500 mb-4 flex items-center gap-2">
-                                <CreditCard className="h-4 w-4 text-primary" />
+                                <CreditCard className="h-4 w-4 text-foreground" />
                                 ช่องทางชำระเงิน
                             </p>
                             <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod} className="grid grid-cols-1 gap-3">
-                                <div className={`flex flex-col items-center justify-center space-y-2 border-2 rounded-2xl p-4 cursor-pointer transition-all ${paymentMethod === 'Transfer' ? 'border-primary bg-primary/5 shadow-md shadow-primary/10' : 'border-gray-50 hover:border-gray-200 bg-gray-50/50'}`}>
+                                <div className={`flex flex-col items-center justify-center space-y-2 border p-4 cursor-pointer transition-colors ${paymentMethod === 'Transfer' ? 'border-foreground bg-white' : 'border-border hover:border-foreground bg-gray-50/50'}`}>
                                     <RadioGroupItem value="Transfer" id="transfer" className="sr-only" />
                                     <Label htmlFor="transfer" className="cursor-pointer text-center">
                                         <span className="font-bold text-gray-900 block text-sm">โอนเงิน</span>
@@ -474,15 +475,15 @@ export default function CartPage() {
                             </RadioGroup>
                         </div>
 
-                        <div className="border-t-2 border-gray-50 pt-6 mb-8 flex justify-between items-center">
+                        <div className="border-t border-border pt-6 mb-8 flex justify-between items-center">
                             <span className="text-xl font-black text-gray-600 uppercase tracking-tighter">ยอดรวม</span>
-                            <span className="text-4xl font-black text-primary tracking-tighter drop-shadow-sm">
+                            <span className="text-4xl font-black text-brand tracking-tighter font-mitr">
                                 ฿{totalAmount.toLocaleString()}
                             </span>
                         </div>
 
                         <Button
-                            className="w-full bg-gray-900 text-white hover:bg-black rounded-3xl h-16 text-xl font-black uppercase tracking-widest shadow-xl shadow-gray-200 transition-all hover:-translate-y-1 active:scale-95 disabled:opacity-50"
+                            className="w-full h-14 text-lg uppercase tracking-widest"
                             size="lg"
                             onClick={handleCheckout}
                             disabled={createOrder.isPending || !selectedAddressId || !selectedShippingId || selectedItems.length === 0}
@@ -491,14 +492,14 @@ export default function CartPage() {
                         </Button>
 
                         {selectedItems.length === 0 && (
-                            <p className="mt-3 text-center text-xs font-bold text-red-500">
+                            <p className="mt-3 text-center text-xs font-bold text-brand">
                                 กรุณาเลือกสินค้าอย่างน้อย 1 รายการ
                             </p>
                         )}
 
                         <Button
                             variant="ghost"
-                            className="w-full mt-4 text-gray-600 hover:text-primary font-bold transition-colors"
+                            className="w-full mt-4 text-gray-600 hover:text-gray-900 font-bold transition-colors"
                             asChild
                         >
                             <Link href="/products">← เลือกสินค้าต่อ</Link>

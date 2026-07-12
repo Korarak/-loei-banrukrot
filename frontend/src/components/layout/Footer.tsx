@@ -6,22 +6,17 @@ import { siteConfig } from '@/config/site';
 
 export default function Footer() {
     return (
-        <footer className="bg-zinc-950 text-white mt-0 pt-12 md:pt-20 pb-12 rounded-t-[3rem] relative overflow-hidden">
-            {/* Animated Background */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(175,29,53,0.12),rgba(255,255,255,0))]" />
-            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-gray-800 to-transparent"></div>
-
-
+        <footer className="bg-zinc-950 text-white mt-0 pt-12 md:pt-20 pb-12 relative overflow-hidden border-t border-white/10">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 lg:gap-20 mb-16">
                     {/* Brand Section */}
                     <div className="col-span-1 md:col-span-1">
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="h-10 px-2.5 bg-gradient-to-br from-primary to-red-900 rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
-                                <span className="font-black text-[10px] italic tracking-tight leading-none">VESPA</span>
+                            <div className="h-10 px-2.5 border border-white/25 flex items-center justify-center text-white">
+                                <span className="font-black text-[10px] tracking-tight leading-none">VESPA</span>
                             </div>
                             <div>
-                                <h2 className="text-xl font-black italic tracking-tighter text-white">{siteConfig.brand.name}</h2>
+                                <h2 className="text-xl font-black tracking-tighter text-white">{siteConfig.brand.name}</h2>
                                 <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold">OAT ENGINEERING</p>
                             </div>
                         </div>
@@ -29,13 +24,13 @@ export default function Footer() {
                             {siteConfig.brand.description}
                         </p>
                         <div className="flex flex-wrap gap-4">
-                            <Link href={siteConfig.footerData.contact.social.facebook} aria-label="Facebook" className="h-10 w-10 bg-gray-900 rounded-full flex items-center justify-center text-gray-400 hover:bg-[#1877F2] hover:text-white transition-all transform hover:-translate-y-1">
+                            <Link href={siteConfig.footerData.contact.social.facebook} aria-label="Facebook" className="h-10 w-10 border border-white/15 flex items-center justify-center text-gray-400 hover:bg-white hover:text-black transition-colors">
                                 <Facebook className="h-5 w-5" />
                             </Link>
-                            <Link href={siteConfig.footerData.contact.social.tiktok} aria-label="TikTok" className="h-10 w-10 bg-gray-900 rounded-full flex items-center justify-center text-gray-400 hover:bg-[#000000] hover:text-white transition-all transform hover:-translate-y-1">
+                            <Link href={siteConfig.footerData.contact.social.tiktok} aria-label="TikTok" className="h-10 w-10 border border-white/15 flex items-center justify-center text-gray-400 hover:bg-white hover:text-black transition-colors">
                                 <span className="font-bold text-xs" aria-hidden="true">TT</span>
                             </Link>
-                            <Link href={siteConfig.footerData.contact.social.youtube} aria-label="YouTube" className="h-10 w-10 bg-gray-900 rounded-full flex items-center justify-center text-gray-400 hover:bg-[#FF0000] hover:text-white transition-all transform hover:-translate-y-1">
+                            <Link href={siteConfig.footerData.contact.social.youtube} aria-label="YouTube" className="h-10 w-10 border border-white/15 flex items-center justify-center text-gray-400 hover:bg-white hover:text-black transition-colors">
                                 <span className="font-bold text-xs" aria-hidden="true">YT</span>
                             </Link>
                         </div>
@@ -49,7 +44,7 @@ export default function Footer() {
                             <ul className="space-y-4 text-sm font-medium">
                                 {siteConfig.footerData.explore.map((item, index) => (
                                     <li key={index}>
-                                        <Link href={item.href} className="text-gray-400 hover:text-primary transition-colors block">
+                                        <Link href={item.href} className="text-gray-400 hover:text-white transition-colors block">
                                             {item.label}
                                         </Link>
                                     </li>
@@ -64,12 +59,12 @@ export default function Footer() {
                                 {siteConfig.footerData.contact.items.map((item: any, index: number) => (
                                     <li key={index} className="flex items-start gap-3">
                                         <div className="mt-1 min-w-[16px]">
-                                            {item.type === 'phone' && <Phone className="h-4 w-4 text-primary" />}
-                                            {item.type === 'address' && <MapPin className="h-4 w-4 text-primary" />}
-                                            {item.type === 'maps' && <ChevronRight className="h-4 w-4 text-primary" />}
+                                            {item.type === 'phone' && <Phone className="h-4 w-4 text-brand" />}
+                                            {item.type === 'address' && <MapPin className="h-4 w-4 text-brand" />}
+                                            {item.type === 'maps' && <ChevronRight className="h-4 w-4 text-brand" />}
                                         </div>
                                         {item.href ? (
-                                            <Link href={item.href} target="_blank" className="hover:text-primary transition-colors">
+                                            <Link href={item.href} target="_blank" className="hover:text-white transition-colors">
                                                 {item.label ? `${item.label}: ` : ''}{item.value}
                                             </Link>
                                         ) : (
@@ -86,7 +81,7 @@ export default function Footer() {
                             <p className="text-xs text-gray-400 mb-4">อะไหล่และอุปกรณ์ตกแต่ง Vespa คัดสรรโดยช่างผู้เชี่ยวชาญ</p>
                             <Link
                                 href="/products"
-                                className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-2.5 rounded-full text-sm font-bold hover:brightness-110 transition-all"
+                                className="inline-flex items-center gap-2 bg-white text-zinc-950 px-5 py-2.5 text-sm font-bold uppercase tracking-wide hover:bg-gray-200 transition-colors"
                             >
                                 ดูสินค้าทั้งหมด
                                 <ChevronRight className="h-4 w-4" />
@@ -103,7 +98,7 @@ export default function Footer() {
                                 {item.label}
                             </Link>
                         ))}
-                        <Link href="/login" className="text-gray-500 hover:text-primary text-[10px] font-bold transition-colors uppercase tracking-widest border border-gray-700 rounded px-1.5 py-0.5 ml-4">
+                        <Link href="/login" className="text-gray-500 hover:text-white text-[10px] font-bold transition-colors uppercase tracking-widest border border-gray-700 px-1.5 py-0.5 ml-4">
                             Admin
                         </Link>
                     </div>

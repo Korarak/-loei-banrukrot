@@ -38,7 +38,7 @@ export default function RelatedProducts({ categoryId, currentProductId, category
         <section className="mt-20 border-t border-gray-100 pt-16" aria-label="สินค้าที่คุณอาจสนใจ">
             <div className="flex items-end justify-between mb-8">
                 <div>
-                    <h2 className="text-xs font-black uppercase tracking-[0.3em] text-primary mb-3">You May Also Like</h2>
+                    <h2 className="text-xs font-black uppercase tracking-[0.3em] text-muted-foreground mb-3">You May Also Like</h2>
                     <h3 className="text-2xl md:text-3xl font-bold text-gray-900 font-mitr">
                         สินค้าที่คุณอาจสนใจ
                         {categoryName && (

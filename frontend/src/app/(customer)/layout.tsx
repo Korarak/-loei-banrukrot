@@ -121,13 +121,13 @@ export default function CustomerLayout({
             {/* Scroll Progress Bar */}
             <div className="fixed top-0 left-0 right-0 z-[60] h-[3px] bg-transparent">
                 <div
-                    className="h-full scroll-progress-bar rounded-r-full"
+                    className="h-full scroll-progress-bar"
                     style={{ width: `${scrollProgress}%` }}
                 />
             </div>
-            {/* Desktop Header - GLASSMORPHISM POWER */}
+            {/* Desktop Header */}
             <motion.nav
-                className={`fixed top-[3px] left-0 right-0 z-50 transition-all duration-300 hidden md:block ${scrolled ? 'glass-card border-b border-gray-200/30 shadow-lg py-2' : 'bg-transparent py-4'
+                className={`fixed top-[3px] left-0 right-0 z-50 bg-white transition-all duration-300 hidden md:block ${scrolled ? 'border-b border-border py-2' : 'py-4'
                     }`}
                 initial={{ y: -100 }}
                 animate={{ y: 0 }}
@@ -137,14 +137,14 @@ export default function CustomerLayout({
                     <div className="flex justify-between h-16 items-center">
                         {/* Logo */}
                         <Link href="/" className="flex items-center gap-3 group">
-                            <div className="h-10 px-2.5 rounded-xl bg-gradient-to-br from-primary to-red-900 flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3 shrink-0">
-                                <span className="text-white font-black text-[10px] italic tracking-tight leading-none">VESPA</span>
+                            <div className="h-10 px-2.5 bg-foreground flex items-center justify-center shrink-0">
+                                <span className="text-white font-black text-[10px] tracking-tight leading-none">VESPA</span>
                             </div>
                             <div>
-                                <div className="text-xl font-black tracking-tighter italic text-gray-900 group-hover:text-primary transition-colors">
+                                <div className="text-xl font-black tracking-tighter text-gray-900">
                                     {siteConfig.brand.name}
                                 </div>
-                                <div className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] group-hover:text-primary/70 transition-colors">
+                                <div className="text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">
                                     {siteConfig.brand.englishName}
                                 </div>
                             </div>
@@ -155,16 +155,16 @@ export default function CustomerLayout({
                             <div className="flex items-center space-x-1">
                                 <Link
                                     href="/products"
-                                    className="relative px-4 py-2 text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors group overflow-hidden rounded-full hover:bg-gray-50"
+                                    className="relative px-1 py-2 text-sm font-bold text-gray-600 hover:text-gray-900 transition-colors after:absolute after:left-0 after:right-0 after:bottom-0 after:h-0.5 after:bg-foreground after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:origin-left"
                                 >
-                                    <span className="relative z-10">สินค้าทั้งหมด</span>
+                                    สินค้าทั้งหมด
                                 </Link>
                             </div>
 
                             <div className="flex items-center gap-2 pl-6 border-l-2 border-gray-100 min-w-[200px] justify-end">
                                 <Link
                                     href="/cart"
-                                    className="relative p-3 text-gray-500 hover:text-gray-900 transition-colors group hover:bg-gray-50 rounded-full"
+                                    className="relative p-3 text-gray-600 hover:text-gray-900 transition-colors group hover:bg-accent"
                                 >
                                     <motion.div
                                         animate={bump ? { scale: [1, 1.2, 1], rotate: [0, -15, 15, -15, 15, 0] } : {}}
@@ -180,7 +180,7 @@ export default function CustomerLayout({
                                                 animate={{ scale: 1 }}
                                                 exit={{ scale: 0 }}
                                                 key={totalItems}
-                                                className="absolute top-1 right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-[10px] rounded-full min-w-[1.2rem] h-[1.2rem] px-1 flex items-center justify-center font-bold shadow-md border-2 border-white"
+                                                className="absolute top-1 right-1 bg-brand text-brand-foreground text-[10px] min-w-[1.2rem] h-[1.2rem] px-1 flex items-center justify-center font-bold border-2 border-white"
                                             >
                                                 {totalItems > 99 ? '99+' : totalItems}
                                             </motion.span>
@@ -192,8 +192,8 @@ export default function CustomerLayout({
                                     customer ? (
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" className="gap-3 pl-1 pr-4 rounded-full hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-all h-11">
-                                                    <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-gray-100 to-gray-200 flex items-center justify-center overflow-hidden ring-2 ring-white shadow-sm relative">
+                                                <Button variant="ghost" className="gap-3 pl-1 pr-4 border border-transparent hover:border-border transition-all h-11">
+                                                    <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden ring-1 ring-border relative">
                                                         {customer.profilePicture ? (
                                                             <Image
                                                                 src={getImageUrl(customer.profilePicture)}
@@ -213,27 +213,27 @@ export default function CustomerLayout({
                                                     <Menu className="h-4 w-4 text-gray-500" />
                                                 </Button>
                                             </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 shadow-2xl border-gray-100 bg-white z-[60]">
+                                            <DropdownMenuContent align="end" className="w-56 rounded-none p-2 shadow-lg border-border bg-white z-[60]">
                                                 <DropdownMenuLabel className="px-2 py-1.5 text-xs font-black text-gray-500 uppercase tracking-wider">บัญชีของฉัน</DropdownMenuLabel>
                                                 <DropdownMenuSeparator className="bg-gray-100" />
-                                                <DropdownMenuItem asChild className="rounded-xl cursor-pointer focus:bg-primary/10 focus:text-primary">
+                                                <DropdownMenuItem asChild className="rounded-none cursor-pointer focus:bg-accent focus:text-foreground">
                                                     <Link href="/profile" className="w-full flex items-center gap-2 font-bold text-gray-600">
                                                         <User className="h-4 w-4" />
                                                         <span>โปรไฟล์</span>
                                                     </Link>
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem asChild className="rounded-xl cursor-pointer focus:bg-primary/10 focus:text-primary">
+                                                <DropdownMenuItem asChild className="rounded-none cursor-pointer focus:bg-accent focus:text-foreground">
                                                     <Link href="/wishlist" className="w-full flex items-center gap-2 font-bold text-gray-600">
                                                         <Heart className="h-4 w-4" />
                                                         <span>รายการโปรด</span>
                                                     </Link>
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem asChild className="rounded-xl cursor-pointer focus:bg-primary/10 focus:text-primary">
+                                                <DropdownMenuItem asChild className="rounded-none cursor-pointer focus:bg-accent focus:text-foreground">
                                                     <Link href="/orders" className="w-full flex items-center gap-2 font-bold text-gray-600">
                                                         <Package className="h-4 w-4" />
                                                         <span>คำสั่งซื้อ</span>
                                                         {pendingSlipCount > 0 && (
-                                                            <span className="ml-auto bg-orange-500 text-white text-[10px] font-black rounded-full min-w-[1.1rem] h-[1.1rem] px-1 flex items-center justify-center">
+                                                            <span className="ml-auto bg-brand text-brand-foreground text-[10px] font-black min-w-[1.1rem] h-[1.1rem] px-1 flex items-center justify-center">
                                                                 {pendingSlipCount}
                                                             </span>
                                                         )}
@@ -242,7 +242,7 @@ export default function CustomerLayout({
                                                 <DropdownMenuSeparator className="bg-gray-100" />
                                                 <DropdownMenuItem
                                                     onSelect={(e) => { e.preventDefault(); setShowLogoutConfirm(true); }}
-                                                    className="text-red-500 rounded-xl cursor-pointer focus:text-red-600 focus:bg-red-50 font-bold"
+                                                    className="text-brand rounded-none cursor-pointer focus:text-brand focus:bg-brand/5 font-bold"
                                                 >
                                                     <LogOut className="h-4 w-4 mr-2" />
                                                     ออกจากระบบ
@@ -251,16 +251,16 @@ export default function CustomerLayout({
                                         </DropdownMenu>
                                     ) : (
                                         <div className="flex items-center gap-2">
-                                            <Button variant="ghost" asChild className="text-gray-600 font-bold hover:text-accent hover:bg-accent/5 rounded-full px-5 transition-colors">
+                                            <Button variant="ghost" asChild className="text-gray-600 font-bold px-5">
                                                 <Link href="/customer-login">เข้าสู่ระบบ</Link>
                                             </Button>
-                                            <Button asChild className="bg-gradient-to-r from-accent to-amber-600 text-accent-foreground hover:brightness-110 rounded-full shadow-lg shadow-accent/20 px-6 font-bold transition-all hover:-translate-y-0.5 border-none">
+                                            <Button asChild className="px-6 font-bold">
                                                 <Link href="/customer-register">สมัครสมาชิก</Link>
                                             </Button>
                                         </div>
                                     )
                                 ) : (
-                                    <div className="w-24 h-10 bg-gray-100 animate-pulse rounded-full"></div>
+                                    <div className="w-24 h-10 bg-gray-100 animate-pulse"></div>
                                 )}
                             </div>
                         </div>
@@ -269,20 +269,20 @@ export default function CustomerLayout({
             </motion.nav>
 
             {/* Mobile Header */}
-            <nav className={`sticky top-0 z-50 transition-all duration-300 md:hidden ${scrolled ? 'glass-card border-b border-gray-100 shadow-sm' : 'bg-white'}`}>
+            <nav className={`sticky top-0 z-50 bg-white transition-all duration-300 md:hidden ${scrolled ? 'border-b border-border' : ''}`}>
                 <div className="px-4 h-16 flex items-center justify-between">
                     <Link href="/" className="flex items-center gap-2">
-                        <div className="h-8 px-2 rounded-lg bg-gradient-to-br from-primary to-red-900 flex items-center justify-center shadow-md shrink-0">
-                            <span className="text-white font-black text-[9px] italic tracking-tight leading-none">VESPA</span>
+                        <div className="h-8 px-2 bg-foreground flex items-center justify-center shrink-0">
+                            <span className="text-white font-black text-[9px] tracking-tight leading-none">VESPA</span>
                         </div>
-                        <span className="font-black italic text-lg text-gray-900 tracking-tight">{siteConfig.brand.name}</span>
+                        <span className="font-black text-lg text-gray-900 tracking-tight">{siteConfig.brand.name}</span>
                     </Link>
 
                     <div className="flex items-center gap-2">
                         <Link href="/cart" className="relative p-2">
                             <ShoppingCart className="h-6 w-6 text-gray-800" />
                             {mounted && isHydrated && totalItems > 0 && (
-                                <span className="absolute top-0 right-0 bg-red-500 text-white text-[10px] rounded-full h-4 w-4 flex items-center justify-center border border-white">
+                                <span className="absolute top-0 right-0 bg-brand text-brand-foreground text-[10px] h-4 w-4 flex items-center justify-center border border-white">
                                     {totalItems}
                                 </span>
                             )}
@@ -299,14 +299,14 @@ export default function CustomerLayout({
                                     </Link>
                                     <button
                                         onClick={() => setShowLogoutConfirm(true)}
-                                        className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors active:scale-95"
+                                        className="p-2 text-gray-500 hover:text-brand hover:bg-accent transition-colors"
                                         aria-label="ออกจากระบบ"
                                     >
                                         <LogOut className="h-5 w-5" />
                                     </button>
                                 </div>
                             ) : (
-                                <Button size="sm" asChild className="rounded-full h-8 px-4 text-xs font-bold bg-gradient-to-r from-accent to-amber-600 text-accent-foreground border-none shadow-md shadow-accent/20">
+                                <Button size="sm" asChild className="h-8 px-4 text-xs font-bold">
                                     <Link href="/customer-login">เข้าสู่ระบบ</Link>
                                 </Button>
                             )
@@ -330,9 +330,9 @@ export default function CustomerLayout({
                         >
                             <Link
                                 href="/orders?tab=pending"
-                                className="flex items-center justify-center gap-2 bg-orange-500 text-white text-sm font-bold px-4 py-2.5 hover:bg-orange-600 transition-colors"
+                                className="flex items-center justify-center gap-2 bg-foreground text-white text-sm font-bold px-4 py-2.5 border-l-4 border-brand hover:bg-black transition-colors"
                             >
-                                <AlertCircle className="h-4 w-4 shrink-0" />
+                                <AlertCircle className="h-4 w-4 shrink-0 text-brand" />
                                 <span>
                                     มี {pendingSlipCount} คำสั่งซื้อรอการแนบสลิปโอนเงิน — แตะที่นี่เพื่อดำเนินการ
                                 </span>

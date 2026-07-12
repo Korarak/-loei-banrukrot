@@ -30,7 +30,7 @@ export default function WishlistPage() {
                 <p className="text-gray-600 max-w-sm mb-8">
                     เลือกชมสินค้าและบันทึกรายการที่คุณสนใจได้เลย
                 </p>
-                <Button asChild size="lg" className="rounded-full bg-primary hover:bg-primary/90">
+                <Button asChild size="lg">
                     <Link href="/products">เลือกซื้อสินค้า</Link>
                 </Button>
             </div>
@@ -41,8 +41,8 @@ export default function WishlistPage() {
         <div className="min-h-screen py-12">
             <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">รายการโปรดของฉัน</h1>
-                    <p className="text-gray-600 mt-1">รายการที่บันทึกไว้ทั้งหมด {items.length} รายการ</p>
+                    <h1 className="font-display uppercase text-3xl text-gray-900 leading-none mb-1">Wishlist</h1>
+                    <p className="text-gray-600 mt-1">รายการโปรดของฉัน — บันทึกไว้ทั้งหมด {items.length} รายการ</p>
                 </div>
                 <AlertDialog>
                     <AlertDialogTrigger asChild>

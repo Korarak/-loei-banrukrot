@@ -164,27 +164,24 @@ export default function ProductsPage() {
 
     return (
         <div className="min-h-screen bg-background pb-20">
-            {/* Hero Section - POWERFUL DARK THEME */}
-            <div className="relative overflow-hidden bg-zinc-950 mb-12 rounded-b-[3rem] shadow-2xl">
-                {/* Abstract Background — static gradient (no blur animation to save GPU) */}
-                <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 70% 60% at 80% -10%, rgba(16,185,129,0.15) 0%, transparent 60%), radial-gradient(ellipse 50% 50% at 10% 110%, rgba(236,72,153,0.12) 0%, transparent 60%)' }} />
-
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 relative z-10">
+            {/* Hero Section — flat ink band */}
+            <div className="relative overflow-hidden bg-zinc-950 mb-12 -mx-4 sm:-mx-6 lg:-mx-8">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 relative z-10">
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, ease: "easeOut" }}
                         className="max-w-4xl"
                     >
-                        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-zinc-800 border border-zinc-700 text-accent font-bold text-sm uppercase tracking-widest mb-8">
-                            <ShoppingBag className="h-4 w-4" />
+                        <div className="inline-flex items-center gap-2 text-gray-400 font-bold text-[11px] md:text-xs uppercase tracking-[0.25em] mb-6">
+                            <ShoppingBag className="h-3.5 w-3.5" />
                             Official Store
                         </div>
-                        <h1 className="text-6xl md:text-8xl font-black tracking-tighter text-white mb-8 leading-[0.9]">
-                            SPEED. <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-red-900">STYLE.</span> <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-amber-600 italic">PERFORMANCE.</span>
+                        <h1 className="font-display uppercase text-6xl md:text-8xl tracking-tight text-white mb-8 leading-[0.9]">
+                            Speed. Style. <br />
+                            <span className="text-brand">Performance.</span>
                         </h1>
-                        <p className="text-xl text-gray-400 leading-relaxed max-w-2xl font-medium border-l-4 border-primary pl-6">
+                        <p className="text-lg md:text-xl text-gray-400 leading-relaxed max-w-2xl font-medium border-l-4 border-brand pl-6">
                             ค้นพบอะไหล่และอุปกรณ์ตกแต่งระดับพรีเมียม ที่คัดสรรมาเพื่อเวสป้าคันโปรดของคุณโดยเฉพาะ
                         </p>
                     </motion.div>
@@ -198,16 +195,16 @@ export default function ProductsPage() {
                         {/* Search */}
                         <div className="space-y-4">
                             <h3 className="text-sm font-black uppercase tracking-widest text-gray-900 flex items-center gap-2">
-                                <Search className="h-4 w-4 text-primary" /> ค้นหา
+                                <Search className="h-4 w-4" /> ค้นหา
                             </h3>
                             <form onSubmit={handleSearch} className="relative group">
                                 <Input
                                     placeholder="ค้นหาสินค้า..."
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
-                                    className="pl-4 bg-gray-50 border-2 border-transparent focus:border-primary focus:bg-white rounded-xl h-12 transition-all font-medium"
+                                    className="pl-4 h-12 font-medium"
                                 />
-                                <button type="submit" aria-label="ค้นหาสินค้า" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-primary transition-colors">
+                                <button type="submit" aria-label="ค้นหาสินค้า" className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-900 transition-colors">
                                     <Search className="h-4 w-4" />
                                 </button>
                             </form>
@@ -215,29 +212,27 @@ export default function ProductsPage() {
 
                         {/* Categories */}
                         <div className="space-y-4">
-                            <h3 className="text-sm font-black uppercase tracking-widest text-gray-900 border-b border-gray-100 pb-2">หมวดหมู่</h3>
-                            <div className="space-y-2">
+                            <h3 className="text-sm font-black uppercase tracking-widest text-gray-900 border-b border-border pb-2">หมวดหมู่</h3>
+                            <div>
                                 <button
                                     onClick={() => handleCategoryChange(null)}
-                                    className={`w-full text-left px-4 py-3 rounded-xl text-sm transition-all duration-200 flex items-center justify-between font-bold group ${!categoryParam
-                                        ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30'
-                                        : 'bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                    className={`w-full text-left px-4 py-3 text-sm transition-colors duration-200 flex items-center justify-between border-b border-border border-l-2 ${!categoryParam
+                                        ? 'border-l-foreground text-gray-900 font-black'
+                                        : 'border-l-transparent text-gray-600 font-bold hover:text-gray-900 hover:bg-accent'
                                         }`}
                                 >
                                     สินค้าทั้งหมด
-                                    {!categoryParam && <div className="h-2 w-2 rounded-full bg-white" />}
                                 </button>
                                 {categories?.map((cat) => (
                                     <button
                                         key={cat._id}
                                         onClick={() => handleCategoryChange(cat.slug)}
-                                        className={`w-full text-left px-4 py-3 rounded-xl text-sm transition-all duration-200 flex items-center justify-between font-bold group ${categoryParam === cat.slug
-                                            ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/30'
-                                            : 'bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                        className={`w-full text-left px-4 py-3 text-sm transition-colors duration-200 flex items-center justify-between border-b border-border border-l-2 ${categoryParam === cat.slug
+                                            ? 'border-l-foreground text-gray-900 font-black'
+                                            : 'border-l-transparent text-gray-600 font-bold hover:text-gray-900 hover:bg-accent'
                                             }`}
                                     >
                                         {cat.name.toUpperCase()}
-                                        {categoryParam === cat.slug && <div className="h-2 w-2 rounded-full bg-white" />}
                                     </button>
                                 ))}
                             </div>
@@ -245,7 +240,7 @@ export default function ProductsPage() {
 
                         {/* Price Range */}
                         <div className="space-y-6">
-                            <h3 className="text-sm font-black uppercase tracking-widest text-gray-900 border-b border-gray-100 pb-2">ช่วงราคา</h3>
+                            <h3 className="text-sm font-black uppercase tracking-widest text-gray-900 border-b border-border pb-2">ช่วงราคา</h3>
                             <div className="px-2">
                                 <Slider
                                     defaultValue={[0, 20000]}
@@ -256,7 +251,7 @@ export default function ProductsPage() {
                                     className="my-6"
                                 />
                             </div>
-                            <div className="flex items-center justify-between text-sm font-bold text-gray-700 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                            <div className="flex items-center justify-between text-sm font-bold text-gray-700 bg-gray-50 p-3 border border-border">
                                 <span>฿{priceRange[0].toLocaleString()}</span>
                                 <span className="text-gray-300">–</span>
                                 <span>฿{priceRange[1].toLocaleString()}</span>
@@ -265,15 +260,15 @@ export default function ProductsPage() {
 
                         {/* Brands */}
                         <div className="space-y-4">
-                            <h3 className="text-sm font-black uppercase tracking-widest text-gray-900 border-b border-gray-100 pb-2">แบรนด์</h3>
+                            <h3 className="text-sm font-black uppercase tracking-widest text-gray-900 border-b border-border pb-2">แบรนด์</h3>
                             <div className="flex flex-wrap gap-2">
                                 {availableBrands.map((brand) => (
                                     <button
                                         key={brand}
                                         onClick={() => handleBrandToggle(brand)}
-                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide border-2 transition-all ${selectedBrands.includes(brand)
-                                            ? 'bg-gray-900 text-white border-gray-900'
-                                            : 'bg-white text-gray-600 border-gray-200 hover:border-gray-900 hover:text-gray-900'
+                                        className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wide border transition-colors ${selectedBrands.includes(brand)
+                                            ? 'bg-foreground text-white border-foreground'
+                                            : 'bg-white text-gray-600 border-border hover:border-foreground hover:text-gray-900'
                                             }`}
                                     >
                                         {brand}
@@ -285,7 +280,7 @@ export default function ProductsPage() {
                         <Button
                             variant="outline"
                             onClick={clearFilters}
-                            className="w-full h-12 border-2 border-gray-200 text-gray-600 hover:text-red-500 hover:border-red-200 hover:bg-red-50 rounded-xl font-bold uppercase tracking-wider"
+                            className="w-full h-12 uppercase tracking-wider"
                         >
                             ล้างตัวกรอง
                         </Button>
@@ -293,59 +288,56 @@ export default function ProductsPage() {
                 </aside>
 
                 {/* Mobile Filter Toggle */}
-                <div className="lg:hidden w-full mb-6 sticky top-20 z-20 bg-white p-4 rounded-2xl border border-gray-100 shadow-lg flex gap-3">
+                <div className="lg:hidden w-full mb-6 sticky top-20 z-20 bg-white p-4 border border-border flex gap-3">
                     <form onSubmit={handleSearch} className="flex-1">
                         <Input
                             placeholder="ค้นหาสินค้า..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="bg-white border-gray-200 rounded-xl"
                         />
                     </form>
                     <Sheet>
                         <SheetTrigger asChild>
-                            <Button aria-label="เปิดตัวกรองสินค้า" className="bg-zinc-900 text-white rounded-xl hover:bg-black transition-colors shadow-md">
+                            <Button aria-label="เปิดตัวกรองสินค้า">
                                 <Filter className="h-4 w-4" />
                             </Button>
                         </SheetTrigger>
-                        <SheetContent side="bottom" className="rounded-t-[2.5rem] h-[85vh] overflow-y-auto bg-white border-t-0 p-0 shadow-2xl z-[70]">
+                        <SheetContent side="bottom" className="rounded-none h-[85vh] overflow-y-auto bg-white p-0 z-[70]">
                             {/* Header - Fixed with better spacing */}
-                            <div className="sticky top-0 bg-white/90 backdrop-blur-xl z-20 px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+                            <div className="sticky top-0 bg-white z-20 px-6 py-5 border-b border-border flex items-center justify-between">
                                 <SheetHeader className="p-0 text-left">
                                     <SheetTitle className="text-lg font-black flex items-center gap-2 text-gray-900">
-                                        <Filter className="h-4 w-4 text-primary" /> ตัวกรองสินค้า
+                                        <Filter className="h-4 w-4" /> ตัวกรองสินค้า
                                     </SheetTitle>
                                 </SheetHeader>
-                                <SheetClose aria-label="ปิดตัวกรอง" className="h-9 w-9 flex items-center justify-center rounded-full bg-gray-50 text-gray-500 hover:bg-gray-200 transition-colors border border-gray-100">
+                                <SheetClose aria-label="ปิดตัวกรอง" className="h-9 w-9 flex items-center justify-center bg-gray-50 text-gray-500 hover:bg-gray-200 transition-colors border border-border">
                                     <X className="h-4 w-4" />
                                 </SheetClose>
                             </div>
                             <div className="px-6 py-8 space-y-10 pb-32">
                                 {/* Categories */}
                                 <div className="space-y-5">
-                                    <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-500 border-b border-gray-50 pb-3">หมวดหมู่สินค้า</h3>
+                                    <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-500 border-b border-border pb-3">หมวดหมู่สินค้า</h3>
                                     <div className="grid grid-cols-2 gap-2.5">
                                         <button
                                             onClick={() => handleCategoryChange(null)}
-                                            className={`text-center px-4 py-3 rounded-2xl text-[13px] transition-all duration-300 flex items-center justify-between font-bold group border-2 ${!categoryParam
-                                                ? 'bg-gray-900 border-gray-900 text-white shadow-lg'
-                                                : 'bg-white border-gray-50 text-gray-600 hover:bg-gray-50'
+                                            className={`text-center px-4 py-3 text-[13px] transition-colors duration-200 flex items-center justify-center font-bold border ${!categoryParam
+                                                ? 'bg-foreground border-foreground text-white'
+                                                : 'bg-white border-border text-gray-600 hover:border-foreground'
                                                 }`}
                                         >
                                             ทั้งหมด
-                                            {!categoryParam && <div className="h-1.5 w-1.5 rounded-full bg-primary" />}
                                         </button>
                                         {categories?.map((cat) => (
                                             <button
                                                 key={cat._id}
                                                 onClick={() => handleCategoryChange(cat.slug)}
-                                                className={`text-left px-4 py-3 rounded-2xl text-[13px] transition-all duration-300 flex items-center justify-between font-bold group border-2 ${categoryParam === cat.slug
-                                                    ? 'bg-gray-900 border-gray-900 text-white shadow-lg'
-                                                    : 'bg-white border-gray-50 text-gray-600 hover:bg-gray-50'
+                                                className={`text-left px-4 py-3 text-[13px] transition-colors duration-200 flex items-center justify-between font-bold border ${categoryParam === cat.slug
+                                                    ? 'bg-foreground border-foreground text-white'
+                                                    : 'bg-white border-border text-gray-600 hover:border-foreground'
                                                     }`}
                                             >
                                                 {cat.name}
-                                                {categoryParam === cat.slug && <div className="h-1.5 w-1.5 rounded-full bg-primary" />}
                                             </button>
                                         ))}
                                     </div>
@@ -354,7 +346,7 @@ export default function ProductsPage() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                     {/* Price Range */}
                                     <div className="space-y-6">
-                                        <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-500 border-b border-gray-50 pb-3">ช่วงราคา</h3>
+                                        <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-500 border-b border-border pb-3">ช่วงราคา</h3>
                                         <div className="px-3">
                                             <Slider
                                                 defaultValue={[0, 20000]}
@@ -365,7 +357,7 @@ export default function ProductsPage() {
                                                 className="my-8"
                                             />
                                         </div>
-                                        <div className="flex items-center justify-between text-base font-black text-gray-900 bg-gray-50 p-5 rounded-2xl border-2 border-dashed border-gray-100">
+                                        <div className="flex items-center justify-between text-base font-black text-gray-900 bg-gray-50 p-5 border border-border">
                                             <div className="flex flex-col gap-0.5">
                                                 <span className="text-[10px] text-gray-500 uppercase tracking-widest">เริ่มต้น</span>
                                                 <span className="text-gray-900">฿{priceRange[0].toLocaleString()}</span>
@@ -380,15 +372,15 @@ export default function ProductsPage() {
 
                                     {/* Brands */}
                                     <div className="space-y-5">
-                                        <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-500 border-b border-gray-50 pb-3">แบรนด์สินค้า</h3>
+                                        <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-gray-500 border-b border-border pb-3">แบรนด์สินค้า</h3>
                                         <div className="flex flex-wrap gap-2.5">
                                             {availableBrands.map((brand) => (
                                                 <button
                                                     key={brand}
                                                     onClick={() => handleBrandToggle(brand)}
-                                                    className={`px-5 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-wider border-2 transition-all ${selectedBrands.includes(brand)
-                                                        ? 'bg-gray-900 text-white border-gray-900 shadow-xl'
-                                                        : 'bg-white text-gray-600 border-gray-50 hover:border-gray-900 hover:text-gray-900'
+                                                    className={`px-5 py-2.5 text-[11px] font-black uppercase tracking-wider border transition-colors ${selectedBrands.includes(brand)
+                                                        ? 'bg-foreground text-white border-foreground'
+                                                        : 'bg-white text-gray-600 border-border hover:border-foreground hover:text-gray-900'
                                                         }`}
                                                 >
                                                     {brand}
@@ -402,15 +394,15 @@ export default function ProductsPage() {
                             {/* Sticky Footer for Mobile Buttons - raised above BottomNav (h-16) */}
                             <div className="fixed bottom-16 md:bottom-0 inset-x-0 p-6 bg-gradient-to-t from-white via-white to-transparent pointer-events-none z-30">
                                 <div className="max-w-md mx-auto flex gap-3 pointer-events-auto">
-                                    <Button 
-                                        variant="outline" 
-                                        onClick={clearFilters} 
-                                        className="flex-1 h-12 rounded-2xl font-black text-[13px] uppercase tracking-[0.1em] text-gray-600 border-2 border-gray-50 bg-white hover:bg-red-50 hover:text-red-500 hover:border-red-100 transition-all shadow-lg"
+                                    <Button
+                                        variant="outline"
+                                        onClick={clearFilters}
+                                        className="flex-1 h-12 text-[13px] uppercase tracking-[0.1em] bg-white"
                                     >
                                         ล้างข้อมูล
                                     </Button>
                                     <SheetClose asChild>
-                                        <Button className="flex-[2] h-12 rounded-2xl font-black text-[13px] uppercase tracking-[0.2em] bg-gray-900 text-white hover:bg-black shadow-2xl transition-all active:scale-95">
+                                        <Button className="flex-[2] h-12 text-[13px] uppercase tracking-[0.2em]">
                                             ตกลง
                                         </Button>
                                     </SheetClose>
@@ -443,7 +435,7 @@ export default function ProductsPage() {
                     {isLoading ? (
                         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                             {[1, 2, 3, 4, 5, 6].map((i) => (
-                                <div key={i} className="aspect-[4/3] bg-gray-100 rounded-2xl animate-pulse" />
+                                <div key={i} className="aspect-[4/3] bg-gray-100 animate-pulse" />
                             ))}
                         </div>
                     ) : isError ? (
@@ -452,7 +444,7 @@ export default function ProductsPage() {
                             <p className="text-gray-600 font-medium">ไม่สามารถโหลดรายการสินค้าได้ กรุณาลองใหม่อีกครั้ง</p>
                             <Button
                                 onClick={() => refetch()}
-                                className="rounded-full bg-gray-900 hover:bg-black text-white font-bold px-8"
+                                className="px-8"
                             >
                                 ลองใหม่
                             </Button>
@@ -500,7 +492,6 @@ export default function ProductsPage() {
                             <Button
                                 variant="outline"
                                 onClick={clearFilters}
-                                className="rounded-full border-2 border-gray-200 font-bold hover:border-primary hover:text-primary transition-all"
                             >
                                 ล้างตัวกรองทั้งหมด
                             </Button>

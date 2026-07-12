@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Sarabun, Mitr } from "next/font/google";
+import { Sarabun, Mitr, Anton } from "next/font/google";
 import "./globals.css";
 import QueryProvider from "@/components/providers/QueryProvider";
 import { Toaster } from "@/components/ui/sonner";
@@ -16,6 +16,12 @@ const mitr = Mitr({
   weight: ["400", "500", "600", "700"],
 });
 
+const anton = Anton({
+  variable: "--font-display",
+  subsets: ["latin"],
+  weight: "400",
+});
+
 export const metadata: Metadata = {
   title: "บ้านรักรถเมืองเลย - ซ่อมเวสป้า & โรงกลึงโอ๊ต (Vespa Repair & Oat Engineering)",
   description: "ศูนย์รวมอะไหล่และบริการปรับแต่งซ่อมบำรุงรถจักรยานยนต์ Vespa ครบวงจร โดยช่างโอ๊ต (Oat Engineering) เมืองเลย",
@@ -27,9 +33,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="th">
       <body
-        className={`${sarabun.variable} ${mitr.variable} antialiased`}
+        className={`${sarabun.variable} ${mitr.variable} ${anton.variable} antialiased`}
       >
         <QueryProvider>
           {children}

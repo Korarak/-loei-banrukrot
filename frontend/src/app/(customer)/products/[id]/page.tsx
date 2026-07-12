@@ -46,7 +46,7 @@ export default function ProductDetailPage() {
         return (
             <div className="flex justify-center items-center h-[70vh]">
                 <div className="flex flex-col items-center gap-4">
-                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
+                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-foreground border-t-transparent"></div>
                     <p className="text-gray-600 animate-pulse font-medium">กำลังโหลดสินค้า...</p>
                 </div>
             </div>
@@ -61,7 +61,7 @@ export default function ProductDetailPage() {
                 </div>
                 <h2 className="text-3xl font-black text-gray-900 mb-2">ไม่พบสินค้า</h2>
                 <p className="text-gray-600 mb-8 max-w-md">สินค้าที่คุณค้นหาอาจถูกลบออกไปแล้ว หรืออยู่ระหว่างพักขาย</p>
-                <Button asChild size="lg" className="rounded-full font-bold px-8">
+                <Button asChild size="lg" className="px-8">
                     <Link href="/products">กลับไปยังสินค้า</Link>
                 </Button>
             </div>
@@ -164,7 +164,7 @@ export default function ProductDetailPage() {
                 <div className="lg:sticky lg:top-8 space-y-6">
                     <motion.div
                         layoutId={`product-image-${product._id}`}
-                        className="aspect-square bg-white rounded-3xl overflow-hidden relative border border-gray-100 shadow-md group cursor-zoom-in"
+                        className="aspect-square bg-white overflow-hidden relative border border-border group cursor-zoom-in"
                         onClick={() => displayImage && setFullScreenImage(displayImage)}
                     >
                         {displayImage ? (
@@ -184,7 +184,7 @@ export default function ProductDetailPage() {
                             </div>
                         )}
                         {shippingSizeLabel && (
-                            <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-full text-[10px] font-black text-white uppercase tracking-wider">
+                            <div className="absolute top-4 right-4 bg-foreground px-3 py-1.5 text-[10px] font-black text-white uppercase tracking-wider">
                                 {shippingSizeLabel}
                             </div>
                         )}
@@ -193,8 +193,8 @@ export default function ProductDetailPage() {
                     {product.images && product.images.length > 0 && (
                         <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
                             {product.images.map((img: any, index: number) => (displayImage === img.imagePath) ? (
-                                <div key={index} className="w-20 h-20 md:w-24 md:h-24 flex-shrink-0 rounded-2xl border-2 border-gray-900 p-1 bg-white shadow-sm">
-                                    <div className="relative w-full h-full rounded-xl overflow-hidden">
+                                <div key={index} className="w-20 h-20 md:w-24 md:h-24 flex-shrink-0 border-2 border-foreground p-1 bg-white">
+                                    <div className="relative w-full h-full overflow-hidden">
                                         <Image
                                             src={getImageUrl(img.imagePath)}
                                             alt={`View ${index + 1}`}
@@ -210,9 +210,9 @@ export default function ProductDetailPage() {
                                 <button
                                     key={index}
                                     onClick={() => setActiveImage(img.imagePath)}
-                                    className="relative w-20 h-20 md:w-24 md:h-24 flex-shrink-0 rounded-2xl border border-gray-100 hover:border-gray-300 transition-all bg-white p-1"
+                                    className="relative w-20 h-20 md:w-24 md:h-24 flex-shrink-0 border border-border hover:border-foreground transition-colors bg-white p-1"
                                 >
-                                    <div className="relative w-full h-full rounded-xl overflow-hidden opacity-80 hover:opacity-100 transition-opacity">
+                                    <div className="relative w-full h-full overflow-hidden opacity-80 hover:opacity-100 transition-opacity">
                                         <Image
                                             src={getImageUrl(img.imagePath)}
                                             alt={`View ${index + 1}`}
@@ -235,7 +235,7 @@ export default function ProductDetailPage() {
                         <div className="flex items-center gap-2 mb-4">
                             {product.brand && (
                                 <>
-                                    <span className="text-xs font-black uppercase tracking-widest text-primary">
+                                    <span className="text-xs font-black uppercase tracking-widest text-gray-900">
                                         {product.brand}
                                     </span>
                                     <span className="w-1 h-1 rounded-full bg-gray-300" />
@@ -250,15 +250,15 @@ export default function ProductDetailPage() {
                         </h1>
 
                         <div className="flex items-baseline gap-4 mb-8">
-                            <div className="text-4xl md:text-5xl font-bold text-gray-900 font-mitr">
+                            <div className="text-4xl md:text-5xl font-bold text-brand font-mitr">
                                 ฿{selectedVariant?.price.toLocaleString()}
                             </div>
                             {selectedStock > 0 ? (
-                                <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-md uppercase tracking-wider">
+                                <span className="text-xs font-bold text-gray-900 border border-border px-2.5 py-1 uppercase tracking-wider">
                                     มีสินค้า {selectedStock} ชิ้น
                                 </span>
                             ) : (
-                                <span className="text-xs font-bold text-red-500 bg-red-50 px-2.5 py-1 rounded-md uppercase tracking-wider">
+                                <span className="text-xs font-bold text-brand-foreground bg-brand px-2.5 py-1 uppercase tracking-wider">
                                     สินค้าหมด
                                 </span>
                             )}
@@ -289,11 +289,11 @@ export default function ProductDetailPage() {
                                             }}
                                             disabled={oos}
                                             aria-pressed={selectedVariant?._id === variant._id}
-                                            className={`px-5 py-2.5 rounded-full border-2 text-xs font-bold transition-all ${selectedVariant?._id === variant._id
-                                                ? 'border-gray-900 bg-gray-900 text-white shadow-md'
+                                            className={`px-5 py-2.5 border text-xs font-bold transition-colors ${selectedVariant?._id === variant._id
+                                                ? 'border-foreground bg-foreground text-white'
                                                 : oos
-                                                    ? 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed line-through'
-                                                    : 'border-gray-100 bg-white text-gray-600 hover:border-gray-300'
+                                                    ? 'border-border bg-gray-50 text-gray-300 cursor-not-allowed line-through'
+                                                    : 'border-border bg-white text-gray-600 hover:border-foreground'
                                                 }`}
                                         >
                                             {getVariantLabel(variant)}
@@ -308,12 +308,12 @@ export default function ProductDetailPage() {
                     <div className="space-y-4 hidden lg:block">
                         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">จำนวน</h3>
                         <div className="flex items-center gap-4">
-                            <div className="flex items-center bg-gray-50 rounded-full p-1 border border-gray-100">
+                            <div className="flex items-center border border-border p-1">
                                 <Button
                                     variant="ghost"
                                     size="icon"
                                     aria-label="ลดจำนวน"
-                                    className="h-10 w-10 rounded-full hover:bg-white hover:shadow-sm"
+                                    className="h-10 w-10"
                                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                                 >
                                     <Minus className="h-4 w-4" />
@@ -323,7 +323,7 @@ export default function ProductDetailPage() {
                                     variant="ghost"
                                     size="icon"
                                     aria-label="เพิ่มจำนวน"
-                                    className="h-10 w-10 rounded-full hover:bg-white hover:shadow-sm disabled:opacity-30"
+                                    className="h-10 w-10 disabled:opacity-30"
                                     onClick={() => setQuantity(Math.min(selectedStock || 1, quantity + 1))}
                                     disabled={quantity >= (selectedStock || 1)}
                                 >
@@ -332,7 +332,7 @@ export default function ProductDetailPage() {
                             </div>
                             <Button
                                 size="lg"
-                                className="flex-1 h-14 rounded-full text-lg font-black bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 transition-colors active:scale-[0.98]"
+                                className="flex-1 h-14 text-base uppercase tracking-wide"
                                 onClick={handleAddToCart}
                                 disabled={!selectedVariant || selectedStock <= 0 || addToCart.isPending}
                             >
@@ -343,9 +343,9 @@ export default function ProductDetailPage() {
                     </div>
 
                     {/* Key Attributes */}
-                    <div className="mt-10 border border-gray-100 rounded-2xl overflow-hidden divide-y divide-gray-100">
+                    <div className="mt-10 border border-border overflow-hidden divide-y divide-border">
                         <div className="flex items-center gap-3 px-4 py-3 bg-gray-50/50">
-                            <Layers className="h-4 w-4 text-primary flex-shrink-0" />
+                            <Layers className="h-4 w-4 text-foreground flex-shrink-0" />
                             <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider flex-1">ขนาดพัสดุ</span>
                             <span className="text-xs font-black text-gray-900">{shippingSizeLabel}</span>
                         </div>
@@ -354,22 +354,22 @@ export default function ProductDetailPage() {
             </div>
 
             {/* FULL WIDTH DESCRIPTION SECTION */}
-            <div className="mt-20 border-t border-gray-100 pt-16">
+            <div className="mt-20 border-t border-border pt-16">
                 <div className="max-w-3xl mx-auto">
                     <div className="text-center mb-12">
-                        <h2 className="text-xs font-black uppercase tracking-[0.3em] text-primary mb-3">Product Details</h2>
+                        <h2 className="text-xs font-black uppercase tracking-[0.3em] text-muted-foreground mb-3">Product Details</h2>
                         <h3 className="text-3xl font-bold text-gray-900 font-mitr">รายละเอียดสินค้า</h3>
                     </div>
-                    
+
                     <div className="prose prose-lg prose-gray max-w-none">
-                        <div className="bg-white rounded-[2.5rem] p-8 md:p-12 border border-gray-100 shadow-sm relative overflow-hidden group">
+                        <div className="bg-white p-8 md:p-12 border border-border relative overflow-hidden group">
                             <div className="text-gray-600 leading-[1.8] font-medium text-base line-clamp-4 overflow-hidden">
                                 {product.description || 'ไม่มีข้อมูลรายละเอียดสำหรับสินค้านี้'}
                             </div>
                             <div className="mt-12 flex justify-center">
-                                <Button 
-                                    variant="outline" 
-                                    className="rounded-full px-8 font-black border-2 border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white transition-all uppercase tracking-widest text-xs h-12"
+                                <Button
+                                    variant="outline"
+                                    className="px-8 border-foreground text-gray-900 hover:bg-foreground hover:text-white transition-colors uppercase tracking-widest text-xs h-12"
                                     onClick={() => setIsDescriptionOpen(true)}
                                 >
                                     รายละเอียดทั้งหมด
@@ -389,14 +389,14 @@ export default function ProductDetailPage() {
             />
 
                 {/* Mobile Sticky Action Bar - REFINED */}
-                <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-xl border-t border-gray-100 lg:hidden z-40 safe-area-bottom shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
+                <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-border lg:hidden z-40 safe-area-bottom">
                     <div className="flex gap-3 max-w-lg mx-auto">
-                        <div className="flex items-center bg-gray-100 rounded-2xl px-1 py-1">
+                        <div className="flex items-center border border-border px-1 py-1">
                             <Button
                                 variant="ghost"
                                 size="icon"
                                 aria-label="ลดจำนวน"
-                                className="h-10 w-10 rounded-xl"
+                                className="h-10 w-10"
                                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
                             >
                                 <Minus className="h-4 w-4" />
@@ -406,7 +406,7 @@ export default function ProductDetailPage() {
                                 variant="ghost"
                                 size="icon"
                                 aria-label="เพิ่มจำนวน"
-                                className="h-10 w-10 rounded-xl disabled:opacity-30"
+                                className="h-10 w-10 disabled:opacity-30"
                                 onClick={() => setQuantity(Math.min(selectedStock || 1, quantity + 1))}
                                 disabled={quantity >= (selectedStock || 1)}
                             >
@@ -414,7 +414,7 @@ export default function ProductDetailPage() {
                             </Button>
                         </div>
                         <Button
-                            className="flex-1 h-12 rounded-2xl font-black text-sm shadow-lg bg-primary hover:bg-primary/90 text-white shadow-primary/20 active:scale-95 transition-transform"
+                            className="flex-1 h-12 text-sm uppercase tracking-wide"
                             onClick={handleAddToCart}
                             disabled={!selectedVariant || selectedStock <= 0 || addToCart.isPending}
                         >
@@ -437,7 +437,7 @@ export default function ProductDetailPage() {
                             aria-label="ดูรูปสินค้าแบบเต็มจอ"
                         >
                             <button
-                                className="absolute top-6 right-6 text-gray-900/50 hover:text-gray-900 transition-colors bg-gray-100 p-3 rounded-full z-10"
+                                className="absolute top-6 right-6 text-gray-900/50 hover:text-gray-900 transition-colors bg-gray-100 p-3 z-10"
                                 onClick={() => setFullScreenImage(null)}
                                 aria-label="ปิดรูปเต็มจอ"
                             >
@@ -472,12 +472,12 @@ export default function ProductDetailPage() {
                                 initial={{ opacity: 0, y: 24 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: 24 }}
-                                className="bg-white w-full max-w-4xl max-h-[90vh] rounded-[3rem] shadow-2xl overflow-hidden flex flex-col"
+                                className="bg-white w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col"
                                 onClick={(e) => e.stopPropagation()}
                             >
-                                <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                                <div className="p-6 border-b border-border flex items-center justify-between bg-gray-50/50">
                                     <h3 className="text-lg font-black uppercase tracking-widest text-gray-900">รายละเอียดสินค้า</h3>
-                                    <Button variant="ghost" size="icon" className="rounded-full" onClick={() => setIsDescriptionOpen(false)} aria-label="ปิดรายละเอียดสินค้า">
+                                    <Button variant="ghost" size="icon" onClick={() => setIsDescriptionOpen(false)} aria-label="ปิดรายละเอียดสินค้า">
                                         <X className="h-5 w-5" />
                                     </Button>
                                 </div>
@@ -486,8 +486,8 @@ export default function ProductDetailPage() {
                                         {product.description || 'ไม่มีข้อมูลรายละเอียดสำหรับสินค้านี้'}
                                     </div>
                                 </div>
-                                <div className="p-6 border-t border-gray-100 bg-gray-50/50 text-center">
-                                    <Button onClick={() => setIsDescriptionOpen(false)} className="rounded-full px-8 font-bold">
+                                <div className="p-6 border-t border-border bg-gray-50/50 text-center">
+                                    <Button onClick={() => setIsDescriptionOpen(false)} className="px-8">
                                         ปิดหน้าต่าง
                                     </Button>
                                 </div>

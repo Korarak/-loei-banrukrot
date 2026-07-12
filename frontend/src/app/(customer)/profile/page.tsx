@@ -169,7 +169,7 @@ export default function ProfilePage() {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
                 <div className="flex flex-col items-center gap-3 text-gray-600" role="status" aria-live="polite">
-                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
+                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-foreground" />
                     <span className="text-sm font-medium">กำลังโหลดข้อมูล...</span>
                 </div>
             </div>
@@ -334,7 +334,7 @@ export default function ProfilePage() {
                     <Link href="/orders">
                         <Card className="hover:shadow-lg transition-all cursor-pointer border-0 shadow-sm bg-white group">
                             <CardContent className="p-6 flex flex-col items-center justify-center text-center space-y-3">
-                                <div className="p-4 bg-blue-50 rounded-full text-blue-600 group-hover:scale-110 transition-transform">
+                                <div className="p-4 bg-secondary rounded-none text-foreground group-hover:scale-110 transition-transform">
                                     <Package className="h-6 w-6" />
                                 </div>
                                 <span className="font-bold text-gray-700">ประวัติคำสั่งซื้อ</span>
@@ -344,7 +344,7 @@ export default function ProfilePage() {
                     <Link href="/wishlist">
                         <Card className="hover:shadow-lg transition-all cursor-pointer border-0 shadow-sm bg-white group">
                             <CardContent className="p-6 flex flex-col items-center justify-center text-center space-y-3">
-                                <div className="p-4 bg-pink-50 rounded-full text-pink-600 group-hover:scale-110 transition-transform">
+                                <div className="p-4 bg-secondary rounded-none text-foreground group-hover:scale-110 transition-transform">
                                     <Heart className="h-6 w-6" />
                                 </div>
                                 <span className="font-bold text-gray-700">รายการที่ถูกใจ</span>
@@ -354,7 +354,7 @@ export default function ProfilePage() {
                     <Link href="/cart" className="col-span-2 md:col-span-1">
                         <Card className="hover:shadow-lg transition-all cursor-pointer border-0 shadow-sm bg-white group h-full">
                             <CardContent className="p-6 flex flex-col items-center justify-center text-center space-y-3">
-                                <div className="p-4 bg-orange-50 rounded-full text-orange-600 group-hover:scale-110 transition-transform">
+                                <div className="p-4 bg-secondary rounded-none text-foreground group-hover:scale-110 transition-transform">
                                     <ShoppingBag className="h-6 w-6" />
                                 </div>
                                 <span className="font-bold text-gray-700">ตะกร้าสินค้า</span>
@@ -370,7 +370,7 @@ export default function ProfilePage() {
                             <User className="h-5 w-5 text-primary" />
                             รายละเอียดข้อมูลส่วนตัว
                         </CardTitle>
-                        <Button variant="outline" size="sm" onClick={() => setIsEditingProfile(true)} className="rounded-xl">
+                        <Button variant="outline" size="sm" onClick={() => setIsEditingProfile(true)} className="rounded-none">
                             <Pencil className="h-4 w-4 mr-2" /> แก้ไขข้อมูล
                         </Button>
                     </CardHeader>
@@ -409,7 +409,7 @@ export default function ProfilePage() {
 
                 <Dialog open={isEditingProfile} onOpenChange={(open) => { setIsEditingProfile(open); if (!open) setPhoneError(''); }}>
                     <DialogContent
-                        className="sm:max-w-[500px] rounded-2xl"
+                        className="sm:max-w-[500px] rounded-none"
                         showCloseButton={!isCompletingProfile}
                         onInteractOutside={(e) => { if (isCompletingProfile) e.preventDefault(); }}
                         onEscapeKeyDown={(e) => { if (isCompletingProfile) e.preventDefault(); }}
@@ -433,7 +433,7 @@ export default function ProfilePage() {
                                             value={editForm.firstName}
                                             onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
                                             required
-                                            className="rounded-xl"
+                                            className="rounded-none"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -443,7 +443,7 @@ export default function ProfilePage() {
                                             value={editForm.lastName}
                                             onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
                                             required
-                                            className="rounded-xl"
+                                            className="rounded-none"
                                         />
                                     </div>
                                 </div>
@@ -453,7 +453,7 @@ export default function ProfilePage() {
                                         id="email"
                                         value={customer.email}
                                         disabled
-                                        className="bg-gray-100 text-gray-500 cursor-not-allowed rounded-xl"
+                                        className="bg-gray-100 text-gray-500 cursor-not-allowed rounded-none"
                                         autoComplete="username"
                                     />
                                     <p className="text-xs text-gray-600">อีเมลใช้สำหรับเข้าสู่ระบบ ไม่สามารถเปลี่ยนได้</p>
@@ -478,7 +478,7 @@ export default function ProfilePage() {
                                         required={isCompletingProfile}
                                         aria-invalid={!!phoneError}
                                         aria-describedby={phoneError ? 'phone-error' : undefined}
-                                        className="rounded-xl"
+                                        className="rounded-none"
                                     />
                                     {phoneError && (
                                         <p id="phone-error" role="alert" className="flex items-center gap-1 text-xs text-destructive">
@@ -499,7 +499,7 @@ export default function ProfilePage() {
                                         placeholder="เว้นว่างไว้หากไม่ต้องการเปลี่ยน"
                                         value={editForm.password}
                                         onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
-                                        className="rounded-xl"
+                                        className="rounded-none"
                                     />
                                 </div>
                                 {editForm.password && (
@@ -512,7 +512,7 @@ export default function ProfilePage() {
                                                 value={editForm.confirmPassword}
                                                 onChange={(e) => setEditForm({ ...editForm, confirmPassword: e.target.value })}
                                                 required
-                                                className="rounded-xl"
+                                                className="rounded-none"
                                             />
                                         </div>
                                         <div className="space-y-2">
@@ -524,7 +524,7 @@ export default function ProfilePage() {
                                                 value={editForm.currentPassword}
                                                 onChange={(e) => setEditForm({ ...editForm, currentPassword: e.target.value })}
                                                 required
-                                                className="rounded-xl"
+                                                className="rounded-none"
                                             />
                                         </div>
                                     </>
@@ -532,10 +532,10 @@ export default function ProfilePage() {
                             </div>
 
                             <DialogFooter>
-                                <Button type="button" variant="outline" onClick={() => { setIsEditingProfile(false); setPhoneError(''); }} className="rounded-xl">
+                                <Button type="button" variant="outline" onClick={() => { setIsEditingProfile(false); setPhoneError(''); }} className="rounded-none">
                                     {isCompletingProfile ? 'ข้ามไปก่อน' : 'ยกเลิก'}
                                 </Button>
-                                <Button type="submit" disabled={updateCustomer.isPending} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full">
+                                <Button type="submit" disabled={updateCustomer.isPending} className="bg-primary hover:bg-primary/85 text-primary-foreground">
                                     {updateCustomer.isPending ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}
                                 </Button>
                             </DialogFooter>
@@ -550,13 +550,13 @@ export default function ProfilePage() {
                             <MapPin className="h-5 w-5 text-primary" />
                             ที่อยู่จัดส่ง
                         </CardTitle>
-                        <Button onClick={() => setIsAdding(!isAdding)} variant="outline" size="sm" className="rounded-xl">
+                        <Button onClick={() => setIsAdding(!isAdding)} variant="outline" size="sm" className="rounded-none">
                             {isAdding ? 'ยกเลิก' : <><Plus className="h-4 w-4 mr-2" /> เพิ่มที่อยู่ใหม่</>}
                         </Button>
                     </CardHeader>
                     <CardContent className="pt-6">
                         {isAdding && (
-                            <form onSubmit={handleAddAddress} className="mb-8 p-4 sm:p-6 border rounded-2xl bg-gray-50 space-y-4">
+                            <form onSubmit={handleAddAddress} className="mb-8 p-4 sm:p-6 border rounded-none bg-gray-50 space-y-4">
                                 <h3 className="font-semibold mb-4 text-primary">เพิ่มที่อยู่ใหม่</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
@@ -566,7 +566,7 @@ export default function ProfilePage() {
                                             value={newAddress.recipientName}
                                             onChange={e => setNewAddress({ ...newAddress, recipientName: e.target.value })}
                                             required
-                                            className="bg-white rounded-xl"
+                                            className="bg-white rounded-none"
                                             placeholder="ชื่อ-นามสกุล"
                                         />
                                     </div>
@@ -579,7 +579,7 @@ export default function ProfilePage() {
                                             value={newAddress.phone}
                                             onChange={e => setNewAddress({ ...newAddress, phone: e.target.value })}
                                             required
-                                            className="bg-white rounded-xl"
+                                            className="bg-white rounded-none"
                                         />
                                     </div>
                                     <div className="md:col-span-2 space-y-2">
@@ -589,7 +589,7 @@ export default function ProfilePage() {
                                             value={newAddress.streetAddress}
                                             onChange={e => setNewAddress({ ...newAddress, streetAddress: e.target.value })}
                                             required
-                                            className="bg-white rounded-xl"
+                                            className="bg-white rounded-none"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -599,7 +599,7 @@ export default function ProfilePage() {
                                             value={newAddress.subDistrict}
                                             onChange={e => setNewAddress({ ...newAddress, subDistrict: e.target.value })}
                                             required
-                                            className="bg-white rounded-xl"
+                                            className="bg-white rounded-none"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -609,7 +609,7 @@ export default function ProfilePage() {
                                             value={newAddress.district}
                                             onChange={e => setNewAddress({ ...newAddress, district: e.target.value })}
                                             required
-                                            className="bg-white rounded-xl"
+                                            className="bg-white rounded-none"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -619,7 +619,7 @@ export default function ProfilePage() {
                                             value={newAddress.province}
                                             onChange={e => setNewAddress({ ...newAddress, province: e.target.value })}
                                             required
-                                            className="bg-white rounded-xl"
+                                            className="bg-white rounded-none"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -629,7 +629,7 @@ export default function ProfilePage() {
                                             value={newAddress.zipCode}
                                             onChange={e => setNewAddress({ ...newAddress, zipCode: e.target.value })}
                                             required
-                                            className="bg-white rounded-xl"
+                                            className="bg-white rounded-none"
                                         />
                                     </div>
                                     <div className="flex items-center space-x-2 pt-2">
@@ -644,7 +644,7 @@ export default function ProfilePage() {
                                     </div>
                                 </div>
                                 <div className="flex justify-end pt-4">
-                                    <Button type="submit" disabled={addAddress.isPending} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full">
+                                    <Button type="submit" disabled={addAddress.isPending} className="bg-primary hover:bg-primary/85 text-primary-foreground">
                                         {addAddress.isPending ? 'กำลังบันทึก...' : 'บันทึกที่อยู่'}
                                     </Button>
                                 </div>
@@ -654,12 +654,12 @@ export default function ProfilePage() {
                         <div className="space-y-4">
                             {isLoading ? (
                                 <div className="flex items-center justify-center gap-3 py-8 text-gray-600" role="status">
-                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary" />
+                                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-foreground" />
                                     <span className="text-sm font-medium">กำลังโหลดข้อมูลที่อยู่...</span>
                                 </div>
                             ) : addresses && addresses.length > 0 ? (
                                 addresses.map((addr) => (
-                                    <div key={addr._id} className={`flex items-start justify-between gap-2 p-4 border rounded-2xl transition-all ${addr.isDefault ? 'border-primary/30 bg-primary/5' : 'border-gray-100 hover:bg-gray-50'}`}>
+                                    <div key={addr._id} className={`flex items-start justify-between gap-2 p-4 border rounded-none transition-all ${addr.isDefault ? 'border-primary/30 bg-primary/5' : 'border-gray-100 hover:bg-gray-50'}`}>
                                         <div className="flex gap-3 sm:gap-4 min-w-0">
                                             <div className={`hidden sm:flex h-10 w-10 rounded-full items-center justify-center flex-shrink-0 ${addr.isDefault ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-500'}`}>
                                                 {addr.isDefault ? <Star className="h-5 w-5 fill-current" /> : <Home className="h-5 w-5" />}
@@ -667,7 +667,7 @@ export default function ProfilePage() {
                                             <div className="min-w-0">
                                                 <div className="font-medium flex flex-wrap items-center gap-2 text-gray-900">
                                                     {addr.recipientName}
-                                                    {addr.isDefault && <span className="text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-full font-normal">ค่าเริ่มต้น</span>}
+                                                    {addr.isDefault && <span className="text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-none font-normal">ค่าเริ่มต้น</span>}
                                                 </div>
                                                 <div className="text-sm text-gray-600 mt-1">
                                                     {addr.phone}
@@ -692,7 +692,7 @@ export default function ProfilePage() {
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                className="text-gray-500 hover:text-primary hover:bg-primary/5 rounded-xl sm:mr-1"
+                                                className="text-gray-500 hover:text-primary hover:bg-primary/5 rounded-none sm:mr-1"
                                                 onClick={() => handleEditAddressClick(addr)}
                                                 aria-label={`แก้ไขที่อยู่ของ ${addr.recipientName}`}
                                             >
@@ -703,7 +703,7 @@ export default function ProfilePage() {
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
-                                                        className="text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-xl"
+                                                        className="text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-none"
                                                         disabled={deleteAddress.isPending}
                                                         aria-label={`ลบที่อยู่ของ ${addr.recipientName}`}
                                                     >
@@ -729,7 +729,7 @@ export default function ProfilePage() {
                                     </div>
                                 ))
                             ) : (
-                                <div className="text-center py-8 text-gray-500 border border-dashed rounded-xl bg-gray-50">
+                                <div className="text-center py-8 text-gray-500 border border-dashed rounded-none bg-gray-50">
                                     ยังไม่มีข้อมูลที่อยู่ กรุณาเพิ่มที่อยู่เพื่อดำเนินการสั่งซื้อ
                                 </div>
                             )}
@@ -738,7 +738,7 @@ export default function ProfilePage() {
                 </Card>
 
                 <Dialog open={isEditingAddress} onOpenChange={setIsEditingAddress}>
-                    <DialogContent className="sm:max-w-[600px] rounded-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogContent className="sm:max-w-[600px] rounded-none max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                             <DialogTitle>แก้ไขที่อยู่</DialogTitle>
                             <DialogDescription>
@@ -755,7 +755,7 @@ export default function ProfilePage() {
                                             value={editingAddress.recipientName}
                                             onChange={e => setEditingAddress({ ...editingAddress, recipientName: e.target.value })}
                                             required
-                                            className="bg-white rounded-xl"
+                                            className="bg-white rounded-none"
                                             placeholder="ชื่อ-นามสกุล"
                                         />
                                     </div>
@@ -768,7 +768,7 @@ export default function ProfilePage() {
                                             value={editingAddress.phone || ''}
                                             onChange={e => setEditingAddress({ ...editingAddress, phone: e.target.value })}
                                             required
-                                            className="bg-white rounded-xl"
+                                            className="bg-white rounded-none"
                                         />
                                     </div>
                                     <div className="col-span-1 md:col-span-2 space-y-2">
@@ -778,7 +778,7 @@ export default function ProfilePage() {
                                             value={editingAddress.streetAddress}
                                             onChange={e => setEditingAddress({ ...editingAddress, streetAddress: e.target.value })}
                                             required
-                                            className="bg-white rounded-xl"
+                                            className="bg-white rounded-none"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -788,7 +788,7 @@ export default function ProfilePage() {
                                             value={editingAddress.subDistrict || ''}
                                             onChange={e => setEditingAddress({ ...editingAddress, subDistrict: e.target.value })}
                                             required
-                                            className="bg-white rounded-xl"
+                                            className="bg-white rounded-none"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -798,7 +798,7 @@ export default function ProfilePage() {
                                             value={editingAddress.district}
                                             onChange={e => setEditingAddress({ ...editingAddress, district: e.target.value })}
                                             required
-                                            className="bg-white rounded-xl"
+                                            className="bg-white rounded-none"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -808,7 +808,7 @@ export default function ProfilePage() {
                                             value={editingAddress.province}
                                             onChange={e => setEditingAddress({ ...editingAddress, province: e.target.value })}
                                             required
-                                            className="bg-white rounded-xl"
+                                            className="bg-white rounded-none"
                                         />
                                     </div>
                                     <div className="space-y-2">
@@ -818,7 +818,7 @@ export default function ProfilePage() {
                                             value={editingAddress.zipCode}
                                             onChange={e => setEditingAddress({ ...editingAddress, zipCode: e.target.value })}
                                             required
-                                            className="bg-white rounded-xl"
+                                            className="bg-white rounded-none"
                                         />
                                     </div>
                                     <div className="flex items-center space-x-2 pt-2 md:col-span-2">
@@ -833,10 +833,10 @@ export default function ProfilePage() {
                                     </div>
                                 </div>
                                 <DialogFooter className="pt-4">
-                                    <Button type="button" variant="outline" onClick={() => setIsEditingAddress(false)} className="rounded-xl">
+                                    <Button type="button" variant="outline" onClick={() => setIsEditingAddress(false)} className="rounded-none">
                                         ยกเลิก
                                     </Button>
-                                    <Button type="submit" disabled={updateAddress.isPending} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full">
+                                    <Button type="submit" disabled={updateAddress.isPending} className="bg-primary hover:bg-primary/85 text-primary-foreground">
                                         {updateAddress.isPending ? 'กำลังบันทึก...' : 'บันทึกการแก้ไข'}
                                     </Button>
                                 </DialogFooter>
