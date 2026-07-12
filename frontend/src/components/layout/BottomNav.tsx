@@ -41,7 +41,7 @@ export default function BottomNav() {
             label: 'คำสั่งซื้อ',
             icon: Package,
             badge: pendingSlipCount > 0 ? pendingSlipCount : undefined,
-            badgeColor: 'bg-orange-500',
+            badgeColor: 'bg-brand',
         },
         {
             href: customer ? '/profile' : '/customer-login',
@@ -55,7 +55,7 @@ export default function BottomNav() {
     if (isProductPage) return null;
 
     return (
-        <nav aria-label="เมนูหลัก" className="fixed bottom-0 left-0 right-0 z-[60] bg-white/90 backdrop-blur-lg border-t border-gray-200 md:hidden pb-safe shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <nav aria-label="เมนูหลัก" className="fixed bottom-0 left-0 right-0 z-[60] bg-white border-t border-border md:hidden pb-safe">
             <div className="flex justify-around items-center h-16">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href || (item.href !== '/' && pathname.startsWith(item.href));
@@ -66,22 +66,22 @@ export default function BottomNav() {
                             key={item.href}
                             href={item.href}
                             className={cn(
-                                "flex flex-col items-center justify-center w-full h-full space-y-1",
+                                "relative flex flex-col items-center justify-center w-full h-full space-y-1",
                                 isActive
-                                    ? "text-primary"
-                                    : "text-gray-600 hover:text-gray-900"
+                                    ? "text-foreground after:absolute after:top-0 after:left-1/2 after:-translate-x-1/2 after:w-8 after:h-0.5 after:bg-foreground"
+                                    : "text-gray-500 hover:text-gray-900"
                             )}
                             aria-current={isActive ? 'page' : undefined}
                         >
                             <div className="relative">
                                 <Icon className={cn("h-6 w-6", isActive && "fill-current")} />
                                 {item.badge !== undefined && (
-                                    <span className={`absolute -top-1.5 -right-1.5 ${(item as any).badgeColor || 'bg-red-500'} text-white text-[10px] font-bold rounded-full min-w-[1rem] h-4 px-1 flex items-center justify-center border border-white`}>
+                                    <span className={`absolute -top-1.5 -right-1.5 ${(item as any).badgeColor || 'bg-brand'} text-white text-[10px] font-bold min-w-[1rem] h-4 px-1 flex items-center justify-center border border-white`}>
                                         {item.badge > 99 ? '99+' : item.badge}
                                     </span>
                                 )}
                             </div>
-                            <span className="text-[10px] font-medium">{item.label}</span>
+                            <span className={cn("text-[10px]", isActive ? "font-bold" : "font-medium")}>{item.label}</span>
                         </Link>
                     );
                 })}

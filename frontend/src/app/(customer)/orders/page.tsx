@@ -21,22 +21,25 @@ export default function OrdersPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const customer = useAuthStore((state) => state.customer);
+    const isHydrated = useAuthStore((state) => state.isHydrated);
     const { data: orders, isLoading } = useCustomerOrders();
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'pending');
 
+    // Wait for zustand hydration before redirecting — a hard reload would
+    // otherwise bounce logged-in users to the login page
     useEffect(() => {
-        if (!customer) {
+        if (isHydrated && !customer) {
             router.push('/customer-login?redirect=/orders');
         }
-    }, [customer, router]);
+    }, [isHydrated, customer, router]);
 
-    if (!customer) return null;
+    if (!isHydrated || !customer) return null;
 
     if (isLoading) {
         return (
             <div className="flex justify-center items-center min-h-[400px]" role="status">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-foreground" />
                 <span className="sr-only">กำลังโหลดคำสั่งซื้อ...</span>
             </div>
         );
@@ -62,7 +65,7 @@ export default function OrdersPage() {
     const renderOrderList = (filteredOrders: any[]) => {
         if (filteredOrders.length === 0) {
             return (
-                <div className="text-center py-16 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                <div className="text-center py-16 bg-gray-50 rounded-none border border-dashed border-gray-200">
                     <Package className="h-16 w-16 mx-auto text-gray-300 mb-4" />
                     <p className="text-gray-600 font-bold text-lg">ไม่พบคำสั่งซื้อ</p>
                     <p className="text-gray-500 text-sm mt-1">ยังไม่มีคำสั่งซื้อในสถานะนี้</p>
@@ -79,11 +82,11 @@ export default function OrdersPage() {
                     return (
                         <Card
                             key={order._id}
-                            className={`overflow-hidden border-0 shadow-md rounded-2xl transition-all hover:shadow-lg ${needsSlip ? 'ring-2 ring-orange-400 ring-offset-1' : ''}`}
+                            className={`overflow-hidden border-0 shadow-md rounded-none transition-all hover:shadow-lg ${needsSlip ? 'ring-2 ring-brand ring-offset-1' : ''}`}
                         >
                             {/* Slip-required banner inside card */}
                             {needsSlip && (
-                                <div className="bg-gradient-to-r from-orange-500 to-amber-500 px-4 py-2 flex items-center justify-between gap-3">
+                                <div className="bg-foreground border-l-4 border-brand px-4 py-2 flex items-center justify-between gap-3">
                                     <div className="flex items-center gap-2 text-white text-xs font-bold">
                                         <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                                         รอการชำระเงิน — กรุณาแนบสลิปโอนเงิน
@@ -123,7 +126,7 @@ export default function OrdersPage() {
                                                 <FileText className="h-3.5 w-3.5" />
                                                 <h3 className="font-bold text-sm">#{order.orderReference}</h3>
                                             </div>
-                                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${getOrderStatusColor(order.orderStatus)}`}>
+                                            <span className={`px-3 py-1 rounded-none text-xs font-bold ${getOrderStatusColor(order.orderStatus)}`}>
                                                 {getOrderStatusLabel(order.orderStatus)}
                                             </span>
                                         </div>
@@ -139,7 +142,7 @@ export default function OrdersPage() {
                                         asChild
                                         size="sm"
                                         variant={needsSlip ? 'default' : 'outline'}
-                                        className={`ml-auto md:ml-0 rounded-xl shrink-0 ${needsSlip ? 'bg-orange-500 hover:bg-orange-600 text-white shadow-md shadow-orange-100 gap-1.5' : 'hover:bg-primary/5 hover:text-primary hover:border-primary/30'}`}
+                                        className={`ml-auto md:ml-0 rounded-none shrink-0 ${needsSlip ? 'bg-brand hover:bg-brand/90 text-white shadow-md shadow-orange-100 gap-1.5' : 'hover:bg-primary/5 hover:text-primary hover:border-primary/30'}`}
                                     >
                                         <Link href={`/orders/${order._id}`}>
                                             {needsSlip ? <><Upload className="h-3.5 w-3.5" />แนบสลิป</> : 'ดูรายละเอียด'}
@@ -149,9 +152,9 @@ export default function OrdersPage() {
 
                                 <div className="space-y-2 mb-4">
                                     {order.items.slice(0, 2).map((item: any, index: number) => (
-                                        <div key={index} className="flex justify-between text-sm items-center hover:bg-gray-50 p-2 rounded-xl transition-colors gap-3">
+                                        <div key={index} className="flex justify-between text-sm items-center hover:bg-gray-50 p-2 rounded-none transition-colors gap-3">
                                             <div className="flex items-center gap-3">
-                                                <div className="h-14 w-14 rounded-xl bg-white overflow-hidden relative border border-gray-100 shrink-0">
+                                                <div className="h-14 w-14 rounded-none bg-white overflow-hidden relative border border-gray-100 shrink-0">
                                                     {item.imageUrl ? (
                                                         <Image
                                                             src={getImageUrl(item.imageUrl)}
@@ -185,7 +188,7 @@ export default function OrdersPage() {
                                     const courier = getCourier(order.shippingInfo.provider ?? '');
                                     const trackUrl = getTrackingUrl(order.shippingInfo.provider ?? '', order.shippingInfo.trackingNumber);
                                     return (
-                                        <div className={`flex items-center justify-between gap-3 rounded-xl px-3 py-2.5 border ${courier?.bg ?? 'bg-blue-50 border-blue-100'}`}>
+                                        <div className={`flex items-center justify-between gap-3 rounded-none px-3 py-2.5 border ${courier?.bg ?? 'bg-blue-50 border-blue-100'}`}>
                                             <div className="flex items-center gap-2 min-w-0">
                                                 <Truck className={`h-3.5 w-3.5 shrink-0 ${courier?.color ?? 'text-blue-600'}`} />
                                                 <span className={`text-xs font-bold truncate ${courier?.color ?? 'text-blue-700'}`}>
@@ -225,14 +228,14 @@ export default function OrdersPage() {
                                 <div className="flex justify-between items-center pt-3 border-t border-gray-50">
                                     <div className="flex items-center gap-2">
                                         {order.paymentMethod === 'Cash' ? (
-                                            <span className="text-xs text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full font-medium">เก็บเงินปลายทาง</span>
+                                            <span className="text-xs text-gray-600 bg-gray-100 px-2 py-0.5 rounded-none font-medium">เก็บเงินปลายทาง</span>
                                         ) : order.hasSlip ? (
-                                            <span className="text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-bold flex items-center gap-1 border border-emerald-100">
+                                            <span className="text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-none font-bold flex items-center gap-1 border border-emerald-100">
                                                 <CheckCircle className="h-3 w-3" />
                                                 {order.slipVerified ? 'ยืนยันแล้ว' : 'แนบสลิปแล้ว'}
                                             </span>
                                         ) : (
-                                            <span className="text-xs text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full font-bold flex items-center gap-1 border border-orange-100">
+                                            <span className="text-xs text-brand bg-white px-2 py-0.5 rounded-none font-bold flex items-center gap-1 border border-brand">
                                                 <AlertCircle className="h-3 w-3" />
                                                 ยังไม่แนบสลิป
                                             </span>
@@ -264,9 +267,9 @@ export default function OrdersPage() {
                         exit={{ opacity: 0, y: -12 }}
                         className="mb-6"
                     >
-                        <div className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 shadow-lg shadow-orange-100">
+                        <div className="bg-foreground border-l-4 border-brand rounded-none p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 shadow-lg shadow-orange-100">
                             <div className="flex items-center gap-3 flex-1">
-                                <div className="bg-white/20 rounded-xl p-2 shrink-0">
+                                <div className="bg-white/20 rounded-none p-2 shrink-0">
                                     <AlertCircle className="h-5 w-5 text-white" />
                                 </div>
                                 <div className="text-white">
@@ -279,7 +282,7 @@ export default function OrdersPage() {
                                 </div>
                             </div>
                             {pendingSlipOrders.length === 1 && (
-                                <Button asChild size="sm" className="bg-white text-orange-600 hover:bg-white/90 font-bold rounded-xl shrink-0 shadow-md gap-1.5">
+                                <Button asChild size="sm" className="bg-white text-zinc-950 hover:bg-gray-200 font-bold rounded-none shrink-0 shadow-md gap-1.5">
                                     <Link href={`/orders/${pendingSlipOrders[0]._id}`}>
                                         <Upload className="h-3.5 w-3.5" />
                                         แนบสลิปเลย
@@ -295,13 +298,13 @@ export default function OrdersPage() {
                 <div>
                     <h1 className="text-3xl font-black text-gray-900">คำสั่งซื้อของฉัน</h1>
                     {pendingSlipOrders.length > 0 && (
-                        <p className="text-orange-500 text-sm font-bold mt-1 flex items-center gap-1">
-                            <span className="inline-block w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+                        <p className="text-brand text-sm font-bold mt-1 flex items-center gap-1">
+                            <span className="inline-block w-2 h-2 rounded-full bg-brand animate-pulse" />
                             {pendingSlipOrders.length} รายการรอแนบสลิป
                         </p>
                     )}
                 </div>
-                <Button asChild className="bg-gray-900 hover:bg-black text-white rounded-xl shadow-lg gap-2 shrink-0">
+                <Button asChild className="bg-gray-900 hover:bg-black text-white rounded-none shadow-lg gap-2 shrink-0">
                     <Link href="/products">
                         <ShoppingBag className="h-4 w-4" />
                         เลือกซื้อสินค้าต่อ
@@ -313,33 +316,33 @@ export default function OrdersPage() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 h-4 w-4" />
                 <Input
                     placeholder="ค้นหาเลขคำสั่งซื้อ หรือชื่อสินค้า..."
-                    className="pl-10 h-11 rounded-xl border-gray-200"
+                    className="pl-10 h-11 rounded-none border-gray-200"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />
             </div>
 
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="flex w-full overflow-x-auto md:grid md:grid-cols-5 mb-6 h-auto p-1 bg-gray-100/50 rounded-2xl gap-1 no-scrollbar">
-                    <TabsTrigger value="pending" className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm py-2 text-xs md:text-sm relative">
+                <TabsList className="flex w-full overflow-x-auto md:grid md:grid-cols-5 mb-6 h-auto p-0 bg-transparent border-b border-border rounded-none gap-0 no-scrollbar">
+                    <TabsTrigger value="pending" className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none py-2.5 text-xs md:text-sm relative">
                         ที่ต้องชำระ
                         {pendingSlipOrders.length > 0 && (
-                            <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center">
+                            <span className="absolute -top-1 -right-1 bg-brand text-white text-[9px] font-black rounded-none w-4 h-4 flex items-center justify-center">
                                 {pendingSlipOrders.length}
                             </span>
                         )}
                     </TabsTrigger>
-                    <TabsTrigger value="processing" className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm py-2 text-xs md:text-sm">ที่ต้องจัดส่ง</TabsTrigger>
-                    <TabsTrigger value="shipped" className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm py-2 text-xs md:text-sm relative">
+                    <TabsTrigger value="processing" className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none py-2.5 text-xs md:text-sm">ที่ต้องจัดส่ง</TabsTrigger>
+                    <TabsTrigger value="shipped" className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none py-2.5 text-xs md:text-sm relative">
                         อยู่ระหว่างส่ง
                         {shippedCount > 0 && (
-                            <span className="absolute -top-1 -right-1 bg-blue-500 text-white text-[9px] font-black rounded-full w-4 h-4 flex items-center justify-center">
+                            <span className="absolute -top-1 -right-1 bg-foreground text-white text-[9px] font-black rounded-none w-4 h-4 flex items-center justify-center">
                                 {shippedCount}
                             </span>
                         )}
                     </TabsTrigger>
-                    <TabsTrigger value="delivered" className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm py-2 text-xs md:text-sm">สำเร็จ</TabsTrigger>
-                    <TabsTrigger value="cancelled" className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm py-2 text-xs md:text-sm">ยกเลิก</TabsTrigger>
+                    <TabsTrigger value="delivered" className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none py-2.5 text-xs md:text-sm">สำเร็จ</TabsTrigger>
+                    <TabsTrigger value="cancelled" className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:shadow-none py-2.5 text-xs md:text-sm">ยกเลิก</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="pending" className="mt-0">{renderOrderList(filterOrders(['pending']))}</TabsContent>

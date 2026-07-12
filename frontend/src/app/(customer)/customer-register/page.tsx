@@ -221,26 +221,22 @@ export default function CustomerRegisterPage() {
 
     return (
         <div className="container mx-auto flex items-center justify-center min-h-[calc(100vh-4rem)] p-4 relative">
-            {/* Static ambience — matches storefront hero language */}
-            <div
-                className="absolute inset-0 pointer-events-none"
-                style={{ background: 'radial-gradient(ellipse 60% 40% at 80% 0%, rgba(175,29,53,0.08) 0%, transparent 60%), radial-gradient(ellipse 50% 40% at 10% 100%, rgba(201,162,39,0.07) 0%, transparent 60%)' }}
-            />
             <div className="absolute top-4 right-4 z-20">
                 <Button
                     variant="outline"
                     size="sm"
                     onClick={toggleLanguage}
-                    className="bg-white/50 backdrop-blur-sm hover:bg-white border-gray-200"
+                    className="bg-white hover:bg-accent border-border"
                 >
                     <Globe className="mr-2 h-4 w-4" />
                     {language === 'th' ? 'EN' : 'TH'}
                 </Button>
             </div>
 
-            <Card className="w-full max-w-md border-0 shadow-2xl shadow-gray-200/60 rounded-[2rem] relative z-10">
+            <Card className="w-full max-w-md relative z-10">
                 <CardHeader className="space-y-2 pt-8">
-                    <CardTitle className="text-3xl font-black tracking-tight text-center text-gray-900">{t.title}</CardTitle>
+                    <div className="font-display uppercase text-3xl text-center text-gray-900 leading-none">Sign Up</div>
+                    <CardTitle className="text-lg font-bold tracking-tight text-center text-muted-foreground">{t.title}</CardTitle>
                     <CardDescription className="text-center text-gray-600 font-medium">
                         {t.subtitle}
                     </CardDescription>
@@ -256,7 +252,7 @@ export default function CustomerRegisterPage() {
                                         <FormItem>
                                             <FormLabel className="text-xs font-black uppercase tracking-widest text-gray-500">{t.firstName}</FormLabel>
                                             <FormControl>
-                                                <Input placeholder={t.placeholders.firstName} className="h-12 rounded-xl bg-gray-50 border-2 border-transparent focus-visible:border-primary focus-visible:bg-white transition-all font-medium" {...field} />
+                                                <Input placeholder={t.placeholders.firstName} className="h-12 font-medium" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -269,7 +265,7 @@ export default function CustomerRegisterPage() {
                                         <FormItem>
                                             <FormLabel className="text-xs font-black uppercase tracking-widest text-gray-500">{t.lastName}</FormLabel>
                                             <FormControl>
-                                                <Input placeholder={t.placeholders.lastName} className="h-12 rounded-xl bg-gray-50 border-2 border-transparent focus-visible:border-primary focus-visible:bg-white transition-all font-medium" {...field} />
+                                                <Input placeholder={t.placeholders.lastName} className="h-12 font-medium" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -283,7 +279,7 @@ export default function CustomerRegisterPage() {
                                     <FormItem>
                                         <FormLabel className="text-xs font-black uppercase tracking-widest text-gray-500">{t.email}</FormLabel>
                                         <FormControl>
-                                            <Input type="email" autoComplete="email" placeholder={t.placeholders.email} className="h-12 rounded-xl bg-gray-50 border-2 border-transparent focus-visible:border-primary focus-visible:bg-white transition-all font-medium" {...field} />
+                                            <Input type="email" autoComplete="email" placeholder={t.placeholders.email} className="h-12 font-medium" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -296,7 +292,7 @@ export default function CustomerRegisterPage() {
                                     <FormItem>
                                         <FormLabel className="text-xs font-black uppercase tracking-widest text-gray-500">{t.phone}</FormLabel>
                                         <FormControl>
-                                            <Input type="tel" inputMode="numeric" autoComplete="tel" placeholder={t.placeholders.phone} className="h-12 rounded-xl bg-gray-50 border-2 border-transparent focus-visible:border-primary focus-visible:bg-white transition-all font-medium" {...field} />
+                                            <Input type="tel" inputMode="numeric" autoComplete="tel" placeholder={t.placeholders.phone} className="h-12 font-medium" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -309,7 +305,7 @@ export default function CustomerRegisterPage() {
                                     <FormItem>
                                         <FormLabel className="text-xs font-black uppercase tracking-widest text-gray-500">{t.password}</FormLabel>
                                         <FormControl>
-                                            <Input type="password" autoComplete="new-password" placeholder={t.placeholders.password} className="h-12 rounded-xl bg-gray-50 border-2 border-transparent focus-visible:border-primary focus-visible:bg-white transition-all font-medium" {...field} />
+                                            <Input type="password" autoComplete="new-password" placeholder={t.placeholders.password} className="h-12 font-medium" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -322,7 +318,7 @@ export default function CustomerRegisterPage() {
                                     <FormItem>
                                         <FormLabel className="text-xs font-black uppercase tracking-widest text-gray-500">{t.confirmPassword}</FormLabel>
                                         <FormControl>
-                                            <Input type="password" autoComplete="new-password" placeholder={t.placeholders.password} className="h-12 rounded-xl bg-gray-50 border-2 border-transparent focus-visible:border-primary focus-visible:bg-white transition-all font-medium" {...field} />
+                                            <Input type="password" autoComplete="new-password" placeholder={t.placeholders.password} className="h-12 font-medium" {...field} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -338,7 +334,7 @@ export default function CustomerRegisterPage() {
                             />
 
                             {/* Math Challenge Captcha */}
-                            <div className="space-y-2 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                            <div className="space-y-2 p-4 bg-gray-50 border border-border">
                                 <Label className="text-xs font-black uppercase tracking-widest text-gray-500">{t.security.label}: {captcha.question}</Label>
                                 <Input
                                     inputMode="numeric"
@@ -346,13 +342,13 @@ export default function CustomerRegisterPage() {
                                     placeholder={t.security.placeholder}
                                     value={captchaInput}
                                     onChange={(e) => setCaptchaInput(e.target.value)}
-                                    className="h-12 rounded-xl bg-white border-2 border-transparent focus-visible:border-primary transition-all font-medium"
+                                    className="h-12 bg-white font-medium"
                                 />
                             </div>
 
                             <Button
                                 type="submit"
-                                className="w-full h-12 rounded-2xl bg-gray-900 hover:bg-black text-white font-black text-base uppercase tracking-widest shadow-lg transition-all hover:-translate-y-0.5 active:scale-[0.98]"
+                                className="w-full h-12 text-base uppercase tracking-widest"
                                 disabled={isLoading}
                             >
                                 {isLoading ? (

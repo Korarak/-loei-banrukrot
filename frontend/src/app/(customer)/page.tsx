@@ -102,60 +102,55 @@ export default function Home() {
     return (
         <div className="space-y-0 pb-10">
 
-            {/* ── Hero — compact, centered, no duplicated shop-name card ────── */}
-            <section className="relative bg-gradient-to-br from-primary via-red-950 to-black text-white rounded-[2rem] overflow-hidden shadow-2xl">
-                <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-accent/15 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-primary/15 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 pointer-events-none" />
-
-                <div className="relative container mx-auto px-6 md:px-12 pt-12 md:pt-16 pb-24 md:pb-28">
+            {/* ── Hero — flat ink block, display type ───────────────────────── */}
+            <section className="relative bg-zinc-950 text-white overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8">
+                <div className="relative container mx-auto px-6 md:px-12 pt-14 md:pt-20 pb-16 md:pb-24">
                     <motion.div
                         className="relative z-10 max-w-3xl mx-auto text-center"
                         initial="hidden"
                         animate="visible"
                         variants={staggerContainer}
                     >
-                        <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 px-5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-accent font-bold text-xs md:text-sm uppercase tracking-widest mb-5 shadow-glow">
-                            <Zap className="h-4 w-4 fill-accent" />
-                            Vespa Specialist & Oat Engineering
+                        <motion.div variants={fadeInUp} className="inline-flex items-center gap-2 text-gray-400 font-bold text-[11px] md:text-xs uppercase tracking-[0.25em] mb-6">
+                            <Zap className="h-3.5 w-3.5 text-brand fill-current" />
+                            Vespa Specialist &amp; Oat Engineering
                         </motion.div>
 
-                        <motion.h1 variants={fadeInUp} className="text-3xl md:text-5xl font-black mb-4 tracking-tighter leading-[1.1] drop-shadow-lg">
-                            {siteConfig.brand.name}{' '}
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-amber-600 italic pr-2">
-                                {siteConfig.brand.englishName}
-                            </span>
+                        <motion.h1 variants={fadeInUp} className="font-display uppercase leading-[0.95] tracking-tight text-5xl md:text-7xl mb-5">
+                            Vespa Parts.
+                            <br />
+                            <span className="text-brand">Built</span> to Last.
                         </motion.h1>
 
-                        <motion.p variants={fadeInUp} className="text-base md:text-lg mb-7 text-gray-200 font-medium leading-relaxed">
-                            ศูนย์รวมอะไหล่และบริการ Vespa ครบวงจร โดย{' '}
-                            <span className="text-accent font-bold">ช่างโอ๊ต (Oat Engineering)</span>{' '}
-                            สำหรับคนรักเวสป้าเมืองเลย
+                        <motion.p variants={fadeInUp} className="text-base md:text-lg mb-8 text-gray-300 font-medium leading-relaxed">
+                            {siteConfig.brand.name} — ศูนย์รวมอะไหล่และบริการ Vespa ครบวงจร
+                            โดยช่างโอ๊ต (Oat Engineering) สำหรับคนรักเวสป้าเมืองเลย
                         </motion.p>
 
                         {/* Search bar */}
-                        <motion.form variants={fadeInUp} onSubmit={handleHeroSearch} className="flex gap-2 mb-6 max-w-lg mx-auto">
+                        <motion.form variants={fadeInUp} onSubmit={handleHeroSearch} className="flex gap-2 mb-8 max-w-lg mx-auto">
                             <div className="relative flex-1">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500 pointer-events-none" />
                                 <Input
                                     value={heroSearch}
                                     onChange={e => setHeroSearch(e.target.value)}
                                     placeholder="ค้นหาอะไหล่ Vespa..."
-                                    className="pl-11 h-12 rounded-full bg-white/10 border-white/20 text-white placeholder:text-gray-400 text-base focus-visible:ring-accent focus-visible:border-accent backdrop-blur-sm"
+                                    className="pl-11 h-12 bg-transparent border-white/25 text-white placeholder:text-gray-500 text-base focus-visible:ring-white focus-visible:border-white"
                                 />
                             </div>
-                            <Button type="submit" className="h-12 px-6 rounded-full bg-accent text-accent-foreground border-0 hover:bg-accent/90 shadow-[0_0_20px_rgba(201,162,39,0.5)] font-bold shrink-0">
+                            <Button type="submit" className="h-12 px-6 bg-white text-zinc-950 hover:bg-gray-200 shrink-0">
                                 ค้นหา
                             </Button>
                         </motion.form>
 
                         <motion.div variants={fadeInUp} className="flex flex-wrap gap-3 justify-center">
-                            <Button asChild className="bg-white text-primary hover:bg-gray-100 border-0 rounded-full px-7 has-[>svg]:px-7 h-12 text-base font-bold transition-all hover:scale-105 active:scale-95 shadow-lg hover:brightness-110 duration-200">
+                            <Button asChild className="bg-white text-zinc-950 hover:bg-gray-200 px-7 has-[>svg]:px-7 h-12 text-base uppercase">
                                 <Link href="/products">
                                     <ShoppingCart className="mr-2 h-5 w-5" />
                                     ช้อปเลย
                                 </Link>
                             </Button>
-                            <Button variant="outline" asChild className="bg-black/20 backdrop-blur-sm border-2 border-white/30 text-white hover:bg-white hover:text-black rounded-full px-7 h-12 text-base font-bold transition-all hover:scale-105">
+                            <Button variant="outline" asChild className="bg-transparent border border-white/40 text-white hover:bg-white hover:text-zinc-950 px-7 h-12 text-base">
                                 <Link href="/products">
                                     ดูสินค้าทั้งหมด
                                     <ChevronRight className="ml-1 h-5 w-5" />
@@ -167,29 +162,27 @@ export default function Home() {
             </section>
 
             {/* ── Trust bar ─────────────────────────────────────────────────── */}
-            <section className="container mx-auto px-4 -mt-14 relative z-10">
+            <section className="-mx-4 sm:-mx-6 lg:-mx-8 border-b border-border">
                 <motion.div
-                    className="bg-white rounded-[2rem] shadow-xl border border-gray-200 p-6 md:p-8 grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8"
+                    className="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 divide-x divide-border"
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true, margin: '-50px' }}
                     variants={staggerContainer}
                 >
                     {[
-                        { icon: ShieldCheck, title: 'สินค้าแท้ 100%', desc: 'คัดคุณภาพทุกชิ้นก่อนส่ง', gradient: 'from-primary to-red-900' },
-                        { icon: Truck, title: 'ส่งไวทั่วไทย', desc: 'แพ็คแน่น ส่งใน 1-2 วันทำการ', gradient: 'from-accent to-amber-600' },
-                        { icon: Wrench, title: 'ปรึกษาช่างโอ๊ต', desc: 'ผู้เชี่ยวชาญ Vespa ตัวจริง', gradient: 'from-blue-500 to-indigo-600' },
-                        { icon: QrCode, title: 'จ่ายสะดวก ปลอดภัย', desc: 'ชำระผ่าน QR PromptPay', gradient: 'from-emerald-500 to-green-600' },
+                        { icon: ShieldCheck, title: 'สินค้าแท้ 100%', desc: 'คัดคุณภาพทุกชิ้นก่อนส่ง' },
+                        { icon: Truck, title: 'ส่งไวทั่วไทย', desc: 'แพ็คแน่น ส่งใน 1-2 วันทำการ' },
+                        { icon: Wrench, title: 'ปรึกษาช่างโอ๊ต', desc: 'ผู้เชี่ยวชาญ Vespa ตัวจริง' },
+                        { icon: QrCode, title: 'จ่ายสะดวก ปลอดภัย', desc: 'ชำระผ่าน QR PromptPay' },
                     ].map((item, i) => (
-                        <motion.div key={i} variants={scaleIn}
-                            className="flex flex-col md:flex-row items-center md:items-start gap-3 md:gap-4 text-center md:text-left"
+                        <motion.div key={i} variants={fadeInUp}
+                            className="flex flex-col items-center gap-2 text-center px-3 py-6 md:py-8"
                         >
-                            <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shrink-0 shadow-lg`}>
-                                <item.icon className="h-6 w-6 text-white" />
-                            </div>
+                            <item.icon className="h-6 w-6 text-foreground" />
                             <div>
-                                <div className="font-black text-gray-900 text-sm md:text-base">{item.title}</div>
-                                <div className="text-xs md:text-sm text-gray-500 mt-0.5 leading-snug">{item.desc}</div>
+                                <div className="font-bold text-gray-900 text-xs md:text-sm">{item.title}</div>
+                                <div className="hidden md:block text-xs text-muted-foreground mt-0.5 leading-snug">{item.desc}</div>
                             </div>
                         </motion.div>
                     ))}
@@ -197,46 +190,46 @@ export default function Home() {
             </section>
 
             {/* ── Categories ────────────────────────────────────────────────── */}
-            <section className="container mx-auto px-4 mt-24">
+            <section className="container mx-auto px-4 mt-20">
                 <motion.div
-                    className="flex items-end justify-between mb-6"
+                    className="flex items-end justify-between mb-8"
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true, margin: '-80px' }}
                     variants={fadeInUp}
                 >
                     <div>
-                        <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-2">หมวดหมู่ <span className="text-primary">สินค้า</span></h2>
-                        <div className="h-2 w-24 bg-accent rounded-full" />
+                        <h2 className="font-display uppercase text-3xl md:text-4xl text-gray-900 leading-none mb-2">Shop by Category</h2>
+                        <p className="text-sm font-bold text-muted-foreground">หมวดหมู่สินค้า</p>
                     </div>
                     <div className="flex items-center gap-2">
                         <div className="flex md:hidden gap-2">
-                            <Button size="icon" variant="outline" onClick={() => scroll(catScrollRef, 'left')} className="h-10 w-10 rounded-lg border-2 border-gray-100 bg-white/80 backdrop-blur-sm -skew-x-12 hover:skew-x-0 transition-transform active:scale-95 shadow-sm" aria-label="เลื่อนซ้าย">
+                            <Button size="icon" variant="outline" onClick={() => scroll(catScrollRef, 'left')} className="h-10 w-10" aria-label="เลื่อนซ้าย">
                                 <ChevronLeft className="h-5 w-5" />
                             </Button>
-                            <Button size="icon" onClick={() => scroll(catScrollRef, 'right')} className="h-10 w-10 rounded-lg bg-gradient-to-r from-accent to-amber-600 text-accent-foreground border-none -skew-x-12 hover:skew-x-0 transition-transform active:scale-95 shadow-lg shadow-accent/20" aria-label="เลื่อนขวา">
+                            <Button size="icon" onClick={() => scroll(catScrollRef, 'right')} className="h-10 w-10" aria-label="เลื่อนขวา">
                                 <ChevronRight className="h-5 w-5" />
                             </Button>
                         </div>
-                        <Link href="/products" className="flex items-center text-lg font-bold text-gray-600 hover:text-accent transition-colors group">
+                        <Link href="/products" className="hidden md:flex items-center text-sm font-bold uppercase tracking-widest text-gray-600 hover:text-gray-900 transition-colors group">
                             ดูทุกหมวดหมู่
-                            <ChevronRight className="ml-1 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                            <ChevronRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                         </Link>
                     </div>
                 </motion.div>
 
                 <motion.div
                     ref={catScrollRef}
-                    className="flex md:grid md:grid-cols-3 lg:grid-cols-4 gap-6 overflow-x-auto md:overflow-visible pb-4 md:pb-0 snap-x snap-mandatory scrollbar-hide"
+                    className="flex md:grid md:grid-cols-3 lg:grid-cols-4 gap-4 overflow-x-auto md:overflow-visible pb-4 md:pb-0 snap-x snap-mandatory scrollbar-hide"
                     initial="hidden"
                     animate={categoriesLoading ? 'hidden' : 'visible'}
                     variants={staggerContainer}
                 >
                     {categoriesLoading
                         ? Array.from({ length: 4 }).map((_, i) => (
-                            <div key={i} className="h-[280px] w-[240px] md:w-auto flex-shrink-0 snap-start rounded-[2rem] bg-gray-50 overflow-hidden p-8">
+                            <div key={i} className="h-[280px] w-[240px] md:w-auto flex-shrink-0 snap-start bg-gray-50 overflow-hidden p-8">
                                 <div className="flex flex-col items-center justify-center h-full space-y-4">
-                                    <Skeleton className="h-20 w-20 rounded-[1.5rem]" />
+                                    <Skeleton className="h-20 w-20" />
                                     <Skeleton className="h-6 w-32" />
                                     <Skeleton className="h-4 w-24" />
                                 </div>
@@ -247,28 +240,28 @@ export default function Home() {
                             return (
                                 <motion.div key={category._id} variants={fadeInUp} className="w-[240px] md:w-auto flex-shrink-0 md:flex-shrink snap-start">
                                     <Link href={`/products?category=${category.slug}`} className="group block h-full">
-                                        <Card className="h-[280px] p-0 gap-0 border border-gray-200/60 shadow-none hover:shadow-xl hover:border-gray-200 transition-all duration-500 rounded-[2rem] overflow-hidden relative card-hover-lift">
+                                        <Card className="h-[280px] p-0 gap-0 border border-border hover:border-foreground transition-colors duration-300 overflow-hidden relative">
                                             {catImage
                                                 ? <Image
                                                     src={getImageUrl(catImage)}
                                                     alt={category.name}
                                                     fill
-                                                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                                    className="object-cover transition-transform duration-500 group-hover:scale-105"
                                                     sizes="240px"
                                                     priority
                                                     placeholder={category.blurDataURL ? 'blur' : 'empty'}
                                                     blurDataURL={category.blurDataURL}
                                                 />
                                                 : (
-                                                    <div className="absolute inset-0 bg-gradient-to-br from-primary to-gray-900 flex items-center justify-center">
+                                                    <div className="absolute inset-0 bg-zinc-950 flex items-center justify-center">
                                                         <Package className="h-16 w-16 text-white/40" />
                                                     </div>
                                                 )
                                             }
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
                                             <div className="absolute bottom-0 left-0 right-0 p-6 text-left">
-                                                <CardTitle className="text-xl font-black mb-1 text-white group-hover:text-accent transition-colors line-clamp-1 uppercase tracking-tight">{category.name}</CardTitle>
-                                                <CardDescription className="text-sm text-gray-200 font-medium italic line-clamp-1">
+                                                <CardTitle className="text-xl font-black mb-1 text-white line-clamp-1 uppercase tracking-tight">{category.name}</CardTitle>
+                                                <CardDescription className="text-sm text-gray-200 font-medium line-clamp-1">
                                                     {category.description || 'Premium Specialist Parts'}
                                                 </CardDescription>
                                             </div>
@@ -282,39 +275,37 @@ export default function Home() {
             </section>
 
             {/* ── Best Sellers ──────────────────────────────────────────────── */}
-            <section className="container mx-auto px-4 mt-24">
+            <section className="container mx-auto px-4 mt-20">
                 <motion.div
-                    className="flex items-end justify-between mb-12"
+                    className="flex items-end justify-between mb-8"
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true, margin: '-80px' }}
                     variants={fadeInUp}
                 >
                     <div>
-                        <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-2">
-                            สินค้า <span className="text-primary">ขายดี</span>
-                        </h2>
-                        <div className="h-2 w-24 bg-primary rounded-full" />
+                        <h2 className="font-display uppercase text-3xl md:text-4xl text-gray-900 leading-none mb-2">Best Sellers</h2>
+                        <p className="text-sm font-bold text-muted-foreground">สินค้าขายดี</p>
                     </div>
                     <div className="flex items-center gap-3">
                         <div className="flex md:hidden gap-2">
-                            <Button size="icon" variant="outline" onClick={() => scroll(popScrollRef, 'left')} className="h-10 w-10 rounded-lg border-2 border-gray-100 bg-white/80 backdrop-blur-sm -skew-x-12 hover:skew-x-0 transition-transform active:scale-95 shadow-sm" aria-label="เลื่อนซ้าย">
+                            <Button size="icon" variant="outline" onClick={() => scroll(popScrollRef, 'left')} className="h-10 w-10" aria-label="เลื่อนซ้าย">
                                 <ChevronLeft className="h-5 w-5" />
                             </Button>
-                            <Button size="icon" onClick={() => scroll(popScrollRef, 'right')} className="h-10 w-10 rounded-lg bg-gradient-to-r from-primary to-red-900 text-white border-none -skew-x-12 hover:skew-x-0 transition-transform active:scale-95 shadow-lg shadow-primary/20" aria-label="เลื่อนขวา">
+                            <Button size="icon" onClick={() => scroll(popScrollRef, 'right')} className="h-10 w-10" aria-label="เลื่อนขวา">
                                 <ChevronRight className="h-5 w-5" />
                             </Button>
                         </div>
-                        <Link href="/products" className="flex items-center text-lg font-bold text-gray-600 hover:text-primary transition-colors group">
+                        <Link href="/products" className="hidden md:flex items-center text-sm font-bold uppercase tracking-widest text-gray-600 hover:text-gray-900 transition-colors group">
                             ดูสินค้าทั้งหมด
-                            <ChevronRight className="ml-1 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                            <ChevronRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                         </Link>
                     </div>
                 </motion.div>
 
                 <motion.div
                     ref={popScrollRef}
-                    className="flex lg:grid lg:grid-cols-4 gap-6 items-stretch overflow-x-auto lg:overflow-visible pb-10 lg:pb-0 snap-x snap-mandatory scrollbar-hide px-4 md:px-0"
+                    className="flex lg:grid lg:grid-cols-4 gap-4 items-stretch overflow-x-auto lg:overflow-visible pb-10 lg:pb-0 snap-x snap-mandatory scrollbar-hide px-4 md:px-0"
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true, margin: '-50px' }}
@@ -323,7 +314,7 @@ export default function Home() {
                     {popularLoading
                         ? Array.from({ length: 4 }).map((_, i) => (
                             <div key={i} className="w-[240px] sm:w-[300px] lg:w-auto flex-shrink-0 snap-start h-[400px]">
-                                <Skeleton className="w-full h-full rounded-[2rem]" />
+                                <Skeleton className="w-full h-full" />
                             </div>
                         ))
                         : (popularProducts || []).slice(0, 8).map((product, idx) => (
@@ -334,10 +325,8 @@ export default function Home() {
                             >
                                 {idx < 3 && (
                                     <div className="absolute top-3 left-3 z-30 pointer-events-none">
-                                        <div className={`text-white text-[10px] font-black px-3 py-1 rounded-lg shadow-lg uppercase tracking-widest ${
-                                            idx === 0 ? 'bg-yellow-500' : idx === 1 ? 'bg-slate-400' : 'bg-amber-700'
-                                        }`}>
-                                            #{idx + 1} ขายดี
+                                        <div className="bg-foreground text-white font-display text-sm px-2.5 py-1 leading-none">
+                                            {String(idx + 1).padStart(2, '0')}
                                         </div>
                                     </div>
                                 )}
@@ -350,39 +339,37 @@ export default function Home() {
 
             {/* ── New Arrivals ──────────────────────────────────────────────── */}
             {(newProducts && newProducts.length > 0 || newProductsLoading) && (
-                <section className="container mx-auto px-4 mt-24">
+                <section className="container mx-auto px-4 mt-20">
                     <motion.div
-                        className="flex items-end justify-between mb-12"
+                        className="flex items-end justify-between mb-8"
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true, margin: '-80px' }}
                         variants={fadeInUp}
                     >
                         <div>
-                            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-2">
-                                สินค้า <span className="text-rose-500">มาใหม่</span>
-                            </h2>
-                            <div className="h-2 w-24 bg-accent rounded-full" />
+                            <h2 className="font-display uppercase text-3xl md:text-4xl text-gray-900 leading-none mb-2">New Arrivals</h2>
+                            <p className="text-sm font-bold text-muted-foreground">สินค้ามาใหม่</p>
                         </div>
                         <div className="flex items-center gap-3">
                             <div className="flex md:hidden gap-2">
-                                <Button size="icon" variant="outline" onClick={() => scroll(newScrollRef, 'left')} className="h-10 w-10 rounded-lg border-2 border-gray-100 bg-white/80 backdrop-blur-sm -skew-x-12 hover:skew-x-0 transition-transform active:scale-95 shadow-sm" aria-label="เลื่อนซ้าย">
+                                <Button size="icon" variant="outline" onClick={() => scroll(newScrollRef, 'left')} className="h-10 w-10" aria-label="เลื่อนซ้าย">
                                     <ChevronLeft className="h-5 w-5" />
                                 </Button>
-                                <Button size="icon" onClick={() => scroll(newScrollRef, 'right')} className="h-10 w-10 rounded-lg bg-gradient-to-r from-accent to-amber-600 text-accent-foreground border-none -skew-x-12 hover:skew-x-0 transition-transform active:scale-95 shadow-lg shadow-accent/20" aria-label="เลื่อนขวา">
+                                <Button size="icon" onClick={() => scroll(newScrollRef, 'right')} className="h-10 w-10" aria-label="เลื่อนขวา">
                                     <ChevronRight className="h-5 w-5" />
                                 </Button>
                             </div>
-                            <Link href="/products" className="flex items-center text-lg font-bold text-gray-600 hover:text-accent transition-colors group">
+                            <Link href="/products" className="hidden md:flex items-center text-sm font-bold uppercase tracking-widest text-gray-600 hover:text-gray-900 transition-colors group">
                                 ดูสินค้าทั้งหมด
-                                <ChevronRight className="ml-1 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                                <ChevronRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                             </Link>
                         </div>
                     </motion.div>
 
                     <motion.div
                         ref={newScrollRef}
-                        className="flex lg:grid lg:grid-cols-4 gap-6 items-stretch overflow-x-auto lg:overflow-visible pb-10 lg:pb-0 snap-x snap-mandatory scrollbar-hide px-4 md:px-0"
+                        className="flex lg:grid lg:grid-cols-4 gap-4 items-stretch overflow-x-auto lg:overflow-visible pb-10 lg:pb-0 snap-x snap-mandatory scrollbar-hide px-4 md:px-0"
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true, margin: '-50px' }}
@@ -391,7 +378,7 @@ export default function Home() {
                         {newProductsLoading
                             ? Array.from({ length: 4 }).map((_, i) => (
                                 <div key={i} className="w-[240px] sm:w-[300px] lg:w-auto flex-shrink-0 snap-start h-[400px]">
-                                    <Skeleton className="w-full h-full rounded-[2rem]" />
+                                    <Skeleton className="w-full h-full" />
                                 </div>
                             ))
                             : (newProducts || []).filter(p => p.isActive && p.isOnline).slice(0, 8).map((product, idx) => (
@@ -401,7 +388,7 @@ export default function Home() {
                                     className="relative w-[240px] sm:w-[300px] lg:w-auto lg:min-w-0 snap-start flex-shrink-0 lg:flex-shrink h-full"
                                 >
                                     <div className="absolute top-3 left-3 z-30 pointer-events-none">
-                                        <div className="bg-rose-500 text-white text-[10px] font-black px-3 py-1 rounded-lg shadow-lg uppercase tracking-widest">
+                                        <div className="bg-brand text-brand-foreground text-[10px] font-black px-3 py-1 uppercase tracking-widest">
                                             New
                                         </div>
                                     </div>
@@ -414,9 +401,7 @@ export default function Home() {
             )}
 
             {/* ── Why Choose Us ─────────────────────────────────────────────── */}
-            <section className="bg-zinc-950 rounded-[3rem] p-10 md:p-20 text-center relative overflow-hidden mx-4 mt-24"
-                style={{ background: 'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(175,29,53,0.12) 0%, transparent 70%), #09090b' }}
-            >
+            <section className="bg-zinc-950 p-10 md:p-20 text-center relative overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8 mt-20">
                 <motion.div
                     className="relative z-10 container mx-auto"
                     initial="hidden"
@@ -424,24 +409,24 @@ export default function Home() {
                     viewport={{ once: true, margin: '-80px' }}
                     variants={staggerContainer}
                 >
-                    <motion.div variants={fadeInUp} className="inline-block px-4 py-1.5 rounded-full bg-zinc-800/80 border border-zinc-700 text-gray-300 text-sm font-bold uppercase tracking-widest mb-6">
+                    <motion.div variants={fadeInUp} className="inline-block text-gray-400 text-[11px] md:text-xs font-bold uppercase tracking-[0.25em] mb-5">
                         Why Choose Banrakrod Loei
                     </motion.div>
-                    <motion.h2 variants={fadeInUp} className="text-4xl md:text-6xl font-black mb-16 text-white">
-                        WORLD CLASS <span className="text-primary italic">STANDARD</span>
+                    <motion.h2 variants={fadeInUp} className="font-display uppercase leading-[0.95] text-4xl md:text-6xl mb-16 text-white">
+                        World Class <span className="text-brand">Standard</span>
                     </motion.h2>
-                    <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-12" variants={staggerContainer}>
+                    <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-8" variants={staggerContainer}>
                         {[
-                            { icon: ShieldCheck, title: 'Authentic 100%', desc: 'มั่นใจได้ในคุณภาพ สินค้าแท้และเกรดพรีเมียมจากผู้ผลิตชั้นนำเท่านั้น', gradient: 'from-primary to-red-900', shadow: 'shadow-[0_10px_30px_-10px_rgba(175,29,53,0.5)]' },
-                            { icon: Zap, title: 'Fast & Secure', desc: 'จัดส่งรวดเร็วทั่วประเทศ แพ็คสินค้าอย่างดี ปลอดภัยหายห่วง', gradient: 'from-accent to-amber-600', shadow: 'shadow-[0_10px_30px_-10px_rgba(201,162,39,0.5)]' },
-                            { icon: Star, title: 'Expert Support', desc: 'ทีมงานมืออาชีพพร้อมให้คำปรึกษา ทุกปัญหาเรื่องเวสป้าเราช่วยได้', gradient: 'from-blue-500 to-indigo-600', shadow: 'shadow-[0_10px_30px_-10px_rgba(59,130,246,0.5)]' },
+                            { icon: ShieldCheck, title: 'Authentic 100%', desc: 'มั่นใจได้ในคุณภาพ สินค้าแท้และเกรดพรีเมียมจากผู้ผลิตชั้นนำเท่านั้น' },
+                            { icon: Zap, title: 'Fast & Secure', desc: 'จัดส่งรวดเร็วทั่วประเทศ แพ็คสินค้าอย่างดี ปลอดภัยหายห่วง' },
+                            { icon: Star, title: 'Expert Support', desc: 'ทีมงานมืออาชีพพร้อมให้คำปรึกษา ทุกปัญหาเรื่องเวสป้าเราช่วยได้' },
                         ].map((feature, i) => (
-                            <motion.div key={i} variants={scaleIn} className="text-center group p-8 rounded-3xl transition-all hover:bg-white/5">
-                                <div className={`bg-gradient-to-br ${feature.gradient} rounded-3xl w-24 h-24 flex items-center justify-center mx-auto mb-8 ${feature.shadow} group-hover:scale-110 group-hover:rotate-6 transition-all duration-500`}>
-                                    <feature.icon className="h-12 w-12 text-white" />
+                            <motion.div key={i} variants={scaleIn} className="text-center border border-white/10 p-8 transition-colors hover:border-white/30">
+                                <div className="border border-white/15 w-20 h-20 flex items-center justify-center mx-auto mb-8">
+                                    <feature.icon className="h-9 w-9 text-white" />
                                 </div>
-                                <h3 className="text-2xl font-bold mb-4 text-white">{feature.title}</h3>
-                                <p className="text-gray-400 leading-relaxed text-lg">{feature.desc}</p>
+                                <h3 className="text-xl font-bold mb-4 text-white uppercase tracking-wide">{feature.title}</h3>
+                                <p className="text-gray-400 leading-relaxed text-base">{feature.desc}</p>
                             </motion.div>
                         ))}
                     </motion.div>
@@ -449,47 +434,42 @@ export default function Home() {
             </section>
 
             {/* ── How to Order ──────────────────────────────────────────────── */}
-            <section className="container mx-auto px-4 mt-24">
+            <section className="container mx-auto px-4 mt-20">
                 <motion.div
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true, margin: '-80px' }}
                     variants={staggerContainer}
                 >
-                    <motion.div variants={fadeInUp} className="text-center mb-14">
-                        <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-3">
-                            วิธี <span className="text-primary">สั่งซื้อ</span>
+                    <motion.div variants={fadeInUp} className="text-center mb-12">
+                        <h2 className="font-display uppercase text-3xl md:text-4xl text-gray-900 leading-none mb-3">
+                            How to Order
                         </h2>
-                        <p className="text-gray-600 text-lg max-w-xl mx-auto">ง่าย เร็ว ส่งถึงบ้าน ใน 4 ขั้นตอน</p>
+                        <p className="text-muted-foreground text-base max-w-xl mx-auto font-bold">วิธีสั่งซื้อ — ง่าย เร็ว ส่งถึงบ้าน ใน 4 ขั้นตอน</p>
                     </motion.div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         {[
-                            { step: '01', icon: Search, title: 'เลือกสินค้า', desc: 'ค้นหาและเลือกอะไหล่ที่ต้องการ กรองตามหมวดหมู่หรือรุ่นรถ', color: 'from-blue-500 to-indigo-600', shadow: 'shadow-blue-100' },
-                            { step: '02', icon: ShoppingCart, title: 'ใส่ตะกร้า', desc: 'เพิ่มสินค้าลงตะกร้า เลือกตัวเลือกและจำนวนตามต้องการ', color: 'from-accent to-amber-600', shadow: 'shadow-pink-100' },
-                            { step: '03', icon: CheckCircle, title: 'ยืนยันคำสั่งซื้อ', desc: 'ระบุที่อยู่จัดส่ง เลือกวิธีส่ง และชำระเงินผ่าน QR Code', color: 'from-primary to-red-900', shadow: 'shadow-red-100' },
-                            { step: '04', icon: Truck, title: 'รอรับสินค้า', desc: 'เราแพ็คและส่งสินค้าภายใน 1-2 วันทำการหลังยืนยันการชำระ', color: 'from-orange-500 to-amber-600', shadow: 'shadow-orange-100' },
+                            { step: '01', icon: Search, title: 'เลือกสินค้า', desc: 'ค้นหาและเลือกอะไหล่ที่ต้องการ กรองตามหมวดหมู่หรือรุ่นรถ' },
+                            { step: '02', icon: ShoppingCart, title: 'ใส่ตะกร้า', desc: 'เพิ่มสินค้าลงตะกร้า เลือกตัวเลือกและจำนวนตามต้องการ' },
+                            { step: '03', icon: CheckCircle, title: 'ยืนยันคำสั่งซื้อ', desc: 'ระบุที่อยู่จัดส่ง เลือกวิธีส่ง และชำระเงินผ่าน QR Code' },
+                            { step: '04', icon: Truck, title: 'รอรับสินค้า', desc: 'เราแพ็คและส่งสินค้าภายใน 1-2 วันทำการหลังยืนยันการชำระ' },
                         ].map((item, i) => (
-                            <motion.div key={i} variants={fadeInUp} className="relative bg-white rounded-3xl p-8 border border-gray-200 shadow-lg hover:shadow-2xl transition-all duration-500 group card-hover-lift overflow-hidden">
+                            <motion.div key={i} variants={fadeInUp} className="relative bg-white p-8 border border-border hover:border-foreground transition-colors duration-300 overflow-hidden">
                                 <div className="flex items-start justify-between mb-6">
-                                    <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-6 transition-all duration-500`}>
-                                        <item.icon className="h-7 w-7 text-white" />
+                                    <div className="w-12 h-12 bg-foreground flex items-center justify-center">
+                                        <item.icon className="h-6 w-6 text-white" />
                                     </div>
-                                    <span className="text-5xl font-black text-gray-100 group-hover:text-gray-200 transition-colors leading-none">{item.step}</span>
+                                    <span className="font-display text-5xl text-gray-200 leading-none">{item.step}</span>
                                 </div>
-                                <h3 className="text-xl font-black text-gray-900 mb-3">{item.title}</h3>
+                                <h3 className="text-lg font-black text-gray-900 mb-3">{item.title}</h3>
                                 <p className="text-gray-600 leading-relaxed text-sm">{item.desc}</p>
-                                {i < 3 && (
-                                    <div className="hidden lg:flex absolute -right-4 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white border border-gray-200 shadow items-center justify-center">
-                                        <ChevronRight className="h-4 w-4 text-gray-400" />
-                                    </div>
-                                )}
                             </motion.div>
                         ))}
                     </div>
 
                     <motion.div variants={fadeInUp} className="text-center mt-10">
-                        <Button size="lg" asChild className="rounded-full px-10 h-14 text-lg font-bold bg-gradient-to-r from-primary to-red-900 border-0 shadow-lg shadow-primary/30 hover:brightness-110 hover:scale-105 transition-all">
+                        <Button size="lg" asChild className="px-10 h-14 text-base uppercase">
                             <Link href="/products">
                                 <ShoppingCart className="mr-2 h-5 w-5" />
                                 เริ่มช้อปเลย
@@ -500,55 +480,51 @@ export default function Home() {
             </section>
 
             {/* ── Contact & Social ──────────────────────────────────────────── */}
-            <section className="container mx-auto px-4 mt-24 mb-8">
+            <section className="container mx-auto px-4 mt-20 mb-8">
                 <motion.div
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true, margin: '-80px' }}
                     variants={staggerContainer}
-                    className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-[3rem] p-10 md:p-16 overflow-hidden relative"
+                    className="border border-border p-10 md:p-16 overflow-hidden relative"
                 >
-                    {/* Background deco */}
-                    <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-                    <div className="absolute bottom-0 left-0 w-[200px] h-[200px] bg-accent/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
-
                     <div className="relative z-10 grid md:grid-cols-2 gap-12 items-center">
                         {/* Info */}
                         <motion.div variants={fadeInUp}>
-                            <div className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-bold uppercase tracking-widest mb-6">
-                                ติดต่อเรา
+                            <div className="inline-block text-muted-foreground text-[11px] font-bold uppercase tracking-[0.25em] mb-5">
+                                Contact Us
                             </div>
                             <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-8 leading-tight">
                                 พร้อมให้คำปรึกษา<br />
-                                <span className="text-primary">ทุกวัน ทุกเวลา</span>
+                                ทุกวัน ทุกเวลา
                             </h2>
 
                             <div className="space-y-4 mb-8">
                                 {contact.items.filter(i => i.type === 'phone').map((item, i) => (
                                     <a key={i} href={`tel:${item.value?.replace(/-/g, '')}`}
-                                        className="flex items-center gap-4 group hover:text-primary transition-colors"
+                                        className="flex items-center gap-4 group transition-colors"
                                     >
-                                        <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all duration-300 shrink-0">
-                                            <Phone className="h-5 w-5 text-primary group-hover:text-white" />
+                                        <div className="w-12 h-12 bg-foreground flex items-center justify-center shrink-0">
+                                            <Phone className="h-5 w-5 text-white" />
                                         </div>
                                         <div>
                                             <div className="text-xs font-bold text-gray-500 uppercase tracking-wider">{item.label}</div>
-                                            <div className="text-lg font-black text-gray-800 group-hover:text-primary transition-colors">{item.value}</div>
+                                            <div className="text-lg font-black text-gray-900 group-hover:underline underline-offset-4">{item.value}</div>
                                         </div>
                                     </a>
                                 ))}
 
                                 {contact.items.filter(i => i.type === 'address').map((item, i) => (
                                     <div key={i} className="flex items-start gap-4">
-                                        <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center shrink-0 mt-0.5">
-                                            <MapPin className="h-5 w-5 text-accent" />
+                                        <div className="w-12 h-12 border border-border flex items-center justify-center shrink-0 mt-0.5">
+                                            <MapPin className="h-5 w-5 text-foreground" />
                                         </div>
                                         <div>
                                             <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">ที่อยู่ร้าน</div>
                                             <div className="text-sm text-gray-700 leading-relaxed">{item.value}</div>
                                             {contact.items.filter(i => i.type === 'maps').map((m, mi) => (
                                                 <a key={mi} href={m.href} target="_blank" rel="noopener noreferrer"
-                                                    className="inline-flex items-center gap-1 text-xs font-bold text-primary hover:underline mt-1"
+                                                    className="inline-flex items-center gap-1 text-xs font-bold text-foreground underline underline-offset-4 mt-1"
                                                 >
                                                     <MapPin className="h-3 w-3" />
                                                     ดูแผนที่ Google Maps
@@ -565,7 +541,7 @@ export default function Home() {
                                 <div className="flex gap-3 flex-wrap">
                                     {contact.social.facebook && (
                                         <a href={contact.social.facebook} target="_blank" rel="noopener noreferrer"
-                                            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold text-sm transition-all hover:scale-105 active:scale-95"
+                                            className="flex items-center gap-2 px-4 py-2.5 border border-border hover:border-foreground text-gray-800 font-bold text-sm transition-colors"
                                         >
                                             <Facebook className="h-5 w-5" />
                                             Facebook
@@ -573,7 +549,7 @@ export default function Home() {
                                     )}
                                     {contact.social.tiktok && (
                                         <a href={contact.social.tiktok} target="_blank" rel="noopener noreferrer"
-                                            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold text-sm transition-all hover:scale-105 active:scale-95"
+                                            className="flex items-center gap-2 px-4 py-2.5 border border-border hover:border-foreground text-gray-800 font-bold text-sm transition-colors"
                                         >
                                             <TikTokIcon className="h-5 w-5" />
                                             TikTok
@@ -581,7 +557,7 @@ export default function Home() {
                                     )}
                                     {contact.social.line && (
                                         <a href={contact.social.line} target="_blank" rel="noopener noreferrer"
-                                            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-green-50 hover:bg-green-100 text-green-600 font-bold text-sm transition-all hover:scale-105 active:scale-95"
+                                            className="flex items-center gap-2 px-4 py-2.5 border border-border hover:border-foreground text-gray-800 font-bold text-sm transition-colors"
                                         >
                                             <LineIcon className="h-5 w-5" />
                                             LINE
@@ -589,7 +565,7 @@ export default function Home() {
                                     )}
                                     {contact.social.youtube && (
                                         <a href={contact.social.youtube} target="_blank" rel="noopener noreferrer"
-                                            className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-red-50 hover:bg-red-100 text-red-600 font-bold text-sm transition-all hover:scale-105 active:scale-95"
+                                            className="flex items-center gap-2 px-4 py-2.5 border border-border hover:border-foreground text-gray-800 font-bold text-sm transition-colors"
                                         >
                                             <Headphones className="h-5 w-5" />
                                             YouTube
@@ -608,23 +584,23 @@ export default function Home() {
                                     href={mapsItem?.href}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="group rounded-3xl overflow-hidden shadow-2xl border border-gray-200 aspect-[4/3] md:aspect-auto md:h-[420px] flex flex-col items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300 hover:from-primary/10 hover:to-amber-100 transition-all duration-500 relative"
+                                    className="group overflow-hidden border border-border hover:border-foreground aspect-[4/3] md:aspect-auto md:h-[420px] flex flex-col items-center justify-center bg-gray-50 transition-colors duration-300 relative"
                                 >
                                     {/* Road/grid pattern background */}
                                     <div className="absolute inset-0 opacity-10"
                                         style={{ backgroundImage: 'repeating-linear-gradient(0deg,#000 0,#000 1px,transparent 0,transparent 50%),repeating-linear-gradient(90deg,#000 0,#000 1px,transparent 0,transparent 50%)', backgroundSize: '40px 40px' }}
                                     />
                                     <div className="relative z-10 flex flex-col items-center gap-4 p-8 text-center">
-                                        <div className="w-20 h-20 rounded-full bg-white shadow-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
-                                            <MapPin className="h-10 w-10 text-primary" />
+                                        <div className="w-20 h-20 bg-white border border-border flex items-center justify-center">
+                                            <MapPin className="h-10 w-10 text-brand" />
                                         </div>
                                         <div>
-                                            <p className="font-black text-xl text-gray-800 mb-1">ร้านบ้านรักรถเมืองเลย</p>
+                                            <p className="font-black text-xl text-gray-900 mb-1">ร้านบ้านรักรถเมืองเลย</p>
                                             <p className="text-sm text-gray-600 max-w-[240px] leading-relaxed">
                                                 {contact.items.find(i => i.type === 'address')?.value}
                                             </p>
                                         </div>
-                                        <span className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary text-white font-bold text-sm group-hover:bg-primary/90 transition-colors shadow-lg">
+                                        <span className="inline-flex items-center gap-2 px-6 py-3 bg-foreground text-white font-bold text-sm uppercase tracking-wide group-hover:bg-black transition-colors">
                                             <MapPin className="h-4 w-4" />
                                             เปิดใน Google Maps
                                         </span>

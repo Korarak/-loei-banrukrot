@@ -40,6 +40,10 @@ export default {
                     DEFAULT: "hsl(var(--destructive))",
                     foreground: "hsl(var(--destructive-foreground))",
                 },
+                brand: {
+                    DEFAULT: "hsl(var(--brand))",
+                    foreground: "hsl(var(--brand-foreground))",
+                },
                 border: "hsl(var(--border))",
                 input: "hsl(var(--input))",
                 ring: "hsl(var(--ring))",
@@ -54,6 +58,7 @@ export default {
             fontFamily: {
                 sans: ["var(--font-sarabun)", "ui-sans-serif", "system-ui", "sans-serif"],
                 mitr: ["var(--font-mitr)", "sans-serif"],
+                display: ["var(--font-display)", "var(--font-mitr)", "sans-serif"],
             },
             borderRadius: {
                 lg: "var(--radius)",
