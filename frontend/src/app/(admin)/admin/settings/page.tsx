@@ -15,7 +15,7 @@ import {
     DialogFooter,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Save, Landmark, Store, Trash2, AlertTriangle, ShoppingBag, ListOrdered, Users, LayoutGrid, RotateCcw } from 'lucide-react';
+import { Save, Landmark, Store, Trash2, AlertTriangle, ShoppingBag, ListOrdered, Users, LayoutGrid, RotateCcw, QrCode } from 'lucide-react';
 import api from '@/lib/api';
 import { useAuthStore } from '@/stores/useAuthStore';
 
@@ -36,6 +36,17 @@ const SETTING_GROUPS: { label: string; icon: React.ElementType; keys: { key: str
             { key: 'store_name', label: 'ชื่อร้าน', placeholder: 'เช่น บ้านรักรถเมืองเลย' },
             { key: 'store_phone', label: 'เบอร์โทรร้าน', placeholder: 'เช่น 042-000-000' },
             { key: 'store_address', label: 'ที่อยู่ร้าน', placeholder: 'เช่น 519/2 ม.5 ต.เมือง อ.เมือง จ.เลย 42000' },
+        ],
+    },
+];
+
+// เฉพาะ owner เท่านั้นที่เห็น/แก้ได้ — backend คัดกรอง GET /settings และปฏิเสธ PUT ให้เจ้าของร้านเท่านั้น
+const OWNER_SETTING_GROUPS: typeof SETTING_GROUPS = [
+    {
+        label: 'PromptPay',
+        icon: QrCode,
+        keys: [
+            { key: 'payment_promptpay_id', label: 'เบอร์พร้อมเพย์ (สร้าง QR อัตโนมัติ)', placeholder: 'เช่น 0613702484 หรือเลขบัตร ปชช. 13 หลัก' },
         ],
     },
 ];
@@ -83,6 +94,38 @@ const RESET_ACTIONS = [
     },
 ] as const;
 
+function SettingField({
+    settingKey, label, placeholder, value, dirty, saving, onChange, onSave,
+}: {
+    settingKey: string;
+    label: string;
+    placeholder: string;
+    value: string;
+    dirty: boolean;
+    saving: boolean;
+    onChange: (val: string) => void;
+    onSave: () => void;
+}) {
+    return (
+        <div className="space-y-1.5">
+            <Label htmlFor={settingKey} className="text-sm font-medium text-gray-700">{label}</Label>
+            <div className="flex gap-2">
+                <Input
+                    id={settingKey}
+                    value={value}
+                    placeholder={placeholder}
+                    onChange={e => onChange(e.target.value)}
+                    className="flex-1"
+                />
+                <Button size="sm" onClick={onSave} disabled={!dirty || saving} className="shrink-0 gap-1.5">
+                    <Save className="h-3.5 w-3.5" />
+                    บันทึก
+                </Button>
+            </div>
+        </div>
+    );
+}
+
 export default function SettingsPage() {
     const { data: settings, isLoading } = useAdminSettings();
     const updateSetting = useUpdateSetting();
@@ -114,8 +157,8 @@ export default function SettingsPage() {
             await updateSetting.mutateAsync({ key, value: values[key] ?? '' });
             setDirty(prev => ({ ...prev, [key]: false }));
             toast.success('บันทึกเรียบร้อย');
-        } catch {
-            toast.error('บันทึกไม่สำเร็จ');
+        } catch (err: any) {
+            toast.error('บันทึกไม่สำเร็จ', { description: err.response?.data?.message });
         }
     };
 
@@ -161,27 +204,43 @@ export default function SettingsPage() {
                     </h2>
 
                     {group.keys.map(({ key, label, placeholder }) => (
-                        <div key={key} className="space-y-1.5">
-                            <Label htmlFor={key} className="text-sm font-medium text-gray-700">{label}</Label>
-                            <div className="flex gap-2">
-                                <Input
-                                    id={key}
-                                    value={values[key] ?? ''}
-                                    placeholder={placeholder}
-                                    onChange={e => handleChange(key, e.target.value)}
-                                    className="flex-1"
-                                />
-                                <Button
-                                    size="sm"
-                                    onClick={() => handleSave(key)}
-                                    disabled={!dirty[key] || updateSetting.isPending}
-                                    className="shrink-0 gap-1.5"
-                                >
-                                    <Save className="h-3.5 w-3.5" />
-                                    บันทึก
-                                </Button>
-                            </div>
-                        </div>
+                        <SettingField
+                            key={key}
+                            settingKey={key}
+                            label={label}
+                            placeholder={placeholder}
+                            value={values[key] ?? ''}
+                            dirty={!!dirty[key]}
+                            saving={updateSetting.isPending}
+                            onChange={val => handleChange(key, val)}
+                            onSave={() => handleSave(key)}
+                        />
+                    ))}
+                </Card>
+            ))}
+
+            {isOwner && OWNER_SETTING_GROUPS.map(group => (
+                <Card key={group.label} className="p-6 border shadow-sm rounded-2xl space-y-5">
+                    <div>
+                        <h2 className="font-bold text-base text-gray-900 flex items-center gap-2">
+                            <group.icon className="h-4 w-4 text-primary" />
+                            {group.label}
+                        </h2>
+                        <p className="text-xs text-gray-500 mt-1">มองเห็นและแก้ไขได้เฉพาะเจ้าของร้าน ใช้สร้าง QR Code ชำระเงินในหน้าคำสั่งซื้อของลูกค้า</p>
+                    </div>
+
+                    {group.keys.map(({ key, label, placeholder }) => (
+                        <SettingField
+                            key={key}
+                            settingKey={key}
+                            label={label}
+                            placeholder={placeholder}
+                            value={values[key] ?? ''}
+                            dirty={!!dirty[key]}
+                            saving={updateSetting.isPending}
+                            onChange={val => handleChange(key, val)}
+                            onSave={() => handleSave(key)}
+                        />
                     ))}
                 </Card>
             ))}

@@ -1,8 +1,15 @@
 const generatePayload = require('promptpay-qr');
 const qrcode = require('qrcode');
+const Setting = require('../models/Setting');
+
+async function resolvePromptPayId() {
+    const setting = await Setting.findOne({ key: 'payment_promptpay_id' });
+    if (setting?.value) return setting.value;
+    return process.env.PROMPTPAY_ID || '000-000-0000';
+}
 
 exports.generateQRCode = async (amount) => {
-    const mobileNumber = process.env.PROMPTPAY_ID || '000-000-0000';
+    const mobileNumber = await resolvePromptPayId();
     const payload = generatePayload(mobileNumber, { amount });
 
     try {
@@ -16,7 +23,7 @@ exports.generateQRCode = async (amount) => {
 };
 
 exports.generateQRCodeDataURL = async (amount) => {
-    const mobileNumber = process.env.PROMPTPAY_ID || '000-000-0000';
+    const mobileNumber = await resolvePromptPayId();
     const payload = generatePayload(mobileNumber, { amount });
 
     try {
