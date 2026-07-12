@@ -84,6 +84,26 @@ export default function Home() {
     const newScrollRef = useRef<HTMLDivElement>(null);
     const popScrollRef = useRef<HTMLDivElement>(null);
 
+    // ── Bento span patterns (md+/lg+ only) — literal classes so Tailwind's
+    // content scanner can find them; each group of spans sums to the grid's
+    // column count so rows stay full-width with no gaps.
+    const categoryBentoClasses = [
+        'md:col-span-2 md:row-span-2', // 0 — big feature tile
+        'md:col-span-2 md:row-span-1', // 1 — wide tile
+        'md:col-span-1 md:row-span-1', // 2 — small
+        'md:col-span-1 md:row-span-1', // 3 — small
+    ];
+    const bestSellerBentoClasses = [
+        'lg:col-span-2', 'lg:col-span-1', 'lg:col-span-1',
+        'lg:col-span-1', 'lg:col-span-1', 'lg:col-span-2',
+        'lg:col-span-2', 'lg:col-span-2',
+    ];
+    const newArrivalBentoClasses = [
+        'lg:col-span-1', 'lg:col-span-1', 'lg:col-span-2',
+        'lg:col-span-2', 'lg:col-span-1', 'lg:col-span-1',
+        'lg:col-span-2', 'lg:col-span-2',
+    ];
+
     const scroll = (ref: React.RefObject<HTMLDivElement>, dir: 'left' | 'right') => {
         if (!ref.current) return;
         const first = ref.current.querySelector(':scope > div') as HTMLElement;
@@ -104,7 +124,7 @@ export default function Home() {
 
             {/* ── Hero — flat ink block, display type ───────────────────────── */}
             <section className="relative bg-zinc-950 text-white overflow-hidden -mx-4 sm:-mx-6 lg:-mx-8">
-                <div className="relative container mx-auto px-6 md:px-12 pt-14 md:pt-20 pb-16 md:pb-24">
+                <div className="relative container mx-auto px-6 md:px-12 pt-14 md:pt-20 pb-24 md:pb-36">
                     <motion.div
                         className="relative z-10 max-w-3xl mx-auto text-center"
                         initial="hidden"
@@ -161,10 +181,10 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* ── Trust bar ─────────────────────────────────────────────────── */}
-            <section className="-mx-4 sm:-mx-6 lg:-mx-8 border-b border-border">
+            {/* ── Trust bar — floating card overlapping the hero for depth ──── */}
+            <section className="container mx-auto px-4 -mt-10 md:-mt-16 relative z-10">
                 <motion.div
-                    className="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 divide-x divide-border"
+                    className="bg-white border border-border shadow-2xl shadow-black/10 grid grid-cols-2 md:grid-cols-4 divide-x divide-border"
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true, margin: '-50px' }}
@@ -220,14 +240,14 @@ export default function Home() {
 
                 <motion.div
                     ref={catScrollRef}
-                    className="flex md:grid md:grid-cols-3 lg:grid-cols-4 gap-4 overflow-x-auto md:overflow-visible pb-4 md:pb-0 snap-x snap-mandatory scrollbar-hide"
+                    className="flex md:grid md:grid-cols-4 md:grid-rows-2 gap-4 overflow-x-auto md:overflow-visible pb-4 md:pb-0 snap-x snap-mandatory scrollbar-hide md:h-[560px]"
                     initial="hidden"
                     animate={categoriesLoading ? 'hidden' : 'visible'}
                     variants={staggerContainer}
                 >
                     {categoriesLoading
                         ? Array.from({ length: 4 }).map((_, i) => (
-                            <div key={i} className="h-[280px] w-[240px] md:w-auto flex-shrink-0 snap-start bg-gray-50 overflow-hidden p-8">
+                            <div key={i} className={`h-[280px] md:h-full w-[240px] md:w-auto flex-shrink-0 snap-start bg-gray-50 overflow-hidden p-8 ${categoryBentoClasses[i]}`}>
                                 <div className="flex flex-col items-center justify-center h-full space-y-4">
                                     <Skeleton className="h-20 w-20" />
                                     <Skeleton className="h-6 w-32" />
@@ -235,19 +255,20 @@ export default function Home() {
                                 </div>
                             </div>
                         ))
-                        : (categories || []).slice(0, 4).map((category) => {
+                        : (categories || []).slice(0, 4).map((category, i) => {
                             const catImage = category.imageUrl || category.sampleImage;
+                            const isBig = i === 0;
                             return (
-                                <motion.div key={category._id} variants={fadeInUp} className="w-[240px] md:w-auto flex-shrink-0 md:flex-shrink snap-start">
+                                <motion.div key={category._id} variants={fadeInUp} className={`w-[240px] md:w-auto flex-shrink-0 md:flex-shrink snap-start ${categoryBentoClasses[i]}`}>
                                     <Link href={`/products?category=${category.slug}`} className="group block h-full">
-                                        <Card className="h-[280px] p-0 gap-0 border border-border hover:border-foreground transition-colors duration-300 overflow-hidden relative">
+                                        <Card className="h-[280px] md:h-full p-0 gap-0 border border-border hover:border-foreground transition-colors duration-300 overflow-hidden relative">
                                             {catImage
                                                 ? <Image
                                                     src={getImageUrl(catImage)}
                                                     alt={category.name}
                                                     fill
                                                     className="object-cover transition-transform duration-500 group-hover:scale-105"
-                                                    sizes="240px"
+                                                    sizes={isBig ? "(max-width: 768px) 240px, 40vw" : "(max-width: 768px) 240px, 20vw"}
                                                     priority
                                                     placeholder={category.blurDataURL ? 'blur' : 'empty'}
                                                     blurDataURL={category.blurDataURL}
@@ -259,8 +280,8 @@ export default function Home() {
                                                 )
                                             }
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
-                                            <div className="absolute bottom-0 left-0 right-0 p-6 text-left">
-                                                <CardTitle className="text-xl font-black mb-1 text-white line-clamp-1 uppercase tracking-tight">{category.name}</CardTitle>
+                                            <div className={`absolute bottom-0 left-0 right-0 text-left ${isBig ? 'p-8' : 'p-6'}`}>
+                                                <CardTitle className={`font-black mb-1 text-white line-clamp-1 uppercase tracking-tight ${isBig ? 'text-3xl' : 'text-xl'}`}>{category.name}</CardTitle>
                                                 <CardDescription className="text-sm text-gray-200 font-medium line-clamp-1">
                                                     {category.description || 'Premium Specialist Parts'}
                                                 </CardDescription>
@@ -305,7 +326,7 @@ export default function Home() {
 
                 <motion.div
                     ref={popScrollRef}
-                    className="flex lg:grid lg:grid-cols-4 gap-4 items-stretch overflow-x-auto lg:overflow-visible pb-10 lg:pb-0 snap-x snap-mandatory scrollbar-hide px-4 md:px-0"
+                    className="flex lg:grid lg:grid-cols-4 gap-4 items-start overflow-x-auto lg:overflow-visible pb-10 lg:pb-0 snap-x snap-mandatory scrollbar-hide px-4 md:px-0"
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true, margin: '-50px' }}
@@ -313,7 +334,7 @@ export default function Home() {
                 >
                     {popularLoading
                         ? Array.from({ length: 4 }).map((_, i) => (
-                            <div key={i} className="w-[240px] sm:w-[300px] lg:w-auto flex-shrink-0 snap-start h-[400px]">
+                            <div key={i} className={`w-[240px] sm:w-[300px] lg:w-auto flex-shrink-0 snap-start h-[400px] ${bestSellerBentoClasses[i]}`}>
                                 <Skeleton className="w-full h-full" />
                             </div>
                         ))
@@ -321,10 +342,10 @@ export default function Home() {
                             <motion.div
                                 key={product._id}
                                 variants={fadeInUp}
-                                className="relative w-[240px] sm:w-[300px] lg:w-auto lg:min-w-0 snap-start flex-shrink-0 lg:flex-shrink h-full"
+                                className={`relative w-[240px] sm:w-[300px] lg:w-auto lg:min-w-0 snap-start flex-shrink-0 lg:flex-shrink ${bestSellerBentoClasses[idx % bestSellerBentoClasses.length]}`}
                             >
                                 {idx < 3 && (
-                                    <div className="absolute top-3 left-3 z-30 pointer-events-none">
+                                    <div className="absolute bottom-3 left-3 z-30 pointer-events-none">
                                         <div className="bg-foreground text-white font-display text-sm px-2.5 py-1 leading-none">
                                             {String(idx + 1).padStart(2, '0')}
                                         </div>
@@ -369,7 +390,7 @@ export default function Home() {
 
                     <motion.div
                         ref={newScrollRef}
-                        className="flex lg:grid lg:grid-cols-4 gap-4 items-stretch overflow-x-auto lg:overflow-visible pb-10 lg:pb-0 snap-x snap-mandatory scrollbar-hide px-4 md:px-0"
+                        className="flex lg:grid lg:grid-cols-4 gap-4 items-start overflow-x-auto lg:overflow-visible pb-10 lg:pb-0 snap-x snap-mandatory scrollbar-hide px-4 md:px-0"
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true, margin: '-50px' }}
@@ -377,7 +398,7 @@ export default function Home() {
                     >
                         {newProductsLoading
                             ? Array.from({ length: 4 }).map((_, i) => (
-                                <div key={i} className="w-[240px] sm:w-[300px] lg:w-auto flex-shrink-0 snap-start h-[400px]">
+                                <div key={i} className={`w-[240px] sm:w-[300px] lg:w-auto flex-shrink-0 snap-start h-[400px] ${newArrivalBentoClasses[i]}`}>
                                     <Skeleton className="w-full h-full" />
                                 </div>
                             ))
@@ -385,9 +406,9 @@ export default function Home() {
                                 <motion.div
                                     key={product._id}
                                     variants={fadeInUp}
-                                    className="relative w-[240px] sm:w-[300px] lg:w-auto lg:min-w-0 snap-start flex-shrink-0 lg:flex-shrink h-full"
+                                    className={`relative w-[240px] sm:w-[300px] lg:w-auto lg:min-w-0 snap-start flex-shrink-0 lg:flex-shrink ${newArrivalBentoClasses[idx % newArrivalBentoClasses.length]}`}
                                 >
-                                    <div className="absolute top-3 left-3 z-30 pointer-events-none">
+                                    <div className="absolute bottom-3 left-3 z-30 pointer-events-none">
                                         <div className="bg-brand text-brand-foreground text-[10px] font-black px-3 py-1 uppercase tracking-widest">
                                             New
                                         </div>
