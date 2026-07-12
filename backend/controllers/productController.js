@@ -6,6 +6,12 @@ const { Product, ProductVariant, ProductImage, Category, OrderDetail } = require
 const { csvProductRowSchema } = require('../models/validationSchemas');
 
 const escapeCSV = (val) => `"${String(val ?? '').replace(/"/g, '""')}"`;
+// Trims each comma-separated brand token and dedupes, so however the admin
+// types spacing/repeats ("SIP,PIAGGIO" / " SIP , sip ") it's stored consistently.
+const normalizeBrand = (raw) => {
+    if (!raw) return raw;
+    return Array.from(new Set(String(raw).split(',').map(b => b.trim()).filter(Boolean))).join(', ');
+};
 const CSV_PRODUCT_EXPORT_LIMIT = 2000;
 const CSV_PRODUCT_IMPORT_LIMIT = 2000;
 
@@ -39,14 +45,33 @@ exports.getAllProducts = async (req, res, next) => {
             baseMatch.isActive = isActive === 'true';
         }
 
-        // Brand Filter
+        // Brand Filter — brand is stored as a comma-separated list (e.g. "SIP, PIAGGIO"),
+        // so match products whose list intersects with the requested brand(s), not an
+        // exact-string match against the whole field.
         if (brand) {
-            if (Array.isArray(brand)) {
-                baseMatch.brand = { $in: brand };
-            } else if (brand.includes(',')) {
-                baseMatch.brand = { $in: brand.split(',') };
-            } else {
-                baseMatch.brand = brand;
+            const requestedBrands = (Array.isArray(brand) ? brand : brand.split(','))
+                .map(b => b.trim().toLowerCase())
+                .filter(Boolean);
+            if (requestedBrands.length > 0) {
+                baseMatch.$expr = {
+                    $gt: [
+                        {
+                            $size: {
+                                $setIntersection: [
+                                    {
+                                        $map: {
+                                            input: { $split: [{ $ifNull: ['$brand', ''] }, ','] },
+                                            as: 'b',
+                                            in: { $toLower: { $trim: { input: '$$b' } } }
+                                        }
+                                    },
+                                    requestedBrands
+                                ]
+                            }
+                        },
+                        0
+                    ]
+                };
             }
         }
 
@@ -304,7 +329,7 @@ exports.createProduct = async (req, res, next) => {
             productName,
             description,
             categoryId,
-            brand,
+            brand: normalizeBrand(brand),
             shippingSize: shippingSize || 'small',
             isOnline: req.body.isOnline !== undefined ? req.body.isOnline : true,
             isPos: req.body.isPos !== undefined ? req.body.isPos : true
@@ -366,7 +391,7 @@ exports.updateProduct = async (req, res, next) => {
         const product = await Product.findByIdAndUpdate(
             req.params.id,
             {
-                productName, description, categoryId, brand, shippingSize, isActive,
+                productName, description, categoryId, brand: normalizeBrand(brand), shippingSize, isActive,
                 isOnline: req.body.isOnline,
                 isPos: req.body.isPos
             },
@@ -729,7 +754,7 @@ exports.importProductsCSV = async (req, res, next) => {
 
                 const productFields = {};
                 if (categoryId !== undefined) productFields.categoryId = categoryId;
-                if (row.Brand && row.Brand.trim() !== '') productFields.brand = row.Brand.trim();
+                if (row.Brand && row.Brand.trim() !== '') productFields.brand = normalizeBrand(row.Brand);
                 if (shippingSize !== undefined) productFields.shippingSize = shippingSize;
                 if (isActive !== undefined) productFields.isActive = isActive;
                 if (isPos !== undefined) productFields.isPos = isPos;

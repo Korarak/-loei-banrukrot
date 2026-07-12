@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useAddToCart } from '@/hooks/useCart';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { toast } from 'sonner';
-import { getImageUrl, getPrimaryImage } from '@/lib/utils';
+import { getImageUrl, getPrimaryImage, parseBrands } from '@/lib/utils';
 import { Heart, ShoppingCart } from 'lucide-react';
 import { useWishlistStore } from '@/stores/useWishlistStore';
 import { motion } from 'framer-motion';
@@ -122,10 +122,14 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
                     {/* Info */}
                     <div className="px-4 py-3">
                         <div className="flex items-center justify-between mb-1.5">
-                            {product.brand ? (
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                                    {product.brand}
-                                </span>
+                            {parseBrands(product.brand).length > 0 ? (
+                                <div className="flex flex-wrap gap-x-1.5 gap-y-0.5">
+                                    {parseBrands(product.brand).map((b) => (
+                                        <span key={b} className="text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                                            {b}
+                                        </span>
+                                    ))}
+                                </div>
                             ) : <span />}
                             {!isOutOfStock && (
                                 <span className="flex items-center gap-1 text-[10px] font-semibold text-muted-foreground">

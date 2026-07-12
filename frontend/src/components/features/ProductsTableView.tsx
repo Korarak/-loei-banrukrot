@@ -13,7 +13,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Pencil, Trash2, Store, Globe, Package } from 'lucide-react';
-import { getImageUrl, getPrimaryImage, cn } from '@/lib/utils';
+import { getImageUrl, getPrimaryImage, cn, parseBrands } from '@/lib/utils';
 import type { Product } from '@/hooks/useProducts';
 
 interface ProductsTableViewProps {
@@ -103,7 +103,7 @@ export default function ProductsTableView({
                                         </div>
                                         <div className="min-w-0">
                                             <p className="font-bold text-gray-900 text-sm line-clamp-1">{product.productName}</p>
-                                            <p className="text-xs text-gray-400">{product.brand || '-'} · {product.variants?.length || 0} ตัวเลือก</p>
+                                            <p className="text-xs text-gray-400">{parseBrands(product.brand).join(', ') || '-'} · {product.variants?.length || 0} ตัวเลือก</p>
                                         </div>
                                     </div>
                                 </TableCell>

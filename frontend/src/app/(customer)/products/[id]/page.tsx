@@ -9,7 +9,7 @@ import { useProduct } from '@/hooks/useProducts';
 import { useCategories } from '@/hooks/useCategories';
 import { useAddToCart } from '@/hooks/useCart';
 import { toast } from 'sonner';
-import { getImageUrl, getPrimaryImage } from '@/lib/utils';
+import { getImageUrl, getPrimaryImage, parseBrands } from '@/lib/utils';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -232,12 +232,16 @@ export default function ProductDetailPage() {
                 {/* Product Info - PREMIUM HIERARCHY */}
                 <div className="flex flex-col pt-2">
                     <div className="mb-6">
-                        <div className="flex items-center gap-2 mb-4">
-                            {product.brand && (
+                        <div className="flex items-center flex-wrap gap-2 mb-4">
+                            {parseBrands(product.brand).length > 0 && (
                                 <>
-                                    <span className="text-xs font-black uppercase tracking-widest text-gray-900">
-                                        {product.brand}
-                                    </span>
+                                    <div className="flex flex-wrap gap-x-2 gap-y-1">
+                                        {parseBrands(product.brand).map((b) => (
+                                            <span key={b} className="text-xs font-black uppercase tracking-widest text-gray-900">
+                                                {b}
+                                            </span>
+                                        ))}
+                                    </div>
                                     <span className="w-1 h-1 rounded-full bg-gray-300" />
                                 </>
                             )}

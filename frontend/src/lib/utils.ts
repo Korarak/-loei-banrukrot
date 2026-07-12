@@ -40,6 +40,26 @@ export function getImageUrl(path: string | undefined | null) {
   return `${serverUrl}${normalizedPath}`;
 }
 
+// Splits a comma-separated brand string (e.g. "SIP, PIAGGIO") into individual,
+// trimmed brand names for display as tags or membership checks in filters.
+export function parseBrands(brand?: string | null): string[] {
+  if (!brand) return [];
+  return brand.split(',').map((b) => b.trim()).filter(Boolean);
+}
+
+// De-dupes brand names case-insensitively (keeping the first-seen casing) and
+// sorts them — without this, "SIP" and "sip" from two different products would
+// show up as two visually-identical filter options (brand badges render
+// uppercase via CSS, so the casing difference is invisible to the user).
+export function uniqueBrands(brands: string[]): string[] {
+  const seen = new Map<string, string>();
+  for (const b of brands) {
+    const key = b.toLowerCase();
+    if (!seen.has(key)) seen.set(key, b);
+  }
+  return Array.from(seen.values()).sort((a, b) => a.localeCompare(b));
+}
+
 interface PrimaryImageLike {
   imagePath: string;
   isPrimary?: boolean;

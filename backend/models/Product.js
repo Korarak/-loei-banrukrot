@@ -15,7 +15,9 @@ const productSchema = new mongoose.Schema({
     },
     brand: {
         type: String,
-        maxlength: 100
+        // Comma-separated list of brand names, e.g. "SIP, PIAGGIO" — 255 leaves
+        // room for several names concatenated together.
+        maxlength: 255
     },
     imageUrl: {
         type: String,

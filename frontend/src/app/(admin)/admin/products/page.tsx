@@ -47,7 +47,7 @@ import ProductsTableView from '@/components/features/ProductsTableView';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
-import { getImageUrl, getPrimaryImage, cn } from '@/lib/utils';
+import { getImageUrl, getPrimaryImage, cn, parseBrands, uniqueBrands } from '@/lib/utils';
 import ImagePreviewDialog from '@/components/features/ImagePreviewDialog';
 import { ProductImage } from '@/hooks/useProducts';
 
@@ -98,7 +98,7 @@ export default function AdminProductsPage() {
     // Distinct brands from the full loaded set (not the filtered one, so narrowing by
     // category doesn't yank options out from under an in-progress brand selection)
     const brandOptions = useMemo(() => {
-        return Array.from(new Set((products || []).map(p => p.brand).filter((b): b is string => !!b))).sort();
+        return uniqueBrands((products || []).flatMap(p => parseBrands(p.brand)));
     }, [products]);
 
     const deleteProduct = useDeleteProduct();
@@ -210,7 +210,7 @@ export default function AdminProductsPage() {
         // Stage 1: category/brand/active — affect both the list AND the stat badges
         const preStockFiltered = all.filter(product => {
             if (categoryFilter !== 'all' && product.categoryId !== categoryFilter) return false;
-            if (brandFilter !== 'all' && (product.brand || '') !== brandFilter) return false;
+            if (brandFilter !== 'all' && !parseBrands(product.brand).some(b => b.toLowerCase() === brandFilter.toLowerCase())) return false;
             if (activeFilter === 'active' && !product.isActive) return false;
             if (activeFilter === 'inactive' && product.isActive) return false;
             return true;
@@ -552,7 +552,7 @@ export default function AdminProductsPage() {
                                                 <Badge variant="outline" className="text-[10px] text-gray-500 border-gray-200 h-5">
                                                     {categoryName}
                                                 </Badge>
-                                                {product.brand && <span className="text-xs text-gray-400 font-medium">{product.brand}</span>}
+                                                {parseBrands(product.brand).length > 0 && <span className="text-xs text-gray-400 font-medium">{parseBrands(product.brand).join(', ')}</span>}
                                             </div>
                                             <h3 className="font-bold text-gray-900 text-base sm:text-lg line-clamp-1 group-hover:text-primary transition-colors">
                                                 {product.productName}

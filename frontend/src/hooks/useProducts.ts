@@ -24,6 +24,7 @@ export interface Product {
     productName: string;
     description: string;
     categoryId: number;
+    /** Comma-separated brand names, e.g. "SIP, PIAGGIO" — parse with `parseBrands()` from `@/lib/utils`. */
     brand?: string;
     imageUrl?: string;
     shippingSize?: 'small' | 'large';

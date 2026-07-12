@@ -210,6 +210,7 @@ export default function ProductForm({ product, onSubmit, onCancel, isLoading }: 
                                                 className="h-11"
                                             />
                                         </FormControl>
+                                        <FormDescription>คั่นด้วยเครื่องหมายจุลภาค (,) หากสินค้านี้มีมากกว่า 1 แบรนด์</FormDescription>
                                         <FormMessage />
                                     </FormItem>
                                 )}

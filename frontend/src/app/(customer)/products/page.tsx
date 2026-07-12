@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import ProductCard from '@/components/features/ProductCard';
 import Pagination from '@/components/features/Pagination';
 import api from '@/lib/api';
+import { parseBrands, uniqueBrands } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
@@ -83,8 +84,7 @@ export default function ProductsPage() {
             try {
                 const response = await api.get('/products', { params: { limit: 1000 } });
                 const allProducts = response.data.data || [];
-                const brands = Array.from(new Set(allProducts.map((p: any) => p.brand).filter(Boolean))) as string[];
-                return brands.sort();
+                return uniqueBrands(allProducts.flatMap((p: any) => parseBrands(p.brand)));
             } catch (error) {
                 console.error("Failed to fetch brands", error);
                 return [];
