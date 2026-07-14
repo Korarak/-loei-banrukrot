@@ -39,7 +39,7 @@ async function createProductWithVariant(sku, overrides = {}) {
 }
 
 function csvBuffer(rows) {
-    const header = 'SKU,ProductName,Category,Brand,Option1,Option2,Price,Stock,ShippingSize,IsActive,IsPos,IsOnline';
+    const header = 'VariantID,SKU,ProductName,Category,Brand,Option1,Option2,Price,Stock,ShippingSize,IsActive,IsPos,IsOnline';
     return Buffer.from([header, ...rows].join('\n'), 'utf-8');
 }
 
@@ -48,10 +48,10 @@ beforeEach(async () => {
 });
 
 describe('POST /api/products/import/csv', () => {
-    test('updates price and stock for a matched SKU, and logs a StockMovement', async () => {
+    test('updates price and stock for a matched VariantID, and logs a StockMovement', async () => {
         const { variant } = await createProductWithVariant('SKU-1');
 
-        const csv = csvBuffer([`SKU-1,,,,,,150,25,,,,`]);
+        const csv = csvBuffer([`${variant._id},SKU-1,,,,,,150,25,,,,`]);
 
         const res = await request(app)
             .post('/api/products/import/csv')
@@ -73,10 +73,10 @@ describe('POST /api/products/import/csv', () => {
         expect(movements[0].quantityChange).toBe(15);
     });
 
-    test('reports unknown SKU as a skipped row without touching other rows', async () => {
+    test('reports unknown VariantID as a skipped row without touching other rows', async () => {
         await createProductWithVariant('SKU-1');
 
-        const csv = csvBuffer([`SKU-DOES-NOT-EXIST,,,,,,150,25,,,,`]);
+        const csv = csvBuffer([`000000000000000000000000,SKU-DOES-NOT-EXIST,,,,,,150,25,,,,`]);
 
         const res = await request(app)
             .post('/api/products/import/csv')
@@ -86,14 +86,14 @@ describe('POST /api/products/import/csv', () => {
         expect(res.status).toBe(200);
         expect(res.body.data.updatedCount).toBe(0);
         expect(res.body.data.skippedCount).toBe(1);
-        expect(res.body.data.skipped[0].reason).toMatch(/SKU not found/);
+        expect(res.body.data.skipped[0].reason).toMatch(/VariantID not found/);
     });
 
     test('resolves Category by name and rejects unknown category names for the whole row', async () => {
         const category = await Category.create({ categoryId: 7, name: 'Engine Parts', slug: 'engine-parts' });
         const { product, variant } = await createProductWithVariant('SKU-1');
 
-        const goodCsv = csvBuffer([`SKU-1,,Engine Parts,,,,,,,,,`]);
+        const goodCsv = csvBuffer([`${variant._id},SKU-1,,Engine Parts,,,,,,,,,`]);
         const goodRes = await request(app)
             .post('/api/products/import/csv')
             .set('Authorization', `Bearer ${ownerToken}`)
@@ -103,7 +103,7 @@ describe('POST /api/products/import/csv', () => {
         const updatedProduct = await Product.findById(product._id);
         expect(updatedProduct.categoryId).toBe(7);
 
-        const badCsv = csvBuffer([`SKU-1,,Nonexistent Category,,,,999,,,,,`]);
+        const badCsv = csvBuffer([`${variant._id},SKU-1,,Nonexistent Category,,,,999,,,,,`]);
         const badRes = await request(app)
             .post('/api/products/import/csv')
             .set('Authorization', `Bearer ${ownerToken}`)
@@ -118,7 +118,7 @@ describe('POST /api/products/import/csv', () => {
     test('blank cells leave existing values unchanged', async () => {
         const { product, variant } = await createProductWithVariant('SKU-1', { brand: 'Acme' });
 
-        const csv = csvBuffer([`SKU-1,,,,,,,5,,,,`]); // only Stock set
+        const csv = csvBuffer([`${variant._id},SKU-1,,,,,,,5,,,,`]); // only Stock set
 
         const res = await request(app)
             .post('/api/products/import/csv')
@@ -135,12 +135,12 @@ describe('POST /api/products/import/csv', () => {
         expect(updatedVariant.stockAvailable).toBe(5); // changed
     });
 
-    test('duplicate SKU rows in one file apply deltas against the running value', async () => {
+    test('duplicate VariantID rows in one file apply deltas against the running value', async () => {
         const { variant } = await createProductWithVariant('SKU-1'); // starts at 10
 
         const csv = csvBuffer([
-            `SKU-1,,,,,,,15,,,,`, // 10 -> 15
-            `SKU-1,,,,,,,20,,,,`  // 15 -> 20
+            `${variant._id},SKU-1,,,,,,,15,,,,`, // 10 -> 15
+            `${variant._id},SKU-1,,,,,,,20,,,,`  // 15 -> 20
         ]);
 
         const res = await request(app)

@@ -26,6 +26,7 @@ const createCustomerSchema = z.object({
 // in the controller, not here — keeps "is this row shaped right" separate from
 // "what does this row mean."
 const csvProductRowSchema = z.object({
+    VariantID: z.string().trim().regex(/^[0-9a-fA-F]{24}$/, 'VariantID is required and must be a valid id'),
     SKU: z.string().trim().min(1, 'SKU is required'),
     ProductName: z.string().optional(),
     Category: z.string().optional(),

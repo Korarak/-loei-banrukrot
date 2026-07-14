@@ -34,7 +34,7 @@ This MongoDB database schema is designed for an **E-commerce + POS System** with
 - **Purpose:** Product variations with different options/prices
 - **Key Fields:** sku, option1Value, option2Value, price, stockAvailable
 - **Relationships:** References Product
-- **Indexes:** sku (unique), productId
+- **Indexes:** sku (non-unique — same SKU may repeat across different products), productId
 
 ### 7. **ProductImages** - Product Photos
 - **Purpose:** Store product image paths

@@ -601,13 +601,14 @@ exports.exportProductsCSV = async (req, res, next) => {
         const productMap = new Map(products.map(p => [p._id.toString(), p]));
 
         let csvData = '﻿';
-        csvData += 'SKU,ProductName,Category,Brand,Option1,Option2,Price,Stock,ShippingSize,IsActive,IsPos,IsOnline\n';
+        csvData += 'VariantID,SKU,ProductName,Category,Brand,Option1,Option2,Price,Stock,ShippingSize,IsActive,IsPos,IsOnline\n';
 
         variants.forEach(v => {
             const product = productMap.get(v.productId.toString());
             if (!product) return;
             const categoryName = categoryMap.get(product.categoryId) || '';
             csvData += [
+                escapeCSV(v._id.toString()),
                 escapeCSV(v.sku),
                 escapeCSV(product.productName),
                 escapeCSV(categoryName),
@@ -631,7 +632,8 @@ exports.exportProductsCSV = async (req, res, next) => {
     }
 };
 
-// @desc    Import products from CSV — updates existing products/variants matched by SKU.
+// @desc    Import products from CSV — updates existing products/variants matched by VariantID
+//          (SKU is no longer unique, so it can't be used to identify a row's target variant).
 //          Never creates new products. Blank cells mean "don't change this field."
 // @route   POST /api/products/import/csv
 // @access  Private (staff/owner)
@@ -663,9 +665,9 @@ exports.importProductsCSV = async (req, res, next) => {
         const categories = await Category.find({});
         const categoryByName = new Map(categories.map(c => [c.name.trim().toLowerCase(), c.categoryId]));
 
-        const skus = records.map(r => (r.SKU || '').trim()).filter(Boolean);
-        const variants = await ProductVariant.find({ sku: { $in: skus } });
-        const variantBySku = new Map(variants.map(v => [v.sku, v]));
+        const variantIds = records.map(r => (r.VariantID || '').trim()).filter(Boolean);
+        const variants = await ProductVariant.find({ _id: { $in: variantIds } });
+        const variantById = new Map(variants.map(v => [v._id.toString(), v]));
 
         const parseBoolCell = (value) => {
             const v = value.trim().toLowerCase();
@@ -691,9 +693,10 @@ exports.importProductsCSV = async (req, res, next) => {
             }
 
             const sku = parseResult.data.SKU.trim();
-            const variant = variantBySku.get(sku);
+            const variantId = parseResult.data.VariantID.trim();
+            const variant = variantById.get(variantId);
             if (!variant) {
-                errors.push({ row: rowNum, sku, reason: 'SKU not found' });
+                errors.push({ row: rowNum, sku, reason: 'VariantID not found' });
                 continue;
             }
 
@@ -774,7 +777,7 @@ exports.importProductsCSV = async (req, res, next) => {
                         // Stock changes must always go through stockUtils so every change
                         // is logged in StockMovement — never a raw update here.
                         await changeStock(variant._id, delta, 'adjustment', null, null, req.user._id, 'CSV import');
-                        variant.stockAvailable = stock; // keep map correct for duplicate-SKU rows in this file
+                        variant.stockAvailable = stock; // keep map correct for duplicate-VariantID rows in this file
                     }
                 }
 

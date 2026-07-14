@@ -49,8 +49,8 @@ export default function CsvImportDialog({ open, onOpenChange }: CsvImportDialogP
                 <DialogHeader>
                     <DialogTitle>นำเข้าสินค้าจาก CSV</DialogTitle>
                     <DialogDescription>
-                        อัปเดตราคา สต๊อก หมวดหมู่ และช่องทางขาย โดยจับคู่ด้วย SKU — เว้นว่างช่องไหนไว้ ช่องนั้นจะไม่ถูกเปลี่ยน
-                        ไม่สามารถสร้างสินค้าใหม่ผ่าน CSV ได้
+                        อัปเดตราคา สต๊อก หมวดหมู่ และช่องทางขาย โดยจับคู่ด้วยคอลัมน์ VariantID ในไฟล์ (ห้ามลบคอลัมน์นี้ — SKU ซ้ำกันได้จึงใช้จับคู่ไม่ได้)
+                        เว้นว่างช่องไหนไว้ ช่องนั้นจะไม่ถูกเปลี่ยน ไม่สามารถสร้างสินค้าใหม่ผ่าน CSV ได้
                     </DialogDescription>
                 </DialogHeader>
 

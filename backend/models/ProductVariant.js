@@ -10,7 +10,6 @@ const productVariantSchema = new mongoose.Schema({
     sku: {
         type: String,
         required: true,
-        unique: true,
         maxlength: 100
     },
     option1Value: {
@@ -45,7 +44,7 @@ const productVariantSchema = new mongoose.Schema({
 
 // Indexes
 productVariantSchema.index({ productId: 1 });
-// productVariantSchema.index({ sku: 1 }); // Already defined as unique
+productVariantSchema.index({ sku: 1 }); // Non-unique — same SKU can be reused across different products (e.g. shared color codes)
 productVariantSchema.index({ productId: 1, stockAvailable: 1 });
 
 module.exports = mongoose.model('ProductVariant', productVariantSchema);
