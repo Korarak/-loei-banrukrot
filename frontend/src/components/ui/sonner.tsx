@@ -31,29 +31,31 @@ const Toaster = ({ ...props }: ToasterProps) => {
       className="toaster group"
       position={position}
       expand={true}
-      richColors
       closeButton
       visibleToasts={4}
       toastOptions={{
         classNames: {
-          closeButton: "!bg-white/90 !border-gray-200 !text-gray-500 hover:!bg-gray-100 !left-auto !right-1 !top-2 !transform-none",
+          // MONO/INK base: sharp corners, bold black frame, no shadow — sonner's
+          // own richColors palette (soft pastel green/red/blue) clashed with the
+          // site's black/white + Vespa-red design language, so it's off in favor
+          // of these explicit overrides.
+          toast: "!rounded-none !border-2 !border-black !bg-white !shadow-none !gap-3",
+          title: "!text-foreground !font-bold",
+          description: "!text-muted-foreground",
+          // Error/warning get the Vespa-red treatment (border + icon + title) —
+          // the same "red marks trouble" rule already used for OOS/pending badges.
+          error: "!border-brand [&_[data-title]]:!text-brand",
+          warning: "!border-brand [&_[data-title]]:!text-brand",
+          closeButton: "!bg-white !border-2 !border-black !rounded-none !text-foreground hover:!bg-black hover:!text-white !left-auto !right-1 !top-2 !transform-none",
         },
       }}
       icons={{
-        success: <CircleCheckIcon className="size-4" />,
-        info: <InfoIcon className="size-4" />,
-        warning: <TriangleAlertIcon className="size-4" />,
-        error: <OctagonXIcon className="size-4" />,
-        loading: <Loader2Icon className="size-4 animate-spin" />,
+        success: <CircleCheckIcon className="size-4 text-foreground" />,
+        info: <InfoIcon className="size-4 text-foreground" />,
+        warning: <TriangleAlertIcon className="size-4 text-brand" />,
+        error: <OctagonXIcon className="size-4 text-brand" />,
+        loading: <Loader2Icon className="size-4 animate-spin text-foreground" />,
       }}
-      style={
-        {
-          "--normal-bg": "var(--popover)",
-          "--normal-text": "var(--popover-foreground)",
-          "--normal-border": "var(--border)",
-          "--border-radius": "var(--radius)",
-        } as React.CSSProperties
-      }
       {...props}
     />
   )
