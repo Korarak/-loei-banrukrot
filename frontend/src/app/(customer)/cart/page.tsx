@@ -281,7 +281,7 @@ export default function CartPage() {
                                     <div className="space-y-2">
                                         <div className="flex justify-between items-start gap-4">
                                             <Link href={`/products/${item.product._id}`} className="group/title">
-                                                <h3 className={`font-bold text-xl md:text-2xl transition-colors line-clamp-2 leading-tight ${oos ? 'text-gray-500' : 'text-gray-900 group-hover/title:underline underline-offset-4'}`}>
+                                                <h3 className={`font-bold text-base md:text-lg transition-colors line-clamp-2 leading-tight ${oos ? 'text-gray-500' : 'text-gray-900 group-hover/title:underline underline-offset-4'}`}>
                                                     {item.product.productName}
                                                 </h3>
                                             </Link>
@@ -328,7 +328,7 @@ export default function CartPage() {
                                     <div className="flex flex-wrap items-end justify-between mt-6 gap-4">
                                         <div className="flex flex-col">
                                             <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">ราคาต่อชิ้น</span>
-                                            <p className={`text-xl font-black font-mitr ${oos ? 'text-gray-400' : 'text-brand'}`}>
+                                            <p className={`text-lg font-black font-mitr ${oos ? 'text-gray-400' : 'text-brand'}`}>
                                                 ฿{item.variant.price.toLocaleString()}
                                             </p>
                                         </div>
@@ -367,7 +367,7 @@ export default function CartPage() {
 
                                         <div className="flex flex-col items-end">
                                             <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">ราคารวม</span>
-                                            <p className={`text-2xl font-black ${oos ? 'text-gray-400 line-through' : 'text-gray-900'}`}>
+                                            <p className={`text-xl font-black ${oos ? 'text-gray-400 line-through' : 'text-gray-900'}`}>
                                                 ฿{(item.variant.price * item.quantity).toLocaleString()}
                                             </p>
                                         </div>
@@ -387,11 +387,11 @@ export default function CartPage() {
                         <p className="text-sm font-bold text-muted-foreground mb-8">สรุปคำสั่งซื้อ</p>
 
                         <div className="space-y-6 mb-8">
-                            <div className="flex justify-between items-center text-lg">
+                            <div className="flex justify-between items-center text-base">
                                 <span className="text-gray-600 font-medium">ยอดสินค้า ({selectedItems.length} รายการ)</span>
                                 <span className="font-bold text-gray-900">฿{cartSubtotal.toLocaleString()}</span>
                             </div>
-                            <div className="flex justify-between items-center text-lg">
+                            <div className="flex justify-between items-center text-base">
                                 <span className="text-gray-600 font-medium">ค่าจัดส่ง</span>
                                 <span className="font-bold text-gray-900">
                                     {!selectedMethod ? '—' : shippingCost > 0 ? `฿${shippingCost.toLocaleString()}` : 'ฟรี'}
@@ -478,14 +478,14 @@ export default function CartPage() {
                         </div>
 
                         <div className="border-t border-border pt-6 mb-8 flex justify-between items-center">
-                            <span className="text-xl font-black text-gray-600 uppercase tracking-tighter">ยอดรวม</span>
-                            <span className="text-4xl font-black text-brand tracking-tighter font-mitr">
+                            <span className="text-lg font-black text-gray-600 uppercase tracking-tighter">ยอดรวม</span>
+                            <span className="text-3xl font-black text-brand tracking-tighter font-mitr">
                                 ฿{totalAmount.toLocaleString()}
                             </span>
                         </div>
 
                         <Button
-                            className="w-full h-14 text-lg uppercase tracking-widest"
+                            className="w-full h-14 text-base uppercase tracking-widest"
                             size="lg"
                             onClick={handleCheckout}
                             disabled={createOrder.isPending || !selectedAddressId || !selectedShippingId || selectedItems.length === 0}
