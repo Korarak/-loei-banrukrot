@@ -6,6 +6,7 @@ const { Order, OrderDetail, Payment, ProductVariant, Cart, CartItem, CustomerAdd
 // @access  Private (customer)
 const { generateQRCodeDataURL } = require('../utils/promptpay');
 const { deductStock, addStock } = require('../utils/stockUtils');
+const { generateSaleReference } = require('../utils/saleReference');
 const { processImage } = require('../utils/imageProcessing');
 const { UPLOADS_BASE, getUploadSubdir } = require('../middleware/upload');
 const path = require('path');
@@ -100,10 +101,7 @@ exports.createOrderFromCart = async (req, res, next) => {
         totalAmount += shippingCost;
 
         // Generate Sale Reference
-        const date = new Date();
-        const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
-        const randomStr = Math.random().toString(36).substring(2, 7).toUpperCase();
-        const saleReference = `ORD-${dateStr}-${randomStr}`;
+        const saleReference = await generateSaleReference('ORD');
 
         // สร้าง order
         const order = await Order.create({
@@ -368,6 +366,64 @@ exports.updateOrderStatus = async (req, res, next) => {
             success: true,
             message: 'Order status updated',
             data: order
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// Thai labels for order statuses — mirrors frontend/src/lib/order-status.ts,
+// kept minimal here since this is the only backend message that needs them.
+const ORDER_STATUS_LABELS_TH = {
+    pending: 'กำลังดำเนินการ',
+    confirmed: 'ยืนยันแล้ว',
+    processing: 'กำลังเตรียมสินค้า',
+    shipped: 'เริ่มการจัดส่ง',
+    delivered: 'จัดส่งสำเร็จ',
+    cancelled: 'ยกเลิก',
+    completed: 'เสร็จรับเงิน'
+};
+
+// @desc    Confirm packing via QR scan on the shipping label — only allowed
+//          from 'confirmed' (prevents re-scanning an already-processing/shipped
+//          box from silently reopening its status)
+// @route   POST /api/orders/:id/scan-pack
+// @access  Private (staff/owner)
+exports.scanPackOrder = async (req, res, next) => {
+    try {
+        // Atomic conditional update — the 'confirmed' filter is checked and
+        // written in one MongoDB operation, so two near-simultaneous scans of
+        // the same box (two staff, or a double-tap) can never both win: only
+        // one request's filter can still match by the time it executes.
+        const order = await Order.findOneAndUpdate(
+            { _id: req.params.id, orderStatus: 'confirmed' },
+            { $set: { orderStatus: 'processing' } },
+            { new: true }
+        );
+
+        if (!order) {
+            const existing = await Order.findById(req.params.id);
+            if (!existing) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'ไม่พบออเดอร์นี้'
+                });
+            }
+            const currentLabel = ORDER_STATUS_LABELS_TH[existing.orderStatus] || existing.orderStatus;
+            return res.status(400).json({
+                success: false,
+                message: `ออเดอร์นี้อยู่ในสถานะ "${currentLabel}" ไม่ใช่ "ยืนยันแล้ว" จึงเปลี่ยนเป็น "กำลังเตรียมสินค้า" ผ่านการสแกนไม่ได้`
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'อัปเดตสถานะเป็น "กำลังเตรียมสินค้า" แล้ว',
+            data: {
+                _id: order._id,
+                orderReference: order.saleReference || order._id.toString().slice(-6).toUpperCase(),
+                orderStatus: order.orderStatus
+            }
         });
     } catch (error) {
         next(error);

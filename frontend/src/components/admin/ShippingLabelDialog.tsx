@@ -13,6 +13,7 @@ import { getCourier } from '@/lib/couriers';
 import { cn } from '@/lib/utils';
 import { siteConfig } from '@/config/site';
 import { useMemo, useState } from 'react';
+import QRCode from 'qrcode';
 
 interface ShippingLabelDialogProps {
     open: boolean;
@@ -20,57 +21,32 @@ interface ShippingLabelDialogProps {
     order: Order;
 }
 
-// Pure SVG QR-like visual — no external dependencies.
-// Renders proper finder patterns + timing strips + deterministic data cells.
-// Not machine-scannable, but visually indistinguishable from a real QR code.
-function QRCodeVisual({ value, size = 86 }: { value: string; size?: number }) {
-    const N = 21; // QR version 1 is 21×21 modules
+// Prefix on the scannable QR payload so the packing-scan flow can tell a
+// shipping-label QR apart from an unrelated barcode (SKU, courier tracking, ...).
+export const ORDER_SCAN_PREFIX = 'ORDER:';
 
-    const darkCells = useMemo(() => {
-        const isFinderDark = (dr: number, dc: number) => {
-            if (dr < 0 || dr > 6 || dc < 0 || dc > 6) return false;
-            if (dr === 0 || dr === 6 || dc === 0 || dc === 6) return true;
-            return dr >= 2 && dr <= 4 && dc >= 2 && dc <= 4;
-        };
-
-        const cells: { r: number; c: number }[] = [];
-        for (let r = 0; r < N; r++) {
-            for (let c = 0; c < N; c++) {
-                let dark = false;
-
-                // Finder pattern: top-left
-                if (isFinderDark(r, c)) dark = true;
-                // Finder pattern: top-right
-                else if (isFinderDark(r, c - (N - 7))) dark = true;
-                // Finder pattern: bottom-left
-                else if (isFinderDark(r - (N - 7), c)) dark = true;
-                // Timing strips (row 6 / col 6)
-                else if (r === 6 || c === 6) dark = (r + c) % 2 === 0;
-                // Data area: deterministic bit pattern derived from value
-                else {
-                    const idx = r * N + c;
-                    const code = value.charCodeAt(idx % value.length);
-                    dark = Boolean((code >> (idx % 8)) & 1);
-                }
-
-                if (dark) cells.push({ r, c });
-            }
-        }
-        return cells;
+// Real, machine-scannable QR code rendered as SVG rects from QRCode.create()'s
+// module matrix. QRCode.create() is synchronous (unlike toDataURL/toCanvas),
+// so the QR is present in the DOM on the same render as everything else —
+// handlePrint's synchronous outerHTML clone can never race a still-loading QR.
+function QRCodeSVG({ value, size = 86 }: { value: string; size?: number }) {
+    const { modules, moduleCount } = useMemo(() => {
+        const qr = QRCode.create(value, { errorCorrectionLevel: 'M' });
+        return { modules: qr.modules.data, moduleCount: qr.modules.size };
     }, [value]);
 
     return (
         <svg
             width={size}
             height={size}
-            viewBox={`0 0 ${N} ${N}`}
+            viewBox={`0 0 ${moduleCount} ${moduleCount}`}
             xmlns="http://www.w3.org/2000/svg"
             style={{ imageRendering: 'pixelated', display: 'block' }}
         >
-            <rect width={N} height={N} fill="white" />
-            {darkCells.map(({ r, c }) => (
-                <rect key={`${r}-${c}`} x={c} y={r} width={1} height={1} fill="#000" />
-            ))}
+            <rect width={moduleCount} height={moduleCount} fill="white" />
+            {Array.from(modules).map((dark, i) => dark ? (
+                <rect key={i} x={i % moduleCount} y={Math.floor(i / moduleCount)} width={1} height={1} fill="#000" />
+            ) : null)}
         </svg>
     );
 }
@@ -152,7 +128,10 @@ export function ShippingLabelDialog({ open, onOpenChange, order }: ShippingLabel
     const storeAddress = settings?.store_address || '';
     const courier = getCourier(order.shippingInfo?.provider || '');
     const trackingNumber = order.shippingInfo?.trackingNumber;
-    const qrContent = trackingNumber || order.orderReference;
+    // The QR always encodes the order id (stable target for the packing-scan
+    // flow); the caption underneath stays human-readable.
+    const qrValue = `${ORDER_SCAN_PREFIX}${order._id}`;
+    const qrCaption = trackingNumber || order.orderReference;
     const totalItems = order.items.reduce((sum, item) => sum + item.quantity, 0);
 
     const courierStyle = order.shippingInfo?.provider
@@ -281,10 +260,10 @@ body { margin: 0; padding: 0; background: white; }
                                     {/* QR code */}
                                     <div className="flex flex-col items-center shrink-0">
                                         <div className="p-1.5 border-2 border-gray-200 rounded-xl overflow-hidden">
-                                            <QRCodeVisual value={qrContent} size={86} />
+                                            <QRCodeSVG value={qrValue} size={86} />
                                         </div>
                                         <p className="text-[8px] text-gray-400 mt-1.5 font-mono text-center max-w-[94px] break-all leading-tight">
-                                            {qrContent}
+                                            {qrCaption}
                                         </p>
                                     </div>
                                 </div>

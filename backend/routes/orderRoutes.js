@@ -4,6 +4,7 @@ const router = express.Router();
 const {
     getOrderById,
     updateOrderStatus,
+    scanPackOrder,
     createOrderFromCart,
     getCustomerOrders,
     getAllOrders,
@@ -57,6 +58,15 @@ router.patch(
     requireRole('owner', 'staff'),
     validator.validateId,
     updateOrderStatus
+);
+
+// Scan the shipping label's QR after packing — confirmed → processing only
+router.post(
+    '/:id/scan-pack',
+    authenticateToken('user'),
+    requireRole('owner', 'staff'),
+    validator.validateId,
+    scanPackOrder
 );
 
 router.route('/:id/slip')

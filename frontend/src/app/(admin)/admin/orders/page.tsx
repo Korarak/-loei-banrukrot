@@ -1,6 +1,6 @@
 'use client';
 
-import { useOrders, useUpdateOrderStatus, type Order } from '@/hooks/useOrders';
+import { useOrders, useUpdateOrderStatus, useScanPackOrder, type Order } from '@/hooks/useOrders';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/dialog';
 import { Search, Eye, Plus, AlertCircle, Store, Globe, Calendar, CreditCard, Banknote, User, Copy, ExternalLink, Truck, CheckCircle2, ScanLine, Printer } from 'lucide-react';
 import { BarcodeScanner } from '@/components/features/BarcodeScanner';
-import { ShippingLabelDialog } from '@/components/admin/ShippingLabelDialog';
+import { ShippingLabelDialog, ORDER_SCAN_PREFIX } from '@/components/admin/ShippingLabelDialog';
 import Link from 'next/link';
 import { useRef, useEffect, useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
@@ -52,9 +52,11 @@ export default function AdminOrdersPage() {
     const [trackingNumber, setTrackingNumber] = useState('');
     const [courier, setCourier] = useState('Flash Express');
     const [scannerOpen, setScannerOpen] = useState(false);
+    const [packScannerOpen, setPackScannerOpen] = useState(false);
 
     const { data: orders, isLoading, isError, refetch } = useOrders({ refetchInterval: 10000 }); // Poll every 10s
     const updateStatus = useUpdateOrderStatus();
+    const scanPack = useScanPackOrder();
 
     // Notification Logic
     const previousOrderCount = useRef(0);
@@ -98,6 +100,30 @@ export default function AdminOrdersPage() {
         } catch (error) {
             // Error handled by mutation
         }
+    };
+
+    const handlePackScan = (raw: string) => {
+        if (raw.startsWith(ORDER_SCAN_PREFIX)) {
+            scanPack.mutate(raw.slice(ORDER_SCAN_PREFIX.length));
+            return;
+        }
+
+        // Manual-entry fallback (Safari/Firefox have no in-browser QR camera
+        // support) — staff types the caption printed under the QR, which is
+        // the order reference unless a tracking number was already assigned
+        // (see ShippingLabelDialog's qrCaption), so match on either.
+        const normalized = raw.toUpperCase();
+        const match = orders?.find(o =>
+            o.orderReference?.toUpperCase() === normalized ||
+            o.shippingInfo?.trackingNumber?.toUpperCase() === normalized
+        );
+        if (!match) {
+            toast.error('ไม่พบออเดอร์นี้', {
+                description: 'ตรวจสอบเลขที่ออเดอร์ที่พิมพ์ใต้ QR บนสติ้กเกอร์แล้วลองใหม่',
+            });
+            return;
+        }
+        scanPack.mutate(match._id);
     };
 
     const confirmTracking = async () => {
@@ -194,12 +220,22 @@ export default function AdminOrdersPage() {
                     <h1 className="text-3xl font-bold text-gray-900 tracking-tight">คำสั่งซื้อ</h1>
                     <p className="text-gray-500 text-sm mt-1">จัดการคำสั่งซื้อออนไลน์และรายการขายหน้าร้าน (POS)</p>
                 </div>
-                <Button asChild className="shadow-lg shadow-primary/20 rounded-xl">
-                    <Link href="/admin/pos">
-                        <Plus className="mr-2 h-4 w-4" />
-                        เริ่มการขาย POS ใหม่
-                    </Link>
-                </Button>
+                <div className="flex gap-2">
+                    <Button
+                        variant="outline"
+                        className="rounded-xl gap-2"
+                        onClick={() => setPackScannerOpen(true)}
+                    >
+                        <ScanLine className="h-4 w-4" />
+                        สแกนแพ็คสินค้า
+                    </Button>
+                    <Button asChild className="shadow-lg shadow-primary/20 rounded-xl">
+                        <Link href="/admin/pos">
+                            <Plus className="mr-2 h-4 w-4" />
+                            เริ่มการขาย POS ใหม่
+                        </Link>
+                    </Button>
+                </div>
             </div>
 
             {/* Main Tabs for Source Filtering */}
@@ -511,6 +547,15 @@ export default function AdminOrdersPage() {
                 open={scannerOpen}
                 onScan={(value) => setTrackingNumber(value)}
                 onClose={() => setScannerOpen(false)}
+            />
+
+            <BarcodeScanner
+                open={packScannerOpen}
+                onScan={handlePackScan}
+                onClose={() => setPackScannerOpen(false)}
+                title="สแกน QR แพ็คสินค้า"
+                manualPlaceholder="กรอกเลขที่ออเดอร์ (เช่น ORD-20260715-0001)"
+                manualButtonLabel="พิมพ์เลขที่ออเดอร์แทน"
             />
 
             {labelOrder && (

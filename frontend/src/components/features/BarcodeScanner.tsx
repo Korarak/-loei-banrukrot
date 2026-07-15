@@ -28,9 +28,19 @@ interface BarcodeScannerProps {
     open: boolean;
     onScan: (result: string) => void;
     onClose: () => void;
+    title?: string;
+    manualPlaceholder?: string;
+    manualButtonLabel?: string;
 }
 
-export function BarcodeScanner({ open, onScan, onClose }: BarcodeScannerProps) {
+export function BarcodeScanner({
+    open,
+    onScan,
+    onClose,
+    title = 'สแกนบาร์โค้ดเลขพัสดุ',
+    manualPlaceholder = 'กรอกเลขพัสดุ',
+    manualButtonLabel = 'พิมพ์เลขพัสดุแทน',
+}: BarcodeScannerProps) {
     const videoRef = useRef<HTMLVideoElement>(null);
     const streamRef = useRef<MediaStream | null>(null);
     const rafRef = useRef<number | null>(null);
@@ -185,7 +195,7 @@ export function BarcodeScanner({ open, onScan, onClose }: BarcodeScannerProps) {
                 <DialogHeader className="px-4 pt-4 pb-2">
                     <DialogTitle className="flex items-center gap-2 text-base">
                         <ScanLine className="h-4 w-4 text-primary" />
-                        สแกนบาร์โค้ดเลขพัสดุ
+                        {title}
                     </DialogTitle>
                 </DialogHeader>
 
@@ -200,7 +210,7 @@ export function BarcodeScanner({ open, onScan, onClose }: BarcodeScannerProps) {
                         </p>
                         <Button size="sm" onClick={() => setManualMode(true)}>
                             <Keyboard className="h-3.5 w-3.5 mr-1.5" />
-                            พิมพ์เลขพัสดุแทน
+                            {manualButtonLabel}
                         </Button>
                     </div>
                 )}
@@ -210,7 +220,7 @@ export function BarcodeScanner({ open, onScan, onClose }: BarcodeScannerProps) {
                     <div className="px-4 pb-4 flex flex-col gap-3">
                         <Input
                             autoFocus
-                            placeholder="กรอกเลขพัสดุ"
+                            placeholder={manualPlaceholder}
                             value={manualInput}
                             onChange={e => setManualInput(e.target.value.toUpperCase())}
                             onKeyDown={e => e.key === 'Enter' && submitManual()}

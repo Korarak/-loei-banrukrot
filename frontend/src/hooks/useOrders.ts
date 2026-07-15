@@ -179,6 +179,32 @@ export function useUpdateOrderStatus() {
         },
     });
 }
+// Scan the shipping label QR after packing — confirmed → processing only
+export function useScanPackOrder() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (id: string) => {
+            const response = await api.post(`/orders/${id}/scan-pack`);
+            return response.data.data as { _id: string; orderReference: string; orderStatus: Order['orderStatus'] };
+        },
+        onSuccess: (data) => {
+            // Patch the cached list in place instead of invalidating it — staff
+            // scan boxes back-to-back, and re-fetching the full (joined,
+            // limit=500) order list after every single scan would make each
+            // subsequent scan wait on a refetch it doesn't need.
+            queryClient.setQueryData<Order[]>(['orders', 'all'], (prev) =>
+                prev?.map(o => o._id === data._id ? { ...o, orderStatus: data.orderStatus } : o)
+            );
+            queryClient.invalidateQueries({ queryKey: ['order', data._id] });
+            toast.success(`#${data.orderReference} → กำลังเตรียมสินค้า`);
+        },
+        onError: (error: any) => {
+            toast.error(error.response?.data?.message || 'ไม่สามารถอัปเดตสถานะได้');
+        },
+    });
+}
+
 // Upload payment slip
 export function useUploadSlip() {
     const queryClient = useQueryClient();

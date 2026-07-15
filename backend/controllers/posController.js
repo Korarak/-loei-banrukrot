@@ -1,6 +1,7 @@
 // controllers/posController.js
 const { Order, OrderDetail, Payment, ProductVariant, ProductImage } = require('../models');
 const { deductStock } = require('../utils/stockUtils');
+const { generateSaleReference } = require('../utils/saleReference');
 
 // @desc    Create POS sale (walk-in customer)
 // @route   POST /api/pos/sales
@@ -54,7 +55,7 @@ exports.createPOSSale = async (req, res, next) => {
         }
 
         // สร้างเลขที่ใบเสร็จ
-        const saleReference = `POS-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+        const saleReference = await generateSaleReference('POS');
 
         // สร้าง order
         const order = await Order.create({
