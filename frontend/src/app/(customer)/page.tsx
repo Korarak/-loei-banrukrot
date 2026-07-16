@@ -534,20 +534,6 @@ export default function Home() {
                             </h2>
 
                             <div className="space-y-4 mb-8">
-                                {contact.items.filter(i => i.type === 'phone').map((item, i) => (
-                                    <a key={i} href={`tel:${item.value?.replace(/-/g, '')}`}
-                                        className="flex items-center gap-4 group transition-colors"
-                                    >
-                                        <div className="w-12 h-12 bg-foreground flex items-center justify-center shrink-0">
-                                            <Phone className="h-5 w-5 text-white" />
-                                        </div>
-                                        <div>
-                                            <div className="text-xs font-bold text-gray-500 uppercase tracking-wider">{item.label}</div>
-                                            <div className="text-lg font-black text-gray-900 group-hover:underline underline-offset-4">{item.value}</div>
-                                        </div>
-                                    </a>
-                                ))}
-
                                 {contact.items.filter(i => i.type === 'address').map((item, i) => (
                                     <div key={i} className="flex items-start gap-4">
                                         <div className="w-12 h-12 border border-border flex items-center justify-center shrink-0 mt-0.5">
