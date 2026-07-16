@@ -3,7 +3,7 @@ export const siteConfig = {
         name: "บ้านรักรถเมืองเลย",
         englishName: "BANRUKROT",
         tagline: "Vespa Specialist & Oat Engineering",
-        description: "ยกระดับการขับขี่ของคุณด้วยอะไหล่เวสป้าคุณภาพเยี่ยม คัดสรรเพื่อคนรักรถตัวจริง พร้อมบริการดูแลซ่อมบำรุงและงานโรงกลึงครบวงจร โดยช่างโอ๊ต (Oat Engineering)",
+        description: "อะไหล่เวสป้าคัดสรรคุณภาพ ดูแลโดยช่างโอ๊ต (Oat Engineering) สำหรับคนรักเวสป้าเมืองเลย",
     },
     owner: "นายกิตติธัช กุลัตถ์นาม",
     footerData: {
@@ -15,8 +15,6 @@ export const siteConfig = {
         contact: {
             header: "ติดต่อเรา",
             items: [
-                { type: "phone", label: "ช่างโอ๊ต", value: "061-370-2484" },
-                { type: "phone", label: "ร้าน", value: "094-373-0664" },
                 { type: "address", value: "519/2 หมู่ 5 บ้านหนองผักก้าม ต.เมือง อ.เมือง จ.เลย 42000" },
                 { type: "maps", value: "พิกัดร้าน", href: "https://goo.gl/maps/Cbas3yCjPz6feeSPA" }
             ],

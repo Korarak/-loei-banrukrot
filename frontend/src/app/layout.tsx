@@ -23,8 +23,8 @@ const anton = Anton({
 });
 
 export const metadata: Metadata = {
-  title: "บ้านรักรถเมืองเลย - ซ่อมเวสป้า & โรงกลึงโอ๊ต (Vespa Repair & Oat Engineering)",
-  description: "ศูนย์รวมอะไหล่และบริการปรับแต่งซ่อมบำรุงรถจักรยานยนต์ Vespa ครบวงจร โดยช่างโอ๊ต (Oat Engineering) เมืองเลย",
+  title: "บ้านรักรถเมืองเลย - อะไหล่และซ่อมเวสป้า โดยช่างโอ๊ต (Oat Engineering)",
+  description: "ร้านอะไหล่ Vespa เล็กๆ ที่เมืองเลย ดูแลโดยช่างโอ๊ต (Oat Engineering)",
 };
 
 export default function RootLayout({

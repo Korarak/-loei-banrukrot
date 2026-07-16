@@ -123,8 +123,8 @@ export default function Home() {
                         </motion.h1>
 
                         <motion.p variants={fadeInUp} className="text-base md:text-lg mb-8 text-gray-300 font-medium leading-relaxed">
-                            {siteConfig.brand.name} — ศูนย์รวมอะไหล่และบริการ Vespa ครบวงจร
-                            โดยช่างโอ๊ต (Oat Engineering) สำหรับคนรักเวสป้าเมืองเลย
+                            {siteConfig.brand.name} — ร้านอะไหล่ Vespa จังหวัดเลย
+                            โดยช่างโอ๊ต (Oat Engineering) ดูแลรถให้คนรักเวสป้าเมืองเลย
                         </motion.p>
 
                         {/* Search bar */}
@@ -421,9 +421,9 @@ export default function Home() {
                                 num: '01',
                                 icon: Phone,
                                 title: 'คุยกับช่างโอ๊ตตัวจริง',
-                                desc: 'ไม่ใช่แชทบอท ไม่ใช่คอลเซ็นเตอร์ โทรคุยกับช่างที่ซ่อมรถให้คุณเองโดยตรง',
-                                fact: '061-370-2484',
-                                href: 'tel:0613702484',
+                                desc: 'ไม่ใช่แชทบอท ไม่ใช่คอลเซ็นเตอร์ ทักไลน์หรือเพจคุยกับช่างที่ซ่อมรถให้คุณเองโดยตรง',
+                                fact: 'ทักไลน์เลย',
+                                href: siteConfig.footerData.contact.social.line,
                             },
                             {
                                 num: '02',
