@@ -65,37 +65,7 @@ export function BarcodeScanner({
         streamRef.current = null;
     }, []);
 
-    // Check API support + list cameras when dialog opens
-    useEffect(() => {
-        if (!open) return;
-        setError(null);
-        setDetected(null);
-        setManualInput('');
-
-        const supported = typeof window !== 'undefined' && 'BarcodeDetector' in window;
-        setApiSupported(supported);
-
-        if (!supported) return;
-
-        // Init detector with broad format support
-        const formats = [
-            'code_128', 'code_39', 'code_93',
-            'ean_13', 'ean_8', 'upc_a', 'upc_e',
-            'qr_code', 'data_matrix', 'pdf417',
-        ];
-        detectorRef.current = new window.BarcodeDetector!({ formats });
-
-        navigator.mediaDevices.enumerateDevices()
-            .then(devices => {
-                const videoDevices = devices.filter(d => d.kind === 'videoinput');
-                setCameras(videoDevices);
-                const back = videoDevices.find(d => /back|rear|environment/i.test(d.label));
-                setSelectedCamera(back?.deviceId ?? videoDevices[0]?.deviceId);
-            })
-            .catch(() => setError('ไม่สามารถเข้าถึงกล้องได้'));
-    }, [open]);
-
-    const startDetectionLoop = () => {
+    const startDetectionLoop = useCallback(() => {
         const detect = async () => {
             if (!videoRef.current || !detectorRef.current) return;
             if (videoRef.current.readyState < 2) {
@@ -120,29 +90,41 @@ export function BarcodeScanner({
             rafRef.current = requestAnimationFrame(detect);
         };
         rafRef.current = requestAnimationFrame(detect);
-    };
+    }, [stopCamera]);
 
-    // Start camera stream when camera is selected
-    useEffect(() => {
-        if (!open || !selectedCamera || !apiSupported) return;
-
+    // Opens the camera. Deliberately does NOT require a deviceId up front —
+    // enumerateDevices() returns blank labels/deviceIds until permission has
+    // been granted at least once, so gating the first getUserMedia call on
+    // "pick a device from the list" meant the permission prompt never fired
+    // on a fresh origin (selectedCamera stayed '' / undefined forever).
+    // Instead: request a generic environment-facing stream first (which is
+    // what actually triggers the browser's permission prompt), then use the
+    // now-populated device list to support explicit camera switching.
+    const openStream = useCallback((deviceId?: string) => {
         stopCamera();
+        setError(null);
 
         const constraints: MediaStreamConstraints = {
-            video: {
-                deviceId: { exact: selectedCamera },
-                facingMode: 'environment',
-                width: { ideal: 1280 },
-                height: { ideal: 720 },
-            }
+            video: deviceId
+                ? { deviceId: { exact: deviceId }, width: { ideal: 1280 }, height: { ideal: 720 } }
+                : { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
         };
 
         navigator.mediaDevices.getUserMedia(constraints)
-            .then(stream => {
+            .then(async (stream) => {
                 streamRef.current = stream;
                 if (videoRef.current) {
                     videoRef.current.srcObject = stream;
                     videoRef.current.play();
+                }
+                try {
+                    const devices = await navigator.mediaDevices.enumerateDevices();
+                    const videoDevices = devices.filter(d => d.kind === 'videoinput');
+                    setCameras(videoDevices);
+                    const activeId = stream.getVideoTracks()[0]?.getSettings().deviceId;
+                    setSelectedCamera(activeId ?? deviceId ?? videoDevices[0]?.deviceId);
+                } catch {
+                    // Device listing is best-effort — scanning still works without a switcher
                 }
                 startDetectionLoop();
             })
@@ -151,13 +133,51 @@ export function BarcodeScanner({
                     setError('ถูกปฏิเสธการใช้กล้อง กรุณาอนุญาตในการตั้งค่าเบราว์เซอร์');
                 } else if (err.name === 'NotFoundError') {
                     setError('ไม่พบกล้องในอุปกรณ์นี้');
+                } else if (err.name === 'OverconstrainedError') {
+                    setError('ไม่พบกล้องที่เลือก กรุณาลองสลับกล้อง');
                 } else {
                     setError('เกิดข้อผิดพลาดในการเปิดกล้อง');
                 }
             });
+    }, [stopCamera, startDetectionLoop]);
 
+    // Check API support when dialog opens
+    useEffect(() => {
+        if (!open) return;
+        setError(null);
+        setDetected(null);
+        setManualInput('');
+
+        // getUserMedia only exists in secure contexts (HTTPS, or localhost) —
+        // on plain HTTP over a LAN IP the API is silently absent, which used
+        // to look identical to "unsupported browser" with no clear message.
+        if (typeof window !== 'undefined' && window.isSecureContext === false) {
+            setApiSupported(false);
+            setError('ต้องเข้าผ่าน HTTPS (หรือ localhost) เพื่อใช้กล้อง');
+            return;
+        }
+
+        const supported = typeof window !== 'undefined' && 'BarcodeDetector' in window
+            && typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia;
+        setApiSupported(supported);
+
+        if (!supported) return;
+
+        // Init detector with broad format support
+        const formats = [
+            'code_128', 'code_39', 'code_93',
+            'ean_13', 'ean_8', 'upc_a', 'upc_e',
+            'qr_code', 'data_matrix', 'pdf417',
+        ];
+        detectorRef.current = new window.BarcodeDetector!({ formats });
+    }, [open]);
+
+    // Start the camera once support is confirmed
+    useEffect(() => {
+        if (!open || apiSupported !== true) return;
+        openStream();
         return () => stopCamera();
-    }, [open, selectedCamera, apiSupported]);
+    }, [open, apiSupported, openStream, stopCamera]);
 
     // Clean up when dialog closes
     useEffect(() => {
@@ -172,14 +192,13 @@ export function BarcodeScanner({
     const switchCamera = () => {
         if (cameras.length < 2) return;
         const idx = cameras.findIndex(c => c.deviceId === selectedCamera);
-        setSelectedCamera(cameras[(idx + 1) % cameras.length].deviceId);
+        const next = cameras[(idx + 1) % cameras.length];
+        setSelectedCamera(next.deviceId);
+        openStream(next.deviceId);
     };
 
     const retryCamera = () => {
-        setError(null);
-        const id = selectedCamera;
-        setSelectedCamera(undefined);
-        setTimeout(() => setSelectedCamera(id), 100);
+        openStream(selectedCamera);
     };
 
     const submitManual = () => {
@@ -203,11 +222,15 @@ export function BarcodeScanner({
                 {apiSupported === false && !manualMode && (
                     <div className="px-4 pb-4 flex flex-col items-center gap-3 text-center">
                         <CameraOff className="h-10 w-10 text-gray-400 mt-2" />
-                        <p className="text-sm text-gray-600">
-                            เบราว์เซอร์นี้ไม่รองรับการสแกนบาร์โค้ด
-                            <br />
-                            <span className="text-xs text-gray-400">รองรับ: Chrome, Edge, Samsung Internet</span>
-                        </p>
+                        {error ? (
+                            <p className="text-sm text-gray-600">{error}</p>
+                        ) : (
+                            <p className="text-sm text-gray-600">
+                                เบราว์เซอร์นี้ไม่รองรับการสแกนบาร์โค้ด
+                                <br />
+                                <span className="text-xs text-gray-400">รองรับ: Chrome, Edge, Samsung Internet</span>
+                            </p>
+                        )}
                         <Button size="sm" onClick={() => setManualMode(true)}>
                             <Keyboard className="h-3.5 w-3.5 mr-1.5" />
                             {manualButtonLabel}

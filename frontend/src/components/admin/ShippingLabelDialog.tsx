@@ -114,6 +114,14 @@ const PRINT_SIZES = [
         labelWidth: '100mm',
         margin: '40mm auto',
     },
+    {
+        id: 'thermal-landscape',
+        label: 'Thermal 6"×4" (แนวนอน)',
+        desc: 'ตัวใหญ่ กระชับพื้นที่',
+        pageSize: '152.4mm 101.6mm',
+        labelWidth: '146mm',
+        margin: '3mm',
+    },
 ] as const;
 
 type PrintSizeId = typeof PRINT_SIZES[number]['id'];
@@ -143,6 +151,7 @@ export function ShippingLabelDialog({ open, onOpenChange, order }: ShippingLabel
     });
 
     const selectedSize = PRINT_SIZES.find(s => s.id === sizeId)!;
+    const isLandscape = sizeId === 'thermal-landscape';
 
     const handlePrint = () => {
         const el = document.getElementById('shipping-label-print');
@@ -178,7 +187,10 @@ body { margin: 0; padding: 0; background: white; }
         <>
 
             <Dialog open={open} onOpenChange={onOpenChange}>
-                <DialogContent className="sm:max-w-[420px] p-0 flex flex-col max-h-[90vh]">
+                <DialogContent className={cn(
+                    'p-0 flex flex-col max-h-[90vh] transition-[max-width] duration-200',
+                    isLandscape ? 'sm:max-w-[640px]' : 'sm:max-w-[420px]'
+                )}>
                     <DialogTitle className="sr-only">
                         สติ้กเกอร์จัดส่ง #{order.orderReference}
                     </DialogTitle>
@@ -186,147 +198,285 @@ body { margin: 0; padding: 0; background: white; }
                     <div className="flex-1 min-h-0 overflow-y-auto">
                         {/* ─── Printable label area ─── */}
                         <div id="shipping-label-print" className="bg-white">
-
-                            {/* Courier header strip */}
-                            <div
-                                className="px-4 py-2 flex items-center justify-between border-b"
-                                style={{ borderColor: courierStyle.bg, color: courierStyle.bg }}
-                            >
-                                <div className="flex items-center gap-1.5">
-                                    <Package className="h-3.5 w-3.5 shrink-0" />
-                                    <span className="font-bold text-xs tracking-wide uppercase leading-none">
-                                        {courier?.label || order.shippingInfo?.provider || 'จัดส่งสินค้า'}
-                                    </span>
-                                </div>
-                                <div className="text-right shrink-0 text-gray-500">
-                                    <span className="font-mono text-[10px]">#{order.orderReference}</span>
-                                    <span className="text-[10px] ml-2">{dateStr}</span>
-                                </div>
-                            </div>
-
-                            {/* Label body */}
-                            <div className="border-x border-b border-gray-200 p-4 space-y-4">
-
-                                {/* ── Recipient + QR code ── */}
-                                <div className="flex gap-3 items-start">
-                                    {/* Address block */}
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-400 flex items-center gap-1 mb-2">
-                                            <MapPin className="h-3 w-3 shrink-0" /> ผู้รับ
-                                        </p>
-
-                                        {addr ? (
-                                            <div className="space-y-0.5">
-                                                <p className="font-black text-[1.35rem] leading-snug text-gray-900">
-                                                    {addr.recipientName}
-                                                </p>
-                                                <p className="text-sm text-gray-700 mt-1 leading-relaxed">
-                                                    {addr.streetAddress}
-                                                </p>
-                                                {(addr.subDistrict || addr.district || addr.province) && (
-                                                    <p className="text-sm text-gray-700">
-                                                        {[addr.subDistrict, addr.district, addr.province]
-                                                            .filter(Boolean).join(' ')}
-                                                    </p>
-                                                )}
-                                                {addr.zipCode && (
-                                                    <p className="font-black text-2xl text-gray-900 mt-1.5 tracking-widest">
-                                                        {addr.zipCode}
-                                                    </p>
-                                                )}
-                                                {(addr.phone || order.customer?.phone) && (
-                                                    <p className="text-sm font-semibold text-gray-700 mt-1">
-                                                        ☎ {addr.phone || order.customer?.phone}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <div className="space-y-0.5">
-                                                <p className="font-black text-[1.35rem] leading-snug text-gray-900">
-                                                    {order.customer?.firstName} {order.customer?.lastName}
-                                                </p>
-                                                {order.customer?.phone && (
-                                                    <p className="text-sm font-semibold text-gray-700 mt-1">
-                                                        ☎ {order.customer.phone}
-                                                    </p>
-                                                )}
-                                                <p className="text-xs text-amber-600 mt-1">
-                                                    ไม่พบที่อยู่จัดส่งในระบบ
-                                                </p>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* QR code */}
-                                    <div className="flex flex-col items-center shrink-0">
-                                        <div className="p-1.5 border-2 border-gray-200 rounded-xl overflow-hidden">
-                                            <QRCodeSVG value={qrValue} size={86} />
+                            {isLandscape ? (
+                                <>
+                                    {/* Courier header strip */}
+                                    <div
+                                        className="px-4 py-1.5 flex items-center justify-between border-b"
+                                        style={{ borderColor: courierStyle.bg, color: courierStyle.bg }}
+                                    >
+                                        <div className="flex items-center gap-1.5">
+                                            <Package className="h-4 w-4 shrink-0" />
+                                            <span className="font-bold text-sm tracking-wide uppercase leading-none">
+                                                {courier?.label || order.shippingInfo?.provider || 'จัดส่งสินค้า'}
+                                            </span>
                                         </div>
-                                        <p className="text-[8px] text-gray-400 mt-1.5 font-mono text-center max-w-[94px] break-all leading-tight">
-                                            {qrCaption}
-                                        </p>
+                                        <div className="text-right shrink-0 text-gray-500">
+                                            <span className="font-mono text-xs">#{order.orderReference}</span>
+                                            <span className="text-xs ml-2">{dateStr}</span>
+                                        </div>
                                     </div>
-                                </div>
 
-                                {/* ── Dashed divider ── */}
-                                <div className="border-t border-dashed border-gray-300" />
+                                    {/* Main row: recipient | QR | sender — side-by-side to save vertical space */}
+                                    <div className="border-x border-b border-gray-200 px-4 py-3 flex gap-4">
+                                        {/* Recipient */}
+                                        <div className="flex-1 min-w-0 flex flex-col justify-center">
+                                            <p className="text-xs font-black uppercase tracking-[0.18em] text-gray-400 flex items-center gap-1 mb-1.5">
+                                                <MapPin className="h-3.5 w-3.5 shrink-0" /> ผู้รับ
+                                            </p>
+                                            {addr ? (
+                                                <div className="space-y-1">
+                                                    <p className="font-black text-3xl leading-tight text-gray-900">
+                                                        {addr.recipientName}
+                                                    </p>
+                                                    <p className="text-lg text-gray-700 leading-snug">
+                                                        {addr.streetAddress}
+                                                    </p>
+                                                    {(addr.subDistrict || addr.district || addr.province) && (
+                                                        <p className="text-lg text-gray-700">
+                                                            {[addr.subDistrict, addr.district, addr.province]
+                                                                .filter(Boolean).join(' ')}
+                                                        </p>
+                                                    )}
+                                                    {addr.zipCode && (
+                                                        <p className="font-black text-4xl text-gray-900 mt-1 tracking-widest">
+                                                            {addr.zipCode}
+                                                        </p>
+                                                    )}
+                                                    {(addr.phone || order.customer?.phone) && (
+                                                        <p className="text-lg font-semibold text-gray-700 mt-1">
+                                                            ☎ {addr.phone || order.customer?.phone}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-1">
+                                                    <p className="font-black text-3xl leading-tight text-gray-900">
+                                                        {order.customer?.firstName} {order.customer?.lastName}
+                                                    </p>
+                                                    {order.customer?.phone && (
+                                                        <p className="text-lg font-semibold text-gray-700 mt-1">
+                                                            ☎ {order.customer.phone}
+                                                        </p>
+                                                    )}
+                                                    <p className="text-sm text-amber-600 mt-1">
+                                                        ไม่พบที่อยู่จัดส่งในระบบ
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </div>
 
-                                {/* ── Sender + order totals ── */}
-                                <div className="flex items-end justify-between gap-4">
-                                    <div>
-                                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-400 flex items-center gap-1 mb-1.5">
-                                            <Store className="h-3 w-3 shrink-0" /> ผู้ส่ง
-                                        </p>
-                                        <p className="font-bold text-sm text-gray-900">{storeName}</p>
-                                        {storePhone && (
-                                            <p className="text-xs text-gray-600">โทร: {storePhone}</p>
-                                        )}
-                                        {storeAddress && (
-                                            <p className="text-xs text-gray-500">{storeAddress}</p>
-                                        )}
+                                        {/* QR code */}
+                                        <div className="flex flex-col items-center justify-center shrink-0">
+                                            <div className="p-2 border-2 border-gray-200 rounded-xl overflow-hidden">
+                                                <QRCodeSVG value={qrValue} size={120} />
+                                            </div>
+                                            <p className="text-[9px] text-gray-400 mt-1.5 font-mono text-center max-w-[120px] break-all leading-tight">
+                                                {qrCaption}
+                                            </p>
+                                        </div>
+
+                                        {/* Divider */}
+                                        <div className="border-l border-dashed border-gray-300 self-stretch" />
+
+                                        {/* Sender + totals */}
+                                        <div className="w-[160px] shrink-0 flex flex-col justify-center gap-2">
+                                            <div>
+                                                <p className="text-xs font-black uppercase tracking-[0.18em] text-gray-400 flex items-center gap-1 mb-1">
+                                                    <Store className="h-3.5 w-3.5 shrink-0" /> ผู้ส่ง
+                                                </p>
+                                                <p className="font-bold text-base text-gray-900">{storeName}</p>
+                                                {storePhone && (
+                                                    <p className="text-sm text-gray-600">โทร: {storePhone}</p>
+                                                )}
+                                                {storeAddress && (
+                                                    <p className="text-xs text-gray-500 leading-snug">{storeAddress}</p>
+                                                )}
+                                            </div>
+                                            <p className="text-sm text-gray-500 font-semibold">
+                                                {totalItems} ชิ้น • {order.items.length} รายการ
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div className="text-right shrink-0">
-                                        <p className="text-xs text-gray-500">{totalItems} ชิ้น</p>
-                                    </div>
-                                </div>
 
-                                {/* ── Tracking barcode (only when tracking number exists) ── */}
-                                {trackingNumber && (
-                                    <>
-                                        <div className="border-t-2 border-gray-800 pt-3">
-                                            <PseudoBarcode value={trackingNumber} />
-                                            <div className="text-center mt-2">
-                                                <p className="font-mono font-black text-base tracking-[0.22em] text-gray-900">
+                                    {/* Tracking barcode — full-width, compact height */}
+                                    {trackingNumber && (
+                                        <div className="border-x border-b border-gray-200 px-4 py-2 flex items-center gap-4">
+                                            <div className="flex-1">
+                                                <PseudoBarcode value={trackingNumber} />
+                                            </div>
+                                            <div className="text-right shrink-0">
+                                                <p className="font-mono font-black text-xl tracking-[0.2em] text-gray-900">
                                                     {trackingNumber}
                                                 </p>
                                                 {courier && (
-                                                    <p className="text-xs text-gray-500 mt-0.5">{courier.label}</p>
+                                                    <p className="text-xs text-gray-500">{courier.label}</p>
                                                 )}
                                             </div>
                                         </div>
-                                    </>
-                                )}
-                            </div>
+                                    )}
 
-                            {/* ── Items list ── */}
-                            <div className="border-x border-b border-gray-200 px-4 pt-3 pb-4">
-                                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-400 mb-2">
-                                    รายการสินค้า ({order.items.length} รายการ)
-                                </p>
-                                <div className="space-y-1">
-                                    {order.items.map((item, idx) => (
-                                        <div key={idx} className="flex justify-between text-xs text-gray-700">
-                                            <span className="truncate pr-3">{item.productName}</span>
-                                            <span className="text-gray-500 shrink-0 font-medium">× {item.quantity}</span>
+                                    {/* Items — 2-column grid, bigger text, tight rows */}
+                                    <div className="border-x border-b border-gray-200 px-4 py-2">
+                                        <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
+                                            {order.items.map((item, idx) => (
+                                                <div key={idx} className="flex justify-between text-sm text-gray-700">
+                                                    <span className="truncate pr-2">{item.productName}</span>
+                                                    <span className="text-gray-500 shrink-0 font-medium">× {item.quantity}</span>
+                                                </div>
+                                            ))}
                                         </div>
-                                    ))}
-                                </div>
-                                {!order.shippingAddressId && order.source === 'online' && (
-                                    <p className="mt-2 text-xs text-amber-600">
-                                        ยังไม่มีที่อยู่จัดส่งในระบบ
-                                    </p>
-                                )}
-                            </div>
+                                        {!order.shippingAddressId && order.source === 'online' && (
+                                            <p className="mt-1 text-xs text-amber-600">
+                                                ยังไม่มีที่อยู่จัดส่งในระบบ
+                                            </p>
+                                        )}
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    {/* Courier header strip */}
+                                    <div
+                                        className="px-4 py-2 flex items-center justify-between border-b"
+                                        style={{ borderColor: courierStyle.bg, color: courierStyle.bg }}
+                                    >
+                                        <div className="flex items-center gap-1.5">
+                                            <Package className="h-3.5 w-3.5 shrink-0" />
+                                            <span className="font-bold text-xs tracking-wide uppercase leading-none">
+                                                {courier?.label || order.shippingInfo?.provider || 'จัดส่งสินค้า'}
+                                            </span>
+                                        </div>
+                                        <div className="text-right shrink-0 text-gray-500">
+                                            <span className="font-mono text-[10px]">#{order.orderReference}</span>
+                                            <span className="text-[10px] ml-2">{dateStr}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Label body */}
+                                    <div className="border-x border-b border-gray-200 p-4 space-y-4">
+
+                                        {/* ── Recipient + QR code ── */}
+                                        <div className="flex gap-3 items-start">
+                                            {/* Address block */}
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-400 flex items-center gap-1 mb-2">
+                                                    <MapPin className="h-3 w-3 shrink-0" /> ผู้รับ
+                                                </p>
+
+                                                {addr ? (
+                                                    <div className="space-y-0.5">
+                                                        <p className="font-black text-[1.35rem] leading-snug text-gray-900">
+                                                            {addr.recipientName}
+                                                        </p>
+                                                        <p className="text-sm text-gray-700 mt-1 leading-relaxed">
+                                                            {addr.streetAddress}
+                                                        </p>
+                                                        {(addr.subDistrict || addr.district || addr.province) && (
+                                                            <p className="text-sm text-gray-700">
+                                                                {[addr.subDistrict, addr.district, addr.province]
+                                                                    .filter(Boolean).join(' ')}
+                                                            </p>
+                                                        )}
+                                                        {addr.zipCode && (
+                                                            <p className="font-black text-2xl text-gray-900 mt-1.5 tracking-widest">
+                                                                {addr.zipCode}
+                                                            </p>
+                                                        )}
+                                                        {(addr.phone || order.customer?.phone) && (
+                                                            <p className="text-sm font-semibold text-gray-700 mt-1">
+                                                                ☎ {addr.phone || order.customer?.phone}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <div className="space-y-0.5">
+                                                        <p className="font-black text-[1.35rem] leading-snug text-gray-900">
+                                                            {order.customer?.firstName} {order.customer?.lastName}
+                                                        </p>
+                                                        {order.customer?.phone && (
+                                                            <p className="text-sm font-semibold text-gray-700 mt-1">
+                                                                ☎ {order.customer.phone}
+                                                            </p>
+                                                        )}
+                                                        <p className="text-xs text-amber-600 mt-1">
+                                                            ไม่พบที่อยู่จัดส่งในระบบ
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* QR code */}
+                                            <div className="flex flex-col items-center shrink-0">
+                                                <div className="p-1.5 border-2 border-gray-200 rounded-xl overflow-hidden">
+                                                    <QRCodeSVG value={qrValue} size={86} />
+                                                </div>
+                                                <p className="text-[8px] text-gray-400 mt-1.5 font-mono text-center max-w-[94px] break-all leading-tight">
+                                                    {qrCaption}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* ── Dashed divider ── */}
+                                        <div className="border-t border-dashed border-gray-300" />
+
+                                        {/* ── Sender + order totals ── */}
+                                        <div className="flex items-end justify-between gap-4">
+                                            <div>
+                                                <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-400 flex items-center gap-1 mb-1.5">
+                                                    <Store className="h-3 w-3 shrink-0" /> ผู้ส่ง
+                                                </p>
+                                                <p className="font-bold text-sm text-gray-900">{storeName}</p>
+                                                {storePhone && (
+                                                    <p className="text-xs text-gray-600">โทร: {storePhone}</p>
+                                                )}
+                                                {storeAddress && (
+                                                    <p className="text-xs text-gray-500">{storeAddress}</p>
+                                                )}
+                                            </div>
+                                            <div className="text-right shrink-0">
+                                                <p className="text-xs text-gray-500">{totalItems} ชิ้น</p>
+                                            </div>
+                                        </div>
+
+                                        {/* ── Tracking barcode (only when tracking number exists) ── */}
+                                        {trackingNumber && (
+                                            <>
+                                                <div className="border-t-2 border-gray-800 pt-3">
+                                                    <PseudoBarcode value={trackingNumber} />
+                                                    <div className="text-center mt-2">
+                                                        <p className="font-mono font-black text-base tracking-[0.22em] text-gray-900">
+                                                            {trackingNumber}
+                                                        </p>
+                                                        {courier && (
+                                                            <p className="text-xs text-gray-500 mt-0.5">{courier.label}</p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+
+                                    {/* ── Items list ── */}
+                                    <div className="border-x border-b border-gray-200 px-4 pt-3 pb-4">
+                                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-400 mb-2">
+                                            รายการสินค้า ({order.items.length} รายการ)
+                                        </p>
+                                        <div className="space-y-1">
+                                            {order.items.map((item, idx) => (
+                                                <div key={idx} className="flex justify-between text-xs text-gray-700">
+                                                    <span className="truncate pr-3">{item.productName}</span>
+                                                    <span className="text-gray-500 shrink-0 font-medium">× {item.quantity}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        {!order.shippingAddressId && order.source === 'online' && (
+                                            <p className="mt-2 text-xs text-amber-600">
+                                                ยังไม่มีที่อยู่จัดส่งในระบบ
+                                            </p>
+                                        )}
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
 
