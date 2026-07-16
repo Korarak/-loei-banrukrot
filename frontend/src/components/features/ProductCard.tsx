@@ -13,9 +13,17 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 interface ProductCardProps {
     product: any;
     priority?: boolean;
+    // Callers render this card in grids of very different real widths (4-col
+    // wide container, 3-col with a sidebar, fixed-width carousels, ...). The
+    // default below assumes the widest common case (a 4-col grid inside a
+    // ~1536px-capped container) — pass a tighter value when the card renders
+    // narrower, otherwise the browser fetches a needlessly large image on
+    // wide/high-DPR monitors (unbounded `vw` keeps growing past the point the
+    // container itself stops growing).
+    sizes?: string;
 }
 
-export default function ProductCard({ product, priority = false }: ProductCardProps) {
+export default function ProductCard({ product, priority = false, sizes = '(max-width: 640px) 240px, (max-width: 1024px) 300px, 400px' }: ProductCardProps) {
     const addToCart = useAddToCart();
     const customer = useAuthStore((state) => state.customer);
     const { addToWishlist, removeFromWishlist } = useWishlistStore();
@@ -87,7 +95,7 @@ export default function ProductCard({ product, priority = false }: ProductCardPr
                                 alt={product.productName}
                                 fill
                                 className="object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
-                                sizes="(max-width: 640px) 240px, (max-width: 1024px) 300px, 25vw"
+                                sizes={sizes}
                                 placeholder={primaryImage.blurDataURL ? 'blur' : 'empty'}
                                 blurDataURL={primaryImage.blurDataURL}
                                 {...(priority ? { priority: true } : { loading: 'lazy' as const })}

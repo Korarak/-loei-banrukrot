@@ -473,7 +473,11 @@ export default function ProductsPage() {
                                             show: { opacity: 1, scale: 1 }
                                         }}
                                     >
-                                        <ProductCard product={product} priority={idx < 4} />
+                                        <ProductCard
+                                            product={product}
+                                            priority={idx < 4}
+                                            sizes="(max-width: 1024px) 45vw, 300px"
+                                        />
                                     </motion.div>
                                 ))}
                             </motion.div>

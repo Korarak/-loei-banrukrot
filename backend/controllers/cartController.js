@@ -29,10 +29,10 @@ exports.getCart = async (req, res, next) => {
             productId: { $in: productIds }
         });
 
-        // Create map of productId -> imagePath (prioritize isPrimary)
+        // Create map of productId -> { imagePath, blurDataURL } (prioritize isPrimary)
         const imageMap = productImages.reduce((acc, img) => {
             if (!acc[img.productId] || img.isPrimary) {
-                acc[img.productId] = img.imagePath;
+                acc[img.productId] = { imagePath: img.imagePath, blurDataURL: img.blurDataURL };
             }
             return acc;
         }, {});
@@ -64,7 +64,8 @@ exports.getCart = async (req, res, next) => {
                     _id: product._id,
                     productName: product.productName,
                     shippingSize: product.shippingSize,
-                    imageUrl: imageMap[product._id] || product.imageUrl
+                    imageUrl: imageMap[product._id]?.imagePath || product.imageUrl,
+                    blurDataURL: imageMap[product._id]?.blurDataURL
                 }
             });
             return acc;

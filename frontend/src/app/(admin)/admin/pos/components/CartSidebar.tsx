@@ -23,6 +23,7 @@ interface CartItem {
     quantity: number;
     sku: string;
     image?: string;
+    blurDataURL?: string;
 }
 
 interface CartSidebarProps {
@@ -68,7 +69,15 @@ export function CartSidebar({ cart, onUpdateQuantity, onClearCart, onCheckout }:
                         <div key={item.variantId} className="flex gap-2 p-2 rounded-xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-all group animate-in fade-in slide-in-from-bottom-2 duration-300">
                             <div className="h-12 w-12 bg-gray-100 rounded-lg overflow-hidden shrink-0 border border-gray-100 relative">
                                 {item.image ? (
-                                    <Image src={getImageUrl(item.image)} alt={item.name} width={48} height={48} className="w-full h-full object-cover" />
+                                    <Image
+                                        src={getImageUrl(item.image)}
+                                        alt={item.name}
+                                        width={48}
+                                        height={48}
+                                        className="w-full h-full object-cover"
+                                        placeholder={item.blurDataURL ? 'blur' : 'empty'}
+                                        blurDataURL={item.blurDataURL}
+                                    />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-gray-300">
                                         <Package className="h-5 w-5 opacity-50" />

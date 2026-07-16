@@ -12,6 +12,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
+import { getPrimaryImage } from '@/lib/utils';
 
 import { CategoryFilter } from './components/CategoryFilter';
 import { ProductGrid } from './components/ProductGrid';
@@ -94,6 +95,7 @@ export default function POSPage() {
                 );
             }
             toast.success('เพิ่มลงในรถเข็นแล้ว', { duration: 1000, position: 'bottom-center' });
+            const primaryImage = getPrimaryImage(product.images);
             return [...prev, {
                 variantId: variant._id,
                 productId: product._id,
@@ -101,7 +103,8 @@ export default function POSPage() {
                 price: variant.price,
                 quantity: 1,
                 sku: variant.sku,
-                image: product.images?.[0]?.imagePath,
+                image: primaryImage?.imagePath,
+                blurDataURL: primaryImage?.blurDataURL,
                 stockAvailable: variant.stockAvailable,
             }];
         });

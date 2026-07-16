@@ -59,7 +59,7 @@ export default function RelatedProducts({ categoryId, currentProductId, category
             <div className="flex gap-4 md:gap-5 overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-4 px-4 pb-4">
                 {products.map((product: any) => (
                     <div key={product._id} className="w-[220px] sm:w-[250px] flex-shrink-0 snap-start">
-                        <ProductCard product={product} />
+                        <ProductCard product={product} sizes="(max-width: 640px) 220px, 250px" />
                     </div>
                 ))}
             </div>

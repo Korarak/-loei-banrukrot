@@ -4,13 +4,13 @@ import { memo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Package } from 'lucide-react';
-import { cn, getImageUrl } from '@/lib/utils';
+import { cn, getImageUrl, getPrimaryImage } from '@/lib/utils';
 import Image from 'next/image';
 
 interface Product {
     _id: string;
     productName: string;
-    images: { imagePath: string }[];
+    images: { imagePath: string; isPrimary?: boolean; blurDataURL?: string }[];
     variants: {
         _id: string;
         sku: string;
@@ -49,21 +49,23 @@ export function ProductGrid({ products, onAddToCart, isLoading }: ProductGridPro
 
     return (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pb-32 md:pb-0" role="grid" aria-label="Product list">
-            {products.map((product) => (
+            {products.map((product, idx) => (
                 <POSProductCard
                     key={product._id}
                     product={product}
                     onAdd={() => onAddToCart(product)}
+                    priority={idx < 10}
                 />
             ))}
         </div>
     );
 }
 
-const POSProductCard = memo(function POSProductCard({ product, onAdd }: { product: Product; onAdd: () => void }) {
+const POSProductCard = memo(function POSProductCard({ product, onAdd, priority }: { product: Product; onAdd: () => void; priority?: boolean }) {
     const variant = product.variants?.[0];
     const hasStock = variant && (variant.stockAvailable || 0) > 0;
-    const imageUrl = product.images?.[0]?.imagePath ? getImageUrl(product.images[0].imagePath) : null;
+    const primaryImage = getPrimaryImage(product.images);
+    const imageUrl = primaryImage ? getImageUrl(primaryImage.imagePath) : null;
 
     return (
         <Card
@@ -88,9 +90,11 @@ const POSProductCard = memo(function POSProductCard({ product, onAdd }: { produc
                         src={imageUrl}
                         alt={product.productName}
                         fill
-                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
+                        sizes="(max-width: 767px) 50vw, (max-width: 1023px) 22vw, (max-width: 1279px) 16vw, 13vw"
                         className="object-cover group-hover:scale-110 transition-transform duration-500"
-                        loading="lazy"
+                        placeholder={primaryImage?.blurDataURL ? 'blur' : 'empty'}
+                        blurDataURL={primaryImage?.blurDataURL}
+                        {...(priority ? { priority: true } : { loading: 'lazy' as const })}
                     />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center text-gray-300">

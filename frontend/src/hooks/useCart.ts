@@ -10,6 +10,7 @@ export interface CartItem {
         productName: string;
         shippingSize?: 'small' | 'large';
         imageUrl?: string;
+        blurDataURL?: string;
     };
     variant: {
         _id: string;

@@ -261,6 +261,8 @@ export default function CartPage() {
                                                 fill
                                                 className="object-cover"
                                                 sizes="(max-width: 768px) 128px, 160px"
+                                                placeholder={item.product.blurDataURL ? 'blur' : 'empty'}
+                                                blurDataURL={item.product.blurDataURL}
                                             />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center text-xs text-gray-500 bg-gray-50">
