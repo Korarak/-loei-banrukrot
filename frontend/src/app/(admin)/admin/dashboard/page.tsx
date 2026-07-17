@@ -2,7 +2,9 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Package, ShoppingCart, Users, DollarSign, TrendingUp, TrendingDown, AlertTriangle, Trophy, Clock, Calendar, Sun, Moon, CloudSun, BarChart3, PieChart as PieChartIcon, Activity, UserPlus, Repeat, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { Package, ShoppingCart, Users, DollarSign, TrendingUp, TrendingDown, AlertTriangle, Trophy, Clock, Calendar, Sun, Moon, CloudSun, BarChart3, PieChart as PieChartIcon, Activity, UserPlus, Repeat, ArrowUpRight, ArrowDownRight, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useDashboardSummary, useDailyRevenue, useTopCategories } from '@/hooks/useDashboard';
 import { format } from 'date-fns';
@@ -23,7 +25,7 @@ import {
     Legend
 } from 'recharts';
 import Image from 'next/image';
-import { getImageUrl } from '@/lib/utils';
+import { getImageUrl, cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { getOrderStatusLabel, ORDER_STATUS_HEX } from '@/lib/order-status';
 import {
@@ -105,6 +107,7 @@ function ChangeIndicator({ value }: { value: number }) {
 export default function AdminDashboard() {
     const [dateRange, setDateRange] = useState<DateRange>('30d');
     const params = { range: dateRange };
+    const router = useRouter();
 
     const { data, isLoading } = useDashboardSummary(params);
     const { data: dailyData, isLoading: dailyLoading } = useDailyRevenue(params);
@@ -112,6 +115,10 @@ export default function AdminDashboard() {
 
     const { user } = useAuthStore();
     const { greeting, icon: GreetingIcon } = getGreeting();
+
+    // Pending orders need action (confirm/pack/ship) — surfaced as a badge + shortcut,
+    // derived from the same status breakdown already fetched for the pie chart.
+    const pendingOrdersCount = data?.orderStatusDistribution?.find((s: any) => s._id === 'pending')?.count || 0;
 
     const stats = [
         {
@@ -123,6 +130,8 @@ export default function AdminDashboard() {
             color: 'text-emerald-500',
             bg: 'bg-emerald-500/10',
             iconBg: 'bg-gradient-to-br from-emerald-500 to-emerald-600',
+            href: undefined as string | undefined,
+            badge: undefined as string | undefined,
         },
         {
             title: 'คำสั่งซื้อ',
@@ -133,6 +142,8 @@ export default function AdminDashboard() {
             color: 'text-blue-500',
             bg: 'bg-blue-500/10',
             iconBg: 'bg-gradient-to-br from-blue-500 to-blue-600',
+            href: pendingOrdersCount > 0 ? '/admin/orders?status=pending' : '/admin/orders',
+            badge: pendingOrdersCount > 0 ? `${pendingOrdersCount} รอดำเนินการ` : undefined,
         },
         {
             title: 'ลูกค้าสมาชิก',
@@ -143,6 +154,8 @@ export default function AdminDashboard() {
             color: 'text-pink-500',
             bg: 'bg-pink-500/10',
             iconBg: 'bg-gradient-to-br from-pink-500 to-pink-600',
+            href: undefined as string | undefined,
+            badge: undefined as string | undefined,
         },
         {
             title: 'ยอดเฉลี่ย/ออเดอร์',
@@ -153,6 +166,8 @@ export default function AdminDashboard() {
             color: 'text-violet-500',
             bg: 'bg-violet-500/10',
             iconBg: 'bg-gradient-to-br from-violet-500 to-violet-600',
+            href: undefined as string | undefined,
+            badge: undefined as string | undefined,
         },
     ];
 
@@ -248,13 +263,27 @@ export default function AdminDashboard() {
             <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                 {stats.map((stat) => (
                     <motion.div key={stat.title} variants={itemVariant}>
-                        <Card className="border-0 shadow-lg shadow-gray-100/50 hover:shadow-xl hover:shadow-gray-200/50 transition-all duration-300 rounded-[2rem] overflow-hidden group card-hover-lift">
+                        <Card
+                            className={cn(
+                                "border-0 shadow-lg shadow-gray-100/50 hover:shadow-xl hover:shadow-gray-200/50 transition-all duration-300 rounded-[2rem] overflow-hidden group card-hover-lift relative",
+                                stat.href && "cursor-pointer"
+                            )}
+                            onClick={stat.href ? () => router.push(stat.href!) : undefined}
+                            role={stat.href ? 'link' : undefined}
+                            tabIndex={stat.href ? 0 : undefined}
+                            onKeyDown={stat.href ? (e) => { if (e.key === 'Enter') router.push(stat.href!); } : undefined}
+                        >
+                            {stat.badge && (
+                                <span className="absolute top-4 right-4 bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full shadow-lg shadow-red-500/30 animate-pulse z-10">
+                                    {stat.badge}
+                                </span>
+                            )}
                             <CardContent className="p-6">
                                 <div className="flex items-center justify-between mb-4">
                                     <div className={`h-12 w-12 rounded-2xl ${stat.iconBg} flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
                                         <stat.icon className="h-6 w-6 text-white" />
                                     </div>
-                                    <ChangeIndicator value={stat.change} />
+                                    {!stat.badge && <ChangeIndicator value={stat.change} />}
                                 </div>
                                 <div className="space-y-1">
                                     <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">{stat.title}</h3>
@@ -556,11 +585,22 @@ export default function AdminDashboard() {
                 {/* Recent Orders */}
                 <motion.div variants={itemVariant}>
                     <Card className="border-0 shadow-lg shadow-gray-100/50 rounded-[2rem] overflow-hidden h-full">
-                        <CardHeader>
+                        <CardHeader className="flex flex-row items-center justify-between">
                             <CardTitle className="flex items-center gap-2 text-xl font-bold">
                                 <Clock className="h-5 w-5 text-blue-500" />
                                 การสั่งซื้อล่าสุด
+                                {pendingOrdersCount > 0 && (
+                                    <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm shadow-red-500/30">
+                                        {pendingOrdersCount} รอดำเนินการ
+                                    </span>
+                                )}
                             </CardTitle>
+                            <Button variant="ghost" size="sm" className="text-primary hover:text-primary hover:bg-primary/5 gap-1 rounded-lg font-bold" asChild>
+                                <Link href="/admin/orders">
+                                    ดูทั้งหมด
+                                    <ArrowRight className="h-3.5 w-3.5" />
+                                </Link>
+                            </Button>
                         </CardHeader>
                         <CardContent>
                             <div className="overflow-hidden rounded-2xl border border-gray-50">
@@ -574,7 +614,11 @@ export default function AdminDashboard() {
                                     </TableHeader>
                                     <TableBody>
                                         {data?.recentOrders?.slice(0, 5).map((order: any) => (
-                                            <TableRow key={order._id} className="hover:bg-gray-50/50 border-gray-50 transition-colors cursor-pointer group">
+                                            <TableRow
+                                                key={order._id}
+                                                className="hover:bg-gray-50/50 border-gray-50 transition-colors cursor-pointer group"
+                                                onClick={() => router.push(`/admin/orders/${order._id}`)}
+                                            >
                                                 <TableCell>
                                                     <div className="flex flex-col">
                                                         <span className="font-bold text-gray-900 group-hover:text-primary transition-colors text-sm">

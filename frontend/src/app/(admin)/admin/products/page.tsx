@@ -44,6 +44,7 @@ import BulkActionToolbar from '@/components/features/BulkActionToolbar';
 import BulkCategoryDialog from '@/components/features/BulkCategoryDialog';
 import CsvImportDialog from '@/components/features/CsvImportDialog';
 import ProductsTableView from '@/components/features/ProductsTableView';
+import Pagination from '@/components/features/Pagination';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
@@ -66,6 +67,8 @@ export default function AdminProductsPage() {
     const [brandFilter, setBrandFilter] = useState<string>('all');
     const [activeFilter, setActiveFilter] = useState<'all' | 'active' | 'inactive'>('all');
     const [viewMode, setViewMode] = useState<'card' | 'table'>('card');
+    const [currentPage, setCurrentPage] = useState(1);
+    const PAGE_SIZE = 24;
 
     // Bulk selection + bulk action dialogs
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -84,6 +87,12 @@ export default function AdminProductsPage() {
         searchDebounceRef.current = setTimeout(() => setSearch(searchInput), 350);
         return () => { if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current); };
     }, [searchInput]);
+
+    // Reset to page 1 whenever the filtered/sorted set would change shape —
+    // otherwise switching filters can strand the view on a now-empty page.
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [search, stockFilter, channelFilter, categoryFilter, brandFilter, activeFilter, sortConfig, viewMode]);
 
     const { data: products, isLoading, isError, refetch } = useProducts({ search, channel: channelFilter });
     const { data: categoriesData } = useCategories(true);
@@ -254,15 +263,22 @@ export default function AdminProductsPage() {
         return { sortedProducts: sorted, totalProducts: preStockFiltered.length, lowStockCount: low, outStockCount: out };
     }, [products, stockFilter, sortConfig, categoryFilter, brandFilter, activeFilter]);
 
-    const allVisibleSelected = sortedProducts.length > 0 && sortedProducts.every(p => selectedIds.has(p._id));
+    const totalPages = Math.max(1, Math.ceil(sortedProducts.length / PAGE_SIZE));
+    const pagedProducts = useMemo(
+        () => sortedProducts.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+        [sortedProducts, currentPage]
+    );
+
+    // "Select all" only affects the current page — matches what the admin actually sees.
+    const allVisibleSelected = pagedProducts.length > 0 && pagedProducts.every(p => selectedIds.has(p._id));
 
     const handleToggleSelectAll = () => {
         setSelectedIds(prev => {
             const next = new Set(prev);
             if (allVisibleSelected) {
-                sortedProducts.forEach(p => next.delete(p._id));
+                pagedProducts.forEach(p => next.delete(p._id));
             } else {
-                sortedProducts.forEach(p => next.add(p._id));
+                pagedProducts.forEach(p => next.add(p._id));
             }
             return next;
         });
@@ -468,19 +484,23 @@ export default function AdminProductsPage() {
                 </div>
             ) : sortedProducts.length > 0 ? (
                 viewMode === 'table' ? (
-                    <ProductsTableView
-                        products={sortedProducts}
-                        categoryMap={categoryMap}
-                        selectedIds={selectedIds}
-                        onToggleSelect={handleToggleSelect}
-                        allVisibleSelected={allVisibleSelected}
-                        onToggleSelectAll={handleToggleSelectAll}
-                        onEditProduct={handleEditProduct}
-                        onDeleteProduct={handleDeleteClick}
-                    />
+                    <>
+                        <ProductsTableView
+                            products={pagedProducts}
+                            categoryMap={categoryMap}
+                            selectedIds={selectedIds}
+                            onToggleSelect={handleToggleSelect}
+                            allVisibleSelected={allVisibleSelected}
+                            onToggleSelectAll={handleToggleSelectAll}
+                            onEditProduct={handleEditProduct}
+                            onDeleteProduct={handleDeleteClick}
+                        />
+                        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+                    </>
                 ) : (
+                <>
                 <div className="space-y-3">
-                    {sortedProducts.map((product, index) => {
+                    {pagedProducts.map((product, index) => {
                         const totalStock = product.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0;
                         const prices = product.variants?.map((v) => v.price).filter(p => p != null) || [];
                         const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
@@ -633,6 +653,8 @@ export default function AdminProductsPage() {
                         );
                     })}
                 </div>
+                <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+                </>
                 )
             ) : (
                 <div className="text-center py-24 bg-white rounded-3xl border border-gray-200 border-dashed">

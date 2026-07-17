@@ -25,6 +25,7 @@ import { Search, Eye, Plus, AlertCircle, Store, Globe, Calendar, CreditCard, Ban
 import { BarcodeScanner } from '@/components/features/BarcodeScanner';
 import { ShippingLabelDialog, ORDER_SCAN_PREFIX } from '@/components/admin/ShippingLabelDialog';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { useRef, useEffect, useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -39,8 +40,15 @@ const statusOptions = [
 ];
 
 export default function AdminOrdersPage() {
+    // Supports deep-linking a status filter from elsewhere in the admin (e.g.
+    // the dashboard's "pending orders" shortcut → /admin/orders?status=pending).
+    const searchParams = useSearchParams();
+    const initialStatus = searchParams.get('status');
+
     const [searchQuery, setSearchQuery] = useState('');
-    const [statusFilter, setStatusFilter] = useState('all');
+    const [statusFilter, setStatusFilter] = useState(
+        initialStatus && ORDER_STATUS_ORDER.includes(initialStatus as any) ? initialStatus : 'all'
+    );
     const [sourceFilter, setSourceFilter] = useState('all'); // 'all' | 'online' | 'pos'
     const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
     const [orderToCancel, setOrderToCancel] = useState<string | null>(null);

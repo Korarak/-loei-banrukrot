@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { LayoutDashboard, ShoppingCart, Package, Store, Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { useOrders, Order } from '@/hooks/useOrders';
 
 interface AdminBottomNavProps {
     onMenuClick?: () => void;
@@ -12,6 +13,12 @@ interface AdminBottomNavProps {
 
 export function AdminBottomNav({ onMenuClick }: AdminBottomNavProps) {
     const pathname = usePathname();
+
+    // Same pending-orders signal as the desktop sidebar — mobile only ever sees
+    // this bar (the sidebar itself is hidden behind the menu drawer), so without
+    // this the badge was invisible on mobile.
+    const { data: allOrders } = useOrders({ refetchInterval: 30000 });
+    const pendingOrdersCount = (allOrders as Order[] | undefined)?.filter(o => o.orderStatus === 'pending').length ?? 0;
 
     const isActive = (path: string) => pathname.startsWith(path);
 
@@ -25,6 +32,7 @@ export function AdminBottomNav({ onMenuClick }: AdminBottomNavProps) {
             href: '/admin/orders',
             label: 'คำสั่งซื้อ',
             icon: ShoppingCart,
+            badge: pendingOrdersCount > 0 ? pendingOrdersCount : undefined,
         },
         {
             href: '/admin/products',
@@ -66,7 +74,14 @@ export function AdminBottomNav({ onMenuClick }: AdminBottomNavProps) {
                         aria-current={isActive(item.href) ? 'page' : undefined}
                         className={linkClass(item.href)}
                     >
-                        <item.icon className="h-6 w-6" />
+                        <span className="relative">
+                            <item.icon className="h-6 w-6" />
+                            {!!item.badge && (
+                                <span className="absolute -top-1.5 -right-2.5 bg-red-500 text-white text-[9px] font-bold min-w-[1.1rem] h-[1.1rem] px-1 rounded-full flex items-center justify-center shadow-sm shadow-red-500/30">
+                                    {item.badge > 9 ? '9+' : item.badge}
+                                </span>
+                            )}
+                        </span>
                         <span className="text-[10px] font-medium">{item.label}</span>
                         {isActive(item.href) && (
                             <span className="absolute top-0 w-8 h-1 bg-primary rounded-b-full" />
