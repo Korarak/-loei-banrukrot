@@ -14,10 +14,12 @@ deploy-check ท้ายไฟล์นี้)
 ระบบ backward-compatible เต็มที่ — push โค้ดชุดนี้ขึ้น production ได้เลยตอนนี้
 โดยไม่พังของเดิม (ทุก env var ใหม่เป็น optional)
 
-**Step 1 (NPM websocket routing) ทำเสร็จแล้ว** (ดูรายละเอียด/เหตุการณ์ระหว่างทำ
-ด้านล่าง) — พอ push โค้ดขึ้น backend จะต่อ socket ได้ทันทีไม่ต้องแก้ NPM เพิ่ม
-เหลือแค่ **Step 2** (สร้าง VAPID key จริง) ที่ยังไม่ได้ทำ — push notification
-จะยังไม่ทำงานจนกว่าจะทำ step นี้ (แต่แชทตัวข้อความ/รูปภาพใช้งานได้ปกติโดยไม่ต้องรอ)
+**Step 1 (NPM websocket routing) ทำเสร็จแล้ว และ verify กับ production จริงแล้ว**
+(ต่อ WebSocket จริงผ่าน `wss://banrukrot.com` ได้, ส่ง-รับข้อความ real-time
+ผ่านมาแล้ว — ดูรายละเอียดที่ Step 1 และ Step 3 ด้านล่าง) **แชทใช้งานได้เต็มรูปแบบ
+บนเว็บจริงแล้วตอนนี้** เหลือแค่ **Step 2** (สร้าง VAPID key จริง) ที่ยังไม่ได้
+ทำ — push notification จะยังไม่ทำงานจนกว่าจะทำ step นี้ (ไม่กระทบแชทตัวข้อความ/
+รูปภาพซึ่งใช้งานได้ปกติแล้ว)
 
 ## Step 1 — ตั้งค่า Nginx Proxy Manager ให้ route `/socket.io/` — ✅ เสร็จแล้ว (2026-07-17)
 
@@ -101,12 +103,31 @@ template อยู่แล้วบ้าง
 - Grant permission แล้วปิดแท็บ/เบราว์เซอร์ของลูกค้าทั้งหมด (หรือ log out) แล้วให้
   staff ตอบข้อความในนั้น → รอ 5-10 วินาที ควรมี system notification เด้งขึ้น
 
-## Step 3 — หลัง push code ขึ้น main แล้ว
+## Step 3 — หลัง push code ขึ้น main แล้ว — ✅ เสร็จแล้ว (2026-07-17)
 
-1. ใช้ `deploy-check` skill เช็ค GitHub Actions run + container health ตามปกติ
-2. ~~ทำ Step 1~~ — เสร็จแล้ว ไม่ต้องทำอะไรเพิ่มฝั่ง NPM
-3. ทดสอบแชทจริงบนเว็บ (สองเบราว์เซอร์/สอง account) ว่าข้อความขึ้นแบบ real-time
-4. Push notification จะ no-op เงียบๆ (ไม่ error) จนกว่าจะทำ Step 2 ครบ
+Commit ที่ push จริง:
+- `49217c5` — fix เล็กๆ ที่ค้างอยู่ก่อนหน้า (ย้าย badge สินค้าหมด), ไม่เกี่ยวกับแชท
+- `5fa56e6` — ฟีเจอร์แชท + push notification ทั้งหมด (Phase 1-3)
+
+1. ✅ `deploy-check`: GitHub Actions run
+   [29592087137](https://github.com/Korarak/-loei-banrukrot/actions/runs/29592087137)
+   — `completed` / `success`
+2. ✅ Container health: `frontend`/`backend` recreate ใหม่ (~1 นาทีหลัง deploy),
+   `backend` status `healthy`
+3. ✅ Smoke test: `/api/status` → `Server Running` + DB connected, homepage 200
+4. ✅ **ทดสอบ WebSocket ผ่าน production จริง** — เนื่องจากไม่มี credential ของ
+   owner จริงในมือ เลยทดสอบด้วยการต่อ `socket.io-client` ตรงๆ ผ่าน
+   `wss://banrukrot.com` ด้วย account ลูกค้าทดสอบที่สมัครขึ้นมา (auth ผ่าน
+   จริง), ยิงข้อความผ่าน REST แล้วเช็คว่า socket เดียวกันได้รับ
+   `chat:message:new` กลับมาแบบ real-time — **ได้ผลลัพธ์ถูกต้องครบ**:
+   `SOCKET CONNECTED` → REST ส่งสำเร็จ (201) → broadcast กลับมาที่ socket ทันที
+   ยืนยันว่า route `/socket.io/` ที่ตั้งใน Step 1 ทำงานถูกต้องกับ production
+   จริง ไม่ใช่แค่ในเครื่อง dev
+5. Push notification ยัง no-op เงียบๆ ตามคาด (ไม่ error) จนกว่าจะทำ Step 2
+
+**คงเหลือ**: มี test customer 1 คน (`deploytest-chat@example.com`) กับข้อความ
+ทดสอบ 1 ข้อความค้างอยู่ในระบบจริงจากการทดสอบนี้ — ไม่กระทบผู้ใช้จริง ลบทิ้งได้
+ทีหลังผ่าน admin หรือ mongo shell ถ้าต้องการความสะอาด ไม่เร่งด่วน
 
 ## หมายเหตุ
 

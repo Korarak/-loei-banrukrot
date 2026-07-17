@@ -120,7 +120,7 @@ export default function ProductCard({ product, priority = false, sizes = '(max-w
                                 </span>
                             </div>
                         ) : hasDiscount && (
-                            <div className="absolute top-3 left-3 z-20">
+                            <div className="absolute bottom-3 left-3 z-20">
                                 <span className="bg-red-600 text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1">
                                     -{product.discountPercent}%
                                 </span>
