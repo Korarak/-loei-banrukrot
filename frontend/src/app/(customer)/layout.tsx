@@ -41,6 +41,8 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { siteConfig } from '@/config/site';
+import { ChatSocketProvider } from '@/hooks/useChatSocket';
+import ChatLauncherButton from '@/components/chat/ChatLauncherButton';
 
 
 export default function CustomerLayout({
@@ -117,6 +119,7 @@ export default function CustomerLayout({
     };
 
     return (
+        <ChatSocketProvider tokenType="customer">
         <div className="min-h-screen bg-background font-sans selection:bg-primary selection:text-white pb-20 md:pb-0">
             {/* Scroll Progress Bar */}
             <div className="fixed top-0 left-0 right-0 z-[60] h-[3px] bg-transparent">
@@ -349,6 +352,9 @@ export default function CustomerLayout({
             <BottomNav />
             <Footer />
 
+            {/* Always visible (even to guests) — clicking it while logged out prompts login, matching cart's add-to-cart pattern */}
+            {mounted && isHydrated && <ChatLauncherButton />}
+
             <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
@@ -366,5 +372,6 @@ export default function CustomerLayout({
                 </AlertDialogContent>
             </AlertDialog>
         </div >
+        </ChatSocketProvider>
     );
 }

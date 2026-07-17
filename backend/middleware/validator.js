@@ -84,6 +84,30 @@ const validationRules = {
     validateId: [
         param('id').isMongoId().withMessage('Invalid ID format'),
         validate
+    ],
+
+    // Chat validations
+    sendChatMessage: [
+        body('body').optional({ checkFalsy: true }).trim().isLength({ max: 2000 }).withMessage('Message must be at most 2000 characters'),
+        body('attachments').optional().isArray({ max: 5 }).withMessage('At most 5 attachments'),
+        body('attachments.*.url').if(body('attachments').exists()).isString().notEmpty().withMessage('Invalid attachment URL'),
+        body().custom((value) => {
+            const hasBody = typeof value.body === 'string' && value.body.trim().length > 0;
+            const hasAttachments = Array.isArray(value.attachments) && value.attachments.length > 0;
+            if (!hasBody && !hasAttachments) {
+                throw new Error('Message must have text or at least one attachment');
+            }
+            return true;
+        }),
+        validate
+    ],
+
+    // Push notification validations
+    subscribePush: [
+        body('endpoint').isURL().withMessage('Invalid push subscription endpoint'),
+        body('keys.p256dh').notEmpty().withMessage('Missing p256dh key'),
+        body('keys.auth').notEmpty().withMessage('Missing auth key'),
+        validate
     ]
 };
 

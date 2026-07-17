@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Sarabun, Mitr, Anton } from "next/font/google";
 import "./globals.css";
 import QueryProvider from "@/components/providers/QueryProvider";
 import { Toaster } from "@/components/ui/sonner";
+import ServiceWorkerRegistration from "@/components/pwa/ServiceWorkerRegistration";
 
 const sarabun = Sarabun({
   variable: "--font-sarabun",
@@ -25,6 +26,16 @@ const anton = Anton({
 export const metadata: Metadata = {
   title: "บ้านรักรถเมืองเลย - อะไหล่และซ่อมเวสป้า โดยช่างโอ๊ต (Oat Engineering)",
   description: "ร้านอะไหล่ Vespa เล็กๆ ที่เมืองเลย ดูแลโดยช่างโอ๊ต (Oat Engineering)",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "บ้านรักรถเมืองเลย",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#af1d35",
 };
 
 export default function RootLayout({
@@ -40,6 +51,7 @@ export default function RootLayout({
         <QueryProvider>
           {children}
           <Toaster />
+          <ServiceWorkerRegistration />
         </QueryProvider>
       </body>
     </html>

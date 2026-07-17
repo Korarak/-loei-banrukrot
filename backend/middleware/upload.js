@@ -11,6 +11,7 @@ function getUploadSubdir(fieldname) {
     if (fieldname === 'image') return 'products'; // Product/category images
     if (fieldname === 'slip') return 'slips';
     if (fieldname === 'profile') return 'profiles';
+    if (fieldname === 'chatImage') return 'chat';
     return 'others';
 }
 

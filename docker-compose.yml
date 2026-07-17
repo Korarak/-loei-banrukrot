@@ -44,6 +44,11 @@ services:
       - FRONTEND_URL=${FRONTEND_URL:?FRONTEND_URL is required (e.g. https://yourdomain.com)}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      # Optional like Google OAuth above — webPush.js no-ops until these are set,
+      # so an unconfigured deploy just runs chat without push, not a broken one.
+      - WEB_PUSH_VAPID_PUBLIC_KEY=${WEB_PUSH_VAPID_PUBLIC_KEY}
+      - WEB_PUSH_VAPID_PRIVATE_KEY=${WEB_PUSH_VAPID_PRIVATE_KEY}
+      - WEB_PUSH_VAPID_SUBJECT=${WEB_PUSH_VAPID_SUBJECT}
     volumes:
       - ./backend/public/uploads:/app/backend/public/uploads
     logging: *default-logging

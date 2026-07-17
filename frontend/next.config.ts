@@ -4,8 +4,13 @@ import path from "path";
 // CSP ต้องอนุญาต origin ของ API (รูปสินค้า + XHR) — ดึงจาก build-time env
 // บน production API อยู่ domain เดียวกันผ่าน nginx จึงซ้ำกับ 'self' อย่างไม่มีผลเสีย
 let apiOrigin = '';
+let wsOrigin = '';
 try {
   apiOrigin = process.env.NEXT_PUBLIC_API_URL ? new URL(process.env.NEXT_PUBLIC_API_URL).origin : '';
+  // Socket.io connects over ws(s):// to this same origin — Chrome's CSP evaluator
+  // does NOT treat an http(s):// connect-src entry as covering the ws(s):// scheme,
+  // so it needs its own explicit entry or every WebSocket connection is silently blocked.
+  wsOrigin = apiOrigin.replace(/^http/, 'ws');
 } catch { /* ignore malformed URL */ }
 
 const isDev = process.env.NODE_ENV !== 'production';
@@ -20,7 +25,7 @@ const contentSecurityPolicy = [
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob: ${apiOrigin} https://*.loeitech.org https://lh3.googleusercontent.com`.replace(/\s+/g, ' '),
   "font-src 'self' data:",
-  `connect-src 'self' ${apiOrigin} https://cloudflareinsights.com`.replace(/\s+/g, ' '),
+  `connect-src 'self' ${apiOrigin} ${wsOrigin} https://cloudflareinsights.com`.replace(/\s+/g, ' '),
   // @zxing barcode scanner ใช้ camera stream + blob
   "media-src 'self' blob:",
   "worker-src 'self' blob:",
@@ -116,6 +121,15 @@ const nextConfig: NextConfig = {
           { key: 'Content-Security-Policy', value: contentSecurityPolicy },
           { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains' },
           { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+        ],
+      },
+      {
+        // sw.js is hand-rolled (no build hash in its filename), so without this
+        // browsers may keep serving a stale service worker across deploys —
+        // always re-check with the server before using a cached copy.
+        source: '/sw.js',
+        headers: [
+          { key: 'Cache-Control', value: 'no-cache' },
         ],
       },
     ];

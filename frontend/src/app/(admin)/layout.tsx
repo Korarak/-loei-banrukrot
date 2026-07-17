@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { useState, useEffect } from 'react';
 import { AdminBottomNav } from '@/components/admin/AdminBottomNav';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
+import { ChatSocketProvider } from '@/hooks/useChatSocket';
 
 export default function AdminLayout({
     children,
@@ -48,6 +49,7 @@ export default function AdminLayout({
     }
 
     return (
+        <ChatSocketProvider tokenType="user">
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex font-sans text-gray-900">
             <AdminSidebar
                 isOpen={isSidebarOpen}
@@ -65,5 +67,6 @@ export default function AdminLayout({
 
             <AdminBottomNav onMenuClick={() => setIsSidebarOpen(true)} />
         </div>
+        </ChatSocketProvider>
     );
 }

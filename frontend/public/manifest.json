@@ -1,0 +1,23 @@
+{
+  "name": "บ้านรักรถเมืองเลย - อะไหล่และซ่อมเวสป้า",
+  "short_name": "บ้านรักรถเมืองเลย",
+  "description": "อะไหล่เวสป้าคัดสรรคุณภาพ ดูแลโดยช่างโอ๊ต (Oat Engineering) สำหรับคนรักเวสป้าเมืองเลย",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#af1d35",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

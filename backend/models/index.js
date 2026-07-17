@@ -16,5 +16,8 @@ module.exports = {
     Store: require('./Store'),
     ShippingMethod: require('./ShippingMethod'),
     StockMovement: require('./StockMovement'),
-    Counter: require('./Counter')
+    Counter: require('./Counter'),
+    Conversation: require('./Conversation'),
+    Message: require('./Message'),
+    PushSubscription: require('./PushSubscription')
 };

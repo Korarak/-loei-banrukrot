@@ -21,6 +21,7 @@ import {
     FileText,
     Warehouse,
     X,
+    MessageCircle,
 } from 'lucide-react';
 import { cn, getImageUrl } from '@/lib/utils';
 import {
@@ -38,6 +39,7 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useOrders, Order } from '@/hooks/useOrders';
 import { useLowStockAlerts } from '@/hooks/useInventory';
+import { useConversations } from '@/hooks/useChat';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface AdminSidebarProps {
@@ -62,6 +64,7 @@ const MENU_GROUPS: Record<string, MenuGroup> = {
             { href: '/admin/reports', label: 'รายงาน', icon: FileText },
             { href: '/admin/users', label: 'ผู้ใช้งาน', icon: User },
             { href: '/admin/customers', label: 'ลูกค้า', icon: Users },
+            { href: '/admin/chat', label: 'แชท', icon: MessageCircle },
             { href: '/admin/backups', label: 'สำรองข้อมูล', icon: Database },
             { href: '/admin/settings', label: 'ตั้งค่าระบบ', icon: Settings },
         ]
@@ -97,6 +100,10 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
     // Low stock badge
     const { data: lowStockData } = useLowStockAlerts();
     const lowStockCount = lowStockData?.data?.length || 0;
+
+    // Unread chat badge
+    const { data: conversations } = useConversations();
+    const unreadChatCount = conversations?.reduce((sum, c) => sum + (c.unreadCount || 0), 0) ?? 0;
 
     // State for collapsible sections
     const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
@@ -258,6 +265,11 @@ export function AdminSidebar({ isOpen, onClose }: AdminSidebarProps) {
                                                 {item.href === '/admin/inventory' && lowStockCount > 0 && (
                                                     <span className="bg-yellow-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] h-5 flex items-center justify-center shadow-lg shadow-yellow-500/20">
                                                         {lowStockCount}
+                                                    </span>
+                                                )}
+                                                {item.href === '/admin/chat' && unreadChatCount > 0 && (
+                                                    <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] h-5 flex items-center justify-center shadow-lg shadow-red-500/20 animate-pulse">
+                                                        {unreadChatCount}
                                                     </span>
                                                 )}
                                             </Link>

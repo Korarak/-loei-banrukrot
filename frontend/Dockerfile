@@ -34,6 +34,11 @@ WORKDIR /app
 # Re-declare build arg for this stage (ARGs don't carry across stages)
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+# Optional — Web Push public key, inlined at build time like the API URL above.
+# Blank until VAPID keys are generated; webPush.js/usePushSubscription.ts both
+# no-op gracefully when unset, so an unconfigured build isn't a broken one.
+ARG NEXT_PUBLIC_VAPID_PUBLIC_KEY
+ENV NEXT_PUBLIC_VAPID_PUBLIC_KEY=$NEXT_PUBLIC_VAPID_PUBLIC_KEY
 ENV NEXT_TELEMETRY_DISABLED=1
 
 COPY --from=deps /app/node_modules ./node_modules

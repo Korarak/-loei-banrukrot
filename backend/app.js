@@ -103,6 +103,8 @@ app.use('/api/reports', require('./routes/reportRoutes'));
 app.use('/api/inventory', require('./routes/inventoryRoutes'));
 app.use('/api/settings', require('./routes/settingRoutes'));
 app.use('/api/shopee', require('./routes/shopeeRoutes'));
+app.use('/api/chat', require('./routes/chatRoutes'));
+app.use('/api/push', require('./routes/pushRoutes'));
 
 app.get('/', (req, res) => {
     res.send('API is running...');

@@ -19,6 +19,10 @@ if (missingEnvVars.length > 0) {
 connectDB();
 
 const app = require('./app');
+const { Server } = require('socket.io');
+const io = require('./sockets/io');
+const socketAuthMiddleware = require('./sockets/authMiddleware');
+const registerChatSocket = require('./sockets/chatSocket');
 
 const server = app.listen(PORT, () => {
     console.log(`🚀 Server is running on port ${PORT}`);
@@ -39,3 +43,16 @@ const server = app.listen(PORT, () => {
 // Prevent 502 errors behind reverse proxy — Node's default (5s) is shorter than Nginx's idle timeout
 server.keepAliveTimeout = 65_000;
 server.headersTimeout = 66_000;
+
+// Socket.io — same CORS allowlist as app.js's REST CORS config
+const allowedOrigins = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(',') : [];
+const socketIo = new Server(server, {
+    cors: {
+        origin: allowedOrigins.length ? allowedOrigins : false,
+        credentials: true
+    }
+});
+socketIo.use(socketAuthMiddleware);
+registerChatSocket(socketIo);
+io.init(socketIo);
+console.log(`   - Socket.io:  ws://localhost:${PORT}/socket.io/`);
