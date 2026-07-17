@@ -40,12 +40,21 @@ export function useConversations() {
 }
 
 // The current customer's own (lazily-created) conversation.
-// Gated on auth (mirrors useCart's isAuth pattern) — the launcher button that
-// uses this is visible to guests too, and must not fire an authenticated
-// request that would trip lib/api.ts's 401 interceptor and bounce them.
+// Gated on auth — the launcher button that uses this is visible to guests
+// too, and must not fire an authenticated request that would trip
+// lib/api.ts's 401 interceptor and bounce them.
+//
+// Select customer/customerToken directly rather than the isCustomerAuthenticated()
+// getter — that getter is a stable function reference stored once at store
+// creation, so subscribing to it never re-renders when the underlying auth
+// state actually changes. That's invisible after a full page load (a fresh
+// mount reads current state), but /customer-login lives inside this same
+// (customer) layout, so a guest who logs in there without a full remount
+// would see this hook stay stuck at isAuth=false until a manual refresh.
 export function useMyConversation() {
-    const isCustomerAuthenticated = useAuthStore((state) => state.isCustomerAuthenticated);
-    const isAuth = isCustomerAuthenticated();
+    const customer = useAuthStore((state) => state.customer);
+    const customerToken = useAuthStore((state) => state.customerToken);
+    const isAuth = !!(customer && customerToken);
 
     const query = useQuery<Conversation>({
         queryKey: ['chat', 'my-conversation'],

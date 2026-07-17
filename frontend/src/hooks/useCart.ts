@@ -32,8 +32,15 @@ export interface Cart {
 
 // Get customer's cart
 export function useCart() {
-    const isCustomerAuthenticated = useAuthStore((state) => state.isCustomerAuthenticated);
-    const isAuth = isCustomerAuthenticated();
+    // Select customer/customerToken directly, not the isCustomerAuthenticated()
+    // getter — that getter is a stable function reference stored once at store
+    // creation, so subscribing to it never re-renders when auth state actually
+    // changes (only visible on a fresh mount, e.g. after a full page load —
+    // stale otherwise, such as logging in on /customer-login without a remount
+    // since it shares this same persistent (customer) layout).
+    const customer = useAuthStore((state) => state.customer);
+    const customerToken = useAuthStore((state) => state.customerToken);
+    const isAuth = !!(customer && customerToken);
 
     return useQuery<Cart>({
         queryKey: ['cart'],
