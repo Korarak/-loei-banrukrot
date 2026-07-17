@@ -2,6 +2,7 @@
 const { Order, OrderDetail, Payment, ProductVariant, ProductImage } = require('../models');
 const { deductStock } = require('../utils/stockUtils');
 const { generateSaleReference } = require('../utils/saleReference');
+const { applyDiscount } = require('../utils/pricing');
 
 // @desc    Create POS sale (walk-in customer)
 // @route   POST /api/pos/sales
@@ -44,12 +45,14 @@ exports.createPOSSale = async (req, res, next) => {
                 });
             }
 
-            const subtotal = item.quantity * variant.price;
+            const effectivePrice = applyDiscount(variant.price, variant.productId?.discountPercent);
+            const subtotal = item.quantity * effectivePrice;
             totalAmount += subtotal;
 
             variantDetails.push({
                 variant,
                 quantity: item.quantity,
+                effectivePrice,
                 subtotal
             });
         }
@@ -75,7 +78,7 @@ exports.createPOSSale = async (req, res, next) => {
                 orderId: order._id,
                 variantId: item.variant._id,
                 quantity: item.quantity,
-                pricePerUnit: item.variant.price,
+                pricePerUnit: item.effectivePrice,
                 subtotal: item.subtotal
             }))
         );

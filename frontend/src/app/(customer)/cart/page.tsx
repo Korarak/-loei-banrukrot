@@ -57,9 +57,11 @@ export default function CartPage() {
     const exceedsStock = (item: (typeof items)[number]) => !isOutOfStock(item) && item.quantity > getStock(item);
     const isSelectable = (item: (typeof items)[number]) => !isOutOfStock(item) && !exceedsStock(item);
 
+    const getUnitPrice = (item: (typeof items)[number]) => item.variant.effectivePrice ?? item.variant.price;
+
     const selectableItems = items.filter(isSelectable);
     const selectedItems = selectableItems.filter(item => !deselectedIds.has(item._id));
-    const cartSubtotal = selectedItems.reduce((sum, item) => sum + item.variant.price * item.quantity, 0);
+    const cartSubtotal = selectedItems.reduce((sum, item) => sum + getUnitPrice(item) * item.quantity, 0);
 
     const toggleItem = (itemId: string) => {
         setDeselectedIds(prev => {
@@ -330,9 +332,16 @@ export default function CartPage() {
                                     <div className="flex flex-wrap items-end justify-between mt-6 gap-4">
                                         <div className="flex flex-col">
                                             <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">ราคาต่อชิ้น</span>
-                                            <p className={`text-lg font-black font-mitr ${oos ? 'text-gray-400' : 'text-brand'}`}>
-                                                ฿{item.variant.price.toLocaleString()}
-                                            </p>
+                                            <div className="flex items-baseline gap-2">
+                                                <p className={`text-lg font-black font-mitr ${oos ? 'text-gray-400' : 'text-brand'}`}>
+                                                    ฿{getUnitPrice(item).toLocaleString()}
+                                                </p>
+                                                {!oos && (item.variant.effectivePrice ?? item.variant.price) < item.variant.price && (
+                                                    <span className="text-xs text-gray-400 line-through">
+                                                        ฿{item.variant.price.toLocaleString()}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
 
                                         <div className="flex flex-col items-center gap-1">
@@ -370,7 +379,7 @@ export default function CartPage() {
                                         <div className="flex flex-col items-end">
                                             <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">ราคารวม</span>
                                             <p className={`text-xl font-black ${oos ? 'text-gray-400 line-through' : 'text-gray-900'}`}>
-                                                ฿{(item.variant.price * item.quantity).toLocaleString()}
+                                                ฿{(getUnitPrice(item) * item.quantity).toLocaleString()}
                                             </p>
                                         </div>
                                     </div>

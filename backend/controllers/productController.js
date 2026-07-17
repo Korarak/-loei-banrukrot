@@ -2,6 +2,7 @@
 const mongoose = require('mongoose');
 const { parse: parseCsv } = require('csv-parse/sync');
 const { changeStock } = require('../utils/stockUtils');
+const { applyDiscount } = require('../utils/pricing');
 const { Product, ProductVariant, ProductImage, Category, OrderDetail } = require('../models');
 const { csvProductRowSchema } = require('../models/validationSchemas');
 
@@ -176,11 +177,14 @@ exports.getAllProducts = async (req, res, next) => {
         const data = result[0].data;
         const total = result[0].metadata[0] ? result[0].metadata[0].total : 0;
 
-        // Post-process images sorting
+        // Post-process images sorting + attach discounted price per variant
         data.forEach(p => {
             if (p.images && Array.isArray(p.images)) {
                 p.images.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
             }
+            p.variants.forEach(v => {
+                v.effectivePrice = applyDiscount(v.price, p.discountPercent);
+            });
         });
 
         res.json({
@@ -220,10 +224,11 @@ exports.getProductById = async (req, res, next) => {
         const variants = await ProductVariant.find({ productId: product._id });
         const images = await ProductImage.find({ productId: product._id }).sort({ sortOrder: 1 });
 
-        // Map stockAvailable to stock for frontend consistency
+        // Map stockAvailable to stock for frontend consistency + attach discounted price
         const mappedVariants = variants.map(v => ({
             ...v.toObject(),
             stock: v.stockAvailable,
+            effectivePrice: applyDiscount(v.price, product.discountPercent),
         }));
 
         res.json({
@@ -306,9 +311,14 @@ exports.getPopularProducts = async (req, res, next) => {
             products = [...products, ...fallback];
         }
 
-        // Sort images
+        // Sort images + attach discounted price per variant
         products.forEach(p => {
             if (p.images) p.images.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+            if (p.variants) {
+                p.variants.forEach(v => {
+                    v.effectivePrice = applyDiscount(v.price, p.discountPercent);
+                });
+            }
         });
 
         res.json({ success: true, data: products });
@@ -322,7 +332,7 @@ exports.getPopularProducts = async (req, res, next) => {
 // @access  Private (staff/owner)
 exports.createProduct = async (req, res, next) => {
     try {
-        const { productName, description, categoryId, brand, shippingSize, variants, images } = req.body;
+        const { productName, description, categoryId, brand, shippingSize, discountPercent, variants, images } = req.body;
 
         // สร้างสินค้า
         const product = await Product.create({
@@ -331,6 +341,7 @@ exports.createProduct = async (req, res, next) => {
             categoryId,
             brand: normalizeBrand(brand),
             shippingSize: shippingSize || 'small',
+            discountPercent: discountPercent || 0,
             isOnline: req.body.isOnline !== undefined ? req.body.isOnline : true,
             isPos: req.body.isPos !== undefined ? req.body.isPos : true
         });
@@ -363,6 +374,7 @@ exports.createProduct = async (req, res, next) => {
         const mappedCreatedVariants = createdVariants.map(v => ({
             ...v.toObject(),
             stock: v.stockAvailable,
+            effectivePrice: applyDiscount(v.price, product.discountPercent),
         }));
         const createdImages = await ProductImage.find({ productId: product._id });
 
@@ -385,13 +397,13 @@ exports.createProduct = async (req, res, next) => {
 // @access  Private (staff/owner)
 exports.updateProduct = async (req, res, next) => {
     try {
-        const { productName, description, categoryId, brand, shippingSize, isActive, variants } = req.body;
+        const { productName, description, categoryId, brand, shippingSize, discountPercent, isActive, variants } = req.body;
 
         // Update product basic info
         const product = await Product.findByIdAndUpdate(
             req.params.id,
             {
-                productName, description, categoryId, brand: normalizeBrand(brand), shippingSize, isActive,
+                productName, description, categoryId, brand: normalizeBrand(brand), shippingSize, discountPercent, isActive,
                 isOnline: req.body.isOnline,
                 isPos: req.body.isPos
             },
@@ -435,6 +447,10 @@ exports.updateProduct = async (req, res, next) => {
 
         // Fetch updated variants and images
         const updatedVariants = await ProductVariant.find({ productId: product._id });
+        const mappedUpdatedVariants = updatedVariants.map(v => ({
+            ...v.toObject(),
+            effectivePrice: applyDiscount(v.price, product.discountPercent),
+        }));
         const images = await ProductImage.find({ productId: product._id });
 
         res.json({
@@ -442,7 +458,7 @@ exports.updateProduct = async (req, res, next) => {
             message: 'Product updated successfully',
             data: {
                 ...product.toObject(),
-                variants: updatedVariants,
+                variants: mappedUpdatedVariants,
                 images
             }
         });

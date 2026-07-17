@@ -6,6 +6,8 @@ export interface ProductVariant {
     _id: string;
     sku: string;
     price: number;
+    /** price after the parent product's discountPercent is applied; equals price when there's no discount */
+    effectivePrice?: number;
     stock: number;
     option1Value?: string;
     option2Value?: string;
@@ -28,6 +30,8 @@ export interface Product {
     brand?: string;
     imageUrl?: string;
     shippingSize?: 'small' | 'large';
+    /** 0-100, percentage discount applied to every variant's price */
+    discountPercent?: number;
     isActive: boolean;
     isOnline?: boolean;
     isPos?: boolean;
@@ -42,6 +46,7 @@ export interface CreateProductData {
     categoryId: number;
     brand?: string;
     shippingSize?: 'small' | 'large';
+    discountPercent?: number;
     isOnline?: boolean;
     isPos?: boolean;
     variants: Omit<ProductVariant, '_id'>[];

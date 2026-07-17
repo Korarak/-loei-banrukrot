@@ -35,6 +35,7 @@ const validationRules = {
         body('productName').trim().notEmpty().withMessage('Product name is required'),
         body('variants').isArray({ min: 1 }).withMessage('At least one variant is required'),
         body('variants.*.price').isFloat({ min: 0 }).withMessage('Price must be a positive number'),
+        body('discountPercent').optional().isFloat({ min: 0, max: 100 }).withMessage('Discount must be between 0 and 100'),
         validate
     ],
 

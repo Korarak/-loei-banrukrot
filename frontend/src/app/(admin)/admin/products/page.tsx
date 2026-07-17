@@ -503,8 +503,12 @@ export default function AdminProductsPage() {
                     {pagedProducts.map((product, index) => {
                         const totalStock = product.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0;
                         const prices = product.variants?.map((v) => v.price).filter(p => p != null) || [];
+                        const effectivePrices = product.variants?.map((v) => v.effectivePrice ?? v.price).filter(p => p != null) || [];
                         const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
                         const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
+                        const minEffective = effectivePrices.length > 0 ? Math.min(...effectivePrices) : 0;
+                        const maxEffective = effectivePrices.length > 0 ? Math.max(...effectivePrices) : 0;
+                        const hasDiscount = !!product.discountPercent && minEffective < minPrice;
                         const categoryName = categoryMap.get(product.categoryId) || 'ไม่มีหมวดหมู่';
                         const primaryImage = getPrimaryImage(product.images, product.imageUrl);
 
@@ -588,8 +592,16 @@ export default function AdminProductsPage() {
 
                                         <div className="text-right">
                                             <p className="font-bold text-lg text-gray-900">
-                                                {prices.length === 0 ? 'ไม่มี' : (minPrice === maxPrice ? `฿${minPrice.toLocaleString()}` : `฿${minPrice.toLocaleString()} - ฿${maxPrice.toLocaleString()}`)}
+                                                {prices.length === 0 ? 'ไม่มี' : (minEffective === maxEffective ? `฿${minEffective.toLocaleString()}` : `฿${minEffective.toLocaleString()} - ฿${maxEffective.toLocaleString()}`)}
                                             </p>
+                                            {hasDiscount && (
+                                                <div className="flex items-center gap-1 justify-end">
+                                                    <span className="text-xs text-gray-400 line-through">
+                                                        {minPrice === maxPrice ? `฿${minPrice.toLocaleString()}` : `฿${minPrice.toLocaleString()} - ฿${maxPrice.toLocaleString()}`}
+                                                    </span>
+                                                    <span className="text-[10px] font-bold text-red-600">-{product.discountPercent}%</span>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
 

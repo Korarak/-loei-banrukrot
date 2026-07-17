@@ -62,8 +62,12 @@ export default function ProductsTableView({
                     {products.map((product, index) => {
                         const totalStock = product.variants?.reduce((sum, v) => sum + (v.stock || 0), 0) || 0;
                         const prices = product.variants?.map((v) => v.price).filter((p) => p != null) || [];
+                        const effectivePrices = product.variants?.map((v) => v.effectivePrice ?? v.price).filter((p) => p != null) || [];
                         const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
                         const maxPrice = prices.length > 0 ? Math.max(...prices) : 0;
+                        const minEffective = effectivePrices.length > 0 ? Math.min(...effectivePrices) : 0;
+                        const maxEffective = effectivePrices.length > 0 ? Math.max(...effectivePrices) : 0;
+                        const hasDiscount = !!product.discountPercent && minEffective < minPrice;
                         const categoryName = categoryMap.get(product.categoryId) || 'ไม่มีหมวดหมู่';
                         const primaryImage = getPrimaryImage(product.images, product.imageUrl);
                         const stockColor = totalStock === 0 ? 'text-red-600' : totalStock <= 10 ? 'text-orange-600' : 'text-green-600';
@@ -113,7 +117,12 @@ export default function ProductsTableView({
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="py-3 font-bold text-gray-900 text-sm whitespace-nowrap">
-                                    {prices.length === 0 ? 'ไม่มี' : minPrice === maxPrice ? `฿${minPrice.toLocaleString()}` : `฿${minPrice.toLocaleString()}-${maxPrice.toLocaleString()}`}
+                                    {prices.length === 0 ? 'ไม่มี' : minEffective === maxEffective ? `฿${minEffective.toLocaleString()}` : `฿${minEffective.toLocaleString()}-${maxEffective.toLocaleString()}`}
+                                    {hasDiscount && (
+                                        <span className="ml-1.5 font-normal text-xs text-gray-400 line-through">
+                                            ฿{minPrice.toLocaleString()}
+                                        </span>
+                                    )}
                                 </TableCell>
                                 <TableCell className={cn('py-3 font-bold text-sm', stockColor)}>
                                     {totalStock}

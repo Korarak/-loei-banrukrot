@@ -85,6 +85,8 @@ export default function ProductDetailPage() {
     const getVariantStock = (v: any) => v?.stock ?? v?.stockAvailable ?? 0;
     const isVariantOOS = (v: any) => getVariantStock(v) <= 0;
     const selectedStock = getVariantStock(selectedVariant);
+    const selectedPrice = selectedVariant?.effectivePrice ?? selectedVariant?.price;
+    const hasDiscount = selectedVariant?.effectivePrice != null && selectedVariant.effectivePrice < selectedVariant.price;
 
     const handleAddToCart = async () => {
         if (!selectedVariant) return;
@@ -253,9 +255,21 @@ export default function ProductDetailPage() {
                             {product.productName}
                         </h1>
 
-                        <div className="flex items-baseline gap-4 mb-8">
-                            <div className="text-4xl md:text-5xl font-bold text-brand font-mitr">
-                                ฿{selectedVariant?.price.toLocaleString()}
+                        <div className="flex items-baseline gap-4 mb-8 flex-wrap">
+                            <div className="flex items-baseline gap-3">
+                                <div className="text-4xl md:text-5xl font-bold text-brand font-mitr">
+                                    ฿{selectedPrice?.toLocaleString()}
+                                </div>
+                                {hasDiscount && (
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-lg text-gray-400 line-through">
+                                            ฿{selectedVariant.price.toLocaleString()}
+                                        </span>
+                                        <span className="text-xs font-bold text-white bg-red-600 px-2 py-1 uppercase tracking-wider">
+                                            -{product.discountPercent}%
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                             {selectedStock > 0 ? (
                                 <span className="text-xs font-bold text-gray-900 border border-border px-2.5 py-1 uppercase tracking-wider">

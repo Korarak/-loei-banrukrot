@@ -22,6 +22,8 @@ import { Switch } from '@/components/ui/switch';
 import { Card } from '@/components/ui/card';
 import type { Product } from '@/hooks/useProducts';
 import { useCategories } from '@/hooks/useCategories';
+import { useAdminShippingMethods } from '@/hooks/useShippingMethods';
+import Link from 'next/link';
 import ImageManager from './ImageManager';
 
 // Constants for Thai Strings to avoid compiler bugs
@@ -43,6 +45,7 @@ const productSchema = z.object({
     categoryId: z.number().min(1, 'กรุณาเลือกหมวดหมู่'),
     brand: z.string().optional(),
     shippingSize: z.enum(['small', 'large']),
+    discountPercent: z.number().min(0, 'ส่วนลดต้องมากกว่าหรือเท่ากับ 0').max(100, 'ส่วนลดต้องไม่เกิน 100'),
     isOnline: z.boolean().optional(),
     isPos: z.boolean().optional(),
     variants: z.array(variantSchema).min(1, 'ต้องมีอย่างน้อยหนึ่งตัวเลือก'),
@@ -97,6 +100,10 @@ function VariantNumberInput({
 
 export default function ProductForm({ product, onSubmit, onCancel, isLoading }: ProductFormProps) {
     const { data: categories } = useCategories(true);
+    const { data: shippingMethods } = useAdminShippingMethods();
+
+    const methodsForSize = (size: 'small' | 'large') =>
+        shippingMethods?.filter((m) => m.isActive && m.supportedSizes.includes(size)) || [];
 
     const form = useForm<ProductFormData>({
         resolver: zodResolver(productSchema),
@@ -106,6 +113,7 @@ export default function ProductForm({ product, onSubmit, onCancel, isLoading }: 
             categoryId: product?.categoryId || 1,
             brand: product?.brand || '',
             shippingSize: (product?.shippingSize as 'small' | 'large') || 'small',
+            discountPercent: product?.discountPercent || 0,
             isOnline: product?.isOnline !== undefined ? product.isOnline : true,
             isPos: product?.isPos !== undefined ? product.isPos : true,
             variants: product?.variants.map((v) => ({
@@ -125,6 +133,7 @@ export default function ProductForm({ product, onSubmit, onCancel, isLoading }: 
                 categoryId: product.categoryId,
                 brand: product.brand || '',
                 shippingSize: (product.shippingSize as 'small' | 'large') || 'small',
+                discountPercent: product.discountPercent || 0,
                 isOnline: product.isOnline !== undefined ? product.isOnline : true,
                 isPos: product.isPos !== undefined ? product.isPos : true,
                 variants: product.variants.map((v) => ({
@@ -235,12 +244,60 @@ export default function ProductForm({ product, onSubmit, onCancel, isLoading }: 
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="small">ขนาดเล็ก (มาตรฐาน)</SelectItem>
-                                            <SelectItem value="large">ขนาดใหญ่ (Bulky)</SelectItem>
+                                            <SelectItem value="small">
+                                                ขนาดเล็ก
+                                                {methodsForSize('small').length > 0 &&
+                                                    ` — ${methodsForSize('small').map((m) => m.name).join(', ')}`}
+                                            </SelectItem>
+                                            <SelectItem value="large">
+                                                ขนาดใหญ่
+                                                {methodsForSize('large').length > 0 &&
+                                                    ` — ${methodsForSize('large').map((m) => m.name).join(', ')}`}
+                                            </SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormDescription>
-                                        กำหนดวิธีการจัดส่งที่ใช้ได้สำหรับสินค้านี้
+                                        {methodsForSize(field.value).length > 0 ? (
+                                            <>
+                                                ใช้ได้กับวิธีจัดส่ง:{' '}
+                                                {methodsForSize(field.value)
+                                                    .map((m) => `${m.name} (฿${m.price.toLocaleString()})`)
+                                                    .join(', ')}
+                                            </>
+                                        ) : (
+                                            <span className="text-amber-600">
+                                                ยังไม่มีวิธีการจัดส่งที่เปิดใช้งานรองรับขนาดนี้ ตั้งค่าได้ที่{' '}
+                                                <Link href="/admin/shipping" className="underline">
+                                                    วิธีการจัดส่งพัสดุ
+                                                </Link>
+                                            </span>
+                                        )}
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="discountPercent"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>ส่วนลด (%)</FormLabel>
+                                    <FormControl>
+                                        <VariantNumberInput
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            parse={(raw) => Math.min(100, Math.max(0, parseFloat(raw)))}
+                                            step="1"
+                                            placeholder="0"
+                                            className="h-11"
+                                        />
+                                    </FormControl>
+                                    <FormDescription>
+                                        {field.value > 0
+                                            ? `ลด ${field.value}% จากราคาสินค้าทุกตัวเลือกของสินค้านี้`
+                                            : 'ไม่มีส่วนลด — ปล่อยว่างหรือ 0 เพื่อขายราคาปกติ'}
                                     </FormDescription>
                                     <FormMessage />
                                 </FormItem>

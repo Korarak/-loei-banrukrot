@@ -7,6 +7,7 @@ const { Order, OrderDetail, Payment, ProductVariant, Cart, CartItem, CustomerAdd
 const { generateQRCodeDataURL } = require('../utils/promptpay');
 const { deductStock, addStock } = require('../utils/stockUtils');
 const { generateSaleReference } = require('../utils/saleReference');
+const { applyDiscount } = require('../utils/pricing');
 const { processImage } = require('../utils/imageProcessing');
 const { UPLOADS_BASE, getUploadSubdir } = require('../middleware/upload');
 const path = require('path');
@@ -33,7 +34,8 @@ exports.createOrderFromCart = async (req, res, next) => {
             });
         }
 
-        const allCartItems = await CartItem.find({ cartId: cart._id }).populate('variantId');
+        const allCartItems = await CartItem.find({ cartId: cart._id })
+            .populate({ path: 'variantId', populate: { path: 'productId', select: 'discountPercent' } });
 
         // Filter out ghost items (variant was deleted)
         const ghostItems = allCartItems.filter(item => !item.variantId);
@@ -68,7 +70,7 @@ exports.createOrderFromCart = async (req, res, next) => {
                         : `สินค้า ${item.variantId.sku} มีไม่เพียงพอ (คงเหลือ ${remaining} ชิ้น) กรุณาปรับจำนวน`
                 });
             }
-            totalAmount += item.quantity * item.variantId.price;
+            totalAmount += item.quantity * applyDiscount(item.variantId.price, item.variantId.productId?.discountPercent);
         }
 
         // ตรวจสอบที่อยู่จัดส่ง
@@ -121,13 +123,16 @@ exports.createOrderFromCart = async (req, res, next) => {
 
         // สร้าง order details (bulk insert)
         const orderDetails = await OrderDetail.insertMany(
-            cartItems.map(item => ({
-                orderId: order._id,
-                variantId: item.variantId._id,
-                quantity: item.quantity,
-                pricePerUnit: item.variantId.price,
-                subtotal: item.quantity * item.variantId.price
-            }))
+            cartItems.map(item => {
+                const pricePerUnit = applyDiscount(item.variantId.price, item.variantId.productId?.discountPercent);
+                return {
+                    orderId: order._id,
+                    variantId: item.variantId._id,
+                    quantity: item.quantity,
+                    pricePerUnit,
+                    subtotal: item.quantity * pricePerUnit
+                };
+            })
         );
 
         // ลดสต็อก (sequential — each must be atomic)

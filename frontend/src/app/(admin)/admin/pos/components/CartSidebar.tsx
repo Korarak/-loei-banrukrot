@@ -20,6 +20,8 @@ interface CartItem {
     productId: string;
     name: string;
     price: number;
+    /** pre-discount unit price; only set when it differs from `price` */
+    originalPrice?: number;
     quantity: number;
     sku: string;
     image?: string;
@@ -37,6 +39,7 @@ export function CartSidebar({ cart, onUpdateQuantity, onClearCart, onCheckout }:
     const [clearCartOpen, setClearCartOpen] = useState(false);
     const totalAmount = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+    const totalDiscount = cart.reduce((sum, item) => sum + ((item.originalPrice ?? item.price) - item.price) * item.quantity, 0);
 
     return (
         <div className="flex flex-col h-full bg-white md:rounded-2xl md:border md:border-gray-100 md:shadow-xl overflow-hidden">
@@ -87,7 +90,12 @@ export function CartSidebar({ cart, onUpdateQuantity, onClearCart, onCheckout }:
                             <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
                                 <div className="font-semibold text-gray-900 truncate text-xs sm:text-sm">{item.name}</div>
                                 <div className="flex justify-between items-end">
-                                    <div className="text-[10px] text-gray-500 font-medium">฿{item.price.toLocaleString()}</div>
+                                    <div className="text-[10px] text-gray-500 font-medium flex items-center gap-1">
+                                        <span>฿{item.price.toLocaleString()}</span>
+                                        {item.originalPrice != null && item.originalPrice > item.price && (
+                                            <span className="line-through text-gray-300">฿{item.originalPrice.toLocaleString()}</span>
+                                        )}
+                                    </div>
                                     <div className="font-bold text-gray-900 text-sm">฿{(item.price * item.quantity).toLocaleString()}</div>
                                 </div>
                             </div>
@@ -137,7 +145,7 @@ export function CartSidebar({ cart, onUpdateQuantity, onClearCart, onCheckout }:
                     </div>
                     <div className="flex justify-between text-gray-500 text-xs">
                         <span>ส่วนลด</span>
-                        <span className="font-medium">฿0.00</span>
+                        <span className="font-medium">฿{totalDiscount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
                     <Separator className="my-2" />
                     <div className="flex justify-between items-end">

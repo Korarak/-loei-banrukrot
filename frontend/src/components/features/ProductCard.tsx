@@ -36,29 +36,36 @@ export default function ProductCard({ product, priority = false, sizes = '(max-w
 
     const primaryImage = getPrimaryImage(product.images);
 
-    const { priceDisplay, isOutOfStock, firstAvailableVariant, defaultVariant } = useMemo(() => {
-        const prices = product.variants?.map((v: any) => v.price) || [];
+    const { priceDisplay, originalPriceDisplay, hasDiscount, isOutOfStock, firstAvailableVariant, defaultVariant } = useMemo(() => {
+        const prices = product.variants?.map((v: any) => v.effectivePrice ?? v.price) || [];
+        const originalPrices = product.variants?.map((v: any) => v.price) || [];
         const minPrice = prices.length ? Math.min(...prices) : 0;
         const maxPrice = prices.length ? Math.max(...prices) : 0;
+        const minOriginal = originalPrices.length ? Math.min(...originalPrices) : 0;
+        const maxOriginal = originalPrices.length ? Math.max(...originalPrices) : 0;
         return {
             priceDisplay: prices.length === 0
                 ? 'ไม่ระบุราคา'
                 : minPrice === maxPrice
                     ? `฿${minPrice.toLocaleString()}`
                     : `฿${minPrice.toLocaleString()} – ฿${maxPrice.toLocaleString()}`,
+            originalPriceDisplay: minOriginal === maxOriginal
+                ? `฿${minOriginal.toLocaleString()}`
+                : `฿${minOriginal.toLocaleString()} – ฿${maxOriginal.toLocaleString()}`,
+            hasDiscount: !!product.discountPercent && minPrice < minOriginal,
             isOutOfStock: product.variants?.every((v: any) => v.stockAvailable <= 0),
             firstAvailableVariant: product.variants?.find((v: any) => v.stockAvailable > 0),
             defaultVariant: product.variants?.[0],
             minPrice,
         };
-    }, [product.variants]);
+    }, [product.variants, product.discountPercent]);
 
     const handleWishlistToggle = useCallback(() => {
         if (inWishlist) {
             removeFromWishlist(product._id);
             toast.success('ลบออกจากรายการโปรดแล้ว');
         } else {
-            const prices = product.variants?.map((v: any) => v.price) || [];
+            const prices = product.variants?.map((v: any) => v.effectivePrice ?? v.price) || [];
             addToWishlist({
                 _id: product._id,
                 productName: product.productName,
@@ -106,10 +113,16 @@ export default function ProductCard({ product, priority = false, sizes = '(max-w
                             </div>
                         )}
 
-                        {isOutOfStock && (
+                        {isOutOfStock ? (
                             <div className="absolute top-3 left-3 z-20">
                                 <span className="bg-brand text-brand-foreground text-[10px] font-bold uppercase tracking-widest px-2.5 py-1">
                                     สินค้าหมด
+                                </span>
+                            </div>
+                        ) : hasDiscount && (
+                            <div className="absolute top-3 left-3 z-20">
+                                <span className="bg-red-600 text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1">
+                                    -{product.discountPercent}%
                                 </span>
                             </div>
                         )}
@@ -152,9 +165,16 @@ export default function ProductCard({ product, priority = false, sizes = '(max-w
                         </h3>
 
                         <div className="flex items-baseline justify-between">
-                            <span className="text-base font-bold text-brand tracking-tight font-mitr">
-                                {priceDisplay}
-                            </span>
+                            <div className="flex items-baseline gap-1.5 min-w-0">
+                                <span className="text-base font-bold text-brand tracking-tight font-mitr">
+                                    {priceDisplay}
+                                </span>
+                                {hasDiscount && (
+                                    <span className="text-xs text-gray-400 line-through truncate">
+                                        {originalPriceDisplay}
+                                    </span>
+                                )}
+                            </div>
                             {product.variants?.length > 1 && (
                                 <span className="text-[10px] text-gray-500 font-medium">
                                     {product.variants.length} ตัวเลือก

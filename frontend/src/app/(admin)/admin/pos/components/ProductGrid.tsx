@@ -15,6 +15,7 @@ interface Product {
         _id: string;
         sku: string;
         price: number;
+        effectivePrice?: number;
         stockAvailable: number;
     }[];
 }
@@ -66,6 +67,8 @@ const POSProductCard = memo(function POSProductCard({ product, onAdd, priority }
     const hasStock = variant && (variant.stockAvailable || 0) > 0;
     const primaryImage = getPrimaryImage(product.images);
     const imageUrl = primaryImage ? getImageUrl(primaryImage.imagePath) : null;
+    const hasDiscount = variant && variant.effectivePrice != null && variant.effectivePrice < variant.price;
+    const displayPrice = hasDiscount ? variant!.effectivePrice! : variant?.price;
 
     return (
         <Card
@@ -75,7 +78,7 @@ const POSProductCard = memo(function POSProductCard({ product, onAdd, priority }
             )}
             onClick={hasStock ? onAdd : undefined}
             role="article"
-            aria-label={`${product.productName} - ${hasStock ? `ราคา ${variant?.price} บาท` : 'สินค้าหมด'}`}
+            aria-label={`${product.productName} - ${hasStock ? `ราคา ${displayPrice} บาท` : 'สินค้าหมด'}`}
             tabIndex={0}
             onKeyDown={(e) => {
                 if (hasStock && (e.key === 'Enter' || e.key === ' ')) {
@@ -131,9 +134,16 @@ const POSProductCard = memo(function POSProductCard({ product, onAdd, priority }
                 </div>
 
                 <div className="mt-1.5 flex items-center justify-between">
-                    <span className="font-bold text-sm text-primary">
-                        ฿{variant?.price.toLocaleString() || '0'}
-                    </span>
+                    <div className="flex items-baseline gap-1.5 min-w-0">
+                        <span className="font-bold text-sm text-primary">
+                            ฿{displayPrice?.toLocaleString() || '0'}
+                        </span>
+                        {hasDiscount && (
+                            <span className="text-[10px] text-gray-400 line-through truncate">
+                                ฿{variant!.price.toLocaleString()}
+                            </span>
+                        )}
+                    </div>
                     {hasStock && (
                         <div
                             className="h-6 w-6 rounded-full bg-black text-white flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity shadow-sm"

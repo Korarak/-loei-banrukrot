@@ -16,6 +16,8 @@ export interface CartItem {
         _id: string;
         sku: string;
         price: number;
+        /** price after the product's discountPercent is applied; equals price when there's no discount */
+        effectivePrice?: number;
         stockAvailable?: number;
     };
     quantity: number;

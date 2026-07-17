@@ -29,6 +29,12 @@ const productSchema = new mongoose.Schema({
         default: 'small',
         required: true
     },
+    discountPercent: {
+        type: Number,
+        min: 0,
+        max: 100,
+        default: 0
+    },
     isActive: {
         type: Boolean,
         default: true,

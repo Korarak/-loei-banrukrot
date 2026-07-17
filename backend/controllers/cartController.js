@@ -1,5 +1,6 @@
 // controllers/cartController.js
 const { Cart, CartItem, ProductVariant, ProductImage } = require('../models');
+const { applyDiscount } = require('../utils/pricing');
 
 // @desc    Get customer's cart
 // @route   GET /api/cart
@@ -47,7 +48,8 @@ exports.getCart = async (req, res, next) => {
             }
 
             const product = variant.productId;
-            const subtotal = item.quantity * variant.price;
+            const effectivePrice = applyDiscount(variant.price, product.discountPercent);
+            const subtotal = item.quantity * effectivePrice;
             totalAmount += subtotal;
 
             acc.push({
@@ -58,6 +60,7 @@ exports.getCart = async (req, res, next) => {
                     _id: variant._id,
                     sku: variant.sku,
                     price: variant.price,
+                    effectivePrice,
                     stockAvailable: variant.stockAvailable
                 },
                 product: {
