@@ -44,7 +44,7 @@ export default function ChatPanel({ open, onOpenChange }: ChatPanelProps) {
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
-            <SheetContent side="right" className="p-0 flex flex-col w-full sm:max-w-md">
+            <SheetContent side="right" className="p-0 flex flex-col w-full sm:max-w-md z-[70]">
                 <SheetHeader className="border-b px-4 py-3 shrink-0">
                     <SheetTitle className="flex items-center gap-2 text-base">
                         <MessageCircle className="h-5 w-5" />

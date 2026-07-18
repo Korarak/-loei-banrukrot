@@ -354,7 +354,10 @@ body { margin: 0; padding: 0; background: white; }
                                         <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
                                             {order.items.map((item, idx) => (
                                                 <div key={idx} className="flex justify-between text-sm text-gray-700">
-                                                    <span className="flex-1 min-w-0 truncate pr-2">{item.productName}</span>
+                                                    <div className="flex-1 min-w-0 pr-2">
+                                                        <p className="truncate">{item.productName}</p>
+                                                        {item.sku && <p className="text-[10px] text-gray-400 font-mono truncate">SKU: {item.sku}</p>}
+                                                    </div>
                                                     <span className="text-gray-500 shrink-0 font-medium">× {item.quantity}</span>
                                                 </div>
                                             ))}
@@ -493,10 +496,13 @@ body { margin: 0; padding: 0; background: white; }
                                         <p className="text-[9px] font-black uppercase tracking-[0.15em] text-gray-400 mb-1.5">
                                             รายการสินค้า ({order.items.length} รายการ)
                                         </p>
-                                        <div className="space-y-0.5">
+                                        <div className="space-y-1">
                                             {order.items.map((item, idx) => (
                                                 <div key={idx} className="flex justify-between text-[10px] text-gray-700">
-                                                    <span className="flex-1 min-w-0 truncate pr-2">{item.productName}</span>
+                                                    <div className="flex-1 min-w-0 pr-2">
+                                                        <p className="truncate">{item.productName}</p>
+                                                        {item.sku && <p className="text-[8px] text-gray-400 font-mono truncate">SKU: {item.sku}</p>}
+                                                    </div>
                                                     <span className="text-gray-500 shrink-0 font-medium">× {item.quantity}</span>
                                                 </div>
                                             ))}
@@ -621,10 +627,13 @@ body { margin: 0; padding: 0; background: white; }
                                         <p className="text-[9px] font-black uppercase tracking-[0.15em] text-gray-400 mb-1.5">
                                             รายการสินค้า ({order.items.length} รายการ)
                                         </p>
-                                        <div className="space-y-0.5">
+                                        <div className="space-y-1">
                                             {order.items.map((item, idx) => (
                                                 <div key={idx} className="flex justify-between text-[10px] text-gray-700">
-                                                    <span className="flex-1 min-w-0 truncate pr-2">{item.productName}</span>
+                                                    <div className="flex-1 min-w-0 pr-2">
+                                                        <p className="truncate">{item.productName}</p>
+                                                        {item.sku && <p className="text-[8px] text-gray-400 font-mono truncate">SKU: {item.sku}</p>}
+                                                    </div>
                                                     <span className="text-gray-500 shrink-0 font-medium">× {item.quantity}</span>
                                                 </div>
                                             ))}
@@ -766,10 +775,13 @@ body { margin: 0; padding: 0; background: white; }
                                         <p className="text-[10px] font-black uppercase tracking-[0.18em] text-gray-400 mb-2">
                                             รายการสินค้า ({order.items.length} รายการ)
                                         </p>
-                                        <div className="space-y-1">
+                                        <div className="space-y-1.5">
                                             {order.items.map((item, idx) => (
                                                 <div key={idx} className="flex justify-between text-xs text-gray-700">
-                                                    <span className="flex-1 min-w-0 truncate pr-3">{item.productName}</span>
+                                                    <div className="flex-1 min-w-0 pr-3">
+                                                        <p className="truncate">{item.productName}</p>
+                                                        {item.sku && <p className="text-[10px] text-gray-400 font-mono truncate">SKU: {item.sku}</p>}
+                                                    </div>
                                                     <span className="text-gray-500 shrink-0 font-medium">× {item.quantity}</span>
                                                 </div>
                                             ))}

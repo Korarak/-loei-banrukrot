@@ -368,10 +368,24 @@ export default function AdminOrdersPage() {
                                             <span>ชำระด้วย: {order.paymentMethod === 'Cash' ? 'เงินสด' : (order.paymentMethod === 'PromptPay' ? 'พร้อมเพย์' : order.paymentMethod)}</span>
                                         </div>
                                         {order.shippingInfo && order.shippingInfo.provider && (
-                                            <div className="flex items-center gap-2 text-xs text-blue-600 font-medium bg-blue-50 w-fit px-2 py-0.5 rounded-md">
-                                                <Store className="h-3.5 w-3.5" />
-                                                <span>{order.shippingInfo.provider} {order.shippingInfo.trackingNumber ? `(${order.shippingInfo.trackingNumber})` : ''}</span>
-                                            </div>
+                                            order.shippingInfo.trackingNumber && getTrackingUrl(order.shippingInfo.provider, order.shippingInfo.trackingNumber) ? (
+                                                <a
+                                                    href={getTrackingUrl(order.shippingInfo.provider, order.shippingInfo.trackingNumber)}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    className="flex items-center gap-2 text-xs text-blue-600 font-medium bg-blue-50 hover:bg-blue-100 w-fit px-2 py-0.5 rounded-md transition-colors"
+                                                >
+                                                    <Store className="h-3.5 w-3.5" />
+                                                    <span>{order.shippingInfo.provider} ({order.shippingInfo.trackingNumber})</span>
+                                                    <ExternalLink className="h-3 w-3 shrink-0" />
+                                                </a>
+                                            ) : (
+                                                <div className="flex items-center gap-2 text-xs text-blue-600 font-medium bg-blue-50 w-fit px-2 py-0.5 rounded-md">
+                                                    <Store className="h-3.5 w-3.5" />
+                                                    <span>{order.shippingInfo.provider} {order.shippingInfo.trackingNumber ? `(${order.shippingInfo.trackingNumber})` : ''}</span>
+                                                </div>
+                                            )
                                         )}
                                     </div>
                                 </div>

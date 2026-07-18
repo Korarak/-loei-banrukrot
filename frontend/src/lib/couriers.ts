@@ -16,7 +16,7 @@ export const COURIERS: Courier[] = [
         bg: 'bg-orange-50 border-orange-200',
         placeholder: 'เช่น TH0123G5S6FA78',
         hint: 'ขึ้นต้นด้วย TH ตามด้วยตัวอักษรและตัวเลข 12 ตัว',
-        trackingUrl: (t) => `https://flashexpress.com/fle/tracking/?se=${t}`,
+        trackingUrl: (t) => `https://www.flashexpress.co.th/fle/tracking/?se=${t}`,
     },
     {
         value: 'Kerry Express',
