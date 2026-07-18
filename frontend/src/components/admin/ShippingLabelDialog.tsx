@@ -127,6 +127,17 @@ const PRINT_SIZES = [
         margin: '2mm',
     },
     {
+        id: 'thermal-narrow-landscape',
+        label: 'Thermal 3" (แนวนอน)',
+        desc: 'ม้วน 76mm, หมุนแนวนอน',
+        // Same content layout as 'thermal-narrow' (still a 76mm-wide roll —
+        // too narrow for a real side-by-side landscape row), just with the
+        // page dimensions rotated for printers/drivers that feed sideways.
+        pageSize: 'auto 76.2mm',
+        labelWidth: '70mm',
+        margin: '2mm',
+    },
+    {
         id: 'thermal-landscape',
         label: 'Thermal 6"×4" (แนวนอน)',
         desc: 'ตัวใหญ่ กระชับพื้นที่',
@@ -168,7 +179,7 @@ export function ShippingLabelDialog({ open, onOpenChange, order }: ShippingLabel
 
     const selectedSize = PRINT_SIZES.find(s => s.id === sizeId)!;
     const isLandscape = sizeId === 'thermal-landscape';
-    const isNarrow = sizeId === 'thermal-narrow';
+    const isNarrow = sizeId === 'thermal-narrow' || sizeId === 'thermal-narrow-landscape';
 
     const handlePrint = () => {
         const el = document.getElementById('shipping-label-print');
@@ -339,7 +350,7 @@ body { margin: 0; padding: 0; background: white; }
                                         <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
                                             {order.items.map((item, idx) => (
                                                 <div key={idx} className="flex justify-between text-sm text-gray-700">
-                                                    <span className="truncate pr-2">{item.productName}</span>
+                                                    <span className="flex-1 min-w-0 truncate pr-2">{item.productName}</span>
                                                     <span className="text-gray-500 shrink-0 font-medium">× {item.quantity}</span>
                                                 </div>
                                             ))}
@@ -481,7 +492,7 @@ body { margin: 0; padding: 0; background: white; }
                                         <div className="space-y-0.5">
                                             {order.items.map((item, idx) => (
                                                 <div key={idx} className="flex justify-between text-[10px] text-gray-700">
-                                                    <span className="truncate pr-2">{item.productName}</span>
+                                                    <span className="flex-1 min-w-0 truncate pr-2">{item.productName}</span>
                                                     <span className="text-gray-500 shrink-0 font-medium">× {item.quantity}</span>
                                                 </div>
                                             ))}
@@ -626,7 +637,7 @@ body { margin: 0; padding: 0; background: white; }
                                         <div className="space-y-1">
                                             {order.items.map((item, idx) => (
                                                 <div key={idx} className="flex justify-between text-xs text-gray-700">
-                                                    <span className="truncate pr-3">{item.productName}</span>
+                                                    <span className="flex-1 min-w-0 truncate pr-3">{item.productName}</span>
                                                     <span className="text-gray-500 shrink-0 font-medium">× {item.quantity}</span>
                                                 </div>
                                             ))}
@@ -644,14 +655,16 @@ body { margin: 0; padding: 0; background: white; }
 
                     {/* Action bar */}
                     <div className="px-4 pt-3 pb-4 bg-gray-50 border-t space-y-2">
-                        {/* Paper size selector */}
-                        <div className="flex gap-1.5">
+                        {/* Paper size selector — grid, not a single flex row, now that
+                            there are 6 options (a single row would squeeze each tile
+                            too narrow for its label to read comfortably) */}
+                        <div className="grid grid-cols-3 gap-1.5">
                             {PRINT_SIZES.map((size) => (
                                 <button
                                     key={size.id}
                                     onClick={() => setSizeId(size.id)}
                                     className={cn(
-                                        'flex-1 rounded-lg border text-left px-2.5 py-1.5 transition-colors',
+                                        'rounded-lg border text-left px-2.5 py-1.5 transition-colors',
                                         sizeId === size.id
                                             ? 'border-gray-900 bg-gray-900 text-white'
                                             : 'border-gray-200 bg-white text-gray-700 hover:border-gray-400'
