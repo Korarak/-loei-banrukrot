@@ -520,7 +520,10 @@ export default function AdminProductsPage() {
                         return (
                             <div
                                 key={product._id}
-                                className="group bg-white rounded-xl border border-gray-200 hover:border-primary/30 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col sm:flex-row"
+                                className={cn(
+                                    "group bg-white rounded-xl border border-gray-200 hover:border-primary/30 hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col sm:flex-row",
+                                    !product.isActive && "opacity-60 grayscale-[0.4]"
+                                )}
                             >
                                 {/* Image Section */}
                                 <div
@@ -554,6 +557,7 @@ export default function AdminProductsPage() {
                                     )}
                                     {/* Badges Overlay */}
                                     <div className="absolute top-2 left-2 flex flex-col gap-1">
+                                        {!product.isActive && <Badge variant="secondary" className="bg-gray-800 hover:bg-gray-800 text-white shadow-sm text-[10px] h-5 px-1.5">ปิดใช้งาน</Badge>}
                                         {product.isPos && <Badge className="bg-orange-500 hover:bg-orange-600 text-white shadow-sm text-[10px] h-5 px-1.5"><Store className="h-3 w-3 mr-1" /> หน้าร้าน</Badge>}
                                         {product.isOnline && <Badge className="bg-blue-500 hover:bg-blue-600 text-white shadow-sm text-[10px] h-5 px-1.5"><Globe className="h-3 w-3 mr-1" /> ออนไลน์</Badge>}
                                     </div>

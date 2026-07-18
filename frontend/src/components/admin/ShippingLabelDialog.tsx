@@ -6,6 +6,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Printer, X, MapPin, Store, Package } from 'lucide-react';
 import { Order } from '@/hooks/useOrders';
 import { usePublicSettings } from '@/hooks/useSettings';
@@ -129,6 +130,7 @@ type PrintSizeId = typeof PRINT_SIZES[number]['id'];
 export function ShippingLabelDialog({ open, onOpenChange, order }: ShippingLabelDialogProps) {
     const { data: settings } = usePublicSettings();
     const [sizeId, setSizeId] = useState<PrintSizeId>('thermal');
+    const [showBarcode, setShowBarcode] = useState(true);
 
     const addr = order.shippingAddressId;
     const storeName = settings?.store_name || siteConfig.brand.name;
@@ -298,6 +300,23 @@ body { margin: 0; padding: 0; background: white; }
                                         </div>
                                     </div>
 
+                                    {/* Tracking barcode — full-width, compact height */}
+                                    {trackingNumber && showBarcode && (
+                                        <div className="border-x border-b border-gray-200 px-4 py-2 flex items-center gap-4">
+                                            <div className="flex-1">
+                                                <PseudoBarcode value={trackingNumber} />
+                                            </div>
+                                            <div className="text-right shrink-0">
+                                                <p className="font-mono font-black text-xl tracking-[0.2em] text-gray-900">
+                                                    {trackingNumber}
+                                                </p>
+                                                {courier && (
+                                                    <p className="text-xs text-gray-500">{courier.label}</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+
                                     {/* Items — 2-column grid, bigger text, tight rows */}
                                     <div className="border-x border-b border-gray-200 px-4 py-2">
                                         <div className="grid grid-cols-2 gap-x-4 gap-y-0.5">
@@ -420,8 +439,8 @@ body { margin: 0; padding: 0; background: white; }
                                             </div>
                                         </div>
 
-                                        {/* ── Tracking barcode (only when tracking number exists) ── */}
-                                        {trackingNumber && (
+                                        {/* ── Tracking barcode (only when tracking number exists and enabled) ── */}
+                                        {trackingNumber && showBarcode && (
                                             <>
                                                 <div className="border-t-2 border-gray-800 pt-3">
                                                     <PseudoBarcode value={trackingNumber} />
@@ -484,6 +503,19 @@ body { margin: 0; padding: 0; background: white; }
                                 </button>
                             ))}
                         </div>
+                        {/* Barcode toggle — applies across every paper size */}
+                        {trackingNumber && (
+                            <div className="flex items-center gap-2">
+                                <Checkbox
+                                    id="show-barcode"
+                                    checked={showBarcode}
+                                    onCheckedChange={(v) => setShowBarcode(v === true)}
+                                />
+                                <label htmlFor="show-barcode" className="text-xs font-semibold text-gray-600 cursor-pointer select-none">
+                                    แสดงบาร์โค้ดเลขพัสดุ
+                                </label>
+                            </div>
+                        )}
                         {/* Print + close */}
                         <div className="flex gap-2">
                             <Button
