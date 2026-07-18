@@ -95,7 +95,10 @@ const PRINT_SIZES = [
         id: 'thermal',
         label: 'Thermal 4"×6"',
         desc: 'Xprinter, TSC, Zebra',
-        pageSize: '101.6mm 152.4mm',
+        // Height is auto, not a fixed 152.4mm — these print on a continuous
+        // roll, so the cut length should shrink with the content (e.g. the
+        // QR/barcode toggles below) instead of always leaving blank paper.
+        pageSize: '101.6mm auto',
         labelWidth: '95mm',
         margin: '3mm',
     },
@@ -119,7 +122,9 @@ const PRINT_SIZES = [
         id: 'thermal-landscape',
         label: 'Thermal 6"×4" (แนวนอน)',
         desc: 'ตัวใหญ่ กระชับพื้นที่',
-        pageSize: '152.4mm 101.6mm',
+        // Same reasoning as 'thermal' above — width fixed to the roll, height
+        // auto so the cut shrinks when content (QR/barcode) is toggled off.
+        pageSize: '152.4mm auto',
         labelWidth: '146mm',
         margin: '3mm',
     },
