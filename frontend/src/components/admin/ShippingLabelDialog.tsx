@@ -221,8 +221,8 @@ body { margin: 0; padding: 0; background: white; }
                                     <div className="border-x border-b border-gray-200 px-4 py-3 flex gap-4">
                                         {/* Recipient */}
                                         <div className="flex-1 min-w-0 flex flex-col justify-center">
-                                            <p className="text-xs font-black uppercase tracking-[0.18em] text-gray-400 flex items-center gap-1 mb-1.5">
-                                                <MapPin className="h-3.5 w-3.5 shrink-0" /> ผู้รับ
+                                            <p className="text-sm font-black uppercase tracking-[0.18em] text-gray-400 flex items-center gap-1 mb-1.5">
+                                                <MapPin className="h-4 w-4 shrink-0" /> ผู้รับ
                                             </p>
                                             {addr ? (
                                                 <div className="space-y-1">
@@ -279,18 +279,17 @@ body { margin: 0; padding: 0; background: white; }
                                         {/* Divider */}
                                         <div className="border-l border-dashed border-gray-300 self-stretch" />
 
-                                        {/* Sender + totals */}
-                                        <div className="w-[160px] shrink-0 flex flex-col justify-center gap-2">
+                                        {/* Sender + totals — address intentionally omitted here (store
+                                            name/phone is enough to identify the sender; the address line
+                                            just ate space this compact layout doesn't have) */}
+                                        <div className="w-[140px] shrink-0 flex flex-col justify-center gap-2">
                                             <div>
-                                                <p className="text-xs font-black uppercase tracking-[0.18em] text-gray-400 flex items-center gap-1 mb-1">
-                                                    <Store className="h-3.5 w-3.5 shrink-0" /> ผู้ส่ง
+                                                <p className="text-sm font-black uppercase tracking-[0.18em] text-gray-400 flex items-center gap-1 mb-1">
+                                                    <Store className="h-4 w-4 shrink-0" /> ผู้ส่ง
                                                 </p>
-                                                <p className="font-bold text-base text-gray-900">{storeName}</p>
+                                                <p className="font-black text-xl leading-tight text-gray-900">{storeName}</p>
                                                 {storePhone && (
-                                                    <p className="text-sm text-gray-600">โทร: {storePhone}</p>
-                                                )}
-                                                {storeAddress && (
-                                                    <p className="text-xs text-gray-500 leading-snug">{storeAddress}</p>
+                                                    <p className="text-base font-semibold text-gray-700 mt-0.5">โทร: {storePhone}</p>
                                                 )}
                                             </div>
                                             <p className="text-sm text-gray-500 font-semibold">
@@ -298,23 +297,6 @@ body { margin: 0; padding: 0; background: white; }
                                             </p>
                                         </div>
                                     </div>
-
-                                    {/* Tracking barcode — full-width, compact height */}
-                                    {trackingNumber && (
-                                        <div className="border-x border-b border-gray-200 px-4 py-2 flex items-center gap-4">
-                                            <div className="flex-1">
-                                                <PseudoBarcode value={trackingNumber} />
-                                            </div>
-                                            <div className="text-right shrink-0">
-                                                <p className="font-mono font-black text-xl tracking-[0.2em] text-gray-900">
-                                                    {trackingNumber}
-                                                </p>
-                                                {courier && (
-                                                    <p className="text-xs text-gray-500">{courier.label}</p>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
 
                                     {/* Items — 2-column grid, bigger text, tight rows */}
                                     <div className="border-x border-b border-gray-200 px-4 py-2">

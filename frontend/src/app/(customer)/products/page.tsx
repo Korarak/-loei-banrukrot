@@ -75,7 +75,7 @@ export default function ProductsPage() {
     };
 
     // Fetch Categories
-    const { data: categories } = useCategories();
+    const { data: categories } = useCategories(true);
 
     // Fetch Unique Brands from DB
     const { data: availableBrands = [] } = useQuery({
