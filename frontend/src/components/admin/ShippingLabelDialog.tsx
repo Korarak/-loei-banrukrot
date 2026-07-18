@@ -131,6 +131,7 @@ export function ShippingLabelDialog({ open, onOpenChange, order }: ShippingLabel
     const { data: settings } = usePublicSettings();
     const [sizeId, setSizeId] = useState<PrintSizeId>('thermal');
     const [showBarcode, setShowBarcode] = useState(true);
+    const [showQR, setShowQR] = useState(true);
 
     const addr = order.shippingAddressId;
     const storeName = settings?.store_name || siteConfig.brand.name;
@@ -269,14 +270,16 @@ body { margin: 0; padding: 0; background: white; }
                                         </div>
 
                                         {/* QR code */}
-                                        <div className="flex flex-col items-center justify-center shrink-0">
-                                            <div className="p-2 border-2 border-gray-200 rounded-xl overflow-hidden">
-                                                <QRCodeSVG value={qrValue} size={120} />
+                                        {showQR && (
+                                            <div className="flex flex-col items-center justify-center shrink-0">
+                                                <div className="p-2 border-2 border-gray-200 rounded-xl overflow-hidden">
+                                                    <QRCodeSVG value={qrValue} size={120} />
+                                                </div>
+                                                <p className="text-[9px] text-gray-400 mt-1.5 font-mono text-center max-w-[120px] break-all leading-tight">
+                                                    {qrCaption}
+                                                </p>
                                             </div>
-                                            <p className="text-[9px] text-gray-400 mt-1.5 font-mono text-center max-w-[120px] break-all leading-tight">
-                                                {qrCaption}
-                                            </p>
-                                        </div>
+                                        )}
 
                                         {/* Divider */}
                                         <div className="border-l border-dashed border-gray-300 self-stretch" />
@@ -407,14 +410,16 @@ body { margin: 0; padding: 0; background: white; }
                                             </div>
 
                                             {/* QR code */}
-                                            <div className="flex flex-col items-center shrink-0">
-                                                <div className="p-1.5 border-2 border-gray-200 rounded-xl overflow-hidden">
-                                                    <QRCodeSVG value={qrValue} size={86} />
+                                            {showQR && (
+                                                <div className="flex flex-col items-center shrink-0">
+                                                    <div className="p-1.5 border-2 border-gray-200 rounded-xl overflow-hidden">
+                                                        <QRCodeSVG value={qrValue} size={86} />
+                                                    </div>
+                                                    <p className="text-[8px] text-gray-400 mt-1.5 font-mono text-center max-w-[94px] break-all leading-tight">
+                                                        {qrCaption}
+                                                    </p>
                                                 </div>
-                                                <p className="text-[8px] text-gray-400 mt-1.5 font-mono text-center max-w-[94px] break-all leading-tight">
-                                                    {qrCaption}
-                                                </p>
-                                            </div>
+                                            )}
                                         </div>
 
                                         {/* ── Dashed divider ── */}
@@ -503,19 +508,32 @@ body { margin: 0; padding: 0; background: white; }
                                 </button>
                             ))}
                         </div>
-                        {/* Barcode toggle — applies across every paper size */}
-                        {trackingNumber && (
+                        {/* Show/hide toggles — applies across every paper size, for
+                            squeezing the print area as compact as possible */}
+                        <div className="flex items-center gap-4">
                             <div className="flex items-center gap-2">
                                 <Checkbox
-                                    id="show-barcode"
-                                    checked={showBarcode}
-                                    onCheckedChange={(v) => setShowBarcode(v === true)}
+                                    id="show-qr"
+                                    checked={showQR}
+                                    onCheckedChange={(v) => setShowQR(v === true)}
                                 />
-                                <label htmlFor="show-barcode" className="text-xs font-semibold text-gray-600 cursor-pointer select-none">
-                                    แสดงบาร์โค้ดเลขพัสดุ
+                                <label htmlFor="show-qr" className="text-xs font-semibold text-gray-600 cursor-pointer select-none">
+                                    แสดง QR Code
                                 </label>
                             </div>
-                        )}
+                            {trackingNumber && (
+                                <div className="flex items-center gap-2">
+                                    <Checkbox
+                                        id="show-barcode"
+                                        checked={showBarcode}
+                                        onCheckedChange={(v) => setShowBarcode(v === true)}
+                                    />
+                                    <label htmlFor="show-barcode" className="text-xs font-semibold text-gray-600 cursor-pointer select-none">
+                                        แสดงบาร์โค้ดเลขพัสดุ
+                                    </label>
+                                </div>
+                            )}
+                        </div>
                         {/* Print + close */}
                         <div className="flex gap-2">
                             <Button
