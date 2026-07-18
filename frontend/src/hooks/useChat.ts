@@ -79,6 +79,11 @@ export function useChatMessages(conversationId: string | undefined) {
         queryKey: ['chat', 'messages', conversationId],
         queryFn: async () => (await api.get(`/chat/conversations/${conversationId}/messages`)).data.data,
         enabled: !!conversationId,
+        // Resilience fallback, same reasoning as useConversations — this is
+        // the window actually visible on screen, so a socket that drops
+        // silently (deploy restart, laptop sleep, flaky wifi) shouldn't be
+        // able to freeze it indefinitely with no visible sign anything's wrong.
+        refetchInterval: 15_000,
     });
 
     // Live updates — append incoming messages straight into this same cache
@@ -96,7 +101,19 @@ export function useChatMessages(conversationId: string | undefined) {
             });
         };
         socket.on('chat:message:new', handler);
-        return () => { socket.off('chat:message:new', handler); };
+
+        // Socket.io auto-reconnects the same client instance after a drop, so
+        // this effect (keyed on conversationId) never re-runs to catch what
+        // was missed while offline — refetch explicitly once the transport
+        // comes back so the thread catches up immediately instead of waiting
+        // for the next refetchInterval tick.
+        const handleReconnect = () => queryClient.invalidateQueries({ queryKey: ['chat', 'messages', conversationId] });
+        socket.on('connect', handleReconnect);
+
+        return () => {
+            socket.off('chat:message:new', handler);
+            socket.off('connect', handleReconnect);
+        };
     }, [socket, conversationId, queryClient]);
 
     return query;

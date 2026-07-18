@@ -70,22 +70,18 @@ template อยู่แล้วบ้าง
 
 ## Step 2 — สร้าง VAPID key จริงสำหรับ push notification (ไม่บล็อกการ push แค่ทำให้ push ใช้งานได้)
 
-1. รันบนเครื่อง dev (ไม่ต้องต่อ production DB ก็รันได้):
+1. ✅ เสร็จแล้ว (2026-07-18) — รันบนเครื่อง dev แล้ว:
    ```
    cd backend && npx web-push generate-vapid-keys
    ```
-   จะได้ Public Key + Private Key คู่หนึ่ง — **เก็บ private key ให้ดี** ถ้า
-   rotate ทีหลัง subscription เดิมทั้งหมดของลูกค้า/staff จะใช้ไม่ได้ทันที
+   คีย์เก็บไว้ใน `deploy-secrets.local.md` แล้ว (ไม่ commit เข้า git)
 
-2. เพิ่มในไฟล์ `.env` บน VPS (`/home/deploy/loei-banrakrod/.env` — ไฟล์เดียวกับที่
-   `docker-compose.yml` อ่านตอน deploy):
-   ```
-   WEB_PUSH_VAPID_PUBLIC_KEY=<public key>
-   WEB_PUSH_VAPID_PRIVATE_KEY=<private key>
-   WEB_PUSH_VAPID_SUBJECT=mailto:<อีเมลจริงของร้าน>
-   ```
+2. ✅ เสร็จแล้ว (2026-07-18) — เพิ่มในไฟล์ `.env` บน VPS
+   (`/home/deploy/loei-banrakrod/.env`) แล้ว + รัน `docker compose up -d backend`
+   เพื่อ recreate container ให้อ่าน env ใหม่ — container ขึ้น `healthy` ปกติ
+   ยืนยันจาก log แล้ว (ไม่มี error ตอน start, MongoDB connected ปกติ)
 
-3. เพิ่ม GitHub Actions secret ชื่อ `NEXT_PUBLIC_VAPID_PUBLIC_KEY` = public key
+3. ⬜ ยังไม่ทำ — เพิ่ม GitHub Actions secret ชื่อ `NEXT_PUBLIC_VAPID_PUBLIC_KEY` = public key
    ค่าเดียวกับข้อ 2 (Settings → Secrets and variables → Actions ของ repo) —
    ค่านี้ถูกฝังเข้า frontend ตอน build (เหมือน `NEXT_PUBLIC_API_URL`) ไม่ใช่อ่านตอน
    runtime ดังนั้นถ้าลืมเพิ่ม secret นี้ build จะ "สำเร็จ" แต่ปุ่มเปิดการแจ้งเตือน
