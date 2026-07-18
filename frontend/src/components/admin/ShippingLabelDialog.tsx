@@ -129,11 +129,14 @@ const PRINT_SIZES = [
     {
         id: 'thermal-narrow-landscape',
         label: 'Thermal 3" (แนวนอน)',
-        desc: 'ม้วน 76mm, หมุนแนวนอน',
-        // Same content layout as 'thermal-narrow' (still a 76mm-wide roll —
-        // too narrow for a real side-by-side landscape row), just with the
-        // page dimensions rotated for printers/drivers that feed sideways.
-        pageSize: 'auto 76.2mm',
+        desc: 'จัดวางแนวนอน สั้นกว่าเดิม',
+        // Deliberately NOT a rotated page (that would fix the height at
+        // 76.2mm and risk clipping/paginating anything taller — content
+        // length varies with the address). Same safe 76.2mm-wide/auto-height
+        // page as 'thermal-narrow' — only the content arrangement changes
+        // (sender merged into the QR column instead of its own row below a
+        // divider), which is what actually shortens the printed label.
+        pageSize: '76.2mm auto',
         labelWidth: '70mm',
         margin: '2mm',
     },
@@ -179,7 +182,8 @@ export function ShippingLabelDialog({ open, onOpenChange, order }: ShippingLabel
 
     const selectedSize = PRINT_SIZES.find(s => s.id === sizeId)!;
     const isLandscape = sizeId === 'thermal-landscape';
-    const isNarrow = sizeId === 'thermal-narrow' || sizeId === 'thermal-narrow-landscape';
+    const isNarrow = sizeId === 'thermal-narrow';
+    const isNarrowLandscape = sizeId === 'thermal-narrow-landscape';
 
     const handlePrint = () => {
         const el = document.getElementById('shipping-label-print');
@@ -217,7 +221,7 @@ body { margin: 0; padding: 0; background: white; }
             <Dialog open={open} onOpenChange={onOpenChange}>
                 <DialogContent className={cn(
                     'p-0 flex flex-col max-h-[90vh] transition-[max-width] duration-200',
-                    isLandscape ? 'sm:max-w-[640px]' : isNarrow ? 'sm:max-w-[360px]' : 'sm:max-w-[420px]'
+                    isLandscape ? 'sm:max-w-[640px]' : isNarrow || isNarrowLandscape ? 'sm:max-w-[360px]' : 'sm:max-w-[420px]'
                 )}>
                     <DialogTitle className="sr-only">
                         สติ้กเกอร์จัดส่ง #{order.orderReference}
@@ -465,6 +469,134 @@ body { margin: 0; padding: 0; background: white; }
                                             </div>
                                             <div className="text-right shrink-0">
                                                 <p className="text-[10px] text-gray-500">{totalItems} ชิ้น</p>
+                                            </div>
+                                        </div>
+
+                                        {/* ── Tracking barcode (only when tracking number exists and enabled) ── */}
+                                        {trackingNumber && showBarcode && (
+                                            <div className="border-t-2 border-gray-800 pt-2">
+                                                <PseudoBarcode value={trackingNumber} />
+                                                <div className="text-center mt-1.5">
+                                                    <p className="font-mono font-black text-xs tracking-[0.18em] text-gray-900">
+                                                        {trackingNumber}
+                                                    </p>
+                                                    {courier && (
+                                                        <p className="text-[9px] text-gray-500 mt-0.5">{courier.label}</p>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* ── Items list ── */}
+                                    <div className="border-x border-b border-gray-200 px-2.5 pt-2 pb-2.5">
+                                        <p className="text-[9px] font-black uppercase tracking-[0.15em] text-gray-400 mb-1.5">
+                                            รายการสินค้า ({order.items.length} รายการ)
+                                        </p>
+                                        <div className="space-y-0.5">
+                                            {order.items.map((item, idx) => (
+                                                <div key={idx} className="flex justify-between text-[10px] text-gray-700">
+                                                    <span className="flex-1 min-w-0 truncate pr-2">{item.productName}</span>
+                                                    <span className="text-gray-500 shrink-0 font-medium">× {item.quantity}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        {!order.shippingAddressId && order.source === 'online' && (
+                                            <p className="mt-1.5 text-[10px] text-amber-600">
+                                                ยังไม่มีที่อยู่จัดส่งในระบบ
+                                            </p>
+                                        )}
+                                    </div>
+                                </>
+                            ) : isNarrowLandscape ? (
+                                <>
+                                    {/* Courier header strip — same as 'thermal-narrow' */}
+                                    <div
+                                        className="px-2.5 py-1.5 flex items-center justify-between border-b"
+                                        style={{ borderColor: courierStyle.bg, color: courierStyle.bg }}
+                                    >
+                                        <div className="flex items-center gap-1">
+                                            <Package className="h-3 w-3 shrink-0" />
+                                            <span className="font-bold text-[10px] tracking-wide uppercase leading-none">
+                                                {courier?.label || order.shippingInfo?.provider || 'จัดส่งสินค้า'}
+                                            </span>
+                                        </div>
+                                        <div className="text-right shrink-0 text-gray-500">
+                                            <span className="font-mono text-[9px]">#{order.orderReference}</span>
+                                            <span className="text-[9px] ml-1">{dateStr}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="border-x border-b border-gray-200 p-2.5 space-y-2">
+                                        {/* Main row: recipient | QR+sender column — sender is grouped into
+                                            the QR column here instead of its own row below a divider (like
+                                            'thermal-narrow' does), so this variant prints a whole section
+                                            shorter — the actual "แนวนอน" difference, not just a relabel. */}
+                                        <div className="flex gap-2 items-start">
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-[9px] font-black uppercase tracking-[0.15em] text-gray-400 flex items-center gap-1 mb-1">
+                                                    <MapPin className="h-2.5 w-2.5 shrink-0" /> ผู้รับ
+                                                </p>
+
+                                                {addr ? (
+                                                    <div className="space-y-0.5">
+                                                        <p className="font-black text-base leading-snug text-gray-900">
+                                                            {addr.recipientName}
+                                                        </p>
+                                                        <p className="text-[11px] text-gray-700 leading-relaxed">
+                                                            {addr.streetAddress}
+                                                        </p>
+                                                        {(addr.subDistrict || addr.district || addr.province) && (
+                                                            <p className="text-[11px] text-gray-700">
+                                                                {[addr.subDistrict, addr.district, addr.province]
+                                                                    .filter(Boolean).join(' ')}
+                                                            </p>
+                                                        )}
+                                                        {addr.zipCode && (
+                                                            <p className="font-black text-lg text-gray-900 mt-1 tracking-wider">
+                                                                {addr.zipCode}
+                                                            </p>
+                                                        )}
+                                                        {(addr.phone || order.customer?.phone) && (
+                                                            <p className="text-[11px] font-semibold text-gray-700 mt-0.5">
+                                                                ☎ {addr.phone || order.customer?.phone}
+                                                            </p>
+                                                        )}
+                                                    </div>
+                                                ) : (
+                                                    <div className="space-y-0.5">
+                                                        <p className="font-black text-base leading-snug text-gray-900">
+                                                            {order.customer?.firstName} {order.customer?.lastName}
+                                                        </p>
+                                                        {order.customer?.phone && (
+                                                            <p className="text-[11px] font-semibold text-gray-700 mt-0.5">
+                                                                ☎ {order.customer.phone}
+                                                            </p>
+                                                        )}
+                                                        <p className="text-[10px] text-amber-600 mt-0.5">
+                                                            ไม่พบที่อยู่จัดส่งในระบบ
+                                                        </p>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* QR + sender, stacked in one narrow column */}
+                                            <div className="w-[92px] shrink-0 flex flex-col items-center gap-1">
+                                                {showQR && (
+                                                    <div className="p-1 border-2 border-gray-200 rounded-lg overflow-hidden">
+                                                        <QRCodeSVG value={qrValue} size={56} />
+                                                    </div>
+                                                )}
+                                                <div className="text-center w-full border-t border-dashed border-gray-300 pt-1">
+                                                    <p className="text-[7px] font-black uppercase tracking-wide text-gray-400 flex items-center justify-center gap-0.5">
+                                                        <Store className="h-2 w-2 shrink-0" /> ผู้ส่ง
+                                                    </p>
+                                                    <p className="font-bold text-[10px] text-gray-900 truncate w-full">{storeName}</p>
+                                                    {storePhone && (
+                                                        <p className="text-[8px] text-gray-600 truncate w-full">{storePhone}</p>
+                                                    )}
+                                                    <p className="text-[8px] text-gray-400 mt-0.5">{totalItems} ชิ้น</p>
+                                                </div>
                                             </div>
                                         </div>
 
