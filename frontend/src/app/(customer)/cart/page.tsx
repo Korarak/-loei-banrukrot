@@ -29,7 +29,6 @@ import { Label } from '@/components/ui/label';
 import { Truck, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 import { getImageUrl } from '@/lib/utils';
-import { usePublicSettings } from '@/hooks/useSettings';
 
 export default function CartPage() {
     const router = useRouter();
@@ -38,7 +37,6 @@ export default function CartPage() {
     const { data: cart, isLoading } = useCart();
     const { data: shippingMethods, isLoading: isLoadingShipping } = useShippingMethods();
     const { data: addresses, isLoading: isLoadingAddresses } = useCustomerAddresses(customer?._id);
-    const { data: settings } = usePublicSettings();
     const updateCartItem = useUpdateCartItem();
     const removeCartItem = useRemoveCartItem();
     const clearCart = useClearCart();
@@ -397,17 +395,7 @@ export default function CartPage() {
                 <div className="lg:col-span-1">
                     <Card className="p-8 sticky top-24 bg-white">
                         <h2 className="font-display uppercase text-2xl mb-1 text-gray-900 leading-none">Summary</h2>
-                        <p className="text-sm font-bold text-muted-foreground mb-4">สรุปคำสั่งซื้อ</p>
-
-                        {settings?.store_phone && (
-                            <a
-                                href={`tel:${settings.store_phone}`}
-                                className="inline-flex items-center gap-2 px-3 py-2 mb-8 bg-brand/10 border border-brand/30 text-brand font-bold text-sm hover:bg-brand/15 transition-colors"
-                            >
-                                <Phone className="h-4 w-4" />
-                                มีคำถาม? โทร {settings.store_phone}
-                            </a>
-                        )}
+                        <p className="text-sm font-bold text-muted-foreground mb-8">สรุปคำสั่งซื้อ</p>
 
                         <div className="space-y-6 mb-8">
                             <div className="flex justify-between items-center text-base">
@@ -437,6 +425,12 @@ export default function CartPage() {
                                                         <span className="font-bold text-gray-900 text-base leading-none">{address.recipientName}</span>
                                                         {address.isDefault && <span className="text-[10px] font-black tracking-wider text-gray-900 px-2 py-0.5 border border-border">ที่อยู่หลัก</span>}
                                                     </div>
+                                                    {address.phone && (
+                                                        <span className="flex items-center gap-1.5 text-xs text-gray-600 font-bold">
+                                                            <Phone className="h-3 w-3" />
+                                                            {address.phone}
+                                                        </span>
+                                                    )}
                                                     <span className="text-xs text-gray-600 font-medium leading-relaxed">
                                                         {address.streetAddress}, {address.subDistrict}, {address.district}, {address.province} {address.zipCode}
                                                     </span>
