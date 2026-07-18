@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
     Package, Zap, ShieldCheck,
     ChevronRight, ChevronLeft,
-    Search, Phone, MapPin, Facebook,
+    Search, MapPin, Facebook,
     ShoppingCart, CheckCircle, Truck, Headphones,
     Wrench, QrCode,
 } from 'lucide-react';
@@ -46,11 +46,12 @@ function TikTokIcon({ className }: { className?: string }) {
     );
 }
 
-// ─── LINE Icon ───────────────────────────────────────────────────────────────
-function LineIcon({ className }: { className?: string }) {
+// ─── Facebook Icon (brand-colored badge, not outline) ────────────────────────
+function FacebookIcon({ className }: { className?: string }) {
     return (
-        <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.349 0 .63.285.63.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.281.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314" />
+        <svg className={className} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <rect width="24" height="24" rx="6" fill="#1877F2" />
+            <path d="M16.55 12.2h-2.2v7.6h-3.1v-7.6H9.65V9.55h1.6V7.98c0-1.62.87-3.13 3.4-3.13.97 0 1.87.11 2.11.16v2.45h-1.32c-.72 0-.94.31-.94.92v1.17h2.36l-.31 2.65z" fill="#fff" />
         </svg>
     );
 }
@@ -419,11 +420,12 @@ export default function Home() {
                         {[
                             {
                                 num: '01',
-                                icon: Phone,
-                                title: 'คุยกับช่างโอ๊ตตัวจริง',
-                                desc: 'ไม่ใช่แชทบอท ไม่ใช่คอลเซ็นเตอร์ ทักไลน์หรือเพจคุยกับช่างที่ซ่อมรถให้คุณเองโดยตรง',
-                                fact: 'ทักไลน์เลย',
-                                href: siteConfig.footerData.contact.social.line,
+                                icon: FacebookIcon,
+                                iconColorful: true,
+                                title: 'บริการซ่อมหน้าร้าน',
+                                desc: 'ไม่ใช่แค่ขาย ทำจริง ใช้จริง นานกว่า 10 ปี',
+                                fact: 'บ้านรักรถเมืองเลย',
+                                href: siteConfig.footerData.contact.social.facebook,
                             },
                             {
                                 num: '02',
@@ -444,7 +446,7 @@ export default function Home() {
                             <motion.div key={i} variants={fadeInUp} className="border border-white/10 p-8 transition-colors hover:border-white/30">
                                 <div className="flex items-start justify-between mb-6">
                                     <span className="font-display text-6xl leading-none text-white/10">{item.num}</span>
-                                    <item.icon className="h-6 w-6 text-brand" />
+                                    <item.icon className={('iconColorful' in item && item.iconColorful) ? 'h-9 w-9 shadow-lg shadow-black/30' : 'h-6 w-6 text-brand'} />
                                 </div>
                                 <h3 className="text-xl font-bold mb-3 text-white">{item.title}</h3>
                                 <p className="text-gray-400 leading-relaxed text-sm mb-6">{item.desc}</p>
@@ -528,10 +530,14 @@ export default function Home() {
                             <div className="inline-block text-muted-foreground text-[11px] font-bold uppercase tracking-[0.25em] mb-5">
                                 Contact Us
                             </div>
-                            <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-8 leading-tight">
-                                พร้อมให้คำปรึกษา<br />
-                                ทุกวัน ทุกเวลา
+                            <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-4 leading-tight">
+                                จัดส่งสินค้า<br />
+                                จันทร์ - เสาร์
                             </h2>
+                            <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 bg-brand/10 border border-brand/30 text-brand font-bold text-sm">
+                                <Truck className="h-4 w-4" />
+                                ตัดรอบส่งของทุกวัน เวลา 10.00 น.
+                            </div>
 
                             <div className="space-y-4 mb-8">
                                 {contact.items.filter(i => i.type === 'address').map((item, i) => (
@@ -573,14 +579,6 @@ export default function Home() {
                                         >
                                             <TikTokIcon className="h-5 w-5" />
                                             TikTok
-                                        </a>
-                                    )}
-                                    {contact.social.line && (
-                                        <a href={contact.social.line} target="_blank" rel="noopener noreferrer"
-                                            className="flex items-center gap-2 px-4 py-2.5 border border-border hover:border-foreground text-gray-800 font-bold text-sm transition-colors"
-                                        >
-                                            <LineIcon className="h-5 w-5" />
-                                            LINE
                                         </a>
                                     )}
                                     {contact.social.youtube && (

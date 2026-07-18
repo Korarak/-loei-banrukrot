@@ -185,7 +185,7 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
 
             {/* Order Header */}
             <Card className="p-6">
-                <div className="flex justify-between items-start">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
                     <div>
                         <h1 className="text-2xl font-bold mb-2">คำสั่งซื้อ #{order.orderReference}</h1>
                         <p className="text-gray-600">
@@ -198,7 +198,7 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                             })}
                         </p>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-3">
                         {order.source === 'online' && (
                             <Button
                                 variant="outline"
@@ -246,13 +246,13 @@ export default function AdminOrderDetailPage({ params }: { params: Promise<{ id:
                         <h2 className="text-xl font-bold mb-4">รายการสินค้า</h2>
                         <div className="space-y-4">
                             {order.items.map((item, index) => (
-                                <div key={index} className="flex justify-between items-center border-b pb-4 last:border-b-0">
-                                    <div className="flex-1">
-                                        <h3 className="font-semibold">{item.productName}</h3>
+                                <div key={index} className="flex justify-between items-center gap-3 border-b pb-4 last:border-b-0">
+                                    <div className="flex-1 min-w-0">
+                                        <h3 className="font-semibold break-words">{item.productName}</h3>
                                         <p className="text-sm text-gray-600">SKU: {item.sku}</p>
                                         <p className="text-sm text-gray-600">จำนวน: {item.quantity}</p>
                                     </div>
-                                    <div className="text-right">
+                                    <div className="text-right shrink-0">
                                         <p className="font-semibold">฿{item.price.toFixed(2)}</p>
                                         <p className="text-sm text-gray-600">
                                             รวม: ฿{(item.price * item.quantity).toFixed(2)}
