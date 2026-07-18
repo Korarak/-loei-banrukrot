@@ -489,7 +489,7 @@ export default function Home() {
                             { step: '01', icon: Search, title: 'เลือกสินค้า', desc: 'ค้นหาและเลือกอะไหล่ที่ต้องการ กรองตามหมวดหมู่หรือรุ่นรถ' },
                             { step: '02', icon: ShoppingCart, title: 'ใส่ตะกร้า', desc: 'เพิ่มสินค้าลงตะกร้า เลือกตัวเลือกและจำนวนตามต้องการ' },
                             { step: '03', icon: CheckCircle, title: 'ยืนยันคำสั่งซื้อ', desc: 'ระบุที่อยู่จัดส่ง เลือกวิธีส่ง และชำระเงินผ่าน QR Code' },
-                            { step: '04', icon: Truck, title: 'รอรับสินค้า', desc: 'เราแพ็คและส่งสินค้าภายใน 1-2 วันทำการหลังยืนยันการชำระ' },
+                            { step: '04', icon: Truck, title: 'รอรับสินค้า', desc: 'ภายใน 1-3 วัน หลังยืนยันการชำระ' },
                         ].map((item, i) => (
                             <motion.div key={i} variants={fadeInUp} className="relative bg-white p-8 border border-border hover:border-foreground transition-colors duration-300 overflow-hidden">
                                 <div className="flex items-start justify-between mb-6">
