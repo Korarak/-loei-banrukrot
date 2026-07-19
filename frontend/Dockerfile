@@ -63,6 +63,13 @@ COPY --from=builder --chown=nextjs:nodejs /app/frontend/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/frontend/.next/static ./frontend/.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/frontend/public ./frontend/public
 
+# Pre-create Next's image-optimization cache dir owned by nextjs — this path is
+# mounted as a named volume in docker-compose (so it survives redeploys); an
+# empty named volume inherits ownership from whatever already exists here at
+# mount time, so without this the volume would mount root-owned and the
+# non-root nextjs user below would silently fail to write cache files.
+RUN mkdir -p frontend/.next/cache/images && chown -R nextjs:nodejs frontend/.next
+
 USER nextjs
 
 EXPOSE 8081

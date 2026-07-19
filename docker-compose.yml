@@ -75,6 +75,13 @@ services:
         condition: service_healthy
     environment:
       - NODE_ENV=production
+    volumes:
+      # Next's built-in image-optimization cache — without this it lives only
+      # in the container's writable layer and gets wiped on every deploy
+      # (docker compose pull && up -d recreates the container), forcing sharp
+      # to re-resize/re-encode every image at every responsive size from
+      # scratch on the next visitor's request.
+      - frontend_image_cache:/app/frontend/.next/cache
     logging: *default-logging
     deploy:
       resources:
@@ -132,3 +139,4 @@ volumes:
   registry_data:
   npm_data:
   npm_letsencrypt:
+  frontend_image_cache:
