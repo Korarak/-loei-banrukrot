@@ -4,10 +4,11 @@
 import BottomNav from '@/components/layout/BottomNav';
 import Footer from '@/components/layout/Footer';
 import Link from 'next/link';
-import { ShoppingCart, User, LogOut, Package, Heart, Menu, AlertCircle } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Package, Heart, Menu, AlertCircle, AlertTriangle } from 'lucide-react';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useCart } from '@/hooks/useCart';
 import { useCustomerOrders } from '@/hooks/useOrders';
+import { usePublicSettings } from '@/hooks/useSettings';
 import { Button } from '@/components/ui/button';
 import { getImageUrl } from '@/lib/utils';
 import {
@@ -61,6 +62,8 @@ export default function CustomerLayout({
 
     const { data: cart } = useCart();
     const { data: orders } = useCustomerOrders();
+    const { data: publicSettings } = usePublicSettings();
+    const storeClosed = publicSettings?.store_order_acceptance === 'closed';
     const totalItems = useMemo(
         () => (cart?.items || []).reduce((sum, item) => sum + item.quantity, 0),
         [cart?.items]
@@ -322,6 +325,22 @@ export default function CustomerLayout({
 
             {/* Global pending-slip banner — sits below sticky mobile nav; on desktop offset by fixed nav height */}
             <div className="md:pt-20">
+                <AnimatePresence>
+                    {mounted && storeClosed && (
+                        <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="overflow-hidden"
+                        >
+                            <div className="flex items-center justify-center gap-2 bg-red-600 text-white text-sm font-bold px-4 py-2.5">
+                                <AlertTriangle className="h-4 w-4 shrink-0" />
+                                <span>ขณะนี้ร้านปิดรับคำสั่งซื้อออนไลน์ชั่วคราว กรุณาลองใหม่อีกครั้งภายหลัง</span>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
                 <AnimatePresence>
                     {mounted && isHydrated && customer && pendingSlipCount > 0 && (
                         <motion.div

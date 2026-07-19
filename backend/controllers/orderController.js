@@ -1,5 +1,6 @@
 // controllers/orderController.js
 const { Order, OrderDetail, Payment, ProductVariant, Cart, CartItem, CustomerAddress, ShippingMethod, ProductImage } = require('../models');
+const Setting = require('../models/Setting');
 
 // @desc    Create order from cart (E-commerce)
 // @route   POST /api/orders
@@ -18,6 +19,14 @@ const fs = require('fs');
 // @access  Private (customer)
 exports.createOrderFromCart = async (req, res, next) => {
     try {
+        const orderAcceptance = await Setting.findOne({ key: 'store_order_acceptance' });
+        if (orderAcceptance?.value === 'closed') {
+            return res.status(400).json({
+                success: false,
+                message: 'ร้านปิดรับออเดอร์ออนไลน์ชั่วคราว กรุณาลองใหม่อีกครั้งภายหลัง'
+            });
+        }
+
         let { shippingAddressId, paymentMethod, shippingMethodId, itemIds } = req.body;
 
         // Default payment method if not provided

@@ -7,6 +7,19 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useDashboardSummary, useDailyRevenue, useTopCategories } from '@/hooks/useDashboard';
+import { usePublicSettings, useUpdateSetting } from '@/hooks/useSettings';
+import { Switch } from '@/components/ui/switch';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
 import {
@@ -101,6 +114,74 @@ function ChangeIndicator({ value }: { value: number }) {
             {isPositive ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
             {isPositive ? '+' : ''}{value}%
         </Badge>
+    );
+}
+
+// Store-wide toggle for accepting online orders — owner can flip it, others see read-only status
+function StoreOrderToggle() {
+    const { data: publicSettings } = usePublicSettings();
+    const isOwner = useAuthStore((state) => state.user?.role === 'owner');
+    const updateSetting = useUpdateSetting();
+    const [confirmOpen, setConfirmOpen] = useState(false);
+
+    const isClosed = publicSettings?.store_order_acceptance === 'closed';
+
+    const setAcceptance = (value: 'open' | 'closed') => {
+        updateSetting.mutate(
+            { key: 'store_order_acceptance', value },
+            {
+                onSuccess: () => toast.success(value === 'closed' ? 'ปิดรับออเดอร์ออนไลน์แล้ว' : 'เปิดรับออเดอร์ออนไลน์แล้ว'),
+                onError: (err: any) => toast.error('เกิดข้อผิดพลาด', { description: err.response?.data?.message }),
+            }
+        );
+    };
+
+    const handleToggle = (checked: boolean) => {
+        if (checked) {
+            setAcceptance('open');
+        } else {
+            setConfirmOpen(true);
+        }
+    };
+
+    return (
+        <>
+            <div
+                className={cn(
+                    "flex items-center gap-3 rounded-full border px-4 py-2 shrink-0",
+                    isClosed ? "border-red-200 bg-red-50" : "border-emerald-200 bg-emerald-50"
+                )}
+            >
+                <span className={cn("h-2 w-2 rounded-full", isClosed ? "bg-red-500" : "bg-emerald-500 animate-pulse")} />
+                <span className={cn("text-xs font-bold whitespace-nowrap", isClosed ? "text-red-700" : "text-emerald-700")}>
+                    {isClosed ? 'ปิดรับออเดอร์ออนไลน์' : 'เปิดรับออเดอร์ออนไลน์'}
+                </span>
+                {isOwner && (
+                    <Switch
+                        checked={!isClosed}
+                        disabled={updateSetting.isPending}
+                        onCheckedChange={handleToggle}
+                    />
+                )}
+            </div>
+
+            <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>ปิดรับออเดอร์ออนไลน์ใช่หรือไม่?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            ลูกค้าจะไม่สามารถสั่งซื้อผ่านหน้าเว็บได้ชั่วคราว จนกว่าคุณจะกดเปิดรับอีกครั้ง (การขายหน้าร้าน/POS ไม่ได้รับผลกระทบ)
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => { setAcceptance('closed'); setConfirmOpen(false); }}>
+                            ยืนยัน ปิดรับออเดอร์
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </>
     );
 }
 
@@ -243,7 +324,8 @@ export default function AdminDashboard() {
                         วันนี้คือวัน{format(new Date(), 'eeee ที่ d MMMM yyyy', { locale: th })}
                     </p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap justify-end">
+                    <StoreOrderToggle />
                     {(['7d', '30d', '90d'] as DateRange[]).map((range) => (
                         <Button
                             key={range}

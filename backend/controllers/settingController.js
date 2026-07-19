@@ -9,11 +9,13 @@ const PUBLIC_KEYS = [
     'store_phone',
     'store_address',
     'store_tax_id',
+    'store_order_acceptance',
 ];
 
 // Sensitive keys: only owner can view (via admin API) or edit — never public
 const OWNER_ONLY_KEYS = [
     'payment_promptpay_id',
+    'store_order_acceptance',
 ];
 
 const DEFAULT_SETTINGS = [
@@ -25,6 +27,7 @@ const DEFAULT_SETTINGS = [
     { key: 'store_address', value: '', description: 'ที่อยู่ร้าน' },
     { key: 'store_tax_id', value: '', description: 'เลขประจำตัวผู้เสียภาษี (Tax ID)' },
     { key: 'payment_promptpay_id', value: '', description: 'เบอร์พร้อมเพย์ (PromptPay) สำหรับสร้าง QR Code' },
+    { key: 'store_order_acceptance', value: 'open', description: 'สถานะรับออเดอร์ออนไลน์ (open/closed)' },
 ];
 
 // PromptPay target: mobile number (10 digits) or national ID (13 digits)
@@ -91,6 +94,10 @@ exports.updateSetting = async (req, res, next) => {
 
         if (req.params.key === 'payment_promptpay_id' && String(value).trim() !== '' && !isValidPromptPayId(String(value))) {
             return res.status(400).json({ success: false, message: 'รูปแบบเบอร์พร้อมเพย์ไม่ถูกต้อง (เบอร์โทร 10 หลัก หรือเลขบัตรประชาชน 13 หลัก)' });
+        }
+
+        if (req.params.key === 'store_order_acceptance' && !['open', 'closed'].includes(String(value))) {
+            return res.status(400).json({ success: false, message: 'ค่าต้องเป็น open หรือ closed เท่านั้น' });
         }
 
         const setting = await Setting.findOneAndUpdate(

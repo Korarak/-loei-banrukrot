@@ -29,6 +29,8 @@ import { Label } from '@/components/ui/label';
 import { Truck, MapPin } from 'lucide-react';
 import { toast } from 'sonner';
 import { getImageUrl } from '@/lib/utils';
+import { usePublicSettings } from '@/hooks/useSettings';
+import { AlertTriangle } from 'lucide-react';
 
 export default function CartPage() {
     const router = useRouter();
@@ -41,6 +43,8 @@ export default function CartPage() {
     const removeCartItem = useRemoveCartItem();
     const clearCart = useClearCart();
     const createOrder = useCreateOrder();
+    const { data: publicSettings } = usePublicSettings();
+    const storeClosed = publicSettings?.store_order_acceptance === 'closed';
 
     const [manualShippingId, setManualShippingId] = useState<string | null>(null);
     const [manualAddressId, setManualAddressId] = useState<string | null>(null);
@@ -505,12 +509,17 @@ export default function CartPage() {
                             className="w-full h-14 text-base uppercase tracking-widest"
                             size="lg"
                             onClick={handleCheckout}
-                            disabled={createOrder.isPending || !selectedAddressId || !selectedShippingId || selectedItems.length === 0}
+                            disabled={storeClosed || createOrder.isPending || !selectedAddressId || !selectedShippingId || selectedItems.length === 0}
                         >
-                            {createOrder.isPending ? 'กำลังดำเนินการ...' : 'สั่งซื้อเลย'}
+                            {createOrder.isPending ? 'กำลังดำเนินการ...' : storeClosed ? 'ปิดรับออเดอร์ชั่วคราว' : 'สั่งซื้อเลย'}
                         </Button>
 
-                        {selectedItems.length === 0 && (
+                        {storeClosed ? (
+                            <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs font-bold text-red-600">
+                                <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                                ขณะนี้ร้านปิดรับคำสั่งซื้อออนไลน์ชั่วคราว กรุณาลองใหม่อีกครั้งภายหลัง
+                            </p>
+                        ) : selectedItems.length === 0 && (
                             <p className="mt-3 text-center text-xs font-bold text-brand">
                                 กรุณาเลือกสินค้าอย่างน้อย 1 รายการ
                             </p>

@@ -17,6 +17,7 @@ export interface PublicSettings {
     store_phone?: string;
     store_address?: string;
     store_tax_id?: string;
+    store_order_acceptance?: string;
 }
 
 export function usePublicSettings() {
