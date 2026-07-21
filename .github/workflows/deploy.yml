@@ -109,3 +109,8 @@ jobs:
 
             # Clean up leftover images
             docker image prune -f --filter "label=project=loei-banrakrod"
+
+      - name: Warm image-optimization cache
+        run: |
+          chmod +x scripts/warm-image-cache.sh
+          ./scripts/warm-image-cache.sh || true
