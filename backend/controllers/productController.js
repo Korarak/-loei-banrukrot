@@ -434,6 +434,11 @@ exports.updateProduct = async (req, res, next) => {
                 const existing = existingBySku.get(v.sku);
                 if (existing) {
                     await ProductVariant.findByIdAndUpdate(existing._id, { price: v.price });
+                    // Stock is edited separately via changeStock() so the adjustment is
+                    // logged in StockMovement, same as the quick +/- buttons (updateVariantStock).
+                    if (v.stock !== undefined && v.stock !== existing.stockAvailable) {
+                        await changeStock(existing._id, v.stock - existing.stockAvailable, 'adjustment', null, null, req.user._id, 'แก้ไขจากฟอร์มแก้ไขสินค้า');
+                    }
                 } else {
                     await ProductVariant.create({
                         productId: product._id,
