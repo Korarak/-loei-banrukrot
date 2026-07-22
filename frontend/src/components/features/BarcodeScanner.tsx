@@ -1,9 +1,12 @@
 'use client';
 
 /**
- * BarcodeScanner — uses the native BarcodeDetector Web API (no npm deps).
- * Supported: Chrome 83+, Edge 83+, Android Chrome, Samsung Internet.
- * Not supported: Safari/Firefox → shows a typed-entry fallback.
+ * BarcodeScanner — prefers the native BarcodeDetector Web API (Chrome/Edge/
+ * Android Chrome/Samsung Internet), which decodes off-thread via the OS.
+ * Every iOS browser (Chrome, Firefox, Safari — all required by Apple to run
+ * on WebKit) lacks that API entirely, so on iOS — and any other browser
+ * without it — this falls back to @zxing/browser's pure-JS decoder, which
+ * only needs getUserMedia + <canvas>, so it works anywhere a camera does.
  */
 
 import { useEffect, useRef, useState, useCallback } from 'react';
@@ -11,6 +14,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScanLine, CameraOff, RefreshCw, FlipHorizontal, Keyboard, Loader2 } from 'lucide-react';
+import { BrowserMultiFormatReader } from '@zxing/browser';
+import type { IScannerControls } from '@zxing/browser';
+import { BarcodeFormat, DecodeHintType } from '@zxing/library';
 
 // Extend Window type for BarcodeDetector (not yet in lib.dom.d.ts)
 declare global {
@@ -23,6 +29,14 @@ declare global {
         };
     }
 }
+
+const ZXING_HINTS = new Map([
+    [DecodeHintType.POSSIBLE_FORMATS, [
+        BarcodeFormat.CODE_128, BarcodeFormat.CODE_39, BarcodeFormat.CODE_93,
+        BarcodeFormat.EAN_13, BarcodeFormat.EAN_8, BarcodeFormat.UPC_A, BarcodeFormat.UPC_E,
+        BarcodeFormat.QR_CODE, BarcodeFormat.DATA_MATRIX, BarcodeFormat.PDF_417,
+    ]],
+]);
 
 interface BarcodeScannerProps {
     open: boolean;
@@ -45,6 +59,10 @@ export function BarcodeScanner({
     const streamRef = useRef<MediaStream | null>(null);
     const rafRef = useRef<number | null>(null);
     const detectorRef = useRef<InstanceType<NonNullable<typeof window.BarcodeDetector>> | null>(null);
+    // Only set when the native BarcodeDetector is unavailable (every iOS browser) —
+    // holds the ZXing reader/controls used for the software-decode fallback instead.
+    const zxingReaderRef = useRef<BrowserMultiFormatReader | null>(null);
+    const zxingControlsRef = useRef<IScannerControls | null>(null);
     const onScanRef = useRef(onScan);
     const onCloseRef = useRef(onClose);
     useEffect(() => { onScanRef.current = onScan; }, [onScan]);
@@ -61,9 +79,22 @@ export function BarcodeScanner({
     const stopCamera = useCallback(() => {
         if (rafRef.current) cancelAnimationFrame(rafRef.current);
         rafRef.current = null;
+        zxingControlsRef.current?.stop();
+        zxingControlsRef.current = null;
         streamRef.current?.getTracks().forEach(t => t.stop());
         streamRef.current = null;
     }, []);
+
+    // Fires on a successful decode from either engine — shared so both paths
+    // behave identically (flash the value, stop the camera, hand it off).
+    const handleDetected = useCallback((value: string) => {
+        setDetected(value);
+        stopCamera();
+        setTimeout(() => {
+            onScanRef.current(value.toUpperCase());
+            onCloseRef.current();
+        }, 400);
+    }, [stopCamera]);
 
     const startDetectionLoop = useCallback(() => {
         const detect = async () => {
@@ -75,13 +106,7 @@ export function BarcodeScanner({
             try {
                 const results = await detectorRef.current.detect(videoRef.current);
                 if (results.length > 0) {
-                    const value = results[0].rawValue;
-                    setDetected(value);
-                    stopCamera();
-                    setTimeout(() => {
-                        onScanRef.current(value.toUpperCase());
-                        onCloseRef.current();
-                    }, 400);
+                    handleDetected(results[0].rawValue);
                     return;
                 }
             } catch {
@@ -90,7 +115,23 @@ export function BarcodeScanner({
             rafRef.current = requestAnimationFrame(detect);
         };
         rafRef.current = requestAnimationFrame(detect);
-    }, [stopCamera]);
+    }, [handleDetected]);
+
+    // Software-decode fallback for browsers with no native BarcodeDetector —
+    // every iOS browser, since Apple requires them all to run on WebKit.
+    // ZXing decodes frames read off the existing <video> via <canvas>, so it
+    // needs nothing beyond the getUserMedia stream we already opened.
+    const startZxingLoop = useCallback((stream: MediaStream) => {
+        if (!videoRef.current || !zxingReaderRef.current) return;
+        zxingReaderRef.current
+            .decodeFromStream(stream, videoRef.current, (result, err, controls) => {
+                zxingControlsRef.current = controls;
+                if (result) handleDetected(result.getText());
+            })
+            .catch(() => {
+                setError('เกิดข้อผิดพลาดในการเปิดกล้อง');
+            });
+    }, [handleDetected]);
 
     // Opens the camera. Deliberately does NOT require a deviceId up front —
     // enumerateDevices() returns blank labels/deviceIds until permission has
@@ -126,7 +167,11 @@ export function BarcodeScanner({
                 } catch {
                     // Device listing is best-effort — scanning still works without a switcher
                 }
-                startDetectionLoop();
+                if (detectorRef.current) {
+                    startDetectionLoop();
+                } else {
+                    startZxingLoop(stream);
+                }
             })
             .catch(err => {
                 if (err.name === 'NotAllowedError') {
@@ -139,7 +184,7 @@ export function BarcodeScanner({
                     setError('เกิดข้อผิดพลาดในการเปิดกล้อง');
                 }
             });
-    }, [stopCamera, startDetectionLoop]);
+    }, [stopCamera, startDetectionLoop, startZxingLoop]);
 
     // Check API support when dialog opens
     useEffect(() => {
@@ -157,19 +202,26 @@ export function BarcodeScanner({
             return;
         }
 
-        const supported = typeof window !== 'undefined' && 'BarcodeDetector' in window
-            && typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia;
-        setApiSupported(supported);
+        // Camera access (getUserMedia) is the only hard requirement — the actual
+        // decoding falls back to ZXing when the native BarcodeDetector isn't there.
+        const cameraSupported = typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia;
+        setApiSupported(cameraSupported);
 
-        if (!supported) return;
+        if (!cameraSupported) return;
 
-        // Init detector with broad format support
-        const formats = [
-            'code_128', 'code_39', 'code_93',
-            'ean_13', 'ean_8', 'upc_a', 'upc_e',
-            'qr_code', 'data_matrix', 'pdf417',
-        ];
-        detectorRef.current = new window.BarcodeDetector!({ formats });
+        const hasNativeDetector = typeof window !== 'undefined' && 'BarcodeDetector' in window;
+        if (hasNativeDetector) {
+            const formats = [
+                'code_128', 'code_39', 'code_93',
+                'ean_13', 'ean_8', 'upc_a', 'upc_e',
+                'qr_code', 'data_matrix', 'pdf417',
+            ];
+            detectorRef.current = new window.BarcodeDetector!({ formats });
+            zxingReaderRef.current = null;
+        } else {
+            detectorRef.current = null;
+            zxingReaderRef.current = new BrowserMultiFormatReader(ZXING_HINTS);
+        }
     }, [open]);
 
     // Start the camera once support is confirmed
@@ -226,9 +278,7 @@ export function BarcodeScanner({
                             <p className="text-sm text-gray-600">{error}</p>
                         ) : (
                             <p className="text-sm text-gray-600">
-                                เบราว์เซอร์นี้ไม่รองรับการสแกนบาร์โค้ด
-                                <br />
-                                <span className="text-xs text-gray-400">รองรับ: Chrome, Edge, Samsung Internet</span>
+                                อุปกรณ์นี้ไม่มีกล้องหรือไม่รองรับการเข้าถึงกล้อง
                             </p>
                         )}
                         <Button size="sm" onClick={() => setManualMode(true)}>
