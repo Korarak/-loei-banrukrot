@@ -1,5 +1,6 @@
 // controllers/productController.js
 const mongoose = require('mongoose');
+const crypto = require('crypto');
 const { parse: parseCsv } = require('csv-parse/sync');
 const { changeStock } = require('../utils/stockUtils');
 const { applyDiscount } = require('../utils/pricing');
@@ -13,6 +14,9 @@ const normalizeBrand = (raw) => {
     if (!raw) return raw;
     return Array.from(new Set(String(raw).split(',').map(b => b.trim()).filter(Boolean))).join(', ');
 };
+// Single-variant products have nothing to distinguish the SKU by, so the admin
+// form lets that field sit blank — the server stands in with a stable placeholder.
+const generateSku = () => `AUTO-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
 const CSV_PRODUCT_EXPORT_LIMIT = 2000;
 const CSV_PRODUCT_IMPORT_LIMIT = 2000;
 
@@ -350,7 +354,7 @@ exports.createProduct = async (req, res, next) => {
         if (variants && variants.length > 0) {
             const variantDocs = variants.map(v => ({
                 productId: product._id,
-                sku: v.sku,
+                sku: v.sku && v.sku.trim() ? v.sku.trim() : generateSku(),
                 price: v.price,
                 stockAvailable: v.stock // map stock to stockAvailable
             }));
@@ -442,7 +446,7 @@ exports.updateProduct = async (req, res, next) => {
                 } else {
                     await ProductVariant.create({
                         productId: product._id,
-                        sku: v.sku,
+                        sku: v.sku && v.sku.trim() ? v.sku.trim() : generateSku(),
                         price: v.price,
                         stockAvailable: v.stock ?? 0,
                     });

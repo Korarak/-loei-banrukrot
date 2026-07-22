@@ -34,7 +34,7 @@ const SHIPPING_SIZE_PLACEHOLDER = "เลือกขนาดการจัด
 const DESCRIPTION_PLACEHOLDER = "ระบุรายละเอียดสินค้า...";
 
 const variantSchema = z.object({
-    sku: z.string().min(1, 'กรุณาระบุ SKU'),
+    sku: z.string(),
     price: z.number().min(0, 'ราคาต้องมากกว่าหรือเท่ากับ 0'),
     stock: z.number().int().min(0, 'สต๊อกต้องมากกว่าหรือเท่ากับ 0'),
 });
@@ -49,6 +49,20 @@ const productSchema = z.object({
     isOnline: z.boolean().optional(),
     isPos: z.boolean().optional(),
     variants: z.array(variantSchema).min(1, 'ต้องมีอย่างน้อยหนึ่งตัวเลือก'),
+}).superRefine((data, ctx) => {
+    // A single variant has no other option to distinguish it by, so its SKU is optional
+    // (the server auto-generates one). Once there's more than one, each needs a real SKU.
+    if (data.variants.length > 1) {
+        data.variants.forEach((v, index) => {
+            if (!v.sku.trim()) {
+                ctx.addIssue({
+                    code: z.ZodIssueCode.custom,
+                    message: 'กรุณาระบุ SKU',
+                    path: ['variants', index, 'sku'],
+                });
+            }
+        });
+    }
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -426,9 +440,16 @@ export default function ProductForm({ product, onSubmit, onCancel, isLoading }: 
                                         name={`variants.${index}.sku`}
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel className="text-xs text-gray-500 uppercase font-bold">SKU</FormLabel>
+                                                <FormLabel className="text-xs text-gray-500 uppercase font-bold">
+                                                    SKU{fields.length === 1 && ' (ไม่บังคับ)'}
+                                                </FormLabel>
                                                 <FormControl>
-                                                    <Input placeholder="SKU-001" autoComplete="off" {...field} className="h-10 bg-white" />
+                                                    <Input
+                                                        placeholder={fields.length === 1 ? 'เว้นว่างได้ ระบบจะสร้างให้อัตโนมัติ' : 'SKU-001'}
+                                                        autoComplete="off"
+                                                        {...field}
+                                                        className="h-10 bg-white"
+                                                    />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>

@@ -355,8 +355,10 @@ body { margin: 0; padding: 0; background: white; }
                                             {order.items.map((item, idx) => (
                                                 <div key={idx} className="flex justify-between text-sm text-gray-700">
                                                     <div className="flex-1 min-w-0 pr-2">
-                                                        <p className="truncate">{item.productName}</p>
-                                                        {item.sku && <p className="text-[10px] text-gray-400 font-mono truncate">SKU: {item.sku}</p>}
+                                                        <p className="truncate">
+                                                            {item.productName}
+                                                            {item.sku && <span className="text-gray-400 font-mono"> · {item.sku}</span>}
+                                                        </p>
                                                     </div>
                                                     <span className="text-gray-500 shrink-0 font-medium">× {item.quantity}</span>
                                                 </div>
@@ -500,8 +502,10 @@ body { margin: 0; padding: 0; background: white; }
                                             {order.items.map((item, idx) => (
                                                 <div key={idx} className="flex justify-between text-[10px] text-gray-700">
                                                     <div className="flex-1 min-w-0 pr-2">
-                                                        <p className="truncate">{item.productName}</p>
-                                                        {item.sku && <p className="text-[8px] text-gray-400 font-mono truncate">SKU: {item.sku}</p>}
+                                                        <p className="truncate">
+                                                            {item.productName}
+                                                            {item.sku && <span className="text-gray-400 font-mono"> · {item.sku}</span>}
+                                                        </p>
                                                     </div>
                                                     <span className="text-gray-500 shrink-0 font-medium">× {item.quantity}</span>
                                                 </div>
@@ -631,8 +635,10 @@ body { margin: 0; padding: 0; background: white; }
                                             {order.items.map((item, idx) => (
                                                 <div key={idx} className="flex justify-between text-[10px] text-gray-700">
                                                     <div className="flex-1 min-w-0 pr-2">
-                                                        <p className="truncate">{item.productName}</p>
-                                                        {item.sku && <p className="text-[8px] text-gray-400 font-mono truncate">SKU: {item.sku}</p>}
+                                                        <p className="truncate">
+                                                            {item.productName}
+                                                            {item.sku && <span className="text-gray-400 font-mono"> · {item.sku}</span>}
+                                                        </p>
                                                     </div>
                                                     <span className="text-gray-500 shrink-0 font-medium">× {item.quantity}</span>
                                                 </div>
@@ -779,8 +785,10 @@ body { margin: 0; padding: 0; background: white; }
                                             {order.items.map((item, idx) => (
                                                 <div key={idx} className="flex justify-between text-xs text-gray-700">
                                                     <div className="flex-1 min-w-0 pr-3">
-                                                        <p className="truncate">{item.productName}</p>
-                                                        {item.sku && <p className="text-[10px] text-gray-400 font-mono truncate">SKU: {item.sku}</p>}
+                                                        <p className="truncate">
+                                                            {item.productName}
+                                                            {item.sku && <span className="text-gray-400 font-mono"> · {item.sku}</span>}
+                                                        </p>
                                                     </div>
                                                     <span className="text-gray-500 shrink-0 font-medium">× {item.quantity}</span>
                                                 </div>
