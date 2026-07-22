@@ -1,17 +1,19 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { 
-    Database, 
-    Download, 
-    RefreshCcw, 
-    AlertTriangle, 
-    Clock, 
-    HardDrive, 
+import {
+    Database,
+    Download,
+    RefreshCcw,
+    AlertTriangle,
+    Clock,
+    HardDrive,
     ChevronRight,
     Search,
     ShieldAlert,
-    Terminal
+    Terminal,
+    FolderArchive,
+    Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -45,9 +47,23 @@ function formatSize(bytes: number): string {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 }
 
+async function downloadBlob(url: string, filename: string) {
+    const response = await api.get(url, { responseType: 'blob' });
+    const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = blobUrl;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode?.removeChild(link);
+    window.URL.revokeObjectURL(blobUrl);
+}
+
 export default function AdminBackupPage() {
     const queryClient = useQueryClient();
     const [searchTerm, setSearchTerm] = useState('');
+    const [downloadingFile, setDownloadingFile] = useState<string | null>(null);
+    const [downloadingUploads, setDownloadingUploads] = useState(false);
 
     // Fetch backups
     const { data: backups, isLoading, refetch } = useQuery({
@@ -83,6 +99,33 @@ export default function AdminBackupPage() {
         [backups, searchTerm]
     );
 
+    const handleDownloadBackup = async (filename: string) => {
+        setDownloadingFile(filename);
+        try {
+            await downloadBlob(`/settings/backups/${encodeURIComponent(filename)}/download`, filename);
+        } catch (error: any) {
+            toast.error('ดาวน์โหลดไฟล์สำรองไม่สำเร็จ', {
+                description: error.response?.data?.message || 'เกิดข้อผิดพลาดในการดาวน์โหลด'
+            });
+        } finally {
+            setDownloadingFile(null);
+        }
+    };
+
+    const handleDownloadUploads = async () => {
+        setDownloadingUploads(true);
+        try {
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            await downloadBlob('/settings/uploads/download', `uploads_${timestamp}.zip`);
+        } catch (error: any) {
+            toast.error('ดาวน์โหลดไฟล์รูปภาพไม่สำเร็จ', {
+                description: error.response?.data?.message || 'เกิดข้อผิดพลาดในการดาวน์โหลด'
+            });
+        } finally {
+            setDownloadingUploads(false);
+        }
+    };
+
     return (
         <div className="p-6 space-y-8">
             {/* Header */}
@@ -94,18 +137,33 @@ export default function AdminBackupPage() {
                     </h1>
                     <p className="text-gray-500 font-medium">จัดการไฟล์สำรองฐานข้อมูลและแผนการกู้คืนระบบ</p>
                 </div>
-                <Button 
-                    onClick={() => runBackupMutation.mutate()}
-                    disabled={runBackupMutation.isPending}
-                    className="bg-primary hover:bg-primary/90 text-white rounded-xl px-6 h-12 font-bold shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
-                >
-                    {runBackupMutation.isPending ? (
-                        <RefreshCcw className="mr-2 h-5 w-5 animate-spin" />
-                    ) : (
-                        <RefreshCcw className="mr-2 h-5 w-5" />
-                    )}
-                    สำรองข้อมูลเดี๋ยวนี้ (Backup Now)
-                </Button>
+                <div className="flex flex-wrap items-center gap-3">
+                    <Button
+                        onClick={handleDownloadUploads}
+                        disabled={downloadingUploads}
+                        variant="outline"
+                        className="rounded-xl px-6 h-12 font-bold border-gray-200 transition-all hover:scale-105 active:scale-95"
+                    >
+                        {downloadingUploads ? (
+                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        ) : (
+                            <FolderArchive className="mr-2 h-5 w-5" />
+                        )}
+                        ดาวน์โหลดไฟล์อัปโหลด (ZIP)
+                    </Button>
+                    <Button
+                        onClick={() => runBackupMutation.mutate()}
+                        disabled={runBackupMutation.isPending}
+                        className="bg-primary hover:bg-primary/90 text-white rounded-xl px-6 h-12 font-bold shadow-lg shadow-primary/20 transition-all hover:scale-105 active:scale-95"
+                    >
+                        {runBackupMutation.isPending ? (
+                            <RefreshCcw className="mr-2 h-5 w-5 animate-spin" />
+                        ) : (
+                            <RefreshCcw className="mr-2 h-5 w-5" />
+                        )}
+                        สำรองข้อมูลเดี๋ยวนี้ (Backup Now)
+                    </Button>
+                </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -140,7 +198,7 @@ export default function AdminBackupPage() {
                                             <TableHead className="font-bold text-gray-900 pl-6">ชื่อไฟล์</TableHead>
                                             <TableHead className="font-bold text-gray-900">วันที่สร้าง</TableHead>
                                             <TableHead className="font-bold text-gray-900">ขนาด</TableHead>
-                                            <TableHead className="text-right pr-6">สถานะ</TableHead>
+                                            <TableHead className="text-right pr-6">ดำเนินการ</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -166,7 +224,23 @@ export default function AdminBackupPage() {
                                                     </TableCell>
                                                     <TableCell className="text-gray-500 font-medium">{formatSize(backup.size)}</TableCell>
                                                     <TableCell className="text-right pr-6">
-                                                        <Badge variant="outline" className="bg-emerald-50 text-emerald-600 border-emerald-100 rounded-lg">สมบูรณ์แล้ว</Badge>
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            <Badge variant="outline" className="bg-emerald-50 text-emerald-600 border-emerald-100 rounded-lg">สมบูรณ์แล้ว</Badge>
+                                                            <Button
+                                                                size="icon"
+                                                                variant="ghost"
+                                                                className="h-8 w-8 rounded-lg text-gray-500 hover:text-primary hover:bg-primary/10"
+                                                                disabled={downloadingFile === backup.filename}
+                                                                onClick={() => handleDownloadBackup(backup.filename)}
+                                                                title="ดาวน์โหลดไฟล์สำรอง"
+                                                            >
+                                                                {downloadingFile === backup.filename ? (
+                                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                                ) : (
+                                                                    <Download className="h-4 w-4" />
+                                                                )}
+                                                            </Button>
+                                                        </div>
                                                     </TableCell>
                                                 </motion.tr>
                                             ))}
