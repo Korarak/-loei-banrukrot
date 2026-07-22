@@ -323,8 +323,9 @@ export default function CustomerLayout({
                 </div>
             </nav >
 
-            {/* Global pending-slip banner — sits below sticky mobile nav; on desktop offset by fixed nav height */}
-            <div className="md:pt-20">
+            {/* Global pending-slip banner — sits below sticky mobile nav; on desktop offset by
+                fixed nav height (3px progress bar + py-4 + h-16 when unscrolled ≈ 100px) */}
+            <div className="md:pt-[100px]">
                 <AnimatePresence>
                     {mounted && storeClosed && (
                         <motion.div
