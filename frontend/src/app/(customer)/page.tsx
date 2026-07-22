@@ -173,7 +173,7 @@ export default function Home() {
                 >
                     {[
                         { icon: ShieldCheck, title: 'สินค้าแท้ 100% - OEM เกรดพรีเมี่ยม', desc: '' },
-                        { icon: Truck, title: 'ส่งไวทั่วไทย', desc: '' },
+                        { icon: Truck, title: 'ส่งไวทั่วไทย', desc: 'รับสินค้าใน 1-3 วันหลังจัดส่ง' },
                         { icon: Wrench, title: 'ปรึกษาช่างโอ๊ต', desc: 'ผู้เชี่ยวชาญ Vespa ตัวจริง' },
                         { icon: QrCode, title: 'จ่ายสะดวก ปลอดภัย', desc: 'ชำระผ่าน QR PromptPay' },
                     ].map((item, i) => (
