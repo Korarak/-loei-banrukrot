@@ -465,8 +465,7 @@ export default function CartPage() {
                                                 <div className="flex items-center space-x-3">
                                                     <RadioGroupItem value={method._id} id={method._id} />
                                                     <Label htmlFor={method._id} className="cursor-pointer">
-                                                        <span className="font-bold text-gray-900 block">{method.name}</span>
-                                                        <span className="block text-[10px] text-gray-500 font-bold uppercase tracking-wider">{method.description || 'จัดส่งมาตรฐาน'}</span>
+                                                        <span className="font-bold text-gray-900 block">จัดส่งมาตรฐาน</span>
                                                     </Label>
                                                 </div>
                                                 <span className="font-black text-gray-900">฿{method.price.toLocaleString()}</span>

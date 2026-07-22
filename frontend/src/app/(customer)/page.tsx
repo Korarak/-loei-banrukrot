@@ -124,8 +124,8 @@ export default function Home() {
                         </motion.h1>
 
                         <motion.p variants={fadeInUp} className="text-base md:text-lg mb-8 text-gray-300 font-medium leading-relaxed">
-                            {siteConfig.brand.name} — ร้านอะไหล่ Vespa จังหวัดเลย
-                            โดยช่างโอ๊ต (Oat Engineering) ดูแลรถให้คนรักเวสป้าเมืองเลย
+                            {siteConfig.brand.name} — อะไหล่รถมอเตอร์ไซต์ Vespa, Lambretta, กรองน้ำมันเครื่อง, ชุดของเหลว
+                            โดยช่างโอ๊ต (Oat Engineering)
                         </motion.p>
 
                         {/* Search bar */}
@@ -172,8 +172,8 @@ export default function Home() {
                     variants={staggerContainer}
                 >
                     {[
-                        { icon: ShieldCheck, title: 'สินค้าแท้ 100%', desc: 'คัดคุณภาพทุกชิ้นก่อนส่ง' },
-                        { icon: Truck, title: 'ส่งไวทั่วไทย', desc: 'แพ็คแน่น ส่งใน 1-2 วันทำการ' },
+                        { icon: ShieldCheck, title: 'สินค้าแท้ 100% - OEM เกรดพรีเมี่ยม', desc: '' },
+                        { icon: Truck, title: 'ส่งไวทั่วไทย', desc: '' },
                         { icon: Wrench, title: 'ปรึกษาช่างโอ๊ต', desc: 'ผู้เชี่ยวชาญ Vespa ตัวจริง' },
                         { icon: QrCode, title: 'จ่ายสะดวก ปลอดภัย', desc: 'ชำระผ่าน QR PromptPay' },
                     ].map((item, i) => (
