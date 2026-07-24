@@ -15,6 +15,7 @@ module.exports = {
     Payment: require('./Payment'),
     Store: require('./Store'),
     ShippingMethod: require('./ShippingMethod'),
+    RemoteArea: require('./RemoteArea'),
     StockMovement: require('./StockMovement'),
     Counter: require('./Counter'),
     Conversation: require('./Conversation'),

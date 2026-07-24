@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { THAI_PROVINCES } from '@/data/thaiProvinces';
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { MapPin, Plus, Trash2, Check, Pencil, Camera, User, Home, Star, Package, Heart, ShoppingBag, Settings, AlertCircle } from 'lucide-react';
@@ -617,13 +619,19 @@ export default function ProfilePage() {
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="province">จังหวัด</Label>
-                                        <Input
-                                            id="province"
+                                        <Select
                                             value={newAddress.province}
-                                            onChange={e => setNewAddress({ ...newAddress, province: e.target.value })}
-                                            required
-                                            className="bg-white rounded-none"
-                                        />
+                                            onValueChange={value => setNewAddress({ ...newAddress, province: value })}
+                                        >
+                                            <SelectTrigger id="province" className="bg-white rounded-none w-full">
+                                                <SelectValue placeholder="เลือกจังหวัด" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {THAI_PROVINCES.map(province => (
+                                                    <SelectItem key={province} value={province}>{province}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="zipCode">รหัสไปรษณีย์</Label>
@@ -806,13 +814,19 @@ export default function ProfilePage() {
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="edit-province">จังหวัด</Label>
-                                        <Input
-                                            id="edit-province"
+                                        <Select
                                             value={editingAddress.province}
-                                            onChange={e => setEditingAddress({ ...editingAddress, province: e.target.value })}
-                                            required
-                                            className="bg-white rounded-none"
-                                        />
+                                            onValueChange={value => setEditingAddress({ ...editingAddress, province: value })}
+                                        >
+                                            <SelectTrigger id="edit-province" className="bg-white rounded-none w-full">
+                                                <SelectValue placeholder="เลือกจังหวัด" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {THAI_PROVINCES.map(province => (
+                                                    <SelectItem key={province} value={province}>{province}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="edit-zipCode">รหัสไปรษณีย์</Label>

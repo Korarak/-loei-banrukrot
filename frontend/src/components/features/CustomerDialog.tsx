@@ -28,6 +28,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { THAI_PROVINCES } from '@/data/thaiProvinces';
 import { Loader2, User, Mail, Phone, Lock, MapPin, Plus, Trash2, Home } from 'lucide-react';
 import {
     useCreateCustomer,
@@ -532,9 +534,18 @@ export default function CustomerDialog({ open, onOpenChange, customer }: Custome
                                                 render={({ field }) => (
                                                     <FormItem>
                                                         <FormLabel>จังหวัด</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder={PROVINCE_PLACEHOLDER} {...field} className="rounded-xl" />
-                                                        </FormControl>
+                                                        <Select value={field.value} onValueChange={field.onChange}>
+                                                            <FormControl>
+                                                                <SelectTrigger className="rounded-xl w-full">
+                                                                    <SelectValue placeholder={PROVINCE_PLACEHOLDER} />
+                                                                </SelectTrigger>
+                                                            </FormControl>
+                                                            <SelectContent>
+                                                                {THAI_PROVINCES.map(province => (
+                                                                    <SelectItem key={province} value={province}>{province}</SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
                                                         <FormMessage />
                                                     </FormItem>
                                                 )}

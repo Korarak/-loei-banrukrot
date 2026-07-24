@@ -22,6 +22,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useMemo } from 'react';
 import { useShippingMethods } from '@/hooks/useShippingMethods';
+import { useRemoteAreas } from '@/hooks/useRemoteAreas';
 import { useCustomerAddresses } from '@/hooks/useCustomers';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -39,6 +40,7 @@ export default function CartPage() {
     const { data: cart, isLoading } = useCart();
     const { data: shippingMethods, isLoading: isLoadingShipping } = useShippingMethods();
     const { data: addresses, isLoading: isLoadingAddresses } = useCustomerAddresses(customer?._id);
+    const { data: remoteAreas } = useRemoteAreas();
     const updateCartItem = useUpdateCartItem();
     const removeCartItem = useRemoveCartItem();
     const clearCart = useClearCart();
@@ -125,7 +127,11 @@ export default function CartPage() {
     }
 
     const selectedMethod = shippingMethods?.find(m => m._id === selectedShippingId);
-    const shippingCost = selectedMethod?.price || 0;
+    const selectedAddress = addresses?.find(a => a._id === selectedAddressId);
+    const remoteAreaSurcharge = remoteAreas?.find(
+        r => r.province.trim().toLowerCase() === selectedAddress?.province?.trim().toLowerCase()
+    )?.extraCost || 0;
+    const shippingCost = (selectedMethod?.price || 0) + (selectedMethod ? remoteAreaSurcharge : 0);
     const totalAmount = cartSubtotal + shippingCost;
 
     const handleUpdateQuantity = (itemId: string, currentQuantity: number, change: number, maxStock: number) => {
@@ -409,9 +415,15 @@ export default function CartPage() {
                             <div className="flex justify-between items-center text-base">
                                 <span className="text-gray-600 font-medium">ค่าจัดส่ง</span>
                                 <span className="font-bold text-gray-900">
-                                    {!selectedMethod ? '—' : shippingCost > 0 ? `฿${shippingCost.toLocaleString()}` : 'ฟรี'}
+                                    {!selectedMethod ? '—' : selectedMethod.price > 0 ? `฿${selectedMethod.price.toLocaleString()}` : 'ฟรี'}
                                 </span>
                             </div>
+                            {selectedMethod && remoteAreaSurcharge > 0 && (
+                                <div className="flex justify-between items-center text-base">
+                                    <span className="text-gray-600 font-medium">ค่าส่งพื้นที่ห่างไกล</span>
+                                    <span className="font-bold text-gray-900">+฿{remoteAreaSurcharge.toLocaleString()}</span>
+                                </div>
+                            )}
 
                             {/* Address Selection */}
                             <div className="pt-6 border-t border-border">

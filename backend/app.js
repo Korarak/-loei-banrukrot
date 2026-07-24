@@ -98,6 +98,7 @@ app.use('/api/orders', require('./routes/orderRoutes'));
 app.use('/api/pos', require('./routes/posRoutes'));
 app.use('/api/upload', require('./routes/uploadRoutes'));
 app.use('/api/shipping-methods', require('./routes/shippingMethodRoutes'));
+app.use('/api/remote-areas', require('./routes/remoteAreaRoutes'));
 app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 app.use('/api/reports', require('./routes/reportRoutes'));
 app.use('/api/inventory', require('./routes/inventoryRoutes'));

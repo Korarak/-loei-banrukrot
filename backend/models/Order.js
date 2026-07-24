@@ -57,7 +57,8 @@ const orderSchema = new mongoose.Schema({
     shippingInfo: {
         provider: { type: String, default: '' },
         trackingNumber: { type: String, default: '' },
-        cost: { type: Number, default: 0 }
+        cost: { type: Number, default: 0 },
+        remoteAreaSurcharge: { type: Number, default: 0 }
     }
 });
 

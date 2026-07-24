@@ -1,5 +1,5 @@
 // controllers/orderController.js
-const { Order, OrderDetail, Payment, ProductVariant, Cart, CartItem, CustomerAddress, ShippingMethod, ProductImage } = require('../models');
+const { Order, OrderDetail, Payment, ProductVariant, Cart, CartItem, CustomerAddress, ShippingMethod, RemoteArea, ProductImage } = require('../models');
 const Setting = require('../models/Setting');
 
 // @desc    Create order from cart (E-commerce)
@@ -107,8 +107,16 @@ exports.createOrderFromCart = async (req, res, next) => {
             });
         }
 
-        // Add shipping cost to total
-        const shippingCost = shippingMethod.price;
+        // ตรวจสอบพื้นที่ห่างไกล (จับคู่จังหวัดแบบ case-insensitive, escape เพื่อกัน regex injection)
+        const escapedProvince = address.province.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const remoteArea = await RemoteArea.findOne({
+            isActive: true,
+            province: new RegExp(`^${escapedProvince}$`, 'i')
+        });
+        const remoteAreaSurcharge = remoteArea ? remoteArea.extraCost : 0;
+
+        // Add shipping cost (+ remote area surcharge) to total
+        const shippingCost = shippingMethod.price + remoteAreaSurcharge;
         totalAmount += shippingCost;
 
         // Generate Sale Reference
@@ -126,7 +134,8 @@ exports.createOrderFromCart = async (req, res, next) => {
             orderDate: new Date(),
             shippingInfo: {
                 provider: shippingMethod.name,
-                cost: shippingCost
+                cost: shippingCost,
+                remoteAreaSurcharge
             }
         });
 
