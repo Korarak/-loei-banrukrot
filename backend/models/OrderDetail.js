@@ -12,6 +12,14 @@ const orderDetailSchema = new mongoose.Schema({
         ref: 'ProductVariant',
         required: true
     },
+    // Snapshot of product/variant identity at time of sale — kept even if the
+    // Product/ProductVariant is later deleted, so receipts/tax records never change.
+    productNameSnapshot: {
+        type: String
+    },
+    skuSnapshot: {
+        type: String
+    },
     quantity: {
         type: Number,
         required: true,

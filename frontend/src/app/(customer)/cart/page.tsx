@@ -128,9 +128,14 @@ export default function CartPage() {
 
     const selectedMethod = shippingMethods?.find(m => m._id === selectedShippingId);
     const selectedAddress = addresses?.find(a => a._id === selectedAddressId);
-    const remoteAreaSurcharge = remoteAreas?.find(
+    // กฎเฉพาะอำเภอมีผลก่อนกฎทั้งจังหวัด (district ว่าง = ใช้กับทั้งจังหวัด)
+    const provinceMatches = remoteAreas?.filter(
         r => r.province.trim().toLowerCase() === selectedAddress?.province?.trim().toLowerCase()
-    )?.extraCost || 0;
+    ) || [];
+    const remoteAreaMatch = provinceMatches.find(
+        r => r.district && r.district.trim().toLowerCase() === selectedAddress?.district?.trim().toLowerCase()
+    ) || provinceMatches.find(r => !r.district);
+    const remoteAreaSurcharge = remoteAreaMatch?.extraCost || 0;
     const shippingCost = (selectedMethod?.price || 0) + (selectedMethod ? remoteAreaSurcharge : 0);
     const totalAmount = cartSubtotal + shippingCost;
 

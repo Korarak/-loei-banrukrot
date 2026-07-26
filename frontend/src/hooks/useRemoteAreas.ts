@@ -4,6 +4,7 @@ import api from '@/lib/api';
 export interface RemoteArea {
     _id: string;
     province: string;
+    district: string | null;
     extraCost: number;
     isActive: boolean;
     createdAt: string;

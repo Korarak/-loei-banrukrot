@@ -44,7 +44,7 @@ exports.createOrderFromCart = async (req, res, next) => {
         }
 
         const allCartItems = await CartItem.find({ cartId: cart._id })
-            .populate({ path: 'variantId', populate: { path: 'productId', select: 'discountPercent' } });
+            .populate({ path: 'variantId', populate: { path: 'productId', select: 'discountPercent productName' } });
 
         // Filter out ghost items (variant was deleted)
         const ghostItems = allCartItems.filter(item => !item.variantId);
@@ -108,11 +108,15 @@ exports.createOrderFromCart = async (req, res, next) => {
         }
 
         // ตรวจสอบพื้นที่ห่างไกล (จับคู่จังหวัดแบบ case-insensitive, escape เพื่อกัน regex injection)
+        // ถ้ามีทั้งกฎเฉพาะอำเภอและกฎทั้งจังหวัด ให้กฎเฉพาะอำเภอมีผลก่อน
         const escapedProvince = address.province.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const remoteArea = await RemoteArea.findOne({
+        const provinceMatches = await RemoteArea.find({
             isActive: true,
             province: new RegExp(`^${escapedProvince}$`, 'i')
         });
+        const addressDistrict = address.district?.trim().toLowerCase();
+        const remoteArea = provinceMatches.find(r => r.district && r.district.trim().toLowerCase() === addressDistrict)
+            || provinceMatches.find(r => !r.district);
         const remoteAreaSurcharge = remoteArea ? remoteArea.extraCost : 0;
 
         // Add shipping cost (+ remote area surcharge) to total
@@ -146,6 +150,8 @@ exports.createOrderFromCart = async (req, res, next) => {
                 return {
                     orderId: order._id,
                     variantId: item.variantId._id,
+                    productNameSnapshot: item.variantId.productId?.productName,
+                    skuSnapshot: item.variantId.sku,
                     quantity: item.quantity,
                     pricePerUnit,
                     subtotal: item.quantity * pricePerUnit
@@ -234,8 +240,8 @@ exports.getCustomerOrders = async (req, res, next) => {
                 const imgs = imagesByProduct.get(product?._id?.toString()) || [];
                 const primaryImg = imgs.find(img => img.isPrimary) || imgs[0];
                 return {
-                    productName: product?.productName || 'Unknown Product',
-                    sku: item.variantId?.sku,
+                    productName: product?.productName || item.productNameSnapshot || 'Unknown Product',
+                    sku: item.variantId?.sku || item.skuSnapshot,
                     quantity: item.quantity,
                     price: item.pricePerUnit,
                     shippingSize: product?.shippingSize || 'small',
@@ -314,8 +320,8 @@ exports.getOrderById = async (req, res, next) => {
             const product = item.variantId?.productId;
             const imgs = imagesByProduct.get(product?._id?.toString());
             return {
-                productName: product?.productName || 'Unknown Product',
-                sku: item.variantId?.sku,
+                productName: product?.productName || item.productNameSnapshot || 'Unknown Product',
+                sku: item.variantId?.sku || item.skuSnapshot,
                 quantity: item.quantity,
                 price: item.pricePerUnit,
                 shippingSize: product?.shippingSize || 'small',
@@ -504,8 +510,8 @@ exports.getAllOrders = async (req, res, next) => {
             const payments = paymentsByOrder.get(order._id.toString()) || [];
             const payment = payments[0];
             const formattedItems = items.map(item => ({
-                productName: item.variantId?.productId?.productName || 'Unknown Product',
-                sku: item.variantId?.sku,
+                productName: item.variantId?.productId?.productName || item.productNameSnapshot || 'Unknown Product',
+                sku: item.variantId?.sku || item.skuSnapshot,
                 quantity: item.quantity,
                 price: item.pricePerUnit
             }));

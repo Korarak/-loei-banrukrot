@@ -77,6 +77,8 @@ exports.createPOSSale = async (req, res, next) => {
             variantDetails.map(item => ({
                 orderId: order._id,
                 variantId: item.variant._id,
+                productNameSnapshot: item.variant.productId?.productName,
+                skuSnapshot: item.variant.sku,
                 quantity: item.quantity,
                 pricePerUnit: item.effectivePrice,
                 subtotal: item.subtotal
@@ -169,8 +171,8 @@ exports.getPOSSales = async (req, res, next) => {
                 createdAt: order.orderDate,
                 createdBy: order.cashierUserId,
                 items: details.map(d => ({
-                    product: { _id: d.variantId?.productId?._id, productName: d.variantId?.productId?.productName || 'Unknown' },
-                    variant: { _id: d.variantId?._id, sku: d.variantId?.sku, price: d.pricePerUnit },
+                    product: { _id: d.variantId?.productId?._id, productName: d.variantId?.productId?.productName || d.productNameSnapshot || 'Unknown' },
+                    variant: { _id: d.variantId?._id, sku: d.variantId?.sku || d.skuSnapshot, price: d.pricePerUnit },
                     quantity: d.quantity,
                     price: d.pricePerUnit
                 })),
@@ -232,8 +234,8 @@ exports.getSaleReceipt = async (req, res, next) => {
                 createdBy: order.cashierUserId,
                 paymentMethod: payment?.paymentMethod || null,
                 items: details.map(d => ({
-                    product: { _id: d.variantId?.productId?._id, productName: d.variantId?.productId?.productName || 'Unknown' },
-                    variant: { _id: d.variantId?._id, sku: d.variantId?.sku, price: d.pricePerUnit },
+                    product: { _id: d.variantId?.productId?._id, productName: d.variantId?.productId?.productName || d.productNameSnapshot || 'Unknown' },
+                    variant: { _id: d.variantId?._id, sku: d.variantId?.sku || d.skuSnapshot, price: d.pricePerUnit },
                     quantity: d.quantity,
                     price: d.pricePerUnit
                 })),

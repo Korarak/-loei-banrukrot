@@ -1,4 +1,11 @@
 const RemoteArea = require('../models/RemoteArea');
+const { THAI_DISTRICTS_BY_PROVINCE } = require('../utils/thaiDistricts');
+
+// อำเภอ (ถ้าระบุ) ต้องมีอยู่จริงในจังหวัดนั้น
+const isValidDistrict = (province, district) => {
+    if (!district) return true;
+    return THAI_DISTRICTS_BY_PROVINCE[province]?.includes(district) ?? false;
+};
 
 // @desc    Get all active remote areas
 // @route   GET /api/remote-areas
@@ -29,11 +36,18 @@ exports.getAdminRemoteAreas = async (req, res, next) => {
 // @access  Private/Admin
 exports.createRemoteArea = async (req, res, next) => {
     try {
-        const area = await RemoteArea.create(req.body);
+        const district = req.body.district?.trim() || null;
+        if (!isValidDistrict(req.body.province, district)) {
+            return res.status(400).json({ success: false, message: `"${district}" ไม่ใช่อำเภอในจังหวัด "${req.body.province}"` });
+        }
+        const area = await RemoteArea.create({ ...req.body, district });
         res.status(201).json({ success: true, data: area });
     } catch (err) {
         if (err.code === 11000) {
-            return res.status(400).json({ success: false, message: 'จังหวัดนี้ถูกกำหนดเป็นพื้นที่ห่างไกลไว้แล้ว' });
+            const message = req.body.district
+                ? `อำเภอ "${req.body.district}" ในจังหวัดนี้ถูกกำหนดเป็นพื้นที่ห่างไกลไว้แล้ว`
+                : 'จังหวัดนี้ถูกกำหนดเป็นพื้นที่ห่างไกลไว้แล้ว (แบบไม่ระบุอำเภอ)';
+            return res.status(400).json({ success: false, message });
         }
         next(err);
     }
@@ -44,10 +58,22 @@ exports.createRemoteArea = async (req, res, next) => {
 // @access  Private/Admin
 exports.updateRemoteArea = async (req, res, next) => {
     try {
-        const area = await RemoteArea.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-            runValidators: true
-        });
+        const existing = await RemoteArea.findById(req.params.id);
+        if (!existing) {
+            return res.status(404).json({ success: false, message: 'Remote area not found' });
+        }
+
+        const province = req.body.province ?? existing.province;
+        const district = req.body.district?.trim() || null;
+        if (!isValidDistrict(province, district)) {
+            return res.status(400).json({ success: false, message: `"${district}" ไม่ใช่อำเภอในจังหวัด "${province}"` });
+        }
+
+        const area = await RemoteArea.findByIdAndUpdate(
+            req.params.id,
+            { ...req.body, district },
+            { new: true, runValidators: true }
+        );
 
         if (!area) {
             return res.status(404).json({ success: false, message: 'Remote area not found' });
@@ -56,7 +82,10 @@ exports.updateRemoteArea = async (req, res, next) => {
         res.status(200).json({ success: true, data: area });
     } catch (err) {
         if (err.code === 11000) {
-            return res.status(400).json({ success: false, message: 'จังหวัดนี้ถูกกำหนดเป็นพื้นที่ห่างไกลไว้แล้ว' });
+            const message = req.body.district
+                ? `อำเภอ "${req.body.district}" ในจังหวัดนี้ถูกกำหนดเป็นพื้นที่ห่างไกลไว้แล้ว`
+                : 'จังหวัดนี้ถูกกำหนดเป็นพื้นที่ห่างไกลไว้แล้ว (แบบไม่ระบุอำเภอ)';
+            return res.status(400).json({ success: false, message });
         }
         next(err);
     }

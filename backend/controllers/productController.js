@@ -481,7 +481,7 @@ exports.updateProduct = async (req, res, next) => {
 // @access  Private (owner only)
 exports.deleteProduct = async (req, res, next) => {
     try {
-        const product = await Product.findByIdAndDelete(req.params.id);
+        const product = await Product.findById(req.params.id);
 
         if (!product) {
             return res.status(404).json({
@@ -489,6 +489,18 @@ exports.deleteProduct = async (req, res, next) => {
                 message: 'Product not found'
             });
         }
+
+        // กันลบสินค้าที่เคยมีประวัติการสั่งซื้อ — ป้องกันไม่ให้ variantId ในใบเสร็จ/รายงานเก่ากลายเป็นข้อมูลกำพร้า
+        const variantIds = await ProductVariant.distinct('_id', { productId: product._id });
+        const hasOrderHistory = await OrderDetail.exists({ variantId: { $in: variantIds } });
+        if (hasOrderHistory) {
+            return res.status(400).json({
+                success: false,
+                message: 'ไม่สามารถลบสินค้านี้ได้ เนื่องจากมีประวัติการสั่งซื้อ'
+            });
+        }
+
+        await Product.findByIdAndDelete(req.params.id);
 
         // ลบ variants และ images ที่เกี่ยวข้อง
         await ProductVariant.deleteMany({ productId: req.params.id });

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useAdminShippingMethods, useCreateShippingMethod, useUpdateShippingMethod, useDeleteShippingMethod, type ShippingMethod } from '@/hooks/useShippingMethods';
 import { useAdminRemoteAreas, useCreateRemoteArea, useUpdateRemoteArea, useDeleteRemoteArea, type RemoteArea } from '@/hooks/useRemoteAreas';
 import { THAI_PROVINCES } from '@/data/thaiProvinces';
+import { THAI_DISTRICTS_BY_PROVINCE } from '@/data/thaiDistricts';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
@@ -365,12 +366,13 @@ function RemoteAreasTab() {
 
     const [formData, setFormData] = useState({
         province: '',
+        district: 'all',
         extraCost: '',
         isActive: true
     });
 
     const resetForm = () => {
-        setFormData({ province: '', extraCost: '', isActive: true });
+        setFormData({ province: '', district: 'all', extraCost: '', isActive: true });
         setEditingArea(null);
     };
 
@@ -378,11 +380,14 @@ function RemoteAreasTab() {
         setEditingArea(area);
         setFormData({
             province: area.province,
+            district: area.district || 'all',
             extraCost: area.extraCost.toString(),
             isActive: area.isActive
         });
         setIsDialogOpen(true);
     };
+
+    const districtOptions = THAI_DISTRICTS_BY_PROVINCE[formData.province] || [];
 
     const handleSubmit = async () => {
         if (!formData.province) {
@@ -392,6 +397,7 @@ function RemoteAreasTab() {
         try {
             const payload = {
                 province: formData.province,
+                district: formData.district === 'all' ? null : formData.district,
                 extraCost: parseFloat(formData.extraCost) || 0,
                 isActive: formData.isActive
             };
@@ -421,10 +427,6 @@ function RemoteAreasTab() {
             }
         }
     };
-
-    // จังหวัดที่ยังไม่ถูกกำหนดเป็นพื้นที่ห่างไกล (รวมจังหวัดของรายการที่กำลังแก้ไขด้วย)
-    const usedProvinces = new Set((areas ?? []).map(a => a.province).filter(p => p !== editingArea?.province));
-    const availableProvinces = THAI_PROVINCES.filter(p => !usedProvinces.has(p));
 
     if (isLoading) {
         return (
@@ -464,7 +466,10 @@ function RemoteAreasTab() {
                                         <div className="h-10 w-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
                                             <MapPin className="h-5 w-5" />
                                         </div>
-                                        <p className="font-bold text-gray-900 text-base">{area.province}</p>
+                                        <div>
+                                            <p className="font-bold text-gray-900 text-base">{area.province}</p>
+                                            <p className="text-xs text-gray-400">{area.district || 'ทั้งจังหวัด (ทุกอำเภอ)'}</p>
+                                        </div>
                                     </div>
                                 </TableCell>
                                 <TableCell className="py-6 font-bold text-gray-900">
@@ -524,14 +529,32 @@ function RemoteAreasTab() {
                             <Label>จังหวัด</Label>
                             <Select
                                 value={formData.province}
-                                onValueChange={(value) => setFormData({ ...formData, province: value })}
+                                onValueChange={(value) => setFormData({ ...formData, province: value, district: 'all' })}
                             >
                                 <SelectTrigger className="w-full">
                                     <SelectValue placeholder="เลือกจังหวัด" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {availableProvinces.map((province) => (
+                                    {THAI_PROVINCES.map((province) => (
                                         <SelectItem key={province} value={province}>{province}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>อำเภอ</Label>
+                            <Select
+                                value={formData.district}
+                                onValueChange={(value) => setFormData({ ...formData, district: value })}
+                                disabled={!formData.province}
+                            >
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="เลือกจังหวัดก่อน" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">ทั้งจังหวัด (ทุกอำเภอ)</SelectItem>
+                                    {districtOptions.map((district) => (
+                                        <SelectItem key={district} value={district}>{district}</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
