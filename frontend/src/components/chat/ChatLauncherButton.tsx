@@ -11,8 +11,9 @@ import ChatPanel from './ChatPanel';
 
 const POSITION_STORAGE_KEY = 'chat-launcher-position';
 const HINT_SEEN_STORAGE_KEY = 'chat-launcher-hint-seen';
+const NOTICED_STORAGE_KEY = 'chat-launcher-noticed';
 const BUTTON_SIZE = 56; // h-14 w-14
-const LONG_PRESS_MS = 350;
+const LONG_PRESS_MS = 150;
 const DRAG_THRESHOLD_PX = 6;
 const VIEWPORT_MARGIN = 8;
 
@@ -40,6 +41,10 @@ export default function ChatLauncherButton() {
     const [position, setPosition] = useState<Position | null>(null);
     const [dragging, setDragging] = useState(false);
     const [showHint, setShowHint] = useState(false);
+    // Persistent attention ring — keeps pulsing (unlike the one-time hint,
+    // which auto-dismisses after 6s) until the customer notices the button
+    // at all, even if that first tap just redirects them to login.
+    const [hasNoticed, setHasNoticed] = useState(false);
 
     const buttonRef = useRef<HTMLButtonElement>(null);
     const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -54,6 +59,12 @@ export default function ChatLauncherButton() {
         } catch {
             // malformed/old storage value — fall back to the default spot
         }
+        if (localStorage.getItem(NOTICED_STORAGE_KEY)) setHasNoticed(true);
+    }, []);
+
+    const markNoticed = useCallback(() => {
+        localStorage.setItem(NOTICED_STORAGE_KEY, '1');
+        setHasNoticed(true);
     }, []);
 
     // Re-clamp on resize/rotate so a previously-dragged button can't end up off-screen.
@@ -89,6 +100,7 @@ export default function ChatLauncherButton() {
             return;
         }
         dismissHint();
+        markNoticed();
         if (!isCustomerAuthenticated()) {
             toast.error('กรุณาเข้าสู่ระบบเพื่อแชทกับร้านค้า');
             router.push('/customer-login');
@@ -105,6 +117,7 @@ export default function ChatLauncherButton() {
         longPressTimer.current = setTimeout(() => {
             setDragging(true);
             setShowHint(false);
+            markNoticed();
             buttonRef.current?.setPointerCapture(e.pointerId);
         }, LONG_PRESS_MS);
     };
@@ -180,6 +193,9 @@ export default function ChatLauncherButton() {
                     dragging ? 'scale-110 shadow-xl' : 'hover:scale-105 active:scale-95'
                 )}
             >
+                {!hasNoticed && !open && (
+                    <span className="absolute inset-0 rounded-full bg-brand/60 animate-ping pointer-events-none" />
+                )}
                 <MessageCircle className="h-6 w-6" />
                 {unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-brand text-brand-foreground text-[10px] font-bold min-w-[1.25rem] h-5 px-1 rounded-full flex items-center justify-center border-2 border-white">
