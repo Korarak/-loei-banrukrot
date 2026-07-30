@@ -95,7 +95,14 @@ Two completely separate auth flows sharing the same JWT infrastructure:
 - `POST /api/auth/register` is **bootstrap-only** — it works while `User` is empty and makes that first account the `owner`; every later call returns 403 `REGISTRATION_CLOSED`. After that, staff accounts are created via `POST /api/users`. `GET /api/auth/registration-status` → `{ open: boolean }` lets the login/register pages hide the dead-end form.
 - `POST /api/auth/register-customer` is open to the public. Its Zod schema (`createCustomerSchema`) must stay in sync with the form in `(customer)/customer-register` — the Thai phone rule lives in `backend/models/validationSchemas.js` and `frontend/src/lib/phone.ts` and the two must match.
 - Auth error responses carry a machine-readable `code` (`EMAIL_EXISTS`, `ACCOUNT_USES_GOOGLE`, `REGISTRATION_CLOSED`) alongside `message`. The frontend branches on `code` — never on the message text.
-- Google-created customers have **no** `passwordHash` (`provider: 'google'`), so `login-customer` returns 400 `ACCOUNT_USES_GOOGLE` instead of attempting a bcrypt compare. There is no password-reset flow yet.
+- Google-created customers have **no** `passwordHash` (`provider: 'google'`), so `login-customer` returns 400 `ACCOUNT_USES_GOOGLE` instead of attempting a bcrypt compare.
+
+**Email (password reset + verification):**
+- `backend/utils/mailer.js` sends over plain SMTP (`SMTP_HOST/PORT/USER/PASS/FROM`), so it points at Brevo, Resend, SES or anything else without code changes. **Optional** — unset means those features no-op with a warning, same pattern as Google OAuth and web-push; the app still boots and registration still succeeds.
+- Reset: `POST /api/auth/forgot-password` (always 200 — never reveals whether an email exists, and stays silent for Google-only accounts) → `POST /api/auth/reset-password`. Tokens live 1h, are single-use, and only their SHA-256 is stored (`passwordResetTokenHash`, `select: false`).
+- Verification is **soft**: `emailVerified` gates nothing — no login, checkout or order path checks it. It only drives the dismissible banner in `(customer)/layout.tsx`. Registration fires the mail without awaiting it so SMTP latency never blocks signup. Google customers and anyone who completes a password reset are marked verified automatically.
+- `POST /api/auth/forgot-password` and `/resend-verification` use a separate stricter limiter (5/hour/IP) than the other auth routes — they cause outbound mail, so the abuse case is mailbombing and burning the free-tier quota, not credential stuffing.
+- Staff/owner accounts have **no** reset flow — a locked-out owner still needs manual DB intervention.
 
 JWT payload includes a `type` field (`'user'` or `'customer'`). The `authenticateToken` middleware uses this to populate either `req.user` (staff) or `req.customer`. Staff access control uses `requireRole('owner', 'staff', 'admin')`. Combined customer+staff access uses `checkCustomerAccess`.
 

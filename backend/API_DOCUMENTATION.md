@@ -12,6 +12,16 @@
 - `POST /api/auth/login-customer` - Login customer
 - `GET /api/auth/google` + `GET /api/auth/google/callback` - Google OAuth (customers only, 503 when unconfigured)
 
+### Password reset & email verification (customers)
+Requires SMTP env vars; without them these endpoints still respond but no mail goes out.
+
+- `POST /api/auth/forgot-password` `{ email }` — always 200 with the same body regardless of whether the account exists
+- `POST /api/auth/reset-password` `{ token, password }` — token valid 1 hour, single use
+- `POST /api/auth/verify-email` `{ token }` — token valid 24 hours, single use
+- `POST /api/auth/resend-verification` — requires a customer token
+
+`emailVerified` is returned by register/login/`/api/customer/me` and is advisory only — nothing in the app is gated on it.
+
 ### Auth error codes
 Failed auth responses include a stable `code` next to the human-readable `message`. Branch on `code`, not on message text.
 
@@ -20,6 +30,9 @@ Failed auth responses include a stable `code` next to the human-readable `messag
 | `REGISTRATION_CLOSED` | 403 | Staff bootstrap registration is no longer open |
 | `EMAIL_EXISTS` | 400 | Email already has a password account |
 | `ACCOUNT_USES_GOOGLE` | 400 | Account was created via Google and has no password — use Google sign-in |
+| `INVALID_RESET_TOKEN` | 400 | Password reset link expired or already used |
+| `INVALID_VERIFICATION_TOKEN` | 400 | Verification link expired or already used |
+| `MAIL_NOT_CONFIGURED` | 503 | SMTP env vars are not set on the server |
 
 ---
 

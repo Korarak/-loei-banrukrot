@@ -44,6 +44,7 @@ import {
 import { siteConfig } from '@/config/site';
 import { ChatSocketProvider } from '@/hooks/useChatSocket';
 import ChatLauncherButton from '@/components/chat/ChatLauncherButton';
+import EmailVerificationBanner from '@/components/layout/EmailVerificationBanner';
 
 
 export default function CustomerLayout({
@@ -342,6 +343,7 @@ export default function CustomerLayout({
                         </motion.div>
                     )}
                 </AnimatePresence>
+                {mounted && isHydrated && <EmailVerificationBanner />}
                 <AnimatePresence>
                     {mounted && isHydrated && customer && pendingSlipCount > 0 && (
                         <motion.div

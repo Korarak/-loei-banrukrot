@@ -112,6 +112,11 @@ export default function CustomerLoginPage() {
                                     </FormItem>
                                 )}
                             />
+                            <div className="text-right -mt-1">
+                                <Link href="/forgot-password" className="text-xs font-bold text-gray-500 hover:text-foreground hover:underline">
+                                    ลืมรหัสผ่าน?
+                                </Link>
+                            </div>
                             <Button type="submit" className="w-full h-12 text-base uppercase tracking-widest" disabled={isLoading}>
                                 {isLoading ? (
                                     <>

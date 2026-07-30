@@ -31,6 +31,19 @@ const createCustomerSchema = z.object({
     phone: phoneSchema.optional()
 });
 
+const forgotPasswordSchema = z.object({
+    email: z.string().email('Invalid email address')
+});
+
+const resetPasswordSchema = z.object({
+    token: z.string().min(1, 'Token is required'),
+    password: z.string().min(6, 'Password must be at least 6 characters')
+});
+
+const emailTokenSchema = z.object({
+    token: z.string().min(1, 'Token is required')
+});
+
 // CSV import row — structural only (csv-parse yields every cell as a string).
 // Business-rule coercion (blank-means-no-change, boolean/number parsing) happens
 // in the controller, not here — keeps "is this row shaped right" separate from
@@ -55,6 +68,9 @@ module.exports = {
     registerSchema,
     loginSchema,
     createCustomerSchema,
+    forgotPasswordSchema,
+    resetPasswordSchema,
+    emailTokenSchema,
     csvProductRowSchema,
     THAI_PHONE_PATTERN
 };

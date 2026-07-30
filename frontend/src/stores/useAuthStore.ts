@@ -17,6 +17,8 @@ interface Customer {
     email: string;
     phone?: string;
     profilePicture?: string;
+    /** ยืนยันแบบ soft — false ได้แค่ทำให้ขึ้นแบนเนอร์เตือน ไม่บล็อกการสั่งซื้อ */
+    emailVerified?: boolean;
 }
 
 interface AuthState {

@@ -33,6 +33,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
                         // but since Google validates emails, this is generally accepted for MVP.
                         customer.provider = 'google';
                         customer.providerId = profile.id;
+                        customer.emailVerified = true; // Google ยืนยันอีเมลให้แล้ว
                         if (!customer.profilePicture && profile.photos && profile.photos.length > 0) {
                             customer.profilePicture = profile.photos[0].value;
                         }
@@ -49,6 +50,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
                     provider: 'google',
                     providerId: profile.id,
                     isActive: true,
+                    emailVerified: true, // Google ยืนยันอีเมลให้แล้ว
                     profilePicture: profile.photos && profile.photos.length > 0 ? profile.photos[0].value : undefined
                     // phone is optional, passwordHash is optional
                 });

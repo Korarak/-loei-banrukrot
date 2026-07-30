@@ -16,11 +16,24 @@ const authLimiter = rateLimit({
     skip: () => process.env.NODE_ENV === 'test'
 });
 
+// ทุก route ที่ "ทำให้มีอีเมลถูกส่งออกไป" ต้องคุมแยกและแน่นกว่า login เพราะคนร้ายไม่ได้
+// พยายามเข้าบัญชี แต่ยิงเพื่อถล่มกล่องจดหมายคนอื่นและเผาโควตา free tier ของร้าน
+const emailLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 ชั่วโมง
+    max: 5,
+    message: 'ขอลิงก์ถี่เกินไป กรุณารอสักครู่แล้วลองใหม่',
+    skip: () => process.env.NODE_ENV === 'test'
+});
+
 // User (Staff/Owner) routes
 router.use('/register', authLimiter);
 router.use('/login', authLimiter);
 router.use('/register-customer', authLimiter);
 router.use('/login-customer', authLimiter);
+router.use('/forgot-password', emailLimiter);
+router.use('/resend-verification', emailLimiter);
+router.use('/reset-password', authLimiter);
+router.use('/verify-email', authLimiter);
 
 const validateRequest = require('../middleware/validateRequest');
 const schemas = require('../models/validationSchemas');
@@ -35,6 +48,13 @@ router.post('/login', validateRequest(schemas.loginSchema), authController.login
 // Customer routes
 router.post('/register-customer', validateRequest(schemas.createCustomerSchema), authController.registerCustomer);
 router.post('/login-customer', validateRequest(schemas.loginSchema), authController.loginCustomer);
+
+// Password reset + email verification (customers)
+const { authenticateToken } = require('../middleware/auth');
+router.post('/forgot-password', validateRequest(schemas.forgotPasswordSchema), authController.forgotPassword);
+router.post('/reset-password', validateRequest(schemas.resetPasswordSchema), authController.resetPassword);
+router.post('/verify-email', validateRequest(schemas.emailTokenSchema), authController.verifyEmail);
+router.post('/resend-verification', authenticateToken('customer'), authController.resendVerification);
 
 // Google Auth — only registered when credentials are configured
 if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
