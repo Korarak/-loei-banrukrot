@@ -10,6 +10,25 @@ const generateToken = (id, type = 'user') => {
     });
 };
 
+// เก็บเบอร์แบบตัวเลขล้วน — schema ยอมให้พิมพ์เว้นวรรค/ขีดได้ แต่ที่ save ต้องรูปแบบเดียวเสมอ
+const normalizePhone = (phone) => (typeof phone === 'string' ? phone.replace(/[\s-]/g, '') : phone);
+
+// @desc    ระบบยังเปิดให้สมัครบัญชีพนักงานคนแรก (bootstrap) อยู่หรือไม่
+// @route   GET /api/auth/registration-status
+// @access  Public
+// หน้า (auth)/register และ (auth)/login เรียก endpoint นี้เพื่อไม่ให้โชว์ฟอร์ม/ลิงก์ที่กดไปแล้วเจอ 403 เสมอ
+exports.registrationStatus = async (req, res, next) => {
+    try {
+        const userCount = await User.estimatedDocumentCount();
+        res.json({
+            success: true,
+            data: { open: userCount === 0 }
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
 // @desc    Register new user (staff/owner)
 // @route   POST /api/auth/register
 // @access  Public — bootstrap only (works only while no user exists yet)
@@ -23,6 +42,7 @@ exports.registerUser = async (req, res, next) => {
         if (userCount > 0) {
             return res.status(403).json({
                 success: false,
+                code: 'REGISTRATION_CLOSED',
                 message: 'การสมัครสมาชิกพนักงานถูกปิด กรุณาให้เจ้าของร้านเพิ่มบัญชีผ่านหน้าจัดการผู้ใช้'
             });
         }
@@ -32,7 +52,8 @@ exports.registerUser = async (req, res, next) => {
         if (existingUser) {
             return res.status(400).json({
                 success: false,
-                message: 'Email already registered'
+                code: 'EMAIL_EXISTS',
+                message: 'อีเมลนี้ถูกใช้งานแล้ว'
             });
         }
 
@@ -55,7 +76,7 @@ exports.registerUser = async (req, res, next) => {
             success: true,
             message: 'User registered successfully',
             data: {
-                id: user._id,
+                _id: user._id,
                 username: user.username,
                 email: user.email,
                 role: user.role,
@@ -107,7 +128,7 @@ exports.loginUser = async (req, res, next) => {
             success: true,
             message: 'Login successful',
             data: {
-                id: user._id,
+                _id: user._id,
                 username: user.username,
                 email: user.email,
                 role: user.role,
@@ -126,12 +147,17 @@ exports.registerCustomer = async (req, res, next) => {
     try {
         const { firstName, lastName, email, password, phone } = req.body;
 
-        // เช็คว่า email ซ้ำหรือไม่
+        // เช็คว่า email ซ้ำหรือไม่ — แยกเคส "เคยสมัครผ่าน Google" ออกมา เพราะบัญชีพวกนี้ไม่มีรหัสผ่าน
+        // ให้ไปกดปุ่ม Google ไม่ใช่ไปหน้า login แบบกรอกรหัสผ่าน
         const existingCustomer = await Customer.findOne({ email });
         if (existingCustomer) {
+            const usesGoogle = !existingCustomer.passwordHash && existingCustomer.provider === 'google';
             return res.status(400).json({
                 success: false,
-                message: 'Email already registered'
+                code: usesGoogle ? 'ACCOUNT_USES_GOOGLE' : 'EMAIL_EXISTS',
+                message: usesGoogle
+                    ? 'อีเมลนี้เคยสมัครผ่าน Google กรุณาเข้าสู่ระบบด้วย Google'
+                    : 'อีเมลนี้ถูกใช้งานแล้ว กรุณาเข้าสู่ระบบ'
             });
         }
 
@@ -145,7 +171,7 @@ exports.registerCustomer = async (req, res, next) => {
             lastName,
             email,
             passwordHash,
-            phone
+            phone: normalizePhone(phone)
         });
 
         // สร้าง token
@@ -188,6 +214,16 @@ exports.loginCustomer = async (req, res, next) => {
             return res.status(403).json({
                 success: false,
                 message: 'Account is inactive'
+            });
+        }
+
+        // บัญชีที่สมัครผ่าน Google ไม่มี passwordHash — ถ้าปล่อยไปถึง bcrypt.compare จะ throw กลายเป็น 500
+        // ตอบให้ชัดว่าต้องเข้าสู่ระบบด้วย Google แทน
+        if (!customer.passwordHash) {
+            return res.status(400).json({
+                success: false,
+                code: 'ACCOUNT_USES_GOOGLE',
+                message: 'บัญชีนี้สมัครผ่าน Google กรุณาเข้าสู่ระบบด้วยปุ่ม Google'
             });
         }
 

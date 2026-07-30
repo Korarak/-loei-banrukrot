@@ -3,12 +3,23 @@
 ## 🔐 Authentication
 
 ### User (Staff/Owner) Authentication
-- `POST /api/auth/register` - Register new staff/owner
+- `GET /api/auth/registration-status` - `{ open: boolean }` — is the bootstrap registration still available?
+- `POST /api/auth/register` - **Bootstrap only.** Creates the first account as `owner`; returns 403 `REGISTRATION_CLOSED` once any user exists. Later staff accounts go through `POST /api/users`.
 - `POST /api/auth/login` - Login staff/owner
 
 ### Customer Authentication
 - `POST /api/auth/register-customer` - Register new customer
 - `POST /api/auth/login-customer` - Login customer
+- `GET /api/auth/google` + `GET /api/auth/google/callback` - Google OAuth (customers only, 503 when unconfigured)
+
+### Auth error codes
+Failed auth responses include a stable `code` next to the human-readable `message`. Branch on `code`, not on message text.
+
+| `code` | Status | Meaning |
+| --- | --- | --- |
+| `REGISTRATION_CLOSED` | 403 | Staff bootstrap registration is no longer open |
+| `EMAIL_EXISTS` | 400 | Email already has a password account |
+| `ACCOUNT_USES_GOOGLE` | 400 | Account was created via Google and has no password — use Google sign-in |
 
 ---
 

@@ -13,7 +13,7 @@ async function registerOwner() {
     const res = await request(app).post('/api/auth/register').send({
         username: 'owner1', email: 'owner@example.com', password: 'secret123'
     });
-    return { token: res.body.data.token, id: res.body.data.id };
+    return { token: res.body.data.token, id: res.body.data._id };
 }
 
 async function registerCustomer() {

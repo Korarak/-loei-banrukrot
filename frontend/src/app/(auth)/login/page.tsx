@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -35,6 +35,16 @@ export default function LoginPage() {
     const loginUser = useAuthStore((state) => state.loginUser);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+
+    // โชว์ลิงก์ "ลงทะเบียน" เฉพาะตอนที่ระบบยังไม่มีบัญชีไหนเลย — หลังจากนั้นหน้านั้นคืน 403 เสมอ
+    const { data: registrationOpen } = useQuery({
+        queryKey: ['auth', 'registration-status'],
+        queryFn: async () => {
+            const res = await api.get('/auth/registration-status');
+            return res.data.data.open as boolean;
+        },
+        staleTime: 60_000,
+    });
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -129,12 +139,18 @@ export default function LoginPage() {
                 </form>
             </Form>
 
-            <div className="text-center text-sm text-gray-400 font-medium">
-                ยังไม่มีบัญชีพนักงาน?{' '}
-                <Link href="/register" className="text-primary hover:underline font-bold">
-                    ลงทะเบียน
-                </Link>
-            </div>
+            {registrationOpen ? (
+                <div className="text-center text-sm text-gray-400 font-medium">
+                    ยังไม่มีบัญชีในระบบ?{' '}
+                    <Link href="/register" className="text-primary hover:underline font-bold">
+                        สร้างบัญชีเจ้าของร้าน
+                    </Link>
+                </div>
+            ) : (
+                <div className="text-center text-sm text-gray-400 font-medium">
+                    ลืมรหัสผ่าน หรือต้องการบัญชีใหม่? กรุณาติดต่อเจ้าของร้าน
+                </div>
+            )}
         </div>
     );
 }

@@ -1,8 +1,9 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+// ทั้ง User และ Customer ใช้ `_id` เหมือนกัน — ตรงกับ payload ของ /auth/login และ /auth/login-customer
 interface User {
-    id: string;
+    _id: string;
     username: string;
     email: string;
     role: string;

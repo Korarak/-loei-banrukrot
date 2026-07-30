@@ -10,7 +10,10 @@ const rateLimit = require('express-rate-limit');
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 20, // Limit each IP to 20 login/register requests per windowMs
-    message: 'Too many login attempts from this IP, please try again after 15 minutes'
+    message: 'Too many login attempts from this IP, please try again after 15 minutes',
+    // ทุก route ด้านล่างใช้ limiter ตัวเดียวกัน = แชร์โควตา 20 ครั้งร่วมกัน
+    // ซึ่งทำให้ integration test ชุด auth ยิงทะลุโควตาแล้วได้ 429 แทนผลจริง
+    skip: () => process.env.NODE_ENV === 'test'
 });
 
 // User (Staff/Owner) routes
@@ -21,6 +24,9 @@ router.use('/login-customer', authLimiter);
 
 const validateRequest = require('../middleware/validateRequest');
 const schemas = require('../models/validationSchemas');
+
+// บอกว่ายังเปิดสมัครบัญชีพนักงานคนแรกอยู่ไหม เพื่อให้ frontend ไม่โชว์ฟอร์มที่กดไปแล้วเจอ 403 เสมอ
+router.get('/registration-status', authController.registrationStatus);
 
 // User (Staff/Owner) routes
 router.post('/register', validateRequest(schemas.registerSchema), authController.registerUser);

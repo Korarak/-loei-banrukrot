@@ -1,36 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Loader2, UserPlus } from 'lucide-react';
+import { Globe, Loader2, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Label } from '@/components/ui/label';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { GoogleSignInButton } from '@/components/auth/google-sign-in-button';
 import { toast } from 'sonner';
 import api from '@/lib/api';
+import { isValidThaiPhone, normalizePhone } from '@/lib/phone';
 import { useAuthStore } from '@/stores/useAuthStore';
-
-const formSchema = z.object({
-    firstName: z.string().min(2, 'กรุณาระบุชื่อจริงอย่างน้อย 2 ตัวอักษร'),
-    lastName: z.string().min(2, 'กรุณาระบุนามสกุลอย่างน้อย 2 ตัวอักษร'),
-    email: z.string().email('รูปแบบอีเมลไม่ถูกต้อง'),
-    phone: z.string().min(9, 'เบอร์โทรศัพท์ต้องมีอย่างน้อย 9 หลัก'),
-    password: z.string().min(6, 'รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร'),
-    confirmPassword: z.string(),
-    website: z.string().optional(), // Honeypot field
-}).refine((data) => data.password === data.confirmPassword, {
-    message: "รหัสผ่านไม่ตรงกัน",
-    path: ["confirmPassword"],
-});
-
 import { useLanguageStore } from '@/stores/useLanguageStore';
-import { Globe } from 'lucide-react';
 
 const translations = {
     th: {
@@ -40,10 +26,12 @@ const translations = {
         lastName: 'นามสกุล',
         email: 'อีเมล',
         phone: 'เบอร์โทรศัพท์',
+        phoneHint: 'มือถือ 10 หลัก หรือเบอร์บ้าน 9 หลัก',
         password: 'รหัสผ่าน',
         confirmPassword: 'ยืนยันรหัสผ่าน',
         submit: 'สมัครสมาชิก',
         submitting: 'กำลังสมัครสมาชิก...',
+        orContinueWith: 'หรือสมัครด้วย',
         loginPrompt: 'มีบัญชีอยู่แล้ว?',
         loginAction: 'เข้าสู่ระบบ',
         placeholders: {
@@ -57,23 +45,17 @@ const translations = {
             firstName: 'กรุณาระบุชื่อจริงอย่างน้อย 2 ตัวอักษร',
             lastName: 'กรุณาระบุนามสกุลอย่างน้อย 2 ตัวอักษร',
             email: 'รูปแบบอีเมลไม่ถูกต้อง',
-            phone: 'เบอร์โทรศัพท์ต้องมีอย่างน้อย 9 หลัก',
+            phone: 'เบอร์โทรศัพท์ไม่ถูกต้อง (ขึ้นต้นด้วย 0 และมี 9-10 หลัก)',
             password: 'รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร',
             passwordMatch: 'รหัสผ่านไม่ตรงกัน',
-            captcha: 'คำตอบไม่ถูกต้อง',
-            rateLimit: 'ทำรายการถี่เกินไป',
             duplicate: 'มีบัญชีนี้ในระบบแล้ว',
             duplicateDesc: 'อีเมลนี้ถูกใช้งานแล้ว กรุณาเข้าสู่ระบบ',
+            googleAccount: 'บัญชีนี้สมัครผ่าน Google',
+            googleAccountDesc: 'กรุณาใช้ปุ่ม "สมัคร/เข้าสู่ระบบด้วย Google" ด้านล่าง',
             success: 'สมัครสมาชิกสำเร็จ',
             welcome: 'ยินดีต้อนรับเข้าสู่ระบบ',
-            failed: 'การสมัครสมาชิกไม่สำเร็จ'
+            failed: 'การสมัครสมาชิกไม่สำเร็จ',
         },
-        security: {
-            label: 'ยืนยันตัวตน',
-            placeholder: 'ใส่คำตอบ',
-            captchaError: 'กรุณาบวกเลขให้ถูกต้องเพื่อยืนยันตัวตน',
-            rateLimitError: 'กรุณารอสักครู่ก่อนลองใหม่อีกครั้ง'
-        }
     },
     en: {
         title: 'Create Account',
@@ -82,10 +64,12 @@ const translations = {
         lastName: 'Last Name',
         email: 'Email',
         phone: 'Phone Number',
+        phoneHint: '10-digit mobile or 9-digit landline',
         password: 'Password',
         confirmPassword: 'Confirm Password',
         submit: 'Register',
         submitting: 'Creating account...',
+        orContinueWith: 'Or sign up with',
         loginPrompt: 'Already have an account?',
         loginAction: 'Login here',
         placeholders: {
@@ -99,25 +83,41 @@ const translations = {
             firstName: 'First name must be at least 2 characters',
             lastName: 'Last name must be at least 2 characters',
             email: 'Invalid email address',
-            phone: 'Phone number must be at least 9 characters',
+            phone: 'Invalid phone number (must start with 0 and be 9-10 digits)',
             password: 'Password must be at least 6 characters',
             passwordMatch: 'Passwords do not match',
-            captcha: 'Incorrect Security Answer',
-            rateLimit: 'Too Many Attempts',
             duplicate: 'Account already exists',
             duplicateDesc: 'This email is already in use. Please login.',
+            googleAccount: 'This account was created with Google',
+            googleAccountDesc: 'Please use the "Sign up with Google" button below.',
             success: 'Registration successful',
             welcome: 'Welcome to the system',
-            failed: 'Registration failed'
+            failed: 'Registration failed',
         },
-        security: {
-            label: 'Security Check',
-            placeholder: 'Enter answer',
-            captchaError: 'Please solve the math question correctly.',
-            rateLimitError: 'Please wait a minute before trying again.'
-        }
-    }
+    },
 };
+
+type Messages = (typeof translations)['th'];
+
+// สร้าง schema จากข้อความของภาษาปัจจุบัน — เดิม schema ถูก hardcode ภาษาไทย ทำให้สลับเป็น EN
+// แล้ว error ยังโผล่เป็นไทยอยู่ทั้งที่ translations.en.errors ถูกเขียนไว้ครบแล้ว
+const buildFormSchema = (e: Messages['errors']) =>
+    z
+        .object({
+            firstName: z.string().min(2, e.firstName),
+            lastName: z.string().min(2, e.lastName),
+            email: z.string().email(e.email),
+            phone: z.string().refine(isValidThaiPhone, e.phone),
+            password: z.string().min(6, e.password),
+            confirmPassword: z.string(),
+            website: z.string().optional(), // Honeypot field
+        })
+        .refine((data) => data.password === data.confirmPassword, {
+            message: e.passwordMatch,
+            path: ['confirmPassword'],
+        });
+
+type RegisterFormValues = z.infer<ReturnType<typeof buildFormSchema>>;
 
 export default function CustomerRegisterPage() {
     const router = useRouter();
@@ -125,17 +125,16 @@ export default function CustomerRegisterPage() {
     const redirect = searchParams.get('redirect') || '/';
     const { loginCustomer } = useAuthStore();
     const { language, toggleLanguage } = useLanguageStore();
-    const t = translations[language]; // Get current language translations
+    const t = translations[language];
 
     const [isLoading, setIsLoading] = useState(false);
 
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema), // Note: Zod schema needs to be dynamic or we just accept Thai errors for now since Zod runs deep. 
-        // For perfect i18n we'd wrap schema creation in a hook, but for this "button" request, static schema is acceptable or we can just use the store inside refine if possible. 
-        // Ideally we recreate schema when language changes, but that resets form. Let's keep schema static Thai for simplicity or upgrade later.
+    const formSchema = useMemo(() => buildFormSchema(t.errors), [t.errors]);
+
+    const form = useForm<RegisterFormValues>({
+        resolver: zodResolver(formSchema),
         defaultValues: {
             firstName: '',
-
             lastName: '',
             email: '',
             phone: '',
@@ -144,37 +143,18 @@ export default function CustomerRegisterPage() {
         },
     });
 
-    // Security State
-    const [captchaInput, setCaptchaInput] = useState('');
-    const [captcha, setCaptcha] = useState(() => {
-        const num1 = Math.floor(Math.random() * 10) + 1;
-        const num2 = Math.floor(Math.random() * 10) + 1;
-        return { num1, num2, question: `${num1} + ${num2} = ?`, answer: (num1 + num2).toString() };
-    });
+    // สลับภาษาแล้วให้ error ที่ค้างอยู่บนจอเปลี่ยนตามทันที (ไม่ต้องรอ submit รอบใหม่)
+    const { isSubmitted } = form.formState;
+    useEffect(() => {
+        if (isSubmitted) form.trigger();
+    }, [language, isSubmitted, form]);
 
-    async function onSubmit(values: any) { // Use any to bypass schema strictness for honeypot
-        // 1. Honeypot Check
+    async function onSubmit(values: RegisterFormValues) {
+        // Honeypot — ช่องที่คนมองไม่เห็น ถ้ามีค่าแปลว่าเป็นบอท ให้เงียบไปเฉยๆ
         if (values.website) {
-            console.warn("Bot detected via honeypot");
-            return; // Silently fail
-        }
-
-        // 2. Captcha Check
-        if (captchaInput !== captcha.answer) {
-            toast.error(t.errors.captcha, { description: t.security.captchaError });
+            console.warn('Bot detected via honeypot');
             return;
         }
-
-        // 3. Rate Limiting (Frontend)
-        const lastAttempt = localStorage.getItem('register_attempt');
-        if (lastAttempt) {
-            const timeSince = Date.now() - parseInt(lastAttempt);
-            if (timeSince < 60000) { // 60 seconds cooldown
-                toast.error(t.errors.rateLimit, { description: t.security.rateLimitError });
-                return;
-            }
-        }
-        localStorage.setItem('register_attempt', Date.now().toString());
 
         setIsLoading(true);
         try {
@@ -182,7 +162,7 @@ export default function CustomerRegisterPage() {
                 firstName: values.firstName,
                 lastName: values.lastName,
                 email: values.email,
-                phone: values.phone,
+                phone: normalizePhone(values.phone),
                 password: values.password,
             });
 
@@ -193,27 +173,27 @@ export default function CustomerRegisterPage() {
                 router.push(redirect);
             }
         } catch (error: any) {
+            // อ่านจาก code ที่ backend ส่งมา ไม่ใช่ match ข้อความภาษาอังกฤษ — ข้อความเปลี่ยนเมื่อไหร่ปุ่มลัดจะหายทันที
+            const code = error.response?.data?.code;
             const message = error.response?.data?.message || t.errors.failed;
 
-            // Policy: If email exists (via Google or Password), Guide to Login
-            if (message.toLowerCase().includes('email') && (message.toLowerCase().includes('exist') || message.toLowerCase().includes('duplicate'))) {
+            if (code === 'ACCOUNT_USES_GOOGLE') {
+                toast.error(t.errors.googleAccount, {
+                    description: t.errors.googleAccountDesc,
+                    duration: 6000,
+                });
+            } else if (code === 'EMAIL_EXISTS') {
                 toast.error(t.errors.duplicate, {
                     description: t.errors.duplicateDesc,
                     action: {
                         label: t.loginAction,
-                        onClick: () => router.push(`/customer-login?email=${encodeURIComponent(values.email)}`)
+                        onClick: () => router.push(`/customer-login?email=${encodeURIComponent(values.email)}`),
                     },
-                    duration: 5000,
+                    duration: 6000,
                 });
             } else {
                 toast.error(message);
             }
-
-            // Reset captcha on failure
-            const num1 = Math.floor(Math.random() * 10) + 1;
-            const num2 = Math.floor(Math.random() * 10) + 1;
-            setCaptcha({ num1, num2, question: `${num1} + ${num2} = ?`, answer: (num1 + num2).toString() });
-            setCaptchaInput('');
         } finally {
             setIsLoading(false);
         }
@@ -252,7 +232,7 @@ export default function CustomerRegisterPage() {
                                         <FormItem>
                                             <FormLabel className="text-xs font-black uppercase tracking-widest text-gray-500">{t.firstName}</FormLabel>
                                             <FormControl>
-                                                <Input placeholder={t.placeholders.firstName} className="h-12 font-medium" {...field} />
+                                                <Input autoComplete="given-name" placeholder={t.placeholders.firstName} className="h-12 font-medium" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -265,7 +245,7 @@ export default function CustomerRegisterPage() {
                                         <FormItem>
                                             <FormLabel className="text-xs font-black uppercase tracking-widest text-gray-500">{t.lastName}</FormLabel>
                                             <FormControl>
-                                                <Input placeholder={t.placeholders.lastName} className="h-12 font-medium" {...field} />
+                                                <Input autoComplete="family-name" placeholder={t.placeholders.lastName} className="h-12 font-medium" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -294,6 +274,7 @@ export default function CustomerRegisterPage() {
                                         <FormControl>
                                             <Input type="tel" inputMode="numeric" autoComplete="tel" placeholder={t.placeholders.phone} className="h-12 font-medium" {...field} />
                                         </FormControl>
+                                        <FormDescription className="text-xs">{t.phoneHint}</FormDescription>
                                         <FormMessage />
                                     </FormItem>
                                 )}
@@ -328,23 +309,10 @@ export default function CustomerRegisterPage() {
                             <input
                                 type="text"
                                 className="hidden"
-                                {...form.register('website')} // Bots might fill this
+                                {...form.register('website')}
                                 tabIndex={-1}
                                 autoComplete="off"
                             />
-
-                            {/* Math Challenge Captcha */}
-                            <div className="space-y-2 p-4 bg-gray-50 border border-border">
-                                <Label className="text-xs font-black uppercase tracking-widest text-gray-500">{t.security.label}: {captcha.question}</Label>
-                                <Input
-                                    inputMode="numeric"
-                                    autoComplete="off"
-                                    placeholder={t.security.placeholder}
-                                    value={captchaInput}
-                                    onChange={(e) => setCaptchaInput(e.target.value)}
-                                    className="h-12 bg-white font-medium"
-                                />
-                            </div>
 
                             <Button
                                 type="submit"
@@ -365,6 +333,19 @@ export default function CustomerRegisterPage() {
                             </Button>
                         </form>
                     </Form>
+
+                    <div className="relative my-4">
+                        <div className="absolute inset-0 flex items-center">
+                            <span className="w-full border-t" />
+                        </div>
+                        <div className="relative flex justify-center text-xs uppercase">
+                            <span className="bg-background px-2 text-muted-foreground">
+                                {t.orContinueWith}
+                            </span>
+                        </div>
+                    </div>
+
+                    <GoogleSignInButton />
                 </CardContent>
                 <CardFooter className="flex flex-col space-y-2">
                     <div className="text-sm text-center text-gray-600">

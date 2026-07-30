@@ -88,8 +88,14 @@ Next.js App Router with three route groups:
 ### Authentication System
 Two completely separate auth flows sharing the same JWT infrastructure:
 - **Staff/Owner:** POST `/api/auth/login` → `userToken` in localStorage → routes under `/(admin)`
-- **Customer:** POST `/api/auth/customer/login` → `customerToken` in localStorage → routes under `/(customer)`
+- **Customer:** POST `/api/auth/login-customer` → `customerToken` in localStorage → routes under `/(customer)`
 - **Google OAuth (customers only):** Handled by `config/passport.js` using `passport-google-oauth20`. Requires `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` env vars (optional — disabled if absent).
+
+**Registration:**
+- `POST /api/auth/register` is **bootstrap-only** — it works while `User` is empty and makes that first account the `owner`; every later call returns 403 `REGISTRATION_CLOSED`. After that, staff accounts are created via `POST /api/users`. `GET /api/auth/registration-status` → `{ open: boolean }` lets the login/register pages hide the dead-end form.
+- `POST /api/auth/register-customer` is open to the public. Its Zod schema (`createCustomerSchema`) must stay in sync with the form in `(customer)/customer-register` — the Thai phone rule lives in `backend/models/validationSchemas.js` and `frontend/src/lib/phone.ts` and the two must match.
+- Auth error responses carry a machine-readable `code` (`EMAIL_EXISTS`, `ACCOUNT_USES_GOOGLE`, `REGISTRATION_CLOSED`) alongside `message`. The frontend branches on `code` — never on the message text.
+- Google-created customers have **no** `passwordHash` (`provider: 'google'`), so `login-customer` returns 400 `ACCOUNT_USES_GOOGLE` instead of attempting a bcrypt compare. There is no password-reset flow yet.
 
 JWT payload includes a `type` field (`'user'` or `'customer'`). The `authenticateToken` middleware uses this to populate either `req.user` (staff) or `req.customer`. Staff access control uses `requireRole('owner', 'staff', 'admin')`. Combined customer+staff access uses `checkCustomerAccess`.
 

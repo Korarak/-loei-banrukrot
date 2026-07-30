@@ -12,13 +12,23 @@ const loginSchema = z.object({
     password: z.string().min(1, 'Password is required')
 });
 
+// เบอร์โทรไทย: มือถือ 10 หลัก (08xxxxxxxx) หรือเบอร์บ้าน 9 หลัก (042xxxxxx)
+// เว้นวรรค/ขีดถูกตัดออกก่อนตรวจ แต่ค่าที่ save ให้ controller normalize เอง (validateRequest ไม่เขียนค่ากลับเข้า req.body)
+// กติกานี้ต้องตรงกับ frontend/src/lib/phone.ts เป๊ะๆ ไม่งั้นผู้ใช้จะผ่าน validation หน้าเว็บแล้วโดน 400 จาก API
+const THAI_PHONE_PATTERN = /^0\d{8,9}$/;
+const phoneSchema = z.string().refine(
+    (value) => THAI_PHONE_PATTERN.test(value.replace(/[\s-]/g, '')),
+    'Phone number must be a valid Thai number (9-10 digits starting with 0)'
+);
+
 // ต้องตรงกับ payload ของหน้า (customer)/customer-register และ authController.registerCustomer
 const createCustomerSchema = z.object({
     firstName: z.string().min(1, 'First name is required'),
     lastName: z.string().min(1, 'Last name is required'),
     email: z.string().email('Invalid email address'),
     password: z.string().min(6, 'Password must be at least 6 characters'),
-    phone: z.string().min(10, 'Phone number must be at least 10 characters').optional()
+    // ยังคง optional เหมือนเดิม (POS/seed สร้างลูกค้าโดยไม่มีเบอร์ได้) — แต่ถ้าส่งมา ต้องตรงกติกา
+    phone: phoneSchema.optional()
 });
 
 // CSV import row — structural only (csv-parse yields every cell as a string).
@@ -45,5 +55,6 @@ module.exports = {
     registerSchema,
     loginSchema,
     createCustomerSchema,
-    csvProductRowSchema
+    csvProductRowSchema,
+    THAI_PHONE_PATTERN
 };
