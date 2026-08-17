@@ -14,6 +14,7 @@ node_modules/
 # Sensitive credentials
 client_secret*.json
 deploy-secrets.local.md
+resend-dns-setup.local.md
 nginx/certs/*.pem
 nginx/certs/*.key
 
