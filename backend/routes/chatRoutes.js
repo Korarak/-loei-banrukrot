@@ -28,6 +28,10 @@ router.get('/conversations/:id/messages', checkConversationAccess, chatControlle
 router.post('/conversations/:id/messages', checkConversationAccess, sendMessageLimiter, validator.sendChatMessage, chatController.sendMessageRest);
 router.post('/conversations/:id/read', checkConversationAccess, chatController.markRead);
 
+// Inbox housekeeping — staff-only, no customer-facing equivalent.
+router.post('/conversations/:id/close', requireRole('owner', 'staff'), chatController.closeConversation);
+router.post('/conversations/:id/reopen', requireRole('owner', 'staff'), chatController.reopenConversation);
+
 // Upload an image to attach to a chat message — same multer/sharp pipeline as
 // product images (uploadRoutes.js), just a smaller max dimension and its own
 // subdir ('chat'), open to both staff and customers (unlike the staff-only

@@ -4,9 +4,21 @@ import { useEffect, useRef, useState } from 'react';
 import { format } from 'date-fns';
 import { th } from 'date-fns/locale';
 import { toast } from 'sonner';
-import { MessageCircle, User } from 'lucide-react';
+import { ArrowLeft, MessageCircle, Search, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useConversations, useChatMessages, useSendChatMessage, useMarkChatRead, useChatTyping, type Conversation, type ChatAttachment, type ChatMessage } from '@/hooks/useChat';
+import { Button } from '@/components/ui/button';
+import {
+    useConversations,
+    useChatMessages,
+    useSendChatMessage,
+    useMarkChatRead,
+    useChatTyping,
+    useCloseConversation,
+    useReopenConversation,
+    type Conversation,
+    type ChatAttachment,
+    type ChatMessage,
+} from '@/hooks/useChat';
 import { useChatSocket } from '@/hooks/useChatSocket';
 import { playNotificationSound } from '@/lib/notificationSound';
 import ChatMessageList from '@/components/chat/ChatMessageList';
@@ -19,14 +31,30 @@ function customerName(conversation: Conversation) {
     return `${conversation.customerId.firstName} ${conversation.customerId.lastName}`.trim();
 }
 
+function customerEmail(conversation: Conversation) {
+    if (!conversation.customerId || typeof conversation.customerId === 'string') return '';
+    return conversation.customerId.email || '';
+}
+
+const STATUS_TABS = [
+    { value: 'open', label: 'เปิดอยู่' },
+    { value: 'closed', label: 'ปิดแล้ว' },
+    { value: 'all', label: 'ทั้งหมด' },
+] as const;
+
 export default function AdminChatPage() {
-    const { data: conversations, isLoading: isLoadingList } = useConversations();
+    const [statusFilter, setStatusFilter] = useState<'open' | 'closed' | 'all'>('open');
+    const [search, setSearch] = useState('');
+    const [unreadOnly, setUnreadOnly] = useState(false);
+    const { data: conversations, isLoading: isLoadingList } = useConversations(statusFilter);
     const [selectedId, setSelectedId] = useState<string | null>(null);
 
     const { socket, connected } = useChatSocket();
     const { data: messages, isLoading: isLoadingMessages } = useChatMessages(selectedId || undefined);
     const sendMessage = useSendChatMessage();
     const markRead = useMarkChatRead();
+    const closeConversation = useCloseConversation();
+    const reopenConversation = useReopenConversation();
     const { isOtherTyping, emitTyping } = useChatTyping(selectedId || undefined);
 
     const selectedConversation = conversations?.find((c) => c._id === selectedId);
@@ -36,10 +64,35 @@ export default function AdminChatPage() {
         selectedIdRef.current = selectedId;
     }, [selectedId]);
 
-    // Auto-select the first (most recent) conversation once the list loads
+    const hasFilters = search.trim().length > 0 || unreadOnly;
+    const filteredConversations = (conversations || []).filter((c) => {
+        if (unreadOnly && !(c.unreadCount && c.unreadCount > 0)) return false;
+        const q = search.trim().toLowerCase();
+        if (!q) return true;
+        return (
+            customerName(c).toLowerCase().includes(q) ||
+            customerEmail(c).toLowerCase().includes(q) ||
+            (c.lastMessagePreview || '').toLowerCase().includes(q)
+        );
+    });
+
+    // Auto-select the first (most recent) conversation once the list loads —
+    // desktop only. On mobile the list/thread panes are mutually exclusive
+    // (see the layout below), so auto-selecting would skip straight past the
+    // inbox list to a thread the admin never chose to open.
     useEffect(() => {
         if (!selectedId && conversations && conversations.length > 0) {
-            setSelectedId(conversations[0]._id);
+            const isDesktop = typeof window !== 'undefined' && window.matchMedia('(min-width: 640px)').matches;
+            if (isDesktop) setSelectedId(conversations[0]._id);
+        }
+    }, [conversations, selectedId]);
+
+    // If the selected conversation drops out of the current filter (e.g. it
+    // was just closed while viewing the "เปิดอยู่" tab), fall back to the list
+    // rather than showing a stale thread the sidebar no longer highlights.
+    useEffect(() => {
+        if (selectedId && conversations && !conversations.some((c) => c._id === selectedId)) {
+            setSelectedId(null);
         }
     }, [conversations, selectedId]);
 
@@ -95,8 +148,12 @@ export default function AdminChatPage() {
                 </div>
             )}
             <div className="flex-1 flex min-h-0">
-                {/* Conversation list */}
-                <div className="w-full sm:w-80 border-r border-gray-100 flex flex-col shrink-0">
+                {/* Conversation list — full width on mobile until a thread is opened,
+                    fixed sidebar width from sm: up where both panes show together. */}
+                <div className={cn(
+                    'w-full sm:w-80 border-r border-gray-100 flex-col shrink-0',
+                    selectedId ? 'hidden sm:flex' : 'flex'
+                )}>
                     <div className="p-4 border-b border-gray-100 flex items-center justify-between gap-2">
                         <h1 className="font-bold text-lg text-gray-900 flex items-center gap-2">
                             <MessageCircle className="h-5 w-5" />
@@ -104,15 +161,53 @@ export default function AdminChatPage() {
                         </h1>
                         <PushToggleButton />
                     </div>
+                    <div className="p-3 border-b border-gray-100 space-y-2 shrink-0">
+                        <div className="relative">
+                            <Search className="h-4 w-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <input
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder="ค้นหาชื่อ, อีเมล, ข้อความ..."
+                                className="w-full pl-8 pr-2 py-1.5 text-sm rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-gray-400"
+                            />
+                        </div>
+                        <div className="flex items-center justify-between gap-2">
+                            <div className="flex gap-1">
+                                {STATUS_TABS.map((tab) => (
+                                    <button
+                                        key={tab.value}
+                                        onClick={() => setStatusFilter(tab.value)}
+                                        className={cn(
+                                            'px-2.5 py-1 rounded-full text-xs font-medium transition-colors',
+                                            statusFilter === tab.value ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                                        )}
+                                    >
+                                        {tab.label}
+                                    </button>
+                                ))}
+                            </div>
+                            <label className="flex items-center gap-1.5 text-xs text-gray-500 cursor-pointer shrink-0">
+                                <input
+                                    type="checkbox"
+                                    checked={unreadOnly}
+                                    onChange={(e) => setUnreadOnly(e.target.checked)}
+                                    className="rounded"
+                                />
+                                ยังไม่อ่าน
+                            </label>
+                        </div>
+                    </div>
                     <div className="flex-1 overflow-y-auto">
                         {isLoadingList ? (
                             <div className="flex justify-center py-8">
                                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-400" />
                             </div>
-                        ) : conversations?.length === 0 ? (
-                            <p className="text-center text-sm text-gray-400 py-8 px-4">ยังไม่มีการสนทนา</p>
+                        ) : filteredConversations.length === 0 ? (
+                            <p className="text-center text-sm text-gray-400 py-8 px-4">
+                                {hasFilters ? 'ไม่พบการสนทนาที่ตรงกับตัวกรอง' : 'ยังไม่มีการสนทนา'}
+                            </p>
                         ) : (
-                            conversations?.map((c) => (
+                            filteredConversations.map((c) => (
                                 <button
                                     key={c._id}
                                     onClick={() => setSelectedId(c._id)}
@@ -133,7 +228,12 @@ export default function AdminChatPage() {
                                                 </span>
                                             )}
                                         </div>
-                                        <p className="text-xs text-gray-500 truncate mt-0.5">{c.lastMessagePreview || '—'}</p>
+                                        <div className="flex items-center gap-1.5 mt-0.5">
+                                            {c.status === 'closed' && (
+                                                <span className="text-[10px] font-medium text-gray-400 bg-gray-100 rounded px-1.5 py-0.5 shrink-0">ปิดแล้ว</span>
+                                            )}
+                                            <p className="text-xs text-gray-500 truncate">{c.lastMessagePreview || '—'}</p>
+                                        </div>
                                     </div>
                                     {(c.unreadCount || 0) > 0 && (
                                         <span className="bg-red-500 text-white text-[10px] font-bold min-w-[1.25rem] h-5 px-1 rounded-full flex items-center justify-center shrink-0">
@@ -146,12 +246,38 @@ export default function AdminChatPage() {
                     </div>
                 </div>
 
-                {/* Active thread */}
-                <div className="hidden sm:flex flex-1 flex-col min-w-0">
+                {/* Active thread — full width on mobile (in place of the list) once selected */}
+                <div className={cn('flex-1 flex-col min-w-0', selectedId ? 'flex' : 'hidden sm:flex')}>
                     {selectedConversation ? (
                         <>
-                            <div className="p-4 border-b border-gray-100 shrink-0">
-                                <h2 className="font-bold text-gray-900">{customerName(selectedConversation)}</h2>
+                            <div className="p-4 border-b border-gray-100 shrink-0 flex items-center gap-2">
+                                <button
+                                    onClick={() => setSelectedId(null)}
+                                    aria-label="กลับไปที่รายการสนทนา"
+                                    className="sm:hidden -ml-1 p-1 text-gray-500 hover:text-gray-900"
+                                >
+                                    <ArrowLeft className="h-5 w-5" />
+                                </button>
+                                <h2 className="font-bold text-gray-900 flex-1 truncate">{customerName(selectedConversation)}</h2>
+                                {selectedConversation.status === 'closed' ? (
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => reopenConversation.mutate(selectedConversation._id)}
+                                        disabled={reopenConversation.isPending}
+                                    >
+                                        เปิดการสนทนาอีกครั้ง
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => closeConversation.mutate(selectedConversation._id)}
+                                        disabled={closeConversation.isPending}
+                                    >
+                                        ปิดการสนทนา
+                                    </Button>
+                                )}
                             </div>
                             <ChatMessageList
                                 messages={messages || []}
@@ -163,7 +289,7 @@ export default function AdminChatPage() {
                             <ChatComposer onSend={handleSend} onTyping={emitTyping} isSending={sendMessage.isPending} />
                         </>
                     ) : (
-                        <div className="flex-1 flex flex-col items-center justify-center text-gray-300 gap-2">
+                        <div className="flex-1 flex-col items-center justify-center text-gray-300 gap-2 hidden sm:flex">
                             <MessageCircle className="h-12 w-12 opacity-30" />
                             <p className="text-sm">เลือกการสนทนาเพื่อเริ่มตอบกลับ</p>
                         </div>

@@ -133,6 +133,79 @@ describe('Chat', () => {
         expect(res.status).toBe(400);
     });
 
+    test('staff can close and reopen a conversation, and the status filter respects it', async () => {
+        const ownerToken = await registerOwner();
+        const customerToken = await registerCustomer();
+
+        const convRes = await request(app)
+            .get('/api/chat/conversations/me')
+            .set('Authorization', `Bearer ${customerToken}`);
+        const conversationId = convRes.body.data._id;
+
+        const closeRes = await request(app)
+            .post(`/api/chat/conversations/${conversationId}/close`)
+            .set('Authorization', `Bearer ${ownerToken}`);
+        expect(closeRes.status).toBe(200);
+        expect(closeRes.body.data.status).toBe('closed');
+
+        const openList = await request(app)
+            .get('/api/chat/conversations?status=open')
+            .set('Authorization', `Bearer ${ownerToken}`);
+        expect(openList.body.data).toHaveLength(0);
+
+        const closedList = await request(app)
+            .get('/api/chat/conversations?status=closed')
+            .set('Authorization', `Bearer ${ownerToken}`);
+        expect(closedList.body.data).toHaveLength(1);
+
+        const reopenRes = await request(app)
+            .post(`/api/chat/conversations/${conversationId}/reopen`)
+            .set('Authorization', `Bearer ${ownerToken}`);
+        expect(reopenRes.status).toBe(200);
+        expect(reopenRes.body.data.status).toBe('open');
+    });
+
+    test('a customer message reopens a conversation staff had closed', async () => {
+        const ownerToken = await registerOwner();
+        const customerToken = await registerCustomer();
+
+        const convRes = await request(app)
+            .get('/api/chat/conversations/me')
+            .set('Authorization', `Bearer ${customerToken}`);
+        const conversationId = convRes.body.data._id;
+
+        await request(app)
+            .post(`/api/chat/conversations/${conversationId}/close`)
+            .set('Authorization', `Bearer ${ownerToken}`);
+
+        await request(app)
+            .post(`/api/chat/conversations/${conversationId}/messages`)
+            .set('Authorization', `Bearer ${customerToken}`)
+            .send({ body: 'ยังอยู่ไหมครับ' });
+
+        const openList = await request(app)
+            .get('/api/chat/conversations?status=open')
+            .set('Authorization', `Bearer ${ownerToken}`);
+        expect(openList.body.data).toHaveLength(1);
+        expect(openList.body.data[0]._id).toBe(conversationId);
+    });
+
+    test('a customer cannot close a conversation', async () => {
+        const customerToken = await registerCustomer();
+        const convRes = await request(app)
+            .get('/api/chat/conversations/me')
+            .set('Authorization', `Bearer ${customerToken}`);
+
+        const res = await request(app)
+            .post(`/api/chat/conversations/${convRes.body.data._id}/close`)
+            .set('Authorization', `Bearer ${customerToken}`);
+
+        // requireRole checks req.user, which a customer token never populates
+        // (see middleware/auth.js) — so this is a 401 (no staff identity), not
+        // a 403 (staff identity lacking permission).
+        expect(res.status).toBe(401);
+    });
+
     test('mark-read updates lastReadByCustomerAt', async () => {
         const ownerToken = await registerOwner();
         const customerToken = await registerCustomer();

@@ -112,6 +112,15 @@ async function sendMessage({ conversationId, customerId, senderType, senderId, b
         ? safeBody.slice(0, 200)
         : (safeAttachments.length > 0 ? '[รูปภาพ]' : '');
 
+    // A customer messaging back into a conversation staff had closed reopens
+    // it automatically — the conversation document is permanent (one per
+    // customer, see the model's unique index), so "closed" only means
+    // "resolved for now" and must not swallow a customer's next message.
+    const wasReopened = senderType === 'customer' && conversation.status === 'closed';
+    if (wasReopened) {
+        conversation.status = 'open';
+    }
+
     conversation.lastMessageAt = message.createdAt;
     conversation.lastMessagePreview = preview;
     conversation.lastMessageSenderType = senderType;
@@ -138,6 +147,9 @@ async function sendMessage({ conversationId, customerId, senderType, senderId, b
     if (ioInstance) {
         ioInstance.to(`conversation:${conversation._id}`).emit('chat:message:new', payload);
         ioInstance.to('staff:inbox').emit('chat:message:new', payload);
+        if (wasReopened) {
+            ioInstance.to('staff:inbox').emit('chat:status:updated', { conversationId: conversation._id, status: 'open' });
+        }
     }
 
     pushNewMessage(conversation, senderType, payload);
@@ -150,10 +162,13 @@ async function sendMessage({ conversationId, customerId, senderType, senderId, b
 // @access  Private (staff/owner)
 exports.getConversations = async (req, res, next) => {
     try {
-        const { cursor, limit = 30 } = req.query;
+        const { cursor, limit = 30, status } = req.query;
         const query = {};
         if (cursor) {
             query.lastMessageAt = { $lt: new Date(cursor) };
+        }
+        if (status === 'open' || status === 'closed') {
+            query.status = status;
         }
 
         const conversations = await Conversation.find(query)
@@ -317,6 +332,55 @@ exports.uploadChatImage = async (req, res, next) => {
                 blurDataURL
             }
         });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// @desc    Mark a conversation as resolved/closed (staff inbox housekeeping —
+//          a customer message reopens it automatically, see sendMessage above)
+// @route   POST /api/chat/conversations/:id/close
+// @access  Private (staff/owner)
+exports.closeConversation = async (req, res, next) => {
+    try {
+        const conversation = await Conversation.findById(req.params.id);
+        if (!conversation) {
+            return res.status(404).json({ success: false, message: 'ไม่พบบทสนทนา' });
+        }
+
+        conversation.status = 'closed';
+        await conversation.save();
+
+        const ioInstance = io.get();
+        if (ioInstance) {
+            ioInstance.to('staff:inbox').emit('chat:status:updated', { conversationId: conversation._id, status: 'closed' });
+        }
+
+        res.json({ success: true, data: conversation });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// @desc    Reopen a closed conversation
+// @route   POST /api/chat/conversations/:id/reopen
+// @access  Private (staff/owner)
+exports.reopenConversation = async (req, res, next) => {
+    try {
+        const conversation = await Conversation.findById(req.params.id);
+        if (!conversation) {
+            return res.status(404).json({ success: false, message: 'ไม่พบบทสนทนา' });
+        }
+
+        conversation.status = 'open';
+        await conversation.save();
+
+        const ioInstance = io.get();
+        if (ioInstance) {
+            ioInstance.to('staff:inbox').emit('chat:status:updated', { conversationId: conversation._id, status: 'open' });
+        }
+
+        res.json({ success: true, data: conversation });
     } catch (error) {
         next(error);
     }

@@ -20,10 +20,15 @@ export interface Conversation {
 
 // Staff inbox list — polled as a resilience fallback, plus a live socket
 // listener below bumps it immediately when a new message arrives.
-export function useConversations() {
+// `status` omitted (or 'all') fetches every conversation regardless of
+// open/closed — used by AdminSidebar's unread badge, which must count across
+// both. The chat page itself passes 'open'/'closed' to filter server-side.
+export function useConversations(status?: 'open' | 'closed' | 'all') {
     const query = useQuery<Conversation[]>({
-        queryKey: ['chat', 'conversations'],
-        queryFn: async () => (await api.get('/chat/conversations')).data.data,
+        queryKey: ['chat', 'conversations', status ?? 'all'],
+        queryFn: async () => (await api.get('/chat/conversations', {
+            params: status && status !== 'all' ? { status } : undefined,
+        })).data.data,
         refetchInterval: 30_000,
     });
 
@@ -33,7 +38,11 @@ export function useConversations() {
         if (!socket) return;
         const handler = () => queryClient.invalidateQueries({ queryKey: ['chat', 'conversations'] });
         socket.on('chat:message:new', handler);
-        return () => { socket.off('chat:message:new', handler); };
+        socket.on('chat:status:updated', handler);
+        return () => {
+            socket.off('chat:message:new', handler);
+            socket.off('chat:status:updated', handler);
+        };
     }, [socket, queryClient]);
 
     return query;
@@ -141,6 +150,25 @@ export function useMarkChatRead() {
             queryClient.invalidateQueries({ queryKey: ['chat', 'conversations'] });
             queryClient.invalidateQueries({ queryKey: ['chat', 'my-conversation'] });
         },
+    });
+}
+
+// Staff-only inbox housekeeping — closing/reopening is purely a filter aid
+// (see backend: a customer message auto-reopens a closed conversation), not
+// a hard state that blocks replying.
+export function useCloseConversation() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (conversationId: string) => api.post(`/chat/conversations/${conversationId}/close`),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['chat', 'conversations'] }),
+    });
+}
+
+export function useReopenConversation() {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (conversationId: string) => api.post(`/chat/conversations/${conversationId}/reopen`),
+        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['chat', 'conversations'] }),
     });
 }
 
