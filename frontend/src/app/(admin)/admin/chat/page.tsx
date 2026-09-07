@@ -15,7 +15,7 @@ import ChatTypingIndicator from '@/components/chat/ChatTypingIndicator';
 import PushToggleButton from '@/components/chat/PushToggleButton';
 
 function customerName(conversation: Conversation) {
-    if (typeof conversation.customerId === 'string') return 'ลูกค้า';
+    if (!conversation.customerId || typeof conversation.customerId === 'string') return 'ลูกค้า';
     return `${conversation.customerId.firstName} ${conversation.customerId.lastName}`.trim();
 }
 
