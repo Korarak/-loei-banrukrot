@@ -8,7 +8,7 @@ export type { ChatMessage, ChatAttachment };
 
 export interface Conversation {
     _id: string;
-    customerId: { _id: string; firstName: string; lastName: string; email: string; profilePicture?: string } | string;
+    customerId: { _id: string; firstName: string; lastName: string; email: string; profilePicture?: string } | string | null;
     status: 'open' | 'closed';
     lastMessageAt?: string;
     lastMessagePreview?: string;
