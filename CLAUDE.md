@@ -147,5 +147,10 @@ Internet → Nginx Proxy Manager (:80/:443, Let's Encrypt)
 - **CI/CD:** push to `main` → GitHub Actions (`.github/workflows/deploy.yml`) builds + pushes Docker images to the self-hosted registry → SSHes into the VPS → `docker compose pull && up -d`. No `gh` CLI available locally — check run status via the GitHub API (see the `deploy-check` skill below).
 - After any push to `main`, use the **`deploy-check` project skill** (`.claude/skills/deploy-check/SKILL.md`) to verify the deploy: it checks the GitHub Actions run, container health on the VPS, and does a production smoke test — this is the routine documented in `plan.md` that used to be repeated manually every time.
 
+### SEO
+- `lib/seo.ts` holds `SITE_URL` (override with `NEXT_PUBLIC_SITE_URL`), `serverApi()` (server-side fetch to `INTERNAL_API_URL`, never throws) and the store-level `AutoPartsStore` JSON-LD (injected in root `layout.tsx`).
+- `products/[id]/page.tsx` is a **server component** (`generateMetadata` + `Product` JSON-LD) wrapping the client UI in `ProductDetailClient.tsx`. If the backend is unreachable it falls back to generic metadata rather than failing.
+- `sitemap.ts` (dynamic, pages through online products) and `robots.ts`. Private/auth/admin routes each have a tiny `layout.tsx` exporting `robots: noindex` — add one when creating a new private route, and add it to `robots.ts` disallow.
+
 ### Next.js Configuration
 `next.config.ts` enables: standalone output (for Docker), React Compiler, Turbopack, webpack polling (for Docker dev with `WATCHPACK_POLLING=true`). Remote image domains configured for `localhost`, `loeitech.org`, and `banrukrot.com`.
