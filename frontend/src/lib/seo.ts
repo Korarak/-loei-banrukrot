@@ -4,20 +4,26 @@ export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'https://banrukrot.
 
 /**
  * Server-side fetch against the backend over the Docker network (same address the
- * next.config.ts /uploads rewrite uses). Never throws — SEO must not take a page down;
- * callers fall back to generic metadata when this returns null.
+ * next.config.ts /uploads rewrite uses). Never throws — SEO must not take a page down.
+ * `notFound` is true ONLY when the backend answered 404; a network error or 5xx leaves
+ * it false so a transient outage can't make real pages look deleted to crawlers.
  */
-export async function serverApi<T = any>(path: string, revalidate = 300): Promise<T | null> {
+export async function serverFetch<T = any>(path: string, revalidate = 300): Promise<{ data: T | null; notFound: boolean }> {
     const internal = process.env.INTERNAL_API_URL
         || (process.env.NODE_ENV === 'production' ? 'http://backend:8080' : 'http://localhost:8080');
     try {
         const res = await fetch(`${internal}/api${path}`, { next: { revalidate } });
-        if (!res.ok) return null;
+        if (res.status === 404) return { data: null, notFound: true };
+        if (!res.ok) return { data: null, notFound: false };
         const json = await res.json();
-        return (json?.data ?? null) as T | null;
+        return { data: (json?.data ?? null) as T | null, notFound: false };
     } catch {
-        return null;
+        return { data: null, notFound: false };
     }
+}
+
+export async function serverApi<T = any>(path: string, revalidate = 300): Promise<T | null> {
+    return (await serverFetch<T>(path, revalidate)).data;
 }
 
 /** Absolute URL for an uploaded image path (or already-absolute URL). */

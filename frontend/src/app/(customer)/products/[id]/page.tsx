@@ -1,16 +1,21 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import ProductDetailClient from './ProductDetailClient';
-import { SITE_URL, absoluteImage, serverApi, truncate } from '@/lib/seo';
+import { SITE_URL, absoluteImage, serverFetch, truncate } from '@/lib/seo';
 import { siteConfig } from '@/config/site';
 
 type Props = { params: Promise<{ id: string }> };
 
 const isObjectId = (id: string) => /^[0-9a-f]{24}$/i.test(id);
 
+// Real 404 only when the id is malformed or the backend says the product doesn't exist.
+// If the backend is merely unreachable we render the page anyway (client fetches it),
+// so an outage never gets real products de-indexed as "not found".
 async function getProduct(id: string) {
-    if (!isObjectId(id)) return null;
-    return serverApi<any>(`/products/${id}`);
+    if (!isObjectId(id)) notFound();
+    const { data, notFound: missing } = await serverFetch<any>(`/products/${id}`);
+    if (missing) notFound();
+    return data;
 }
 
 function primaryImage(product: any): string | undefined {
